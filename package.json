@@ -1,7 +1,7 @@
 {
   "name": "odb",
   "version": "0.0.1",
-  "description": "peer-to-peer, local-first database using merkle-crdts",
+  "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
