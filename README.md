@@ -1,5 +1,5 @@
-# odb
-> o stands for opal. name is temporary 🚧
+# opal
+> name is temporary 🚧
 
-peer-to-peer, local-first database using merkle-crdts. inspired by orbitdb.
+peer-to-peer, local-first state machines using merkle-crdts. inspired by orbitdb.
 
