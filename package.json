@@ -1,9 +1,17 @@
 {
-  "name": "odb",
+  "name": "opal",
   "version": "0.0.1",
-  "description": "peer-to-peer, local-first database using merkle-crdts",
+  "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "src/index.js",
   "type": "module",
+  "standard": {
+    "envs": [
+      "mocha"
+    ],
+    "ignore": [
+      "/src/keychain/"
+    ]
+  },
   "scripts": {
     "build": "npm run build:js && npm run build:types",
     "build:js": "ipjs build --tests --main && npm run build:copy",
