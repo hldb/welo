@@ -88,16 +88,25 @@ class Identity {
   }
 
   static async import ({ name, identities, keychain, kpi, password }) {
-    const exists = await identities.has(name)
+    const persist = identities && keychain
 
-    if (exists) {
-      throw new Error('an identity with that name already exists; import failed')
+    const block = await Block.decode({ bytes: kpi, codec, hasher })
+    const { value: { pem, identity } } = block
+    const keypair = await keys.import(pem, password)
+
+    if (persist) {
+      const exists = await identities.has(name)
+      if (exists) {
+        throw new Error('an identity with that name already exists; import failed')
+      }
+
+      await keychain.importKey(name, pem, password)
+      await identities.put(name, identity)
     }
 
-    const { value: { pem, identity } } = await Block.decode({ bytes: kpi, codec, hasher })
+    const identityBlock = await Block.decode({ bytes: identity, codec, hasher })
 
-    await keychain.importKey(name, pem, password)
-    await identities.put(name, identity)
+    return new Identity({ name, priv: keypair, pubkey: keypair.public, block: identityBlock })
   }
 
   static async sign ({ identity, data }) {
