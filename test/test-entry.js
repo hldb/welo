@@ -1,6 +1,5 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 import { base32 } from 'multiformats/bases/base32'
 import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
@@ -8,47 +7,32 @@ import { sha256 as hasher } from 'multiformats/hashes/sha2'
 
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
-import { Storage } from '../src/util.js'
-import { KeyChain as Keychain } from '../src/keychain/index.js'
 
-const name = 'default'
-const storage = {
-  identities: new Storage('./test/fixtures/identities'),
-  keychain: new Storage('./test/fixtures/keychain'),
-  temp: {
-    identities: new Storage('./test/temp/identities'),
-    keychain: new Storage('./test/temp/keychain')
-  }
-}
+import { getIpfs, getIdentity, constants } from './utils/index.js'
+const { fixt, names } = constants
 
 describe('Base Entry', () => {
-  let ipfs, blocks, identities, keychain, identity, entry
+  let ipfs, blocks, storage, identity, entry
   const expectedType = 'base'
+  const name = names.name0
+
   const tag = new Uint8Array()
   const payload = {}
   const next = []
   const refs = []
 
   before(async () => {
-    ipfs = await IPFS.create({ repo: './test/fixtures/ipfs' })
+    ipfs = await getIpfs(fixt.ipfs)
     blocks = ipfs.block // replace this with a local block store later
 
-    await storage.identities.open()
-    await storage.keychain.open()
-    await storage.temp.identities.open()
-    await storage.temp.keychain.open()
+    const got = await getIdentity(fixt.path, name)
 
-    identities = storage.identities
-    keychain = new Keychain({ getDatastore: () => storage.keychain })
-    identity = await Identity.get({ name, identities, keychain })
+    identity = got.identity
+    storage = got.storage
   })
 
   after(async () => {
-    await storage.identities.close()
-    await storage.keychain.close()
-    await storage.temp.identities.close()
-    await storage.temp.keychain.close()
-
+    await storage.close()
     await ipfs.stop()
   })
 
@@ -67,13 +51,12 @@ describe('Base Entry', () => {
 
     it('.create returns a new entry', async () => {
       entry = await Entry.create({ identity, tag, payload, next, refs })
-      await blocks.put(entry.block.bytes)
       assert.equal(entry.identity, identity)
       assert.deepEqual(entry.tag, tag)
       assert.deepEqual(entry.payload, payload)
       assert.deepEqual(entry.next, next)
       assert.deepEqual(entry.refs, refs)
-      assert.equal(entry.cid.toString(base32), 'bafyreidt5vtxfdpimnnoizfts23x2w7m2cgcgjreutia35x5etm7twph2m')
+      assert.equal(entry.cid.toString(base32), 'bafyreigadrjqfm7spuib6vfftxzhenb2psuxkyc56xtx4qr7z7k5fk6wrm')
     })
 
     it('.fetch grabs an existing entry', async () => {
@@ -111,9 +94,9 @@ describe('Base Entry', () => {
       })
 
       it('unverifies entry with mismatched identity', async () => {
-        const identities = storage.temp.identities
-        const keychain = new Keychain({ getDatastore: () => storage.temp.keychain })
-        const identity = await Identity.get({ name: Math.random().toString(), identities, keychain })
+        const { identity, storage } = await getIdentity()
+        await storage.close()
+
         const _entry = await Entry.asEntry({ block: entry.block, identity })
         const verified = await Entry.verify(_entry)
         assert.equal(verified, false)

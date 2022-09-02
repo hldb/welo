@@ -1,12 +1,14 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
+
 import { Manifest, Address } from '../src/manifest/index.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
 import { Keyvalue } from '../src/manifest/store/keyvalue.js'
 import { Register } from '../src/register.js'
+
+import { getIpfs } from './utils/index.js'
 
 const registry = Object.fromEntries([
   'store',
@@ -40,7 +42,7 @@ describe('Manifest', () => {
   let ipfs, blocks, manifest
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
     blocks = ipfs.block
   })
 

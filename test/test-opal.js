@@ -1,14 +1,15 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 
 import { Opal } from '../src/index.js'
+
+import { getIpfs } from './utils/index.js'
 
 describe('Opal', () => {
   let ipfs, opal
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
   })
 
   after(async () => {

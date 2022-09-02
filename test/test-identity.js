@@ -1,70 +1,45 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import { base32 } from 'multiformats/bases/base32'
 
 import { Identity } from '../src/manifest/identity/index.js'
-import { KeyChain as Keychain } from '../src/keychain/index.js'
 
-import { identity } from './fixtures/constants.js'
-
-const { identityData, pem, storage: storageFunc } = identity
-const storage = storageFunc()
+import { getIpfs, getIdentity, constants } from './utils/index.js'
+const { fixt, names } = constants
 
 const dataEmpty = new Uint8Array()
-const signedEmpty = new Uint8Array([
-  48,  68,   2,  32, 107, 228, 179,  41,  80, 238,  86,
- 109, 104,  28,  89, 141, 163,  29, 194, 213, 247, 116,
- 186, 230, 221, 203, 250, 106,  39, 251, 117, 240, 140,
- 149, 135, 210,   2,  32, 118,  95, 176, 194,  18, 170,
-  28,  89, 239,  17,  43, 117, 254,  87,  72, 245, 145,
-  66, 180, 251, 131, 199,   9, 205, 170, 158,  84, 249,
- 110, 164, 176,  95
-])
-const identityCID = 'bafyreiaxq34q3ylhpehhpwklmwlymqwb53bneufwboduhxtedx34sf47ga'
+const signedEmpty = base32.decode('bgbcqeiiayc2skoa4am3u3kmq4io6zjspbroxyfw2duj2lzxagrxfoafes4eaeid3eayxiin7neu6s4jhngwj2uoxoxxhzrdcckhtinpqtugc64tyze')
+const kpi = base32.decode('bujrxazlnpbwg2tklmzzgentqjj2vk3zziuyhqz3sgvde6zblpjtxezzsjfzha5rqpfrxq2tzlfqs63btjrxuiwdcjjlve6ktnf3veqzujeztknbtpjcxo5rynnuviulsjvwfcmlqnizgg3cyhbbdc4rxhblfsudnjvshel2wpjdwqtdxizufkqknnbuwizlooruxi6kyukrwe2lelasqqaqseebd2dcxup53qcflrr74f6ov4sulbeqtr7gebgvly7yjp4cpqcb62o3dob2wewbfbabbeiichugfpi73xaekxdd7yl45lzfiwcjbhd6micnkxr7qs7ye7aed5u5wg43jm5memmceaiqbxmbfxub7wpfe7o4kedmlpyvgxacrbk4sizxhqa57g6r6r4xk4kicebxx2krffxna23pegemozn6abevp4yezrcejs7a6ag4nw6auub3m6')
+const authstring = 'bafyreibvk33g3t2jktm3i7q7vwugu3mqoc3oajlymb7u46qn6kqpsexl4u'
 
 describe('Base Identity', () => {
-  let ipfs, blocks, identities, keychain, identity, kpi
-  let tempKeychain
+  let ipfs, blocks, storage, identities, keychain, identity
+  let tempStorage, tempIdentities, tempKeychain
   const expectedType = 'base'
-  const name = 'test'
+  const name = names.name0
   const password = ''
 
   before(async () => {
-    ipfs = await IPFS.create({ repo: './test/fixtures/ipfs' })
+    ipfs = await getIpfs(fixt.ipfs)
     blocks = ipfs.block // replace this with a local block store later
 
-    await storage.identities.open()
-    await storage.keychain.open()
-    await storage.temp.identities.open()
-    await storage.temp.keychain.open()
-
+    const got = await getIdentity(fixt.path, name)
+    identity = got.identity
+    storage = got.storage
     identities = storage.identities
-    keychain = new Keychain({ getDatastore: () => storage.keychain })
-    tempKeychain = new Keychain({ getDatastore: () => storage.temp.keychain })
+    keychain = got.keychain
 
-    const identityBlock = await Block.encode({ value: identityData, codec, hasher })
-    const kpiData = { pem, identity: identityBlock.bytes }
-    kpi = await Block.encode({ value: kpiData, codec, hasher })
-    await Identity.import({
-      name,
-      identities,
-      keychain,
-      kpi: kpi.bytes,
-      password
-    }).catch(e => assert.equal(e.message, 'an identity with that name already exists; import failed'))
-    await blocks.put(identityBlock.bytes)
+    console.log(identity.auth)
+
+    const gotTemp = await getIdentity()
+    tempStorage = gotTemp.storage
+    tempIdentities = tempStorage.identities
+    tempKeychain = gotTemp.keychain
   })
 
   after(async () => {
-    await storage.identities.close()
-    await storage.keychain.close()
-    await storage.temp.identities.close()
-    await storage.temp.keychain.close()
-
+    await storage.close()
+    await tempStorage.close()
     await ipfs.stop()
   })
 
@@ -87,7 +62,7 @@ describe('Base Identity', () => {
       it('grabs existing identity', async () => {
         identity = await Identity.get({ name, identities, keychain })
         assert.equal(identity.name, name)
-        assert.equal(identity.block.cid.toString(base32), identityCID)
+        assert.equal(identity.block.cid.toString(base32), authstring)
         assert.ok(identity instanceof Identity)
       })
 
@@ -95,7 +70,7 @@ describe('Base Identity', () => {
         const randomName = Math.random().toString()
         const _identity = await Identity.get({
           name: randomName,
-          identities: storage.temp.identities,
+          identities: tempIdentities,
           keychain: tempKeychain
         })
         assert.equal(_identity.name, randomName)
@@ -136,33 +111,31 @@ describe('Base Identity', () => {
     })
 
     describe('.import and .export', async () => {
-      let exported, exportedBlock, kpi
-      const tempKeychain = new Keychain({ getDatastore: () => storage.temp.keychain })
-
-      it('exports an encoded identity/keypair', async () => {
-        exported = await Identity.export({ name, identities, keychain, password })
-        exportedBlock = await Block.decode({ bytes: exported, codec, hasher })
-        kpi = await Block.decode({ bytes: exportedBlock.value.identity, codec, hasher })
-        assert.equal(exportedBlock.value.pem.length, 108)
-        assert.deepEqual(kpi.cid, identity.auth)
-      })
-
       it('imports an encoded identity/keypair', async () => {
-        const name = Math.random().toString()
-        await Identity.import({
+        const name = names.name1
+        const imported = await Identity.import({
           name,
-          identities: storage.temp.identities,
+          identities: tempIdentities,
           keychain: tempKeychain,
-          kpi: exported,
+          kpi,
           password
         })
-        const identity = await Identity.get({
-          name,
-          identities: storage.temp.identities,
-          keychain: tempKeychain
-        })
+
         assert.ok(await tempKeychain.exportKey(name, password))
-        assert.deepEqual(identity.block.cid, kpi.cid)
+        assert.deepEqual(imported.auth.toString(base32), identity.auth.toString(base32))
+        assert.ok(imported instanceof Identity)
+      })
+
+      it('exports an encoded identity/keypair', async () => {
+        const name = names.name1
+        const exported = await Identity.export({
+          name,
+          identities: tempIdentities,
+          keychain: tempKeychain,
+          password
+        })
+
+        assert.deepEqual(new Uint8Array(exported), new Uint8Array(exported))
       })
     })
 

@@ -1,13 +1,9 @@
 
 import { strict as assert } from 'assert'
 
-import * as IPFS from 'ipfs'
-
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
-
 import { StaticAccess } from '../src/manifest/access/static.js'
-
 import { Graph } from '../src/database/graph.js'
 import {
   sortCids,
@@ -18,15 +14,14 @@ import {
   graphLinks,
   traverser
 } from '../src/database/traversal.js'
-
 import { cidstring } from '../src/util.js'
 
+import { getIpfs, getIdentity, writeManifest, singleEntry, concurrentEntries } from './utils/index.js'
+
 describe('traversal', () => {
-  let ipfs, blocks, identity, access, noaccess
+  let ipfs, blocks, storage, identity, access, noaccess
 
   const entries = []
-
-  const name = 'test'
 
   const tag = new Uint8Array()
   const next = []
@@ -34,10 +29,12 @@ describe('traversal', () => {
   const payload = {}
 
   before(async () => {
-    ipfs = await IPFS.create({ repo: './test/fixtures/ipfs' })
+    ipfs = await getIpfs()
     blocks = ipfs.block // replace this with a local block store later
 
-    identity = await Identity.ephemeral(name)
+    const got = await getIdentity()
+    storage = got.storage
+    identity = got.identity
 
     access = await StaticAccess.open({ manifest: { access: { write: [identity.id] } } })
     noaccess = await StaticAccess.open({ manifest: { access: { write: ['nobody'] } } })
@@ -53,6 +50,7 @@ describe('traversal', () => {
   })
 
   after(async () => {
+    await storage.close()
     await ipfs.stop()
   })
 
@@ -200,19 +198,10 @@ describe('traversal', () => {
   })
 
   describe('traverser', () => {
-    let sharedAccess, common
-    const refs = []
-    const payload = {}
+    let sharedAccess
 
-    const single = identity => nextEntries => Entry.create({ ...common, identity, next: nextEntries.map(entry => entry.cid) })
-    const concurrent = identities => nextEntriesA => {
-      const entries = []
-      for (const identity of identities) {
-        const nextEntries = nextEntriesA[entries.length]
-        entries.push(single(identity)(nextEntries))
-      }
-      return Promise.all(entries).then(entries => entries.sort(sortEntriesRev))
-    }
+    const single = singleEntry
+    const concurrent = concurrentEntries
 
     // names that represent the topological shape
     const stick = [] // 3 consecutive
@@ -239,13 +228,13 @@ describe('traversal', () => {
     const setHeads = (topo, entries) => heads.set(topo, entries.map(entry => entry.cid))
 
     before(async () => {
-      common = { blocks, tag, refs, payload }
-
       const id0 = identity
-      const id1 = await Identity.ephemeral('id1')
+      const { storage, identity: id1 } = await getIdentity()
+      await storage.close()
       await blocks.put(id1.block.bytes, { version: 1, format: 'dag-cbor' })
 
-      sharedAccess = await StaticAccess.open({ manifest: { access: { write: [id0.id, id1.id] } } })
+      const manifest = await writeManifest({ access: { write: [id0.id, id1.id] } })
+      sharedAccess = await StaticAccess.open({ manifest })
 
       stick[0] = await single(id0)([])
       stick[1] = await single(id0)([stick[0]])
