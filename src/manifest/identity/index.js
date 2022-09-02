@@ -72,14 +72,6 @@ class Identity {
     return new Identity({ pubkey, block })
   }
 
-  // good for testing
-  static async ephemeral (name) {
-    const keypair = await keys.generateKeyPair(secp256k1, 256)
-    const value = await signIdentity(keypair, keypair.public)
-    const block = await Block.encode({ value, codec, hasher })
-    return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
-  }
-
   static async export ({ name, identities, keychain, password }) {
     const exists = await identities.has(name)
 
