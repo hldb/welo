@@ -47,7 +47,6 @@ class Opal {
     let directory
     if (where.isNode) {
       directory = path.resolve(options.directory || OPAL_LOWER)
-      await Promise.all(Object.values(dirs(directory)).map(makedir))
     } else {
       directory = OPAL_LOWER
     }
@@ -65,8 +64,8 @@ class Opal {
       config.identity = options.identity
     } else {
       const storage = {
-        identities: new this.Storage(dirs(directory).identities),
-        keychain: new this.Storage(dirs(directory).keychain)
+        identities: await this.Storage(dirs(directory).identities),
+        keychain: await this.Storage(dirs(directory).keychain)
       }
       await storage.identities.open()
       await storage.keychain.open()
