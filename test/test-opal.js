@@ -6,8 +6,6 @@ import { OPAL_PREFIX } from '../src/constants.js'
 
 import { getIpfs, constants } from './utils/index.js'
 
-import { getIpfs } from './utils/index.js'
-
 describe('Opal', () => {
   let ipfs, opal
 
