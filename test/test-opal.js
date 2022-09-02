@@ -58,7 +58,7 @@ describe('Opal', () => {
     describe('fetchManifest', () => {
       it('returns an instance of Manifest from a manifest address', async () => {
         const _manifest = await opal.fetchManifest(address)
-        assert.deepEqual(_manifest, manifest)
+        assert.deepEqual(_manifest.block.cid, manifest.block.cid)
       })
     })
 

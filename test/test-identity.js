@@ -29,8 +29,6 @@ describe('Base Identity', () => {
     identities = storage.identities
     keychain = got.keychain
 
-    console.log(identity.auth)
-
     const gotTemp = await getIdentity()
     tempStorage = gotTemp.storage
     tempIdentities = tempStorage.identities
