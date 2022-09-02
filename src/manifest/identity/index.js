@@ -1,9 +1,8 @@
 
-import { Key } from 'interface-datastore'
+// import { Key } from 'interface-datastore'
 import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
-import { base32 } from 'multiformats/bases/base32'
 import { keys } from 'libp2p-crypto'
 
 const type = 'base'

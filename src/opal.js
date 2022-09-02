@@ -2,8 +2,6 @@
 import EventEmitter from 'events'
 import where from 'wherearewe'
 import path from 'path'
-import makedir from 'make-dir'
-import { base32 } from 'multiformats/bases/base32'
 
 // import * as version from './version.js'
 import { Manifest, Address } from './manifest/index.js'
@@ -57,7 +55,7 @@ class Opal {
     const config = {
       directory,
       offline: options.offline === true,
-      blocks: options.blocks || options.ipfs.block,
+      blocks: options.blocks || options.ipfs.block
       // peerId and pubsub is not required but for some replicators
       // peerId: options.peerId || null,
       // pubsub: options.pubsub || options.ipfs.pubsub || null
@@ -176,27 +174,14 @@ class Opal {
       keychain: this.keychain
     })
 
-    const Storage = options.Storage || Opal.Storage
+    // const Storage = options.Storage || Opal.Storage
     const Replicator = options.Replicator || Opal.Replicator
 
-    const location = path.join(this.dirs.databases, manifest.address.cid.toString(base32))
+    // const location = path.join(this.dirs.databases, manifest.address.cid.toString(base32))
 
     // not worrying about persistent databases for now
     // const createStorage = name => new Storage(path.join(location, name), this.storageOps)
     const createStorage = () => {}
-
-    const _open = async () => Database.open({
-      odb: this, // passed for access controllers if they need to make another database
-      manifest,
-      blocks: this.blocks,
-      peerId: this.peerId,
-      pubsub: this.pubsub,
-      identity,
-      Replicator,
-      createStorage,
-      options,
-      ...Manifest.getComponents(this.registry, manifest)
-    })
 
     this._opening[address] = Database.open({
       odb: this, // passed for access controllers if they need to make another database
