@@ -209,7 +209,7 @@ const initialNode = {
 class Node {
   // 'ni' because 'in' is a token
   constructor ({ in: ni, out, miss, deny } = initialNode) {
-    this.in = new Set(ni),
+    this.in = new Set(ni)
     this.out = new Set(out)
     this.miss = Boolean(miss)
     this.deny = Boolean(deny)

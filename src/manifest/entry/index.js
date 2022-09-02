@@ -47,7 +47,7 @@ class Entry {
   static async fetch ({ blocks, Identity, cid }) {
     const bytes = await blocks.get(cid)
     const block = await Block.decode({ bytes, codec, hasher })
-    const { auth, data, sig } = block.value
+    const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
 
     if (!await Entry.verify({ block, identity })) {

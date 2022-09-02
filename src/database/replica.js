@@ -1,12 +1,11 @@
 
 import EventEmitter from 'events'
 import { CID } from 'multiformats/cid'
-import { compare } from 'uint8arrays/compare'
+// import { compare } from 'uint8arrays/compare'
 import { equals } from 'uint8arrays/equals'
 
 import { Graph } from './graph.js'
 import { loadEntry, graphLinks, sortEntries, sortEntriesRev, traverser } from './traversal.js'
-import { cidstring, parsedcid } from '../util.js'
 
 export class Replica {
   constructor ({ manifest, storage, blocks, access, identity, Entry, Identity, graph }) {

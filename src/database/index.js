@@ -2,7 +2,8 @@
 import EventEmitter from 'events'
 import { Replica } from './replica.js'
 
-const typeMismatch = (Component) => `${Component}.type does not match manifest.${Component.toLowerCase()}.type`
+// const typeMismatch = (Component) =>
+//  `${Component}.type does not match manifest.${Component.toLowerCase()}.type`
 
 export class Database {
   constructor (config) {
@@ -53,8 +54,7 @@ export class Database {
       Access,
       // Replicator,
       Entry,
-      Identity,
-      options
+      Identity
     } = config
 
     if (identity.constructor.type !== Identity.type) {

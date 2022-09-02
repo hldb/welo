@@ -38,7 +38,6 @@ export class PubsubHeadsExchange {
 
     this.replica.events.on('update', this._onRepicaUpdate)
     this.replica.events.on('write', this._onRepicaUpdate)
-
   }
 
   async stop () {
