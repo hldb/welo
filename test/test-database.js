@@ -1,6 +1,5 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 
 import { Database } from '../src/database/index.js'
 
@@ -9,20 +8,25 @@ import { StaticAccess as Access } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
 
+import { getIpfs, getIdentity, writeManifest } from './utils/index.js'
+
 describe('Database', () => {
-  let ipfs, blocks, database, manifest, identity
+  let ipfs, blocks, storage, database, manifest, identity
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
     blocks = ipfs.block
 
-    identity = await Identity.ephemeral()
+    const obj = await getIdentity()
 
-    const tag = new Uint8Array()
-    manifest = { tag, access: { write: [identity.id] } }
+    storage = obj.storage
+    identity = obj.identity
+
+    manifest = await writeManifest({ access: { write: [identity.id] } })
   })
 
   after(async () => {
+    await storage.close()
     await ipfs.stop()
   })
 

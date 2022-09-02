@@ -1,5 +1,6 @@
 
 import { strict as assert } from 'assert'
+
 import { Register } from '../src/register.js'
 
 const components = {

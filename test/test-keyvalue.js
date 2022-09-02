@@ -1,6 +1,5 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 
 import { Keyvalue } from '../src/manifest/store/keyvalue.js'
 
@@ -10,13 +9,20 @@ import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
 
+import { getIpfs, getIdentity } from './utils/index.js'
+
 describe('Keyvalue', () => {
-  let ipfs, blocks, keyvalue
+  let ipfs, blocks, identity, keyvalue
   const type = 'keyvalue'
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
     blocks = ipfs.block
+
+    const got = await getIdentity()
+    identity = got.identity
+
+    await blocks.put(identity.block.bytes, { version: 1, format: 'dag-cbor' })
   })
 
   after(async () => {
@@ -47,14 +53,12 @@ describe('Keyvalue', () => {
     })
 
     describe('update', () => {
-      let replica, manifest, access, identity
+      let replica, manifest, access
       const tag = new Uint8Array()
       const key = 'key'
       const value = 'value'
 
       before(async () => {
-        identity = await Identity.ephemeral()
-        await blocks.put(identity.block.bytes, { version: 1, format: 'dag-cbor' })
         manifest = { tag, access: { write: [identity.id] } }
         access = await StaticAccess.open({ manifest })
         replica = await Replica.open({ manifest, blocks, access, identity, Entry, Identity })

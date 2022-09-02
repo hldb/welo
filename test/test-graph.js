@@ -3,7 +3,6 @@ import { strict as assert } from 'assert'
 
 import { Graph, Node } from '../src/database/graph.js'
 
-// import { CID } from 'multiformats/cid'
 import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'

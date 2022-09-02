@@ -1,31 +1,35 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 
 import { Replica } from '../src/database/replica.js'
 
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
-
 import { cidstring } from '../src/util.js'
 
+import { getIpfs, getIdentity, writeManifest, singleEntry } from './utils/index.js'
+
 describe('Replica', () => {
-  let ipfs, blocks, replica, manifest, access, identity
-  const tag = new Uint8Array()
+  let ipfs, blocks, storage, replica, manifest, access, identity
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
     blocks = ipfs.block
 
-    identity = await Identity.ephemeral()
+    const got = await getIdentity()
+    storage = got.storage
+    identity = got.identity
+
     await blocks.put(identity.block.bytes, { version: 1, format: 'dag-cbor' })
-    manifest = { tag, access: { write: [identity.id] } }
+
+    manifest = await writeManifest({ access: { write: [identity.id] } })
     access = await StaticAccess.open({ manifest })
   })
 
   after(async () => {
     await replica.close()
+    await storage.close()
     await ipfs.stop()
   })
 
@@ -42,10 +46,8 @@ describe('Replica', () => {
   })
 
   describe('instance', () => {
-    const payload = {}
-    const next = []
-    const refs = []
     const cids = []
+    const payload = {}
 
     it('exposes instance properties', () => {
       assert.ok(replica.manifest)
@@ -71,7 +73,7 @@ describe('Replica', () => {
 
     describe('add', () => {
       it('adds an entry to the replica', async () => {
-        const entry = await Entry.create({ identity, tag, payload, next, refs })
+        const entry = await singleEntry(identity)()
         const cid = entry.cid
         cids.push(cid)
 

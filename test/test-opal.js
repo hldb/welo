@@ -1,14 +1,18 @@
 
 import { strict as assert } from 'assert'
-import * as IPFS from 'ipfs'
 
 import { Opal } from '../src/index.js'
+import { OPAL_PREFIX } from '../src/constants.js'
+
+import { getIpfs, constants } from './utils/index.js'
+
+import { getIpfs } from './utils/index.js'
 
 describe('Opal', () => {
   let ipfs, opal
 
   before(async () => {
-    ipfs = await IPFS.create()
+    ipfs = await getIpfs()
   })
 
   after(async () => {
@@ -30,7 +34,8 @@ describe('Opal', () => {
 
     describe('create', () => {
       it('returns an instance of Opal', async () => {
-        opal = await Opal.create({ ipfs })
+        const directory = constants.temp.path + OPAL_PREFIX + String(Math.random())
+        opal = await Opal.create({ ipfs, directory })
       })
     })
   })
