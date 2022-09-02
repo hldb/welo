@@ -2,7 +2,7 @@
 import { Opal as _Opal } from './opal.js'
 
 import { Storage } from './util.js'
-import { KeyChain as Keychain } from './keychain/index.js'
+import { Keychain } from './keychain/index.js'
 import { Replicator } from './replicator/index.js'
 
 import { StaticAccess } from './manifest/access/static.js'
