@@ -2,6 +2,7 @@
 import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
 
+import { Blocks } from '../src/blocks.js'
 import { Identity } from '../src/manifest/identity/index.js'
 
 import { getIpfs, getIdentity, constants } from './utils/index.js'
@@ -21,7 +22,7 @@ describe('Base Identity', () => {
 
   before(async () => {
     ipfs = await getIpfs(fixt.ipfs)
-    blocks = ipfs.block // replace this with a local block store later
+    blocks = new Blocks(ipfs)
 
     const got = await getIdentity(fixt.path, name)
     identity = got.identity

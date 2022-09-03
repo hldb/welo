@@ -1,6 +1,7 @@
 
 import { strict as assert } from 'assert'
 
+import { Blocks } from '../src/blocks.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
@@ -30,7 +31,7 @@ describe('traversal', () => {
 
   before(async () => {
     ipfs = await getIpfs()
-    blocks = ipfs.block // replace this with a local block store later
+    blocks = new Blocks(ipfs)
 
     const got = await getIdentity()
     storage = got.storage
@@ -43,10 +44,10 @@ describe('traversal', () => {
     entries[1] = await Entry.create({ blocks, identity, tag, next: [entries[0].cid], refs, payload })
     entries[2] = await Entry.create({ blocks, identity, tag, next: [entries[1].cid], refs, payload })
 
-    await blocks.put(identity.block.bytes)
-    await blocks.put(entries[0].block.bytes)
-    await blocks.put(entries[1].block.bytes)
-    await blocks.put(entries[2].block.bytes)
+    await blocks.put(identity.block)
+    await blocks.put(entries[0].block)
+    await blocks.put(entries[1].block)
+    await blocks.put(entries[2].block)
   })
 
   after(async () => {
@@ -231,7 +232,7 @@ describe('traversal', () => {
       const id0 = identity
       const { storage, identity: id1 } = await getIdentity()
       await storage.close()
-      await blocks.put(id1.block.bytes, { version: 1, format: 'dag-cbor' })
+      await blocks.put(id1.block)
 
       const manifest = await writeManifest({ access: { write: [id0.id, id1.id] } })
       sharedAccess = await StaticAccess.open({ manifest })
@@ -286,7 +287,7 @@ describe('traversal', () => {
             const promises = []
             for (const entry of topology) {
               // promises.push(blocks.put(entry.block.bytes, { format: 'dag-cbor' }))
-              promises.push(blocks.put(entry.block.bytes, { version: 1, format: 'dag-cbor' }))
+              promises.push(blocks.put(entry.block))
             }
             await Promise.all(promises)
 

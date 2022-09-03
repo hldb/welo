@@ -8,6 +8,7 @@ import { Manifest, Address } from './manifest/index.js'
 import { Register } from './register.js'
 import { Database } from './database/index.js'
 import { OPAL_LOWER } from './constants.js'
+import { Blocks } from './blocks.js'
 
 const registry = Object.fromEntries([
   'store',
@@ -54,7 +55,7 @@ class Opal {
     const config = {
       directory,
       offline: options.offline === true,
-      blocks: options.blocks || options.ipfs.block
+      blocks: options.blocks || new Blocks(options.ipfs)
       // peerId and pubsub is not required but for some replicators
       // peerId: options.peerId || null,
       // pubsub: options.pubsub || options.ipfs.pubsub || null
@@ -137,7 +138,7 @@ class Opal {
     }
 
     const manifest = await Manifest.create({ name, ...opts })
-    await this.blocks.put(manifest.block.bytes, { version: 1, format: 'dag-cbor' })
+    await this.blocks.put(manifest.block)
 
     try {
       Manifest.getComponents(this.registry, manifest)

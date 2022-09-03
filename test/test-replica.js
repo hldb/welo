@@ -3,6 +3,7 @@ import { strict as assert } from 'assert'
 
 import { Replica } from '../src/database/replica.js'
 
+import { Blocks } from '../src/blocks.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
@@ -15,13 +16,13 @@ describe('Replica', () => {
 
   before(async () => {
     ipfs = await getIpfs()
-    blocks = ipfs.block
+    blocks = new Blocks(ipfs)
 
     const got = await getIdentity()
     storage = got.storage
     identity = got.identity
 
-    await blocks.put(identity.block.bytes, { version: 1, format: 'dag-cbor' })
+    await blocks.put(identity.block)
 
     manifest = await writeManifest({ access: { write: [identity.id] } })
     access = await StaticAccess.open({ manifest })

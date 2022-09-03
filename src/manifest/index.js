@@ -1,8 +1,5 @@
 
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
-
+import { Blocks } from '../blocks.js'
 import { Address } from './address.js'
 // import * as v0 from './v0'
 // import * as v1 from './v1'
@@ -41,13 +38,12 @@ class Manifest {
     if (meta) value.meta = meta
     if (tag) value.tag = tag
 
-    const block = await Block.encode({ value, codec, hasher })
+    const block = await Blocks.encode({ value })
     return new Manifest(block)
   }
 
   static async fetch ({ blocks, address }) {
-    const bytes = await blocks.get(address.cid)
-    const block = await Block.decode({ bytes, codec, hasher })
+    const block = await blocks.get(address.cid)
     return this.asManifest({ block }, true)
   }
 

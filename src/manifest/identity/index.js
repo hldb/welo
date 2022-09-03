@@ -1,9 +1,7 @@
 
 // import { Key } from 'interface-datastore'
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import { keys } from 'libp2p-crypto'
+import { Blocks } from '../../blocks.js'
 
 const type = 'base'
 const secp256k1 = 'secp256k1'
@@ -43,11 +41,11 @@ class Identity {
       await keychain.importKey(name, pem, empty)
 
       const value = await signIdentity(keypair, keypair.public)
-      block = await Block.encode({ value, codec, hasher })
+      block = await Blocks.encode({ value })
       await identities.put(name, block.bytes)
     } else {
       const bytes = await identities.get(name)
-      block = await Block.decode({ bytes, codec, hasher })
+      block = await Blocks.decode({ bytes })
       const pem = await keychain.exportKey(name, empty)
       keypair = await keys.import(pem, empty)
     }
@@ -56,8 +54,7 @@ class Identity {
   }
 
   static async fetch ({ blocks, auth: cid }) {
-    const bytes = await blocks.get(cid)
-    const block = await Block.decode({ bytes, codec, hasher })
+    const block = await blocks.get(cid)
 
     return this.asIdentity({ block })
   }
@@ -83,14 +80,14 @@ class Identity {
     const bytes = await identities.get(name)
 
     const value = { pem, identity: bytes }
-    const block = await Block.encode({ value, codec, hasher })
+    const block = await Blocks.encode({ value })
     return block.bytes
   }
 
   static async import ({ name, identities, keychain, kpi, password }) {
     const persist = identities && keychain
 
-    const block = await Block.decode({ bytes: kpi, codec, hasher })
+    const block = await Blocks.decode({ bytes: kpi })
     const { value: { pem, identity } } = block
     const keypair = await keys.import(pem, password)
 
@@ -104,7 +101,7 @@ class Identity {
       await identities.put(name, identity)
     }
 
-    const identityBlock = await Block.decode({ bytes: identity, codec, hasher })
+    const identityBlock = await Blocks.decode({ bytes: identity })
 
     return new Identity({ name, priv: keypair, pubkey: keypair.public, block: identityBlock })
   }

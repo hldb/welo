@@ -1,7 +1,5 @@
 
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
+import { Blocks } from '../../blocks.js'
 
 const type = 'base'
 
@@ -25,28 +23,19 @@ class Entry {
   static get type () { return type }
 
   static async create ({ identity, tag, payload, next, refs }) {
-    const data = await Block.encode({
-      value: { v: 1, tag, payload, next, refs },
-      codec,
-      hasher
-    })
+    const data = await Blocks.encode({ value: { v: 1, tag, payload, next, refs } })
     const bytes = data.bytes
 
     const auth = identity.auth
     const sig = await identity.sign(bytes)
 
-    const block = await Block.encode({
-      value: { auth, data: bytes, sig },
-      codec,
-      hasher
-    })
+    const block = await Blocks.encode({ value: { auth, data: bytes, sig } })
 
     return new Entry({ block, data, identity })
   }
 
   static async fetch ({ blocks, Identity, cid }) {
-    const bytes = await blocks.get(cid)
-    const block = await Block.decode({ bytes, codec, hasher })
+    const block = await blocks.get(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
 
@@ -63,7 +52,7 @@ class Entry {
     }
 
     const { block, identity } = entry
-    const data = await Block.decode({ bytes: block.value.data, codec, hasher })
+    const data = await Blocks.decode({ bytes: block.value.data })
 
     return new Entry({ block, data, identity })
   }

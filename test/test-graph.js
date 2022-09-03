@@ -2,10 +2,7 @@
 import { strict as assert } from 'assert'
 
 import { Graph, Node } from '../src/database/graph.js'
-
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
+import { Blocks } from '../src/blocks.js'
 
 describe('Graph', () => {
   let nodes, missing, denied
@@ -27,9 +24,9 @@ describe('Graph', () => {
     // make 8 of each cid
     nodes = []; missing = []; denied = []
     for (let i = 0; i < 8; i++) {
-      const { cid: node } = await Block.encode({ value: { node: true, i }, codec, hasher })
-      const { cid: miss } = await Block.encode({ value: { miss: true, i }, codec, hasher })
-      const { cid: deny } = await Block.encode({ value: { deny: true, i }, codec, hasher })
+      const { cid: node } = await Blocks.encode({ value: { node: true, i } })
+      const { cid: miss } = await Blocks.encode({ value: { miss: true, i } })
+      const { cid: deny } = await Blocks.encode({ value: { deny: true, i } })
       nodes.push(node)
       missing.push(miss)
       denied.push(deny)

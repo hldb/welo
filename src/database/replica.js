@@ -85,7 +85,7 @@ export class Replica {
         continue
       }
 
-      await this.blocks.put(entry.block.bytes, { version: 1, format: 'dag-cbor' })
+      await this.blocks.put(entry.block)
 
       if (this.access.canAppend(entry)) {
         Graph.add(this._graph, entry.cid, entry.next)
@@ -105,7 +105,7 @@ export class Replica {
       refs: [] // refs are empty for now
     })
 
-    await this.blocks.put(entry.block.bytes, { version: 1, format: 'dag-cbor' })
+    await this.blocks.put(entry.block)
 
     // do not await
     const add = this.add([entry])

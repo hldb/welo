@@ -1,6 +1,7 @@
 
 import { strict as assert } from 'assert'
 
+import { Blocks } from '../src/blocks.js'
 import { Manifest, Address } from '../src/manifest/index.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
@@ -43,7 +44,7 @@ describe('Manifest', () => {
 
   before(async () => {
     ipfs = await getIpfs()
-    blocks = ipfs.block
+    blocks = new Blocks(ipfs)
   })
 
   after(async () => {
@@ -78,7 +79,7 @@ describe('Manifest', () => {
 
     describe('.fetch', () => {
       it('returns a manifest from an address', async () => {
-        await blocks.put(manifest.block.bytes)
+        await blocks.put(manifest.block)
         const _manifest = await Manifest.fetch({ blocks, address: manifest.address })
         // ipfs block api returns Buffers in nodejs which become block.bytes
         // assert.deepEqual(_manifest.block, manifest.block)

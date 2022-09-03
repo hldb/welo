@@ -1,10 +1,8 @@
 
 import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
-import * as Block from 'multiformats/block'
-import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
 
+import { Blocks } from '../src/blocks.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
 
@@ -23,7 +21,7 @@ describe('Base Entry', () => {
 
   before(async () => {
     ipfs = await getIpfs(fixt.ipfs)
-    blocks = ipfs.block // replace this with a local block store later
+    blocks = new Blocks(ipfs)
 
     const got = await getIdentity(fixt.path, name)
 
@@ -87,7 +85,7 @@ describe('Base Entry', () => {
 
       it('unverifies entry with invalid signature', async () => {
         const value = { ...entry.block.value, sig: new Uint8Array() }
-        const block = await Block.encode({ value, codec, hasher })
+        const block = await Blocks.encode({ value })
         const _entry = await Entry.asEntry({ block, identity })
         const verified = await Entry.verify(_entry)
         assert.equal(verified, false)
@@ -119,7 +117,7 @@ describe('Base Entry', () => {
       assert.equal(entry.cid, entry.block.cid)
       assert.equal(entry.auth, entry.block.value.auth)
       assert.equal(entry.sig, entry.block.value.sig)
-      const data = await Block.decode({ bytes: entry.block.value.data, codec, hasher })
+      const data = await Blocks.decode({ bytes: entry.block.value.data })
       assert.equal(entry.v, data.value.v)
       assert.deepEqual(entry.tag, data.value.tag)
       assert.deepEqual(entry.payload, data.value.payload)
