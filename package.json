@@ -4,14 +4,7 @@
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "src/index.js",
   "type": "module",
-  "standard": {
-    "envs": [
-      "mocha"
-    ],
-    "ignore": [
-      "/src/keychain/"
-    ]
-  },
+  "prettier": "prettier-config-standard",
   "scripts": {
     "build": "npm run build:js && npm run build:types",
     "build:js": "ipjs build --tests --main && npm run build:copy",
@@ -20,7 +13,7 @@
     "build:vendor": "npm run build:vendor:varint && npm run build:vendor:base-x",
     "build:vendor:varint": "npm_config_yes=true npx brrp -x varint > vendor/varint.js",
     "build:vendor:base-x": "npm_config_yes=true npx brrp -x @multiformats/base-x > vendor/base-x.js",
-    "lint": "standard",
+    "lint": "eslint --fix src test",
     "test:cjs": "npm run build:js && mocha dist/cjs/node-test/test-*.js && npm run test:cjs:browser",
     "test:esm": "npm run build:js && mocha dist/esm/node-test/test-*.js && npm run test:esm:browser",
     "test:node": "c8 --check-coverage --branches 100 --functions 100 --lines 100 mocha test/test-*.js",
@@ -51,11 +44,14 @@
   "devDependencies": {
     "@types/mocha": "^9.1.1",
     "c8": "^7.12.0",
+    "eslint": "^8.23.0",
+    "eslint-config-standard-with-typescript": "^22.0.0",
     "ipfs": "^0.63.5",
     "ipjs": "^5.2.0",
     "mocha": "^9.2.2",
     "polendina": "^3.1.0",
-    "standard": "^17.0.0",
+    "prettier": "^2.7.1",
+    "prettier-config-standard": "^5.0.0",
     "typescript": "^4.8.2"
   },
   "dependencies": {
