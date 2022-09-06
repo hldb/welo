@@ -5,7 +5,7 @@ import { Blocks } from "../../mods/blocks.js";
 import { Key } from "interface-datastore";
 import { Block, ByteView } from "multiformats/block.js";
 import { PrivateKey, PublicKey } from "libp2p-crypto";
-import { Keychain } from "src/keychain/index.js";
+import { Keychain } from "src/mods/keychain.js";
 import { StorageReturn } from "src/mods/storage.js";
 import { CID } from "multiformats/cid.js";
 

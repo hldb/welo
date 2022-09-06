@@ -11,7 +11,7 @@ import { OPAL_LOWER } from "./constants.js";
 import { dirs, DirsReturn } from "./util.js";
 
 import type { StorageFunc, StorageReturn } from "./mods/storage.js";
-import type { Keychain } from "./keychain/index.js";
+import type { Keychain } from "./mods/keychain.js";
 import type { Replicator } from "./replicator/index.js";
 import type { Identity } from "./manifest/identity/index.js";
 import type { IPFS } from "ipfs";
@@ -140,10 +140,7 @@ class Opal {
       await _storage.keychain.open();
 
       identities = storage.identities;
-      keychain = new this.Keychain(
-        { getDatastore: () => _storage.keychain },
-        {}
-      );
+      keychain = new this.Keychain(storage.keychain);
 
       const Identity: IdentityType = this.registry.identity.star;
       identity = await Identity.get({

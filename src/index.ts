@@ -1,7 +1,7 @@
 import { Opal as _Opal } from "./opal.js";
 
 import { LevelStorage } from "./mods/storage.js";
-import { Keychain } from "./keychain/index.js";
+import { Keychain } from "./mods/keychain.js";
 import { Replicator } from "./replicator/index.js";
 
 import { StaticAccess } from "./manifest/access/static.js";

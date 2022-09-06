@@ -4,7 +4,7 @@ import { base32 } from "multiformats/bases/base32";
 import { Blocks } from "../src/mods/blocks.js";
 import { Entry, EntryData } from "../src/manifest/entry/index.js";
 import { Identity } from "../src/manifest/identity/index.js";
-import { Keychain } from "../src/keychain/index.js";
+import { Keychain } from "../src/mods/keychain.js";
 
 import {
   getIpfs,
@@ -38,7 +38,7 @@ describe("Base Entry", () => {
 
     storage = await getStorage(fixt.entry);
     const identities = storage.identities;
-    const keychain = new Keychain({ getDatastore: () => storage.keychain });
+    const keychain = new Keychain(storage.keychain);
 
     identity = await Identity.import({
       name,

@@ -7,7 +7,7 @@ import { Entry } from "../../src/manifest/entry/index.js";
 import { sortEntriesRev } from "../../src/database/traversal.js";
 
 import { Identity } from "../../src/manifest/identity/index.js";
-import { Keychain } from "../../src/keychain/index.js";
+import { Keychain } from "../../src/mods/keychain.js";
 import { LevelStorage, StorageReturn } from "../../src/mods/storage.js";
 import { base32 } from "multiformats/bases/base32";
 
@@ -42,13 +42,13 @@ export const getIdentity = async (path?: string, name?: string) => {
   path = path || temp.path;
   name = name || String(Math.random());
 
-  const s = await getStorage(path, name);
-  const identities = s.identities;
-  const keychain = new Keychain({ getDatastore: () => s.keychain });
+  const storage = await getStorage(path, name);
+  const identities = storage.identities;
+  const keychain = new Keychain(storage.keychain);
 
   return {
     identity: await Identity.get({ name, identities, keychain }),
-    storage: s,
+    storage,
     keychain,
   };
 };

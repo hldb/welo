@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { IPFS } from "ipfs";
 import { base32 } from "multiformats/bases/base32";
-import { Keychain } from "../src/keychain/index.js";
+import { Keychain } from "../src/mods/keychain.js";
 import { StorageReturn } from "../src/mods/storage.js";
 
 import { Blocks } from "../src/mods/blocks.js";
@@ -44,7 +44,7 @@ describe("Base Identity", () => {
 
     storage = await getStorage(fixt.identity);
     identities = storage.identities;
-    keychain = new Keychain({ getDatastore: () => storage.keychain });
+    keychain = new Keychain(storage.keychain);
 
     identity = await Identity.import({
       name,
