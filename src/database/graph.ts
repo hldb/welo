@@ -12,7 +12,7 @@ enum Reasons {
   deny = "deny",
 }
 
-interface GraphObj {
+export interface GraphObj {
   nodes: Map<string, Node>;
   // heads: Set<string> | undefined;
   // tails: Set<string> | undefined;
@@ -126,10 +126,20 @@ class Graph implements GraphObj {
     }
 
     const string = cidstring(cid);
+    const seen: Set<string> = new Set();
+
+    // handle self references
+    seen.add(string);
 
     // add node cid to the node of each cid in out
     for (const _cid of out) {
       const _string = cidstring(_cid);
+
+      // no duplicate mutations; no self references
+      if (seen.has(_string)) {
+        continue;
+      }
+
       clone.out.add(_string);
 
       const _node = graph.get(_string);
@@ -215,7 +225,7 @@ class Graph implements GraphObj {
   // static _statefulRm(graph, node) {}
 }
 
-interface NodeObj {
+export interface NodeObj {
   in: Set<string>;
   out: Set<string>;
   miss: Boolean;
@@ -225,7 +235,7 @@ interface NodeObj {
 // a non-missing or non-denied node can have empty sets for out and in
 // a missing or denied node will always have out equal to an empty set
 // a missing or denied node will always have in equal to a non empty set
-const initialNode: NodeObj = {
+export const initialNode: NodeObj = {
   in: new Set(),
   out: new Set(),
   miss: false,

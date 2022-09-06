@@ -28,7 +28,7 @@
     "test:esm:browser": "polendina --page --worker --serviceworker --cleanup dist/esm/browser-test/test-*.js",
     "test:ts": "npm run build:types && npm run test --prefix test/ts-use",
     "test:original": "npm run lint && npm run test:node && npm run test:esm && npm run test:ts",
-    "test": "npx mocha ./test/test-*.js --timeout=30000",
+    "test": "npx mocha --config .mocharc.json && npm run clean",
     "test:ci": "npm run lint && npm run test:node && npm run test:esm && npm run test:cjs && npm run test:ts",
     "coverage": "c8 --reporter=html mocha test/test-*.js && npm_config_yes=true npx st -d coverage -p 8080",
     "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop && rm -rf test/temp"
@@ -49,15 +49,18 @@
   },
   "homepage": "https://github.com/cypsela/odb#readme",
   "devDependencies": {
+    "@types/mocha": "^9.1.1",
     "c8": "^7.12.0",
     "ipfs": "^0.63.5",
     "ipjs": "^5.2.0",
     "mocha": "^9.2.2",
     "polendina": "^3.1.0",
-    "standard": "^17.0.0"
+    "standard": "^17.0.0",
+    "typescript": "^4.8.2"
   },
   "dependencies": {
     "@ipld/dag-cbor": "^7.0.2",
+    "@libp2p/interface-pubsub": "^2.0.1",
     "datastore-level": "^8.0.0",
     "interface-datastore": "^6.1.1",
     "libp2p": "^0.37.3",

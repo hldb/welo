@@ -48,8 +48,8 @@ class IpfsBlocks {
     value: T;
     codec?: Block.BlockEncoder<number, T>;
     hasher?: MultihashHasher<number>;
-  }): Promise<Block.Block<any>> {
-    return Block.encode({
+  }): Promise<Block.Block<T>> {
+    return Block.encode<T, number, number>({
       value,
       codec: codec || cbor,
       hasher: hasher || sha256,
@@ -64,8 +64,8 @@ class IpfsBlocks {
     bytes: Block.ByteView<T>;
     codec?: Block.BlockDecoder<number, T>;
     hasher?: MultihashHasher<number>;
-  }): Promise<Block.Block<any>> {
-    return Block.decode({
+  }): Promise<Block.Block<T>> {
+    return Block.decode<T, number, number>({
       bytes,
       codec: codec || cbor,
       hasher: hasher || sha256,

@@ -100,8 +100,8 @@ class Identity {
       await identities.put(key, block.bytes);
     } else {
       const bytes = await identities.get(key);
-      block = await Blocks.decode({ bytes });
-      const pem = await keychain.exportKey(key, empty);
+      block = await Blocks.decode<SignedIdentity>({ bytes });
+      const pem = await keychain.exportKey(name, empty);
       keypair = await keys.import(pem, empty);
     }
 
@@ -134,7 +134,7 @@ class Identity {
       throw new Error("no identity with that name exists; export failed");
     }
 
-    const pem = await keychain.exportKey(key, password);
+    const pem = await keychain.exportKey(name, password);
     const bytes = await identities.get(key);
 
     const value = { pem, identity: bytes };
@@ -175,7 +175,7 @@ class Identity {
       await identities.put(key, identity);
     }
 
-    const identityBlock = await Blocks.decode({
+    const identityBlock = await Blocks.decode<SignedIdentity>({
       bytes: identity,
     });
 

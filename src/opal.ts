@@ -3,14 +3,14 @@ import where from "wherearewe";
 import path from "path";
 
 // import * as version from './version.js'
+import { initRegistry, RegistryObj } from "./registry.js";
 import { Manifest, Address, ManifestObj } from "./manifest/index.js";
 import { Database } from "./database/index.js";
 import { Blocks } from "./mods/blocks.js";
-import { registry } from "./registry.js";
 import { OPAL_LOWER } from "./constants.js";
 import { dirs, DirsReturn } from "./util.js";
 
-import type { Storage, StorageReturn } from "./mods/storage.js";
+import type { StorageFunc, StorageReturn } from "./mods/storage.js";
 import type { Keychain } from "./keychain/index.js";
 import type { Replicator } from "./replicator/index.js";
 import type { Identity } from "./manifest/identity/index.js";
@@ -49,11 +49,18 @@ interface OpenOptions {
   Replicator?: typeof Replicator;
 }
 
+const registry = initRegistry();
+
 // database factory
 class Opal {
-  static Storage?: Storage;
+  static registry: RegistryObj;
+  static Storage?: StorageFunc;
   static Keychain?: typeof Keychain;
   static Replicator?: typeof Replicator;
+
+  get registry() {
+    return Opal.registry;
+  }
 
   directory: string;
   identity: Identity;
@@ -126,7 +133,7 @@ class Opal {
 
       const _storage: OpalStorage = {
         identities: await this.Storage(dirs(directory).identities),
-        keychain: await this.Storage(dirs(directory).chain),
+        keychain: await this.Storage(dirs(directory).keychain),
       };
       storage = _storage;
       await _storage.identities.open();
@@ -165,13 +172,6 @@ class Opal {
 
   static get Manifest() {
     return Manifest;
-  }
-
-  static get registry() {
-    return registry;
-  }
-  get registry() {
-    return registry;
   }
 
   async stop() {
@@ -246,7 +246,7 @@ class Opal {
       }));
 
     // const Storage = options.Storage || Opal.Storage
-    const Replicator = options.Replicator || Opal.Replicator;
+    // const Replicator = options.Replicator || Opal.Replicator;
 
     // const location = path.join(this.dirs.databases, manifest.address.cid.toString(base32))
 
@@ -282,5 +282,7 @@ class Opal {
     return this._opening[string];
   }
 }
+
+Opal.registry = registry;
 
 export { Opal };

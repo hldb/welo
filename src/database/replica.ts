@@ -149,7 +149,7 @@ export class Replica {
 
   async add(entries: Entry[]) {
     for await (const entry of entries) {
-      if (!equals(entry.tag, this.manifest.tag)) {
+      if (!equals(entry.tag, this.manifest.getTag)) {
         console.warn("replica received entry with mismatched tag");
         continue;
       }
@@ -168,7 +168,7 @@ export class Replica {
   async write(payload: any) {
     const entry = await this.Entry.create({
       identity: this.identity,
-      tag: this.manifest.tag,
+      tag: this.manifest.getTag,
       payload,
       next: Array.from(this.heads).map((string) => CID.parse(string)),
       refs: [], // refs are empty for now

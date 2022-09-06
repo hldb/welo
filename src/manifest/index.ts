@@ -22,21 +22,21 @@ class Manifest implements ManifestObj {
   entry?: any;
   identity?: any;
   meta?: any;
-  tag: Uint8Array;
+  tag?: Uint8Array;
+  getTag: Uint8Array;
 
   constructor(readonly block: Block<ManifestObj>) {
     const manifest = block.value;
     if (manifest.version) this.version = manifest.version;
+    if (manifest.name) this.name = manifest.name;
     if (manifest.store) this.store = manifest.store;
     if (manifest.access) this.access = manifest.access;
     if (manifest.entry) this.entry = manifest.entry;
     if (manifest.identity) this.identity = manifest.identity;
     if (manifest.meta) this.meta = manifest.meta;
-    if (manifest.tag) {
-      this.tag = manifest.tag;
-    } else {
-      this.tag = block.cid.bytes;
-    }
+    if (manifest.tag) this.tag = manifest.tag;
+
+    this.getTag = manifest.tag || block.cid.bytes;
   }
 
   static async create(manifest: ManifestObj) {
@@ -52,10 +52,16 @@ class Manifest implements ManifestObj {
     address: Address;
   }) {
     const block = await blocks.get(address.cid);
-    return this.asManifest({ block }, true);
+    const manifest = await this.asManifest({ block });
+
+    if (manifest === null) {
+      throw new Error("Manifest.fetch: cid did not resolve to valid manifest");
+    }
+
+    return manifest;
   }
 
-  static async asManifest(manifest: any, force = false) {
+  static async asManifest(manifest: any) {
     if (manifest instanceof Manifest) {
       return manifest;
     }
@@ -64,13 +70,6 @@ class Manifest implements ManifestObj {
       const { block } = manifest;
       return new Manifest(block);
     } catch (e) {
-      if (force) {
-        throw new Error(
-          `unable to coerce to manifest from: ${JSON.stringify(manifest)}`
-        );
-      }
-      // todo: handle other errors differently
-
       return null;
     }
   }
@@ -90,6 +89,3 @@ class Manifest implements ManifestObj {
 }
 
 export { Manifest, Address };
-function enumberable(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}

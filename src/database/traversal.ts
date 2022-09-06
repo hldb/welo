@@ -119,7 +119,7 @@ interface TraverserParams {
   cids: CID[];
   load: LoadFunc;
   links: LinksFunc;
-  orderFn: SortEntries;
+  orderFn?: SortEntries;
   //signal: AbortSignal
 }
 

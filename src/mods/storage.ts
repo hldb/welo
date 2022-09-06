@@ -18,12 +18,12 @@ export interface StorageOptions {
 
 export type StorageReturn = LevelDatastore;
 
-export interface Storage {
+export interface StorageFunc {
   (path: string, options?: StorageOptions): Promise<StorageReturn>;
 }
 
 // makes easier to handle nodejs and browser environment differences
-export const LevelStorage: Storage = async function LevelStorage(
+export const LevelStorage: StorageFunc = async function LevelStorage(
   path,
   options
 ): Promise<LevelDatastore> {

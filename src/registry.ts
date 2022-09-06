@@ -42,15 +42,13 @@ interface Registered {
 
 export class Register {
   registered: Registered;
+  readonly starKey: typeof $tar;
 
   constructor(public namespace?: string) {
     // will bring this back better using interface-datastore Key .parent and .name
     // this.namespace = namespace
     this.registered = {};
-  }
-
-  get starKey() {
-    return $tar;
+    this.starKey = $tar;
   }
 
   add(component: any, star = !Object.keys(this.registered).length) {
@@ -77,7 +75,7 @@ export class Register {
     return this.registered[type];
   }
 
-  alias(type: string, alias: string) {
+  alias(type: string, alias: string | typeof $tar) {
     if (!this.registered[type]) {
       throw errors.typeNotRegistered(type);
     }
@@ -99,9 +97,9 @@ export interface RegistryObj {
   [key: string]: Register;
 }
 
-export const registry: RegistryObj = {
+export const initRegistry = (): RegistryObj => ({
   store: new Register(),
   access: new Register(),
   entry: new Register(),
   identity: new Register(),
-};
+});

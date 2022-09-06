@@ -6,7 +6,7 @@ type IdentityType = typeof Identity;
 
 const type = "base";
 
-interface EntryData {
+export interface EntryData {
   v: 1;
   tag: Uint8Array;
   payload: any;
@@ -14,7 +14,7 @@ interface EntryData {
   refs: CID[];
 }
 
-type EntryDataBlock = Block<EntryData>;
+export type EntryDataBlock = Block<EntryData>;
 
 interface SignedEntry {
   auth: CID;
@@ -22,9 +22,9 @@ interface SignedEntry {
   sig: Uint8Array;
 }
 
-type SignedEntryBlock = Block<SignedEntry>;
+export type SignedEntryBlock = Block<SignedEntry>;
 
-interface CreateParams extends Omit<EntryData, "v"> {
+export interface CreateParams extends Omit<EntryData, "v"> {
   identity: Identity;
 }
 

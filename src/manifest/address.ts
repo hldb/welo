@@ -25,7 +25,7 @@ export class Address {
     return prefix;
   }
 
-  static asAddress(address: Address | { cid: CID }, force = false) {
+  static asAddress(address?: any) {
     if (address instanceof Address) {
       return address;
     }
@@ -34,10 +34,6 @@ export class Address {
     if (cid) {
       return new Address(cid);
     } else {
-      if (force) {
-        throw new Error(`unable to coerce to address from: ${address}`);
-      }
-
       return null;
     }
   }
