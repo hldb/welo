@@ -42,7 +42,7 @@ export class Database {
   open: Boolean
   _handlers: any
 
-  constructor(config: DatabaseConfig) {
+  constructor (config: DatabaseConfig) {
     // this.storage = config.storage
     this.blocks = config.blocks
     this.identity = config.identity
@@ -64,8 +64,8 @@ export class Database {
         Object.entries(this.store.actions).map(([key, action]) => [
           key,
           {
-            value: (key: string, value?: any) =>
-              this.replica.write(action(key, value))
+            value: async (key: string, value?: any) =>
+              await this.replica.write(action(key, value))
           }
         ])
       )
@@ -88,7 +88,7 @@ export class Database {
     this.open = true
   }
 
-  static async open(options: DatabaseOptions) {
+  static async open (options: DatabaseOptions): Promise<Database> {
     const {
       // createStorage,
       manifest,
@@ -148,8 +148,8 @@ export class Database {
     return database
   }
 
-  async close() {
-    if (!this.open) {
+  async close (): Promise<void> {
+    if (this.open === false) {
       return
     }
     this.open = false

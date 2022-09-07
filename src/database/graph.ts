@@ -2,8 +2,6 @@
 
 import type { CID } from 'multiformats/cid.js'
 import { cidstring } from '../util.js'
-const have = (node: Node | undefined) =>
-  Boolean(node && !node.miss && !node.deny)
 
 export type Edge = 'in' | 'out'
 
@@ -37,7 +35,7 @@ class Graph implements GraphObj {
   missing: Set<string>
   denied: Set<string>
 
-  constructor({
+  constructor ({
     nodes,
     // heads,
     // tails,
@@ -52,38 +50,38 @@ class Graph implements GraphObj {
     this.denied = new Set(denied)
   }
 
-  static init() {
+  static init (): Graph {
     return new Graph()
   }
 
-  static clone(graph: Graph) {
+  static clone (graph: Graph): Graph {
     return new Graph(graph)
   }
 
-  known(cid: CID | string) {
+  known (cid: CID | string): boolean {
     return this.nodes.has(cidstring(cid))
   }
 
   // true if cid exists in this.nodes and is not missing or denied
-  has(cid: CID | string) {
-    return have(this.get(cid))
+  has (cid: CID | string): boolean {
+    return Node.exists(this.get(cid))
   }
 
-  get(cid: CID | string) {
+  get (cid: CID | string): Node | undefined {
     return this.nodes.get(cidstring(cid))
   }
 
-  get size() {
+  get size (): number {
     return this.nodes.size - this.missing.size - this.denied.size
   }
 
   // stateless heads and tails for now
 
-  get heads() {
+  get heads (): Set<string> {
     const heads: Set<string> = new Set()
 
     for (const [string, node] of this.nodes.entries()) {
-      if (have(node) && !node.in.size) {
+      if (Node.exists(node) && node.in.size === 0) {
         heads.add(string)
       }
     }
@@ -91,12 +89,12 @@ class Graph implements GraphObj {
     return heads
   }
 
-  get tails() {
+  get tails (): Set<string> {
     // this sucks; necessary to make stateful
     const tails: Set<string> = new Set()
 
     for (const [string, node] of this.nodes.entries()) {
-      if (!have(node)) {
+      if (!Node.exists(node)) {
         continue
       }
 
@@ -117,11 +115,12 @@ class Graph implements GraphObj {
 
   // write methods
 
-  static add(graph: Graph, cid: CID | string, out: CID[] | string[]) {
+  static add (graph: Graph, cid: CID | string, out: CID[] | string[]): void {
     const node = graph.get(cid)
     const clone = Node.clone(node)
 
-    if (have(node)) {
+    // nodes are immutable, no reason to update their out edges
+    if (Node.exists(node)) {
       return
     }
 
@@ -165,17 +164,17 @@ class Graph implements GraphObj {
     // this.events.emit('add', cid)
   }
 
-  static miss(graph: Graph, cid: CID | string) {
+  static miss (graph: Graph, cid: CID | string): void {
     this._rm(graph, cid, Reasons.miss)
     // this.events.emit(reasons.miss, cid)
   }
 
-  static deny(graph: Graph, cid: CID | string) {
+  static deny (graph: Graph, cid: CID | string): void {
     this._rm(graph, cid, Reasons.deny)
     // this.events.emit(reasons.deny, cid)
   }
 
-  static _rm(graph: Graph, cid: CID | string, reason: Reasons) {
+  static _rm (graph: Graph, cid: CID | string, reason: Reasons): void {
     const string = cidstring(cid)
 
     // missing or denied based on reason
@@ -186,9 +185,9 @@ class Graph implements GraphObj {
     const dorm = mord === graph.missing ? graph.denied : graph.missing
 
     const node = graph.get(cid)
-    if (node == null || node[reason]) {
+    if (node == null || node[reason] === true) {
       return
-    } else if (!node.in.size) {
+    } else if (node.in.size === 0) {
       // erase orphaned node
       graph.nodes.delete(string)
       graph.missing.delete(string)
@@ -211,7 +210,7 @@ class Graph implements GraphObj {
       _clone.in.delete(string)
       graph.nodes.set(_string, _clone)
 
-      if (!_clone.in.size) {
+      if (_clone.in.size === 0) {
         this[reason](graph, _string)
       }
     }
@@ -249,19 +248,23 @@ class Node implements NodeObj {
   deny: Boolean
 
   // 'ni' because 'in' is a token
-  constructor({ in: ni, out, miss, deny }: NodeObj = initialNode) {
+  constructor ({ in: ni, out, miss, deny }: NodeObj = initialNode) {
     this.in = new Set(ni)
     this.out = new Set(out)
     this.miss = Boolean(miss)
     this.deny = Boolean(deny)
   }
 
-  static init() {
+  static init (): Node {
     return new Node()
   }
 
-  static clone(node: Node | undefined) {
+  static clone (node: Node | undefined): Node {
     return new Node(node)
+  }
+
+  static exists (node: Node | undefined): boolean {
+    return Boolean(node != null && node.miss !== false && node.deny !== false)
   }
 }
 

@@ -5,7 +5,6 @@ import { Entry } from 'src/manifest/entry/index.js'
 import { Identity } from 'src/manifest/identity/index.js'
 import { Manifest } from 'src/manifest/index.js'
 import { Blocks } from 'src/mods/blocks.js'
-import { StorageReturn } from 'src/mods/storage.js'
 // import { compare } from 'uint8arrays/compare'
 import { equals } from 'uint8arrays/equals'
 
@@ -43,7 +42,7 @@ export class Replica {
   readonly _graph: Graph
   readonly events: EventEmitter
 
-  constructor({
+  constructor ({
     manifest,
     // storage,
     blocks,
@@ -65,14 +64,14 @@ export class Replica {
     this.events = new EventEmitter()
   }
 
-  static async open({
+  static async open ({
     manifest,
     blocks,
     access,
     identity,
     Entry,
     Identity
-  }: Omit<ReplicaParams, '_graph'>) {
+  }: Omit<ReplicaParams, '_graph'>): Promise<Replica> {
     // const storage = createStorage('replica')
     // await storage.open()
     const _graph = Graph.init()
@@ -88,28 +87,31 @@ export class Replica {
     })
   }
 
-  async close() {
+  async close (): Promise<void> {
     // await this.storage.close()
   }
 
-  get heads() {
+  get heads (): Set<string> {
     return this._graph.heads
   }
-  get tails() {
+
+  get tails (): Set<string> {
     return this._graph.tails
   }
-  get missing() {
+
+  get missing (): Set<string> {
     return this._graph.missing
   }
-  get denied() {
+
+  get denied (): Set<string> {
     return this._graph.denied
   }
 
-  get size() {
+  get size (): number {
     return this._graph.size
   }
 
-  traverse({ direction } = { direction: 'descend' }) {
+  async traverse ({ direction } = { direction: 'descend' }): Promise<Entry[]> {
     const blocks = this.blocks
     const Entry = this.Entry
     const Identity = this.Identity
@@ -136,18 +138,18 @@ export class Replica {
     const load = loadEntry({ blocks, Entry, Identity })
     const links = graphLinks({ graph, tails, edge })
 
-    return traverser({ cids, load, links, orderFn })
+    return await traverser({ cids, load, links, orderFn })
   }
 
-  async has(cid: CID | string) {
+  async has (cid: CID | string): Promise<boolean> {
     return this._graph.has(cid)
   }
 
-  async known(cid: CID | string) {
+  async known (cid: CID | string): Promise<boolean> {
     return this._graph.known(cid)
   }
 
-  async add(entries: Entry[]) {
+  async add (entries: Entry[]): Promise<void> {
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag)) {
         console.warn('replica received entry with mismatched tag')
@@ -165,7 +167,7 @@ export class Replica {
     this.events.emit('update')
   }
 
-  async write(payload: any) {
+  async write (payload: any): Promise<Entry> {
     const entry = await this.Entry.create({
       identity: this.identity,
       tag: this.manifest.getTag,
@@ -177,10 +179,12 @@ export class Replica {
     await this.blocks.put(entry.block)
 
     // do not await
-    const add = this.add([entry])
-    add.then(() => this.events.emit('write'))
+    const add = await this.add([entry]).then(() => {
+      this.events.emit('write')
+      return entry
+    })
 
-    return add.then(() => entry)
+    return add
   }
 
   // useful when the access list is updated

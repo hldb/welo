@@ -24,10 +24,10 @@ export const sortCids: SortCids = (c1, c2) => compare(c1.bytes, c2.bytes)
 export const sortEntries: SortEntries = (e1, e2) => sortCids(e1.cid, e2.cid)
 export const sortEntriesRev: SortEntries = (e1, e2) => sortCids(e2.cid, e1.cid)
 
-type LoadFunc = (cid: CID) => Promise<Entry>
-type LinksFunc = (entry: Entry) => CID[]
+export type LoadFunc = (cid: CID) => Promise<Entry>
+export type LinksFunc = (entry: Entry) => CID[]
 
-export function loadEntry({
+export function loadEntry ({
   blocks,
   Entry,
   Identity
@@ -35,9 +35,9 @@ export function loadEntry({
   blocks: Blocks
   Entry: EntryType
   Identity: IdentityType
-}) {
+}): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return Entry.fetch({ blocks, cid, Identity })
+    return await Entry.fetch({ blocks, cid, Identity })
   }
   return load
 }
@@ -45,13 +45,13 @@ export function loadEntry({
 // used by replicators to fetch new entries from the dag
 // if entry is not allow to write to log return no links
 // only return links that have not been seen or are unknown to graph
-export function dagLinks({
+export function dagLinks ({
   graph,
   access
 }: {
   graph: Graph
   access: StaticAccess
-}) {
+}): LinksFunc {
   const seen: Set<string> = new Set()
 
   const links: LinksFunc = function (entry: Entry) {
@@ -75,7 +75,7 @@ export function dagLinks({
 }
 
 // used by replica to traverse with help of graph
-export function graphLinks({
+export function graphLinks ({
   graph,
   tails,
   edge
@@ -83,7 +83,7 @@ export function graphLinks({
   graph: Graph
   tails: Set<string>
   edge: Edge
-}) {
+}): LinksFunc {
   const seen: Set<string> = new Set()
 
   const links: LinksFunc = function (entry: Entry) {
@@ -120,16 +120,16 @@ interface TraverserParams {
   load: LoadFunc
   links: LinksFunc
   orderFn?: SortEntries
-  //signal: AbortSignal
+  // signal: AbortSignal
 }
 
 // todo: improve read ahead with entry.refs
-export async function traverser({
+export async function traverser ({
   cids, // array of CID to start from
   load, // load function takes a cid and returns an entry or null
   links, // links function takes an object containing an entry or cid and returns an array of cid
   orderFn // if supplied the entries are yielded in order with ties handled by orderFn
-}: TraverserParams) {
+}: TraverserParams): Promise<Entry[]> {
   const ordered = orderFn instanceof Function
   const result: Entry[] = []
 
@@ -138,7 +138,7 @@ export async function traverser({
   // ordered vs parallel
   // const order = cids => ordered ? walk(cids) : Promise.all(cids.map(cid => walk([cid])))
 
-  async function walk(cids: CID[]): Promise<void> {
+  async function walk (cids: CID[]): Promise<void> {
     // trivial abort for now; later pass abort to load function
 
     const entries = await Promise.all(cids.map(load)).then((entries) =>
@@ -153,9 +153,9 @@ export async function traverser({
     // get next cids; links function must only return unseen cids so there are no duplicate cids in nexts
     const nexts = entries.flatMap((entry) => links(entry)).sort(sortCids) // combine link arrays
 
-    if (nexts.length) {
+    if (nexts.length > 0) {
       // order(nexts)
-      return walk(nexts)
+      return await walk(nexts)
     }
   }
 
