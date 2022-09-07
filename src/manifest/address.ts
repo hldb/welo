@@ -1,49 +1,49 @@
-import { CID } from "multiformats/cid";
-import { base32 } from "multiformats/bases/base32";
-import { OPAL_PREFIX } from "../constants.js";
+import { CID } from 'multiformats/cid'
+import { base32 } from 'multiformats/bases/base32'
+import { OPAL_PREFIX } from '../constants.js'
 
-const prefix = OPAL_PREFIX;
+const prefix = OPAL_PREFIX
 
 const parse = function (address: Address | string) {
-  address = address.toString();
+  address = address.toString()
 
   if (!address.startsWith(prefix)) {
-    throw new Error(`'${prefix}' prefix missing from address: ${address}`);
+    throw new Error(`'${prefix}' prefix missing from address: ${address}`)
   }
 
   try {
-    return CID.parse(address.split("/")[2]);
+    return CID.parse(address.split('/')[2])
   } catch (e) {
-    throw new Error(`failed to parse CID in address: ${address}`);
+    throw new Error(`failed to parse CID in address: ${address}`)
   }
-};
+}
 
 export class Address {
   constructor(public readonly cid: CID) {}
 
   static get prefix() {
-    return prefix;
+    return prefix
   }
 
   static asAddress(address?: any) {
     if (address instanceof Address) {
-      return address;
+      return address
     }
 
-    const cid = CID.asCID(address?.cid);
+    const cid = CID.asCID(address?.cid)
     if (cid) {
-      return new Address(cid);
+      return new Address(cid)
     } else {
-      return null;
+      return null
     }
   }
 
   static fromString(string: string) {
-    return new Address(parse(string));
+    return new Address(parse(string))
   }
 
   toString(base = base32) {
-    return prefix + this.cid.toString(base);
+    return prefix + this.cid.toString(base)
   }
 
   // static fromBytes (bytes) {
@@ -56,13 +56,13 @@ export class Address {
 
   equals(address: Address) {
     if (address === this) {
-      return true;
+      return true
     }
 
     if (address == null) {
-      throw new Error("Address.equals: invalid address parameter");
+      throw new Error('Address.equals: invalid address parameter')
     }
 
-    return this.cid.equals(address.cid);
+    return this.cid.equals(address.cid)
   }
 }

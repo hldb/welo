@@ -1,88 +1,88 @@
-import EventEmitter from "events";
-import where from "wherearewe";
-import path from "path";
+import EventEmitter from 'events'
+import where from 'wherearewe'
+import path from 'path'
 
 // import * as version from './version.js'
-import { initRegistry, RegistryObj } from "./registry.js";
-import { Manifest, Address, ManifestObj } from "./manifest/index.js";
-import { Database } from "./database/index.js";
-import { Blocks } from "./mods/blocks.js";
-import { OPAL_LOWER } from "./constants.js";
-import { dirs, DirsReturn } from "./util.js";
+import { initRegistry, RegistryObj } from './registry.js'
+import { Manifest, Address, ManifestObj } from './manifest/index.js'
+import { Database } from './database/index.js'
+import { Blocks } from './mods/blocks.js'
+import { OPAL_LOWER } from './constants.js'
+import { dirs, DirsReturn } from './util.js'
 
-import type { StorageFunc, StorageReturn } from "./mods/storage.js";
-import type { Keychain } from "./mods/keychain.js";
-import type { Replicator } from "./replicator/index.js";
-import type { Identity } from "./manifest/identity/index.js";
-import type { IPFS } from "ipfs";
-import type { PeerId } from "@libp2p/interface-peer-id";
-import type { PubSub } from "@libp2p/interface-pubsub";
-type IdentityType = typeof Identity;
+import type { StorageFunc, StorageReturn } from './mods/storage.js'
+import type { Keychain } from './mods/keychain.js'
+import type { Replicator } from './replicator/index.js'
+import type { Identity } from './manifest/identity/index.js'
+import type { IPFS } from 'ipfs'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PubSub } from '@libp2p/interface-pubsub'
+type IdentityType = typeof Identity
 
 interface OpalStorage {
-  identities: StorageReturn;
-  keychain: StorageReturn;
+  identities: StorageReturn
+  keychain: StorageReturn
 }
 interface OpalShared {
-  directory?: string;
-  identity?: Identity | undefined;
-  storage?: OpalStorage;
-  identities?: StorageReturn | undefined;
-  keychain?: Keychain | undefined;
+  directory?: string
+  identity?: Identity | undefined
+  storage?: OpalStorage
+  identities?: StorageReturn | undefined
+  keychain?: Keychain | undefined
 }
 
 interface OpalConfig extends OpalShared {
-  directory: string;
-  identity: Identity;
-  blocks: Blocks;
-  peerId?: PeerId;
-  pubsub?: PubSub;
+  directory: string
+  identity: Identity
+  blocks: Blocks
+  peerId?: PeerId
+  pubsub?: PubSub
 }
 
 interface OpalOptions extends OpalShared {
-  ipfs?: IPFS;
+  ipfs?: IPFS
 }
 
 interface OpenOptions {
-  identity?: Identity;
-  Storage?: StorageReturn;
-  Replicator?: typeof Replicator;
+  identity?: Identity
+  Storage?: StorageReturn
+  Replicator?: typeof Replicator
 }
 
-const registry = initRegistry();
+const registry = initRegistry()
 
 // database factory
 class Opal {
-  static registry: RegistryObj;
-  static Storage?: StorageFunc;
-  static Keychain?: typeof Keychain;
-  static Replicator?: typeof Replicator;
+  static registry: RegistryObj
+  static Storage?: StorageFunc
+  static Keychain?: typeof Keychain
+  static Replicator?: typeof Replicator
 
   get registry() {
-    return Opal.registry;
+    return Opal.registry
   }
 
-  directory: string;
-  identity: Identity;
-  blocks: Blocks;
-  events: EventEmitter;
+  directory: string
+  identity: Identity
+  blocks: Blocks
+  events: EventEmitter
 
-  storage?: OpalStorage;
-  identities?: StorageReturn;
-  keychain?: Keychain;
+  storage?: OpalStorage
+  identities?: StorageReturn
+  keychain?: Keychain
 
   opened: {
-    [address: string]: Database;
-  };
+    [address: string]: Database
+  }
 
-  ipfs?: IPFS;
-  peerId?: PeerId;
-  pubsub?: PubSub;
+  ipfs?: IPFS
+  peerId?: PeerId
+  pubsub?: PubSub
 
-  private dirs: DirsReturn;
+  private dirs: DirsReturn
   private _opening: {
-    [address: string]: Promise<Database>;
-  };
+    [address: string]: Promise<Database>
+  }
 
   constructor({
     directory,
@@ -92,62 +92,62 @@ class Opal {
     keychain,
     blocks,
     peerId,
-    pubsub,
+    pubsub
   }: OpalConfig) {
-    this.directory = directory;
-    this.dirs = dirs(this.directory);
+    this.directory = directory
+    this.dirs = dirs(this.directory)
 
-    this.identity = identity;
-    this.storage = storage;
-    this.identities = identities;
-    this.keychain = keychain;
+    this.identity = identity
+    this.storage = storage
+    this.identities = identities
+    this.keychain = keychain
 
-    this.blocks = blocks;
-    this.peerId = peerId;
-    this.pubsub = pubsub;
+    this.blocks = blocks
+    this.peerId = peerId
+    this.pubsub = pubsub
 
-    this.events = new EventEmitter();
+    this.events = new EventEmitter()
 
-    this.opened = {};
-    this._opening = {};
+    this.opened = {}
+    this._opening = {}
   }
 
   static async create(options: OpalOptions = {}) {
-    let directory;
+    let directory
     if (where.isNode) {
-      directory = path.resolve(options.directory || OPAL_LOWER);
+      directory = path.resolve(options.directory || OPAL_LOWER)
     } else {
-      directory = OPAL_LOWER;
+      directory = OPAL_LOWER
     }
 
-    let identity, identities, keychain, storage;
+    let identity, identities, keychain, storage
 
     if (options.identity) {
-      identity = options.identity;
+      identity = options.identity
     } else {
       if (this.Storage === undefined || this.Keychain === undefined) {
         throw new Error(
-          "Opal.create: missing Storage and Keychain; unable to create Identity"
-        );
+          'Opal.create: missing Storage and Keychain; unable to create Identity'
+        )
       }
 
       const _storage: OpalStorage = {
         identities: await this.Storage(dirs(directory).identities),
-        keychain: await this.Storage(dirs(directory).keychain),
-      };
-      storage = _storage;
-      await _storage.identities.open();
-      await _storage.keychain.open();
+        keychain: await this.Storage(dirs(directory).keychain)
+      }
+      storage = _storage
+      await _storage.identities.open()
+      await _storage.keychain.open()
 
-      identities = storage.identities;
-      keychain = new this.Keychain(storage.keychain);
+      identities = storage.identities
+      keychain = new this.Keychain(storage.keychain)
 
-      const Identity: IdentityType = this.registry.identity.star;
+      const Identity: IdentityType = this.registry.identity.star
       identity = await Identity.get({
-        name: "default",
+        name: 'default',
         identities: identities,
-        keychain: keychain,
-      });
+        keychain: keychain
+      })
     }
 
     const config: OpalConfig = {
@@ -156,32 +156,32 @@ class Opal {
       storage,
       identities,
       keychain,
-      blocks: new Blocks(options.ipfs),
+      blocks: new Blocks(options.ipfs)
       // peerId and pubsub is not required but for some replicators
       // peerId: options.peerId || null,
       // pubsub: options.pubsub || options.ipfs.pubsub || null
-    };
+    }
 
-    return new Opal(config);
+    return new Opal(config)
   }
 
   // static get version () { return version }
 
   static get Manifest() {
-    return Manifest;
+    return Manifest
   }
 
   async stop() {
-    await Promise.all(Object.values(this._opening));
-    await Promise.all(Object.values(this.opened).map((db) => db.close()));
+    await Promise.all(Object.values(this._opening))
+    await Promise.all(Object.values(this.opened).map((db) => db.close()))
 
-    this.events.emit("stop");
-    this.events.removeAllListeners("opened");
-    this.events.removeAllListeners("closed");
+    this.events.emit('stop')
+    this.events.removeAllListeners('opened')
+    this.events.removeAllListeners('closed')
 
     if (this.storage) {
-      await this.storage.identities.close();
-      await this.storage.keychain.close();
+      await this.storage.identities.close()
+      await this.storage.keychain.close()
     }
   }
 
@@ -190,57 +190,57 @@ class Opal {
     const opts = {
       version: 1,
       store: {
-        type: this.registry.store.star.type,
+        type: this.registry.store.star.type
       },
       access: {
         type: this.registry.access.star.type,
-        write: [this.identity.id],
+        write: [this.identity.id]
       },
       entry: {
-        type: this.registry.entry.star.type,
+        type: this.registry.entry.star.type
       },
       identity: {
-        type: this.registry.identity.star.type,
+        type: this.registry.identity.star.type
       },
-      ...options,
-    };
-
-    const manifest = await Manifest.create({ name, ...opts });
-    await this.blocks.put(manifest.block);
-
-    try {
-      Manifest.getComponents(this.registry, manifest);
-    } catch (e) {
-      console.warn("manifest configuration contains unregistered components");
+      ...options
     }
 
-    return manifest;
+    const manifest = await Manifest.create({ name, ...opts })
+    await this.blocks.put(manifest.block)
+
+    try {
+      Manifest.getComponents(this.registry, manifest)
+    } catch (e) {
+      console.warn('manifest configuration contains unregistered components')
+    }
+
+    return manifest
   }
 
   async fetchManifest(address: Address) {
-    return Manifest.fetch({ blocks: this.blocks, address });
+    return Manifest.fetch({ blocks: this.blocks, address })
   }
 
   async open(manifest: Manifest, options: OpenOptions = {}) {
-    const address = manifest.address;
-    const string = address.toString();
+    const address = manifest.address
+    const string = address.toString()
 
-    const isOpen = this.opened[string] || this._opening[string];
+    const isOpen = this.opened[string] || this._opening[string]
 
     if (isOpen) {
-      throw new Error(`database ${address} is already open or being opened`);
+      throw new Error(`database ${address} is already open or being opened`)
     }
 
-    const components = Manifest.getComponents(this.registry, manifest);
+    const components = Manifest.getComponents(this.registry, manifest)
 
     // this will return a duplicate instance of the identity (not epic) until the instances cache is used by Identity.get
     const identity =
       options.identity ||
       (await components.Identity.get({
-        name: "default",
+        name: 'default',
         identities: this.identities,
-        keychain: this.keychain,
-      }));
+        keychain: this.keychain
+      }))
 
     // const Storage = options.Storage || Opal.Storage
     // const Replicator = options.Replicator || Opal.Replicator;
@@ -259,27 +259,27 @@ class Opal {
       identity,
       // Replicator,
       // createStorage,
-      ...Manifest.getComponents(this.registry, manifest),
+      ...Manifest.getComponents(this.registry, manifest)
     })
       .then((db) => {
-        this.opened[string] = db;
-        delete this._opening[string];
-        this.events.emit("opened", db);
-        db.events.once("closed", () => {
-          delete this.opened[string];
-          this.events.emit("closed", db);
-        });
-        return db;
+        this.opened[string] = db
+        delete this._opening[string]
+        this.events.emit('opened', db)
+        db.events.once('closed', () => {
+          delete this.opened[string]
+          this.events.emit('closed', db)
+        })
+        return db
       })
       .catch((e) => {
-        console.error(e);
-        throw new Error(`failed opening database with address: ${address}`);
-      });
+        console.error(e)
+        throw new Error(`failed opening database with address: ${address}`)
+      })
 
-    return this._opening[string];
+    return this._opening[string]
   }
 }
 
-Opal.registry = registry;
+Opal.registry = registry
 
-export { Opal };
+export { Opal }

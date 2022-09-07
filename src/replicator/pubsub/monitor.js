@@ -1,4 +1,3 @@
-
 import EventEmitter from 'events'
 
 const peerJoin = 'peer-join'
@@ -6,7 +5,7 @@ const peerLeave = 'peer-leave'
 const update = 'update'
 
 export class Monitor {
-  constructor (pubsub, topic) {
+  constructor(pubsub, topic) {
     this.pubsub = pubsub
     this.topic = topic
     this.peers = new Set()
@@ -14,7 +13,7 @@ export class Monitor {
     this._controller = null
   }
 
-  async start (interval = 1000) {
+  async start(interval = 1000) {
     this._controller = new AbortController()
 
     // re-call _poll
@@ -33,14 +32,14 @@ export class Monitor {
     this.events.on(peerLeave, () => this.events.emit(update))
   }
 
-  async stop () {
+  async stop() {
     this.events.remoteListeners(peerJoin)
     this.events.remoteListeners(peerLeave)
     this._controller.abort()
     this.peers = new Set()
   }
 
-  async _poll () {
+  async _poll() {
     const _peers = this.peers
     this.peers = new Set(await this.pubsub.peers(this.topic))
 

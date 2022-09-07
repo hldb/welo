@@ -1,4 +1,3 @@
-
 import { strict as assert } from 'assert'
 import * as constants from '../src/constants.js'
 
