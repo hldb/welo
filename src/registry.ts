@@ -7,12 +7,15 @@
  * so an entry isnt registered as an identity
  *
  */
-import { OPAL_LOWER } from './constants'
+import { Keyvalue } from './manifest/store/keyvalue'
 import { StaticAccess } from './manifest/access/static'
 import { Entry } from './manifest/entry'
 import { Identity } from './manifest/identity'
-import { Keyvalue } from './manifest/store/keyvalue'
-// import { Component } from "./manifest/component.js";
+
+type StoreType = typeof Keyvalue
+type AccessType = typeof StaticAccess
+type EntryType = typeof Entry
+type IdentityType = typeof Identity
 
 const $tar = Symbol.for('*')
 
@@ -34,72 +37,70 @@ export const errors = {
     )
 }
 
-// hack for now
-interface Registered {
-  [type: string]: any
-  [$tar]?: any
-}
+type Registered<T> = Map<string | typeof $tar, T>
 
-export class Register {
-  registered: Registered
+export class Register<T> {
+  registered: Registered<T>
   readonly starKey: typeof $tar
 
-  constructor(public namespace?: string) {
+  constructor (public namespace?: string) {
     // will bring this back better using interface-datastore Key .parent and .name
     // this.namespace = namespace
-    this.registered = {}
+    this.registered = new Map()
     this.starKey = $tar
   }
 
-  add(component: any, star = !Object.keys(this.registered).length) {
+  add (component: any, star = Object.keys(this.registered).length === 0): void {
     // if (!component.type.startsWith(this.namespace)) {
     //   throw errors.namespaceMismatch(this.namespace, component.type)
     // }
 
-    if (this.registered[component.type]) {
+    if (this.registered.has(component.type)) {
       throw errors.typeRegistered(component.type)
     }
 
     if (star) {
-      this.registered[$tar] = component
+      this.registered.set($tar, component)
     }
 
-    this.registered[component.type] = component
+    this.registered.set(component.type, component)
   }
 
-  get(type: string) {
-    if (!this.registered[type]) {
+  get (type: string): T {
+    if (!this.registered.has(type)) {
+      throw errors.typeNotRegistered(type)
+    }
+    return this.registered.get(type) as T
+  }
+
+  alias (type: string, alias: string | typeof $tar): void {
+    if (!this.registered.has(type)) {
       throw errors.typeNotRegistered(type)
     }
 
-    return this.registered[type]
-  }
-
-  alias(type: string, alias: string | typeof $tar) {
-    if (!this.registered[type]) {
-      throw errors.typeNotRegistered(type)
-    }
-
-    this.registered[alias] = this.registered[type]
+    this.registered.set(alias, this.registered.get(type) as T)
   }
 
   // the favorite/default component
-  get star() {
-    if (!this.registered[$tar]) {
+  get star (): T {
+    if (!this.registered.has($tar)) {
       throw new Error('no star component')
     }
 
-    return this.registered[$tar]
+    return this.registered.get($tar) as T
   }
 }
 
 export interface RegistryObj {
-  [key: string]: Register
+  store: Register<StoreType>
+  access: Register<AccessType>
+  entry: Register<EntryType>
+  identity: Register<IdentityType>
 }
 
 export const initRegistry = (): RegistryObj => ({
-  store: new Register(),
-  access: new Register(),
-  entry: new Register(),
-  identity: new Register()
+  store: new Register<StoreType>(),
+  access: new Register<AccessType>(),
+  entry: new Register<EntryType>(),
+  identity: new Register<IdentityType>()
 })
