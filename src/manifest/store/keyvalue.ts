@@ -1,8 +1,13 @@
 import EventEmitter from 'events'
 import { Replica } from 'src/database/replica'
 import { Entry } from '../entry'
+import { ComponentConfig } from '../interfaces'
 
 const type = 'keyvalue'
+
+export interface StoreConfig extends ComponentConfig<typeof type> {
+  snap?: any
+}
 
 const ops = Object.fromEntries(['PUT', 'DEL'].map((op) => [op, op]))
 
@@ -19,7 +24,10 @@ type StateMap = Map<string, any>
 
 const initialState = (): StateMap => new Map()
 
-async function reducer(traverse: Entry[], state = initialState()) {
+async function reducer (
+  traverse: Entry[],
+  state = initialState()
+): Promise<StateMap> {
   for (const {
     payload: { op, key, value }
   } of traverse) {
@@ -46,36 +54,36 @@ class Keyvalue {
   state: Map<string, any>
   events: EventEmitter
 
-  constructor() {
+  constructor () {
     this.state = initialState()
     this.events = new EventEmitter()
   }
 
-  static async open() {
+  static async open (): Promise<Keyvalue> {
     return new Keyvalue()
   }
 
-  static get type() {
+  static get type (): typeof type {
     return type
   }
 
-  async close() {
+  async close (): Promise<void> {
     this.state = initialState()
   }
 
-  get actions() {
+  get actions (): typeof actions {
     return actions
   }
 
-  get selectors() {
+  get selectors (): typeof selectors {
     return selectors
   }
 
-  get reducer() {
+  get reducer (): typeof reducer {
     return reducer
   }
 
-  async update({ replica }: { replica: Replica }) {
+  async update ({ replica }: { replica: Replica }): Promise<void> {
     this.state = await reducer(await replica.traverse())
     this.events.emit('update')
   }

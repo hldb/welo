@@ -2,12 +2,14 @@ import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { Blocks } from '../../mods/blocks.js'
 import { Identity } from '../identity/index.js'
+import { ComponentConfig } from '../interfaces.js'
 type IdentityType = typeof Identity
 
 const type = 'base'
 
+export type EntryConfig = ComponentConfig<typeof type>
+
 export interface EntryData {
-  v: 1
   tag: Uint8Array
   payload: any
   next: CID[]
@@ -15,6 +17,10 @@ export interface EntryData {
 }
 
 export type EntryDataBlock = Block<EntryData>
+
+export interface CreateParams extends Omit<EntryData, 'v'> {
+  identity: Identity
+}
 
 interface SignedEntry {
   auth: CID
@@ -24,10 +30,6 @@ interface SignedEntry {
 
 export type SignedEntryBlock = Block<SignedEntry>
 
-export interface CreateParams extends Omit<EntryData, 'v'> {
-  identity: Identity
-}
-
 class Entry {
   readonly block: SignedEntryBlock
   readonly identity: Identity
@@ -36,13 +38,12 @@ class Entry {
   readonly auth: CID
   readonly sig: Uint8Array
 
-  readonly v: Number
   readonly tag: Uint8Array
   readonly payload: any
   readonly next: CID[]
   readonly refs: CID[]
 
-  constructor({
+  constructor ({
     block,
     data,
     identity
@@ -58,7 +59,6 @@ class Entry {
     this.auth = block.value.auth
     this.sig = block.value.sig
 
-    this.v = data.value.v
     this.tag = data.value.tag
     this.payload = data.value.payload
     this.next = data.value.next
@@ -68,7 +68,6 @@ class Entry {
       cid: { get: () => block.cid },
       auth: { get: () => block.value.auth },
       sig: { get: () => block.value.sig },
-      v: { get: () => data.value.v },
       tag: { get: () => data.value.tag },
       payload: { get: () => data.value.payload },
       next: { get: () => data.value.next },
@@ -76,13 +75,19 @@ class Entry {
     })
   }
 
-  static get type() {
+  static get type (): typeof type {
     return type
   }
 
-  static async create({ identity, tag, payload, next, refs }: CreateParams) {
+  static async create ({
+    identity,
+    tag,
+    payload,
+    next,
+    refs
+  }: CreateParams): Promise<Entry> {
     const data: EntryDataBlock = await Blocks.encode({
-      value: { v: 1, tag, payload, next, refs }
+      value: { tag, payload, next, refs }
     })
     const bytes = data.bytes
 
@@ -96,7 +101,7 @@ class Entry {
     return new Entry({ block, data, identity })
   }
 
-  static async fetch({
+  static async fetch ({
     blocks,
     Identity,
     cid
@@ -104,10 +109,15 @@ class Entry {
     blocks: Blocks
     Identity: IdentityType
     cid: CID
-  }) {
+  }): Promise<Entry> {
     const block: SignedEntryBlock = await blocks.get(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
+
+    const entry = await this.asEntry({ block, identity })
+    if (entry === null) {
+      throw new Error('cid did not resolve to a valid entry')
+    }
 
     if (!(await Entry.verify({ block, identity }))) {
       throw new Error(
@@ -115,12 +125,12 @@ class Entry {
       )
     }
 
-    return this.asEntry({ block, identity })
+    return entry
   }
 
-  static async asEntry(
-    entry: Entry | { block: SignedEntryBlock; identity: Identity }
-  ) {
+  static async asEntry (
+    entry: Entry | { block: SignedEntryBlock, identity: Identity }
+  ): Promise<Entry | null> {
     if (entry instanceof Entry) {
       return entry
     }
@@ -133,19 +143,18 @@ class Entry {
     return new Entry({ block, data, identity })
   }
 
-  static async verify({
+  static async verify ({
     block,
     identity
   }: {
     block: SignedEntryBlock
     identity: Identity
-  }) {
+  }): Promise<boolean> {
     const { auth, data, sig } = block.value
-    if (!auth.equals(identity.auth)) {
-      return false
-    }
 
-    return identity.verify(data, sig)
+    return (
+      auth.equals(identity.auth) === true && (await identity.verify(data, sig))
+    )
   }
 }
 

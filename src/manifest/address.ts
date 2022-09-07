@@ -4,7 +4,7 @@ import { OPAL_PREFIX } from '../constants.js'
 
 const prefix = OPAL_PREFIX
 
-const parse = function (address: Address | string) {
+const parse = function (address: Address | string): CID {
   address = address.toString()
 
   if (!address.startsWith(prefix)) {
@@ -19,30 +19,30 @@ const parse = function (address: Address | string) {
 }
 
 export class Address {
-  constructor(public readonly cid: CID) {}
+  constructor (public readonly cid: CID) {}
 
-  static get prefix() {
+  static get prefix (): typeof prefix {
     return prefix
   }
 
-  static asAddress(address?: any) {
+  static asAddress (address?: any): Address | null {
     if (address instanceof Address) {
       return address
     }
 
     const cid = CID.asCID(address?.cid)
-    if (cid) {
+    if (cid != null) {
       return new Address(cid)
     } else {
       return null
     }
   }
 
-  static fromString(string: string) {
+  static fromString (string: string): Address {
     return new Address(parse(string))
   }
 
-  toString(base = base32) {
+  toString (base = base32): string {
     return prefix + this.cid.toString(base)
   }
 
@@ -54,7 +54,7 @@ export class Address {
   //   return this.cid.bytes
   // }
 
-  equals(address: Address) {
+  equals (address: Address): boolean {
     if (address === this) {
       return true
     }

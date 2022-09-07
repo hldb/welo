@@ -3,54 +3,57 @@ import { RegistryObj } from 'src/registry.js'
 import { Blocks } from '../mods/blocks.js'
 import { Address } from './address.js'
 
+import { Components } from './interfaces.js'
+import { AccessConfig } from './access/static.js'
+import { StoreConfig } from './store/keyvalue.js'
+import { EntryConfig } from './entry/index.js'
+import { IdentityConfig } from './identity/index.js'
+
 export interface ManifestObj {
-  version?: number
-  name?: string
-  store?: any
-  access?: any
-  entry?: any
-  identity?: any
-  meta?: any
-  tag?: Uint8Array
+  readonly name: string
+  readonly store: StoreConfig
+  readonly access: AccessConfig
+  readonly entry: EntryConfig
+  readonly identity: IdentityConfig
+  readonly meta?: any
+  readonly tag?: Uint8Array
 }
 
 class Manifest implements ManifestObj {
-  version?: number
-  name?: string
-  store?: any
-  access?: any
-  entry?: any
-  identity?: any
-  meta?: any
-  tag?: Uint8Array
-  getTag: Uint8Array
+  readonly name: string
+  readonly store: StoreConfig
+  readonly access: AccessConfig
+  readonly entry: EntryConfig
+  readonly identity: IdentityConfig
+  readonly meta?: any
+  readonly tag?: Uint8Array
+  readonly getTag: Uint8Array
 
-  constructor(readonly block: Block<ManifestObj>) {
+  constructor (readonly block: Block<ManifestObj>) {
     const manifest = block.value
-    if (manifest.version) this.version = manifest.version
-    if (manifest.name) this.name = manifest.name
-    if (manifest.store) this.store = manifest.store
-    if (manifest.access) this.access = manifest.access
-    if (manifest.entry) this.entry = manifest.entry
-    if (manifest.identity) this.identity = manifest.identity
-    if (manifest.meta) this.meta = manifest.meta
-    if (manifest.tag) this.tag = manifest.tag
+    this.name = manifest.name
+    this.store = manifest.store
+    this.access = manifest.access
+    this.entry = manifest.entry
+    this.identity = manifest.identity
+    if (manifest.meta != null) this.meta = manifest.meta
+    if (manifest.tag != null) this.tag = manifest.tag
 
-    this.getTag = manifest.tag || block.cid.bytes
+    this.getTag = manifest.tag != null ? manifest.tag : block.cid.bytes
   }
 
-  static async create(manifest: ManifestObj) {
+  static async create (manifest: ManifestObj): Promise<Manifest> {
     const block = await Blocks.encode({ value: manifest })
     return new Manifest(block)
   }
 
-  static async fetch({
+  static async fetch ({
     blocks,
     address
   }: {
     blocks: Blocks
     address: Address
-  }) {
+  }): Promise<Manifest> {
     const block = await blocks.get(address.cid)
     const manifest = await this.asManifest({ block })
 
@@ -61,7 +64,7 @@ class Manifest implements ManifestObj {
     return manifest
   }
 
-  static async asManifest(manifest: any) {
+  static asManifest (manifest: any): Manifest | null {
     if (manifest instanceof Manifest) {
       return manifest
     }
@@ -74,7 +77,7 @@ class Manifest implements ManifestObj {
     }
   }
 
-  static getComponents(registry: RegistryObj, manifest: Manifest) {
+  static getComponents (registry: RegistryObj, manifest: Manifest): Components {
     return {
       Store: registry.store.get(manifest.store.type),
       Access: registry.access.get(manifest.access.type),
@@ -83,7 +86,7 @@ class Manifest implements ManifestObj {
     }
   }
 
-  get address() {
+  get address (): Address {
     return new Address(this.block.cid)
   }
 }
