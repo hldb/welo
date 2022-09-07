@@ -18,7 +18,7 @@ export interface EntryData {
 
 export type EntryDataBlock = Block<EntryData>
 
-export interface CreateParams extends Omit<EntryData, 'v'> {
+export interface CreateParams extends EntryData {
   identity: Identity
 }
 
