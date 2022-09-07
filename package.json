@@ -6,7 +6,7 @@
   "type": "module",
   "prettier": "prettier-config-standard",
   "scripts": {
-    "lint": "eslint --fix src test",
+    "lint": "eslint src test",
     "test": "npx mocha --config .mocharc.json && npm run clean",
     "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop && rm -rf test/temp"
   },
