@@ -17,7 +17,7 @@ export const defaultOptions = {
 }
 
 class Keychain extends KeyChain {
-  constructor (datastore: StorageReturn, options: KeyChainInit) {
+  constructor (datastore: StorageReturn, options?: KeyChainInit) {
     const components: any = { getDatastore: () => datastore }
     super(components as Components, defaultOptions)
   }
