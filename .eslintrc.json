@@ -9,5 +9,6 @@
         "ecmaVersion": "latest",
         "sourceType": "module",
         "project": "./tsconfig.json"
-    }
+    },
+    "ignorePatterns": ["/src/mods/keychain/libp2p-keychain/*.ts"]
 }
