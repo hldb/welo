@@ -19,7 +19,7 @@ export interface GraphObj {
 }
 // nodes are where the vertices are kept as an adjacency list
 // other properties are sets of cids which make up the graph border
-// cids in missing and denied have a vertex in nodes that is missing or denied respectively
+// cids in missing and denied have a vertex in nodes that is missing or denied
 const initialGraph: GraphObj = {
   nodes: new Map(),
   // heads: new Set(),
