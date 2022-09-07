@@ -41,6 +41,7 @@
   "dependencies": {
     "@ipld/dag-cbor": "^7.0.2",
     "@libp2p/interface-pubsub": "^2.0.1",
+    "@libp2p/interfaces": "^2.0.4",
     "datastore-level": "^8.0.0",
     "interface-datastore": "^6.1.1",
     "libp2p": "^0.37.3",
