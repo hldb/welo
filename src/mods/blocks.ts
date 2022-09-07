@@ -11,7 +11,7 @@ import type { PutOptions } from 'ipfs-core-types/block'
 
 type Codec = typeof cbor
 
-type Codecs = {
+interface Codecs {
   [code: number]: Codec
 }
 
@@ -19,7 +19,7 @@ const codecs: Codecs = {
   [cbor.code]: cbor
 }
 
-type Names = {
+interface Names {
   [code: number]: string
 }
 
@@ -27,7 +27,7 @@ const names: Names = {
   [cbor.code]: cbor.name
 }
 
-type Hashers = {
+interface Hashers {
   [code: number]: Block.Hasher<'sha2-256'>
 }
 
@@ -35,10 +35,10 @@ const hashers: Hashers = {
   [sha256.code]: sha256
 }
 
-const noIpfsError = () => new Error('this.ipfs is undefined')
+const noIpfsError = (): Error => new Error('this.ipfs is undefined')
 
 class IpfsBlocks {
-  constructor(private ipfs: IPFS | undefined) {}
+  constructor (private readonly ipfs: IPFS | undefined) {}
 
   static async encode<T>({
     value,
@@ -49,10 +49,10 @@ class IpfsBlocks {
     codec?: Block.BlockEncoder<number, T>
     hasher?: MultihashHasher<number>
   }): Promise<Block.Block<T>> {
-    return Block.encode<T, number, number>({
+    return await Block.encode<T, number, number>({
       value,
-      codec: codec || cbor,
-      hasher: hasher || sha256
+      codec: codec != null ? codec : cbor,
+      hasher: hasher != null ? hasher : sha256
     })
   }
 
@@ -65,14 +65,14 @@ class IpfsBlocks {
     codec?: Block.BlockDecoder<number, T>
     hasher?: MultihashHasher<number>
   }): Promise<Block.Block<T>> {
-    return Block.decode<T, number, number>({
+    return await Block.decode<T, number, number>({
       bytes,
-      codec: codec || cbor,
-      hasher: hasher || sha256
+      codec: codec != null ? codec : cbor,
+      hasher: hasher != null ? hasher : sha256
     })
   }
 
-  async get(
+  async get (
     cid: CID,
     options?: (AbortOptions & PreloadOptions) | undefined
   ): Promise<Block.Block<any>> {
@@ -82,30 +82,33 @@ class IpfsBlocks {
 
     const bytes = await this.ipfs.block.get(cid, options)
 
-    return Block.decode({
+    return await Block.decode({
       bytes,
       codec: codecs[cid.code],
       hasher: hashers[cid.multihash.code]
     })
   }
 
-  async put(block: Block.Block<any>, options?: PutOptions | undefined) {
+  async put (
+    block: Block.Block<any>,
+    options?: PutOptions | undefined
+  ): Promise<CID> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
     }
 
-    return this.ipfs.block.put(block.bytes, {
+    return await this.ipfs.block.put(block.bytes, {
       version: block.cid.version,
       format: names[block.cid.code],
       ...options
     })
   }
 
-  get encode() {
+  get encode (): typeof IpfsBlocks.encode {
     return IpfsBlocks.encode
   }
 
-  get decode() {
+  get decode (): typeof IpfsBlocks.decode {
     return IpfsBlocks.decode
   }
 }

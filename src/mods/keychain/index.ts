@@ -2,7 +2,7 @@
  * this folder is just a copy of js-libp2p's keychain
  */
 
-import { KeyChain } from 'libp2p/keychain'
+import { KeyChain, KeyChainInit } from './libp2p-keychain'
 import { Components } from '@libp2p/interfaces/components'
 import type { StorageReturn } from 'src/mods/storage'
 
@@ -17,7 +17,7 @@ export const defaultOptions = {
 }
 
 class Keychain extends KeyChain {
-  constructor(private datastore: StorageReturn) {
+  constructor (datastore: StorageReturn, options: KeyChainInit) {
     const components: any = { getDatastore: () => datastore }
     super(components as Components, defaultOptions)
   }

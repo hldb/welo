@@ -18,16 +18,17 @@ export interface StorageOptions {
 
 export type StorageReturn = LevelDatastore
 
-export interface StorageFunc {
-  (path: string, options?: StorageOptions): Promise<StorageReturn>
-}
+export type StorageFunc = (
+  path: string,
+  options?: StorageOptions
+) => Promise<StorageReturn>
 
 // makes easier to handle nodejs and browser environment differences
-export const LevelStorage: StorageFunc = async function LevelStorage(
+export const LevelStorage: StorageFunc = async function LevelStorage (
   path,
   options
 ): Promise<LevelDatastore> {
-  options = options || {}
+  options = options != null ? options : {}
   // todo: handle less common environments like electron
   if (where.isBrowser) {
     options.prefix = '' // removes the 'level' prefix from the path in indexeddb
