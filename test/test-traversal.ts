@@ -3,6 +3,7 @@ import { strict as assert } from 'assert'
 import { Blocks } from '../src/mods/blocks.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
+import { Keyvalue } from '../src/manifest/store/keyvalue.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Graph } from '../src/database/graph.js'
 import {
@@ -14,12 +15,12 @@ import {
   graphLinks,
   traverser
 } from '../src/database/traversal.js'
-import { cidstring } from '../src/util.js'
+import { cidstring, defaultManifest } from '../src/util.js'
+import { initRegistry } from '../src/registry.js'
 
 import {
   getIpfs,
   getIdentity,
-  writeManifest,
   singleEntry,
   concurrentEntries,
   getStorageReturn
@@ -28,6 +29,13 @@ import { IPFS } from 'ipfs'
 import { Manifest } from '../src/manifest/index.js'
 import { CID } from 'multiformats/cid.js'
 
+const registry = initRegistry()
+
+registry.store.add(Keyvalue)
+registry.access.add(StaticAccess)
+registry.entry.add(Entry)
+registry.identity.add(Identity)
+
 describe('traversal', () => {
   let ipfs: IPFS,
     blocks: Blocks,
@@ -35,6 +43,8 @@ describe('traversal', () => {
     identity: Identity,
     access: StaticAccess,
     noaccess: StaticAccess
+
+  const name = 'name'
 
   const entries: Entry[] = []
 
@@ -52,10 +62,16 @@ describe('traversal', () => {
     identity = got.identity
 
     access = await StaticAccess.open({
-      manifest: await Manifest.create({ access: { write: [identity.id] } })
+      manifest: await Manifest.create({
+        ...defaultManifest(name, identity, registry),
+        access: { type: StaticAccess.type, write: [identity.id] }
+      })
     })
     noaccess = await StaticAccess.open({
-      manifest: await Manifest.create({ access: { write: ['nobody'] } })
+      manifest: await Manifest.create({
+        ...defaultManifest(name, identity, registry),
+        access: { type: StaticAccess.type, write: ['nobody'] }
+      })
     })
 
     entries[0] = await Entry.create({
@@ -256,7 +272,7 @@ describe('traversal', () => {
     }
 
     const heads = new Map()
-    const setHeads = (topo: Entry[], entries: Entry[]) =>
+    const setHeads = (topo: Entry[], entries: Entry[]): Map<Entry[], CID[]> =>
       heads.set(
         topo,
         entries.map((entry) => entry.cid)
@@ -268,8 +284,9 @@ describe('traversal', () => {
       await storage.close()
       await blocks.put(id1.block)
 
-      const manifest = await writeManifest({
-        access: { write: [id0.id, id1.id] }
+      const manifest = await Manifest.create({
+        ...defaultManifest(name, identity, registry),
+        access: { type: StaticAccess.type, write: [id0.id, id1.id] }
       })
       sharedAccess = await StaticAccess.open({ manifest })
 
@@ -419,7 +436,7 @@ describe('traversal', () => {
             const orderFn = sortEntriesRev
 
             const cids = topology
-              .filter((entry) => !entry.next.length)
+              .filter((entry) => entry.next.length === 0)
               .map((entry) => entry.cid) // get the tails to start from
             const source = await traverser({ cids, load, links, orderFn })
 

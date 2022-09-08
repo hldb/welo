@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
-import { Replica } from 'src/database/replica'
-import { Entry } from '../entry'
-import { ComponentConfig } from '../interfaces'
+import { Replica } from '../../database/replica.js'
+import { Entry } from '../entry/index.js'
+import { ComponentConfig } from '../interfaces.js'
 
 const type = 'keyvalue'
 

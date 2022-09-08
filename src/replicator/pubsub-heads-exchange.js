@@ -10,7 +10,7 @@ import EventEmitter from 'events'
 const timeout = 30000
 
 export class PubsubHeadsExchange {
-  constructor({
+  constructor ({
     manifest,
     peerId,
     pubsub,
@@ -38,7 +38,7 @@ export class PubsubHeadsExchange {
     this._heads = new Set()
   }
 
-  async start() {
+  async start () {
     this._common.on('peer-join', this._onPeerJoin) // join the direct channel topic for that peer and wait for them to join
     this._common.on('peer-leave', this._onPeerLeave) // if a peer leaves and the direct connection is closed then delete the direct
 
@@ -48,7 +48,7 @@ export class PubsubHeadsExchange {
     this.replica.events.on('write', this._onRepicaUpdate)
   }
 
-  async stop() {
+  async stop () {
     this.replica.events.removeListener('update', this._onReplicaUpdate)
     this.replica.events.removeListener('write', this._onReplicaUpdate)
 
@@ -62,7 +62,7 @@ export class PubsubHeadsExchange {
     await this._common.close()
   }
 
-  async broadcast(heads) {
+  async broadcast (heads) {
     const block = await Block.encode({
       value: Array.from(heads),
       codec,
@@ -75,7 +75,7 @@ export class PubsubHeadsExchange {
     }
   }
 
-  _onReplicaUpdate() {
+  _onReplicaUpdate () {
     const _heads = this._heads
     this._heads = this.replica.heads
 
@@ -88,7 +88,7 @@ export class PubsubHeadsExchange {
     return false
   }
 
-  async _onHeadsMessage(msg) {
+  async _onHeadsMessage (msg) {
     const { data: bytes } = msg
     const { value: cids } = await Block.decode({ bytes, codec, hasher })
 
@@ -102,13 +102,13 @@ export class PubsubHeadsExchange {
 
   // may need to queue _onPeer* so start and stop arent called concurrently, or check for that in Direct
 
-  _onPeerJoin(remotePeerId) {
+  _onPeerJoin (remotePeerId) {
     const direct = Direct(this.pubsub, this.peerId, remotePeerId)
     this.directs.set(remotePeerId, direct)
     direct.start().then(() => direct.subscribe(this._onHeadsMessage))
   }
 
-  _onPeerLeave(remotePeerId) {
+  _onPeerLeave (remotePeerId) {
     // if direct exists in this.directs Map then .delete returns true
     const direct = this.directs.get(remotePeerId)
     this.directs.delete(remotePeerId) && direct.stop()

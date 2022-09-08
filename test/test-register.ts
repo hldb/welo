@@ -9,7 +9,7 @@ const components = {
 }
 
 describe('Register', () => {
-  let register: Register
+  let register: Register<{ type: string }>
 
   describe('Class', () => {
     it('returns an instance', () => {
@@ -26,13 +26,19 @@ describe('Register', () => {
     describe('.add', () => {
       it('registers an initial component', () => {
         register.add(components.one)
-        assert.equal(register.registered[components.one.type], components.one)
+        assert.equal(
+          register.registered.get(components.one.type),
+          components.one
+        )
         assert.equal(register.star, components.one)
       })
 
       it('registers a second component as star', () => {
         register.add(components.two, true)
-        assert.equal(register.registered[components.two.type], components.two)
+        assert.equal(
+          register.registered.get(components.two.type),
+          components.two
+        )
         assert.equal(register.star, components.two)
       })
 

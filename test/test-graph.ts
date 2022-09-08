@@ -10,11 +10,15 @@ describe('Graph', () => {
   const muteNode = ({
     in: ni,
     out
-  }: { in?: Set<string>; out?: Set<string> } = {}) =>
-    new Node({ ...initNode, in: ni || new Set(), out: out || new Set() })
-  const missNode = ({ in: ni }: { in: Set<string> }) =>
+  }: { in?: Set<string>, out?: Set<string> } = {}): Node =>
+    new Node({
+      ...initNode,
+      in: ni != null ? ni : new Set(),
+      out: out != null ? out : new Set()
+    })
+  const missNode = ({ in: ni }: { in: Set<string> }): Node =>
     new Node({ ...muteNode({ in: ni }), miss: true })
-  const denyNode = ({ in: ni }: { in: Set<string> }) =>
+  const denyNode = ({ in: ni }: { in: Set<string> }): Node =>
     new Node({ ...muteNode({ in: ni }), deny: true })
 
   const initialGraph: GraphObj = {

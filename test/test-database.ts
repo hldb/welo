@@ -2,20 +2,27 @@ import { strict as assert } from 'assert'
 
 import { Database } from '../src/database/index.js'
 
-import { Keyvalue as Store } from '../src/manifest/store/keyvalue.js'
-import { StaticAccess as Access } from '../src/manifest/access/static.js'
+import { Keyvalue, Keyvalue as Store } from '../src/manifest/store/keyvalue.js'
+import {
+  StaticAccess as Access,
+  StaticAccess
+} from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
+import { Manifest } from '../src/manifest/index.js'
+import { initRegistry } from '../src/registry.js'
 
-import {
-  getIpfs,
-  getIdentity,
-  writeManifest,
-  getStorageReturn
-} from './utils/index.js'
+import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
 import { IPFS } from 'ipfs'
 import { Blocks } from '../src/mods/blocks.js'
-import { Manifest } from '../src/manifest/index.js'
+import { defaultManifest } from '../src/util.js'
+
+const registry = initRegistry()
+
+registry.store.add(Keyvalue)
+registry.access.add(StaticAccess)
+registry.entry.add(Entry)
+registry.identity.add(Identity)
 
 describe('Database', () => {
   let ipfs: IPFS,
@@ -34,7 +41,10 @@ describe('Database', () => {
     storage = obj.storage
     identity = obj.identity
 
-    manifest = await writeManifest({ access: { write: [identity.id] } })
+    manifest = await Manifest.create({
+      ...defaultManifest('name', identity, registry),
+      access: { type: StaticAccess.type, write: [identity.id] }
+    })
   })
 
   after(async () => {

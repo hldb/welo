@@ -107,7 +107,7 @@ export class CMS {
     const recipients: any = cms.recipients
       // @ts-expect-error cms types not defined
       .filter((r) =>
-        r.issuer.find((a) => a.shortName === 'O' && a.value === 'ipfs')
+        r.issuer.find((a: any) => a.shortName === 'O' && a.value === 'ipfs')
       )
       // @ts-expect-error cms types not defined
       .filter((r) => r.issuer.find((a) => a.shortName === 'CN'))

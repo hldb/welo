@@ -8,7 +8,7 @@ import { Manifest, Address, ManifestObj } from './manifest/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './constants.js'
-import { dirs, DirsReturn } from './util.js'
+import { dirs, DirsReturn, defaultManifest } from './util.js'
 
 import type { StorageFunc, StorageReturn } from './mods/storage.js'
 import type { Keychain } from './mods/keychain/index.js'
@@ -192,26 +192,12 @@ class Opal {
     name: string,
     options: Partial<ManifestObj> = {}
   ): Promise<Manifest> {
-    // clean this up
-    const opts = {
-      version: 1,
-      store: {
-        type: this.registry.store.star.type
-      },
-      access: {
-        type: this.registry.access.star.type,
-        write: [this.identity.id]
-      },
-      entry: {
-        type: this.registry.entry.star.type
-      },
-      identity: {
-        type: this.registry.identity.star.type
-      },
+    const manifestObj: ManifestObj = {
+      ...defaultManifest(name, this.identity, this.registry),
       ...options
     }
 
-    const manifest = await Manifest.create({ name, ...opts })
+    const manifest = await Manifest.create(manifestObj)
     await this.blocks.put(manifest.block)
 
     try {

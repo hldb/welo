@@ -3,21 +3,29 @@ import { strict as assert } from 'assert'
 import { Replica } from '../src/database/replica.js'
 
 import { Blocks } from '../src/mods/blocks.js'
+import { Keyvalue } from '../src/manifest/store/keyvalue.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
-import { cidstring } from '../src/util.js'
+import { cidstring, defaultManifest } from '../src/util.js'
+import { Manifest } from '../src/manifest/index.js'
+import { initRegistry } from '../src/registry.js'
 
 import {
   getIpfs,
   getIdentity,
-  writeManifest,
   singleEntry,
   getStorageReturn
 } from './utils/index.js'
 import { IPFS } from 'ipfs'
-import { Manifest } from 'src/manifest/index.js'
 import { CID } from 'multiformats/cid.js'
+
+const registry = initRegistry()
+
+registry.store.add(Keyvalue)
+registry.access.add(StaticAccess)
+registry.entry.add(Entry)
+registry.identity.add(Identity)
 
 describe('Replica', () => {
   let ipfs: IPFS,
@@ -38,7 +46,9 @@ describe('Replica', () => {
 
     await blocks.put(identity.block)
 
-    manifest = await writeManifest({ access: { write: [identity.id] } })
+    manifest = await Manifest.create({
+      ...defaultManifest('name', identity, registry)
+    })
     access = await StaticAccess.open({ manifest })
   })
 

@@ -4,7 +4,7 @@ import { base32 } from 'multiformats/bases/base32'
 import { Blocks } from '../src/mods/blocks.js'
 import { Entry, EntryData } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
-import { Keychain } from '../src/mods/keychain.js'
+import { Keychain } from '../src/mods/keychain/index.js'
 
 import {
   getIpfs,
@@ -44,9 +44,8 @@ describe('Base Entry', () => {
       name,
       identities,
       keychain,
-      kpi,
-      password: ''
-    }).catch((e) => Identity.get({ name, identities, keychain }))
+      kpi
+    }).catch(async (e) => await Identity.get({ name, identities, keychain }))
   })
 
   after(async () => {
@@ -114,7 +113,7 @@ describe('Base Entry', () => {
       it('unverifies entry with invalid signature', async () => {
         const value = { ...entry.block.value, sig: new Uint8Array() }
         const block = await Blocks.encode({ value })
-        const _entry = await Entry.asEntry({ block, identity })
+        const _entry = (await Entry.asEntry({ block, identity })) as Entry
         const verified = await Entry.verify(_entry)
         assert.equal(verified, false)
       })
@@ -123,7 +122,10 @@ describe('Base Entry', () => {
         const { identity, storage } = await getIdentity()
         await storage.close()
 
-        const _entry = await Entry.asEntry({ block: entry.block, identity })
+        const _entry = (await Entry.asEntry({
+          block: entry.block,
+          identity
+        })) as Entry
         const verified = await Entry.verify(_entry)
         assert.equal(verified, false)
       })
@@ -137,7 +139,6 @@ describe('Base Entry', () => {
       assert.ok(entry.identity)
       assert.ok(entry.auth)
       assert.ok(entry.sig)
-      assert.ok(entry.v)
       assert.ok(entry.tag)
       assert.ok(entry.payload)
       assert.ok(entry.next)
@@ -148,7 +149,6 @@ describe('Base Entry', () => {
       const data = await Blocks.decode<EntryData>({
         bytes: entry.block.value.data
       })
-      assert.equal(entry.v, data.value.v)
       assert.deepEqual(entry.tag, data.value.tag)
       assert.deepEqual(entry.payload, data.value.payload)
       assert.deepEqual(entry.next, data.value.next)

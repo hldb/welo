@@ -95,7 +95,7 @@ describe('Manifest', () => {
       })
     })
 
-    describe('.asManifest', async () => {
+    describe('.asManifest', () => {
       it('returns the same instance if possible', async () => {
         const _manifest = await Manifest.asManifest(manifest)
         assert.equal(_manifest, manifest)
@@ -103,11 +103,11 @@ describe('Manifest', () => {
 
       it('returns a new instance if necessary', async () => {
         const _manifest = await Manifest.asManifest({ block: manifest.block })
-        assert.deepEqual(_manifest && _manifest.block, manifest.block)
+        assert.deepEqual(_manifest?.block, manifest.block)
       })
 
       it('returns null if unable to coerce', async () => {
-        const _manifest = await Manifest.asManifest({ block: false })
+        const _manifest = Manifest.asManifest({ block: false })
         assert.equal(_manifest, null)
       })
     })

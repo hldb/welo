@@ -2,9 +2,9 @@
  * this folder is just a copy of js-libp2p's keychain
  */
 
-import { KeyChain, KeyChainInit } from './libp2p-keychain'
-import { Components } from '@libp2p/interfaces/components'
-import type { StorageReturn } from 'src/mods/storage'
+import { KeyChain, KeyChainInit } from './libp2p-keychain/index.js'
+import { Components } from '@libp2p/interfaces/components.js'
+import type { StorageReturn } from '../storage.js'
 
 export const defaultOptions = {
   // See https://cryptosense.com/parametesr-choice-for-pbkdf2/

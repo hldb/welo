@@ -1,5 +1,5 @@
 import type { Block } from 'multiformats/block.js'
-import { RegistryObj } from 'src/registry.js'
+import { RegistryObj } from '../registry.js'
 import { Blocks } from '../mods/blocks.js'
 import { Address } from './address.js'
 

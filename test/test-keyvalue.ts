@@ -8,10 +8,19 @@ import { Blocks } from '../src/mods/blocks.js'
 import { StaticAccess } from '../src/manifest/access/static.js'
 import { Entry } from '../src/manifest/entry/index.js'
 import { Identity } from '../src/manifest/identity/index.js'
+import { initRegistry } from '../src/registry.js'
 
 import { getIpfs, getIdentity } from './utils/index.js'
 import { IPFS } from 'ipfs'
 import { Manifest } from '../src/manifest/index.js'
+import { defaultManifest } from '../src/util.js'
+
+const registry = initRegistry()
+
+registry.store.add(Keyvalue)
+registry.access.add(StaticAccess)
+registry.entry.add(Entry)
+registry.identity.add(Identity)
 
 describe('Keyvalue', () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity, keyvalue: Keyvalue
@@ -56,14 +65,13 @@ describe('Keyvalue', () => {
 
     describe('update', () => {
       let replica: Replica, manifest: Manifest, access: StaticAccess
-      const tag = new Uint8Array()
       const key = 'key'
-      const value = 'value'
+      const value = 0
 
       before(async () => {
         manifest = await Manifest.create({
-          tag,
-          access: { write: [identity.id] }
+          ...defaultManifest('name', identity, registry),
+          access: { type: StaticAccess.type, write: [identity.id] }
         })
         access = await StaticAccess.open({ manifest })
         replica = await Replica.open({

@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import { base32 } from 'multiformats/bases/base32'
-import { Keychain } from '../src/mods/keychain.js'
+import { Keychain } from '../src/mods/keychain/index.js'
 import { StorageReturn } from '../src/mods/storage.js'
 
 import { Blocks } from '../src/mods/blocks.js'
@@ -49,9 +49,8 @@ describe('Base Identity', () => {
       name,
       identities,
       keychain,
-      kpi,
-      password
-    }).catch((e) => Identity.get({ name, identities, keychain }))
+      kpi
+    }).catch(async () => await Identity.get({ name, identities, keychain }))
 
     const gotTemp = await getIdentity()
     tempStorage = gotTemp.storage
@@ -118,7 +117,7 @@ describe('Base Identity', () => {
       // it('throws fetching invalid identity', async () => {})
     })
 
-    describe('.asIdentity', async () => {
+    describe('.asIdentity', () => {
       it('returns the same instance if possible', async () => {
         const _identity = await Identity.asIdentity(identity)
         assert.equal(_identity, identity)
@@ -131,7 +130,9 @@ describe('Base Identity', () => {
       })
 
       it('returns a new instance if needed', async () => {
-        const _identity = await Identity.asIdentity({ block: identity.block })
+        const _identity = (await Identity.asIdentity({
+          block: identity.block
+        })) as Identity
         assert.notEqual(_identity, identity)
         assert.equal(
           _identity.block.cid.toString(base32),
@@ -142,15 +143,14 @@ describe('Base Identity', () => {
       })
     })
 
-    describe('.import and .export', async () => {
+    describe('.import and .export', () => {
       it('imports an encoded identity/keypair', async () => {
         const name = names.name1
         const imported = await Identity.import({
           name,
           identities: tempIdentities,
           keychain: tempKeychain,
-          kpi,
-          password
+          kpi
         })
 
         assert.ok(await tempKeychain.exportKey(name, password))
@@ -166,8 +166,7 @@ describe('Base Identity', () => {
         const exported = await Identity.export({
           name,
           identities: tempIdentities,
-          keychain: tempKeychain,
-          password
+          keychain: tempKeychain
         })
 
         assert.deepEqual(new Uint8Array(exported), new Uint8Array(exported))

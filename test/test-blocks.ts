@@ -20,7 +20,7 @@ describe('Blocks', () => {
 
   before(async () => {
     block = await Block.encode<
-      Uint8Array,
+    Uint8Array,
       typeof codec.code,
       typeof hasher.code
     >({ value, codec, hasher })

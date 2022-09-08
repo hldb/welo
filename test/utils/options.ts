@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const offlineIpfsOptions = (repo: string) => ({
   repo,
   offline: true,
