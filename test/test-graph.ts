@@ -354,6 +354,31 @@ describe('Graph', () => {
 
         assert.equal(graph.denied.size, 0)
       })
+
+      it('handles self-reference cids in out', () => {
+        const graph = Graph.init()
+        const cid0 = nodes[0]
+        const out0: CID[] = [cid0]
+
+        Graph.add(graph, cid0, out0)
+
+        assert.equal(graph.size, 1)
+        assert.equal(graph.nodes.size, 1)
+        assert.deepEqual(
+          graph.nodes.get(cid0.toString()),
+          muteNode()
+        )
+
+        assert.equal(graph.heads.size, 1)
+        assert.equal(graph.heads.has(cid0.toString()), true)
+
+        assert.equal(graph.tails.size, 1)
+        assert.equal(graph.tails.has(cid0.toString()), true)
+
+        assert.equal(graph.missing.size, 0)
+
+        assert.equal(graph.denied.size, 0)
+      })
     })
 
     // miss and deny tests can be very similar as they both use Graph._rm

@@ -103,7 +103,7 @@ export class Database {
       Identity
     } = options
 
-    if ((identity.constructor as typeof Identity).type !== Identity.type) {
+    if (identity.constructor !== Identity) {
       throw new Error('identity instance type does not match Identity class')
     }
 

@@ -185,8 +185,6 @@ describe('traversal', () => {
   })
 
   describe('graphLinks', () => {
-    before(() => {})
-
     it('returns an array if cids from the graph node', () => {
       const graph = Graph.init()
       const tails: Set<string> = new Set()
@@ -241,6 +239,17 @@ describe('traversal', () => {
       const links = graphLinks({ graph, tails, edge })
 
       assert.deepEqual(links(entry), [])
+    })
+
+    it('throws if there is no node in graph for referenced cid', () => {
+      const graph = Graph.init()
+      const tails: Set<string> = new Set()
+      const edge = 'out'
+      const entry = entries[1]
+
+      const links = graphLinks({ graph, tails, edge })
+
+      assert.throws(() => links(entry))
     })
   })
 

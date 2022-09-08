@@ -34,7 +34,8 @@ describe('Replica', () => {
     replica: Replica,
     manifest: Manifest,
     access: StaticAccess,
-    identity: Identity
+    identity: Identity,
+    tempIdentity: Identity
 
   before(async () => {
     ipfs = await getIpfs()
@@ -51,6 +52,10 @@ describe('Replica', () => {
       tag: new Uint8Array()
     })
     access = await StaticAccess.open({ manifest })
+
+    const temp = await getIdentity()
+    await temp.storage.close()
+    tempIdentity = temp.identity
   })
 
   after(async () => {
@@ -120,6 +125,55 @@ describe('Replica', () => {
         assert.equal(await replica.has(cid), true)
         assert.equal(await replica.known(cid), true)
       })
+
+      it('does not add entry with mismatched tag', async () => {
+        const tag = new Uint8Array([7])
+        const entry = await Entry.create({ identity, tag, payload, next: [], refs: [] })
+        const cid = entry.cid
+        const replica = await Replica.open({
+          manifest,
+          blocks,
+          access,
+          identity,
+          Entry,
+          Identity
+        })
+
+        await replica.add([entry])
+
+        assert.deepEqual(replica.heads, new Set())
+        assert.deepEqual(replica.tails, new Set())
+        assert.deepEqual(replica.missing, new Set())
+        assert.deepEqual(replica.denied, new Set())
+        assert.equal(replica.size, 0)
+        assert.equal(await replica.has(cid), false)
+        assert.equal(await replica.known(cid), false)
+        await replica.close()
+      })
+
+      it('does not add entry without access', async () => {
+        const entry = await singleEntry(tempIdentity)()
+        const cid = entry.cid
+        const replica = await Replica.open({
+          manifest,
+          blocks,
+          access,
+          identity,
+          Entry,
+          Identity
+        })
+
+        await replica.add([entry])
+
+        assert.deepEqual(replica.heads, new Set())
+        assert.deepEqual(replica.tails, new Set())
+        assert.deepEqual(replica.missing, new Set())
+        assert.deepEqual(replica.denied, new Set())
+        assert.equal(replica.size, 0)
+        assert.equal(await replica.has(cid), false)
+        assert.equal(await replica.known(cid), false)
+        await replica.close()
+      })
     })
 
     describe('write', () => {
@@ -156,6 +210,13 @@ describe('Replica', () => {
           entries.map((entry) => entry.cid, cids),
           cids
         )
+      })
+
+      it('rejects when invalid direction is given', async () => {
+        const direction = 'not a real direction'
+        const promise = replica.traverse({ direction })
+
+        await assert.rejects(promise)
       })
     })
   })
