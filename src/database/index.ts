@@ -171,6 +171,6 @@ export class Database {
     //   this.access.close()
     // ])
 
-    this.events.emit('close')
+    this.events.emit('closed')
   }
 }
