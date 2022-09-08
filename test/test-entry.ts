@@ -75,7 +75,7 @@ describe('Base Entry', () => {
       assert.deepEqual(entry.refs, refs)
       assert.equal(
         entry.cid.toString(base32),
-        'bafyreigadrjqfm7spuib6vfftxzhenb2psuxkyc56xtx4qr7z7k5fk6wrm'
+        'bafyreifmxzc4qcntuwdc4lw3rukieuzb5n4rbrkirfcwsesmsgbdc6al5i'
       )
     })
 

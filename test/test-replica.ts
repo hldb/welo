@@ -47,7 +47,8 @@ describe('Replica', () => {
     await blocks.put(identity.block)
 
     manifest = await Manifest.create({
-      ...defaultManifest('name', identity, registry)
+      ...defaultManifest('name', identity, registry),
+      tag: new Uint8Array()
     })
     access = await StaticAccess.open({ manifest })
   })
