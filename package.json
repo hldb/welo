@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint src test",
     "format": "prettier -w src test && eslint --fix src test",
-    "test": "npx mocha --config .mocharc.json && npm run clean",
+    "test": "npx mocha --config ./test/.mocharc.json ; npm run clean",
     "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop && rm -rf test/temp"
   },
   "repository": {
