@@ -264,7 +264,7 @@ class Node implements NodeObj {
   }
 
   static exists (node: Node | undefined): boolean {
-    return Boolean(node != null && node.miss !== false && node.deny !== false)
+    return Boolean(node?.miss === false && node?.deny === false)
   }
 }
 
