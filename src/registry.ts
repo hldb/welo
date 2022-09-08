@@ -20,21 +20,17 @@ type IdentityType = typeof Identity
 const $tar = Symbol.for('*')
 
 export const errors = {
-  namespaceMismatch: (namespace: string, type: string) =>
-    new Error(
-      `component type '${type}' exists outside of namespace '${namespace}'`
-    ),
+  // namespaceMismatch: (namespace: string, type: string) =>
+  //   new Error(
+  //     `component type '${type}' exists outside of namespace '${namespace}'`
+  //   ),
   typeRegistered: (type: string) =>
     new Error(`a component with type '${type}' is already registered`),
   typeNotRegistered: (type: string) =>
     new Error(`no component with type '${type}' is registered`),
   aliasRegistered: (alias: string) =>
     new Error(`a component already exists at type alias '${alias}'`),
-
-  noComponentsRegistered: () =>
-    new Error(
-      'no components are registered, unable to retrieve starred component'
-    )
+  noStar: () => new Error('no star component')
 }
 
 type Registered<T> = Map<string | typeof $tar, T>
@@ -84,7 +80,7 @@ export class Register<T> {
   // the favorite/default component
   get star (): T {
     if (!this.registered.has($tar)) {
-      throw new Error('no star component')
+      throw errors.noStar()
     }
 
     return this.registered.get($tar) as T

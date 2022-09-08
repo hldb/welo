@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 
-import { Register } from '../src/registry.js'
+import { initRegistry, Register } from '../src/registry.js'
 
 const components = {
   one: { type: '1' },
@@ -85,5 +85,15 @@ describe('Register', () => {
         assert.throws(() => register.star)
       })
     })
+  })
+})
+
+describe('initRegistry', () => {
+  it('returns an empty registry', () => {
+    const registry = initRegistry()
+    assert.equal(registry.store.constructor, Register)
+    assert.equal(registry.access.constructor, Register)
+    assert.equal(registry.entry.constructor, Register)
+    assert.equal(registry.identity.constructor, Register)
   })
 })
