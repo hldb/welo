@@ -23,7 +23,9 @@ describe('Base Entry', () => {
     blocks: Blocks,
     storage: getStorageReturn,
     identity: Identity,
-    entry: Entry
+    entry: Entry,
+    invalidEntry: Entry
+
   const expectedType = 'base'
   const name = names.name0
 
@@ -88,6 +90,16 @@ describe('Base Entry', () => {
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
     })
 
+    it('.fetch rejects if signature is invalid', async () => {
+      const value = { ...entry.block.value, sig: new Uint8Array() }
+      const block = await Blocks.encode({ value })
+      await blocks.put(block)
+      invalidEntry = (await Entry.asEntry({ block, identity })) as Entry
+
+      const promise = Entry.fetch({ blocks, Identity, cid: invalidEntry.cid })
+      await assert.rejects(promise)
+    })
+
     describe('.asEntry', () => {
       it('returns the same instance if possible', async () => {
         const _entry = await Entry.asEntry(entry)
@@ -111,9 +123,7 @@ describe('Base Entry', () => {
       })
 
       it('unverifies entry with invalid signature', async () => {
-        const value = { ...entry.block.value, sig: new Uint8Array() }
-        const block = await Blocks.encode({ value })
-        const _entry = (await Entry.asEntry({ block, identity })) as Entry
+        const _entry = invalidEntry
         const verified = await Entry.verify(_entry)
         assert.equal(verified, false)
       })

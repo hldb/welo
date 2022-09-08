@@ -38,7 +38,7 @@ const hashers: Hashers = {
 const noIpfsError = (): Error => new Error('this.ipfs is undefined')
 
 class IpfsBlocks {
-  constructor (private readonly ipfs: IPFS | undefined) {}
+  constructor (private readonly ipfs: IPFS) {}
 
   static async encode<T>({
     value,

@@ -15,6 +15,7 @@ import {
   getStorageReturn,
   getStorage
 } from './utils/index.js'
+import { PublicKey } from 'libp2p-crypto'
 const { fixt, names } = constants
 
 const dataEmpty = new Uint8Array()
@@ -161,6 +162,18 @@ describe('Base Identity', () => {
         assert.ok(imported instanceof Identity)
       })
 
+      it('rejects importing to an existing identity', async () => {
+        const name = names.name1
+        const promise = Identity.import({
+          name,
+          identities: tempIdentities,
+          keychain: tempKeychain,
+          kpi
+        })
+
+        await assert.rejects(promise)
+      })
+
       it('exports an encoded identity/keypair', async () => {
         const name = names.name1
         const exported = await Identity.export({
@@ -170,6 +183,17 @@ describe('Base Identity', () => {
         })
 
         assert.deepEqual(new Uint8Array(exported), new Uint8Array(exported))
+      })
+
+      it('rejects exporting a non-existant identity', async () => {
+        const name = names.name2
+        const promise = Identity.export({
+          name,
+          identities: tempIdentities,
+          keychain: tempKeychain
+        })
+
+        await assert.rejects(promise)
       })
     })
 
@@ -195,6 +219,16 @@ describe('Base Identity', () => {
         const sig = signedEmpty
         const verified = await Identity.verify({ identity, data, sig })
         assert.equal(verified, false)
+      })
+
+      it('rejects verifying signatures without a pubkey', async () => {
+        const _identity = await Identity.asIdentity({ block: identity.block }) as Identity
+        _identity.pubkey = undefined as unknown as PublicKey
+
+        const data = new Uint8Array([1])
+        const sig = signedEmpty
+        const promise = Identity.verify({ identity: _identity, data, sig })
+        await assert.rejects(promise)
       })
     })
   })
@@ -226,6 +260,13 @@ describe('Base Identity', () => {
         const sig = await identity.sign(data)
         assert.ok(sig instanceof Uint8Array)
         assert.deepEqual(sig, signedEmpty)
+      })
+
+      it('rejects signing data without private key', async () => {
+        const _identity = await Identity.asIdentity({ block: identity.block }) as Identity
+        const data = dataEmpty
+        const promise = _identity.sign(data)
+        await assert.rejects(promise)
       })
     })
 

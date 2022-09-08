@@ -40,7 +40,7 @@ interface OpalConfig extends OpalShared {
 }
 
 interface OpalOptions extends OpalShared {
-  ipfs?: IPFS
+  ipfs: IPFS
 }
 
 interface OpenOptions {
@@ -111,7 +111,7 @@ class Opal {
     this._opening = new Map()
   }
 
-  static async create (options: OpalOptions = {}): Promise<Opal> {
+  static async create (options: OpalOptions): Promise<Opal> {
     let directory = OPAL_LOWER
     if (where.isNode && typeof options.directory === 'string') {
       directory = options.directory

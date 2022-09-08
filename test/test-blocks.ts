@@ -84,6 +84,12 @@ describe('Blocks', () => {
         assert.deepEqual(cid, block.cid)
         assert.equal(cid.code, code)
       })
+
+      it('rejects if not ipfs instance provided', async () => {
+        const _blocks = new Blocks(undefined as unknown as IPFS)
+        const promise = _blocks.put(block)
+        await assert.rejects(promise)
+      })
     })
 
     describe('get', () => {
@@ -94,6 +100,12 @@ describe('Blocks', () => {
         assert.deepEqual(new Uint8Array(block.bytes), bytes)
         assert.deepEqual(block.cid, cid)
         assert.equal(block.cid.code, code)
+      })
+
+      it('rejects if not ipfs instance provided', async () => {
+        const _blocks = new Blocks(undefined as unknown as IPFS)
+        const promise = _blocks.get(cid)
+        await assert.rejects(promise)
       })
     })
   })

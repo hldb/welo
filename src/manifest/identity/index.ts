@@ -143,8 +143,14 @@ class Identity {
       return identity
     }
 
-    const { block } = identity
-    const pubkey = keys.unmarshalPublicKey(block.value.pub)
+    let block, pubkey
+    try {
+      block = identity?.block
+      pubkey = keys.unmarshalPublicKey(block.value.pub)
+    } catch (e) {
+      console.error(e)
+      return null
+    }
 
     return new Identity({ pubkey, block })
   }
@@ -181,8 +187,8 @@ class Identity {
 
     let pem: string, identity: Uint8Array
     try {
-      pem = block.value.pem
-      identity = block.value.identity
+      pem = String(block.value.pem)
+      identity = new Uint8Array(block.value.identity)
     } catch (e) {
       throw new Error('Identity.import: failed to read kpi')
     }
