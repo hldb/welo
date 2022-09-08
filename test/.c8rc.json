@@ -1,3 +1,7 @@
 {
-  "exclude": ["src/mods/keychain/libp2p-keychain"]
+  "exclude": [
+    "test",
+    "src/mods/keychain/libp2p-keychain",
+    "src/replicator"
+  ]
 }
