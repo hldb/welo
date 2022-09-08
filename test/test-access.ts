@@ -76,8 +76,8 @@ describe('Static Access', () => {
           ...defaultManifest(name, identity, registry),
           access: emptyaccess
         })
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        assert.rejects(async () => await Access.open({ manifest }))
+        const promise = Access.open({ manifest })
+        await assert.rejects(promise)
       })
     })
   })
