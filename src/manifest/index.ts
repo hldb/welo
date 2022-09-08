@@ -55,7 +55,7 @@ class Manifest implements ManifestObj {
     address: Address
   }): Promise<Manifest> {
     const block = await blocks.get(address.cid)
-    const manifest = await this.asManifest({ block })
+    const manifest = this.asManifest({ block })
 
     if (manifest === null) {
       throw new Error('Manifest.fetch: cid did not resolve to valid manifest')

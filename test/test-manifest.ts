@@ -93,20 +93,29 @@ describe('Manifest', () => {
         // assert.deepEqual(_manifest.block, manifest.block)
         assert.deepEqual(_manifest.block.cid, manifest.block.cid)
       })
+
+      // can't add this yet, no runtime schema checks
+      // it('throws if address did not resolve to a manifest', async () => {
+      //   const block = await Blocks.encode({ value: 'not a manifest' })
+      //   await blocks.put(block)
+      //   const address = new Address(block.cid)
+      //   const promise = Manifest.fetch({ blocks, address })
+      //   await assert.rejects(promise)
+      // })
     })
 
     describe('.asManifest', () => {
-      it('returns the same instance if possible', async () => {
-        const _manifest = await Manifest.asManifest(manifest)
+      it('returns the same instance if possible', () => {
+        const _manifest = Manifest.asManifest(manifest)
         assert.equal(_manifest, manifest)
       })
 
-      it('returns a new instance if necessary', async () => {
-        const _manifest = await Manifest.asManifest({ block: manifest.block })
+      it('returns a new instance if necessary', () => {
+        const _manifest = Manifest.asManifest({ block: manifest.block })
         assert.deepEqual(_manifest?.block, manifest.block)
       })
 
-      it('returns null if unable to coerce', async () => {
+      it('returns null if unable to coerce', () => {
         const _manifest = Manifest.asManifest({ block: false })
         assert.equal(_manifest, null)
       })
