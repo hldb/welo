@@ -1,0 +1,3 @@
+{
+  "exclude": ["src/mods/keychain/libp2p-keychain"]
+}
