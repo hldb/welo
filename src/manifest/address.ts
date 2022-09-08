@@ -59,10 +59,6 @@ export class Address {
       return true
     }
 
-    if (address == null) {
-      throw new Error('Address.equals: invalid address parameter')
-    }
-
-    return this.cid.equals(address.cid)
+    return this.cid.equals(address?.cid)
   }
 }
