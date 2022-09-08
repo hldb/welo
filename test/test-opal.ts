@@ -1,13 +1,15 @@
 import { strict as assert } from 'assert'
 
 import { Opal } from '../src/index.js'
+import { Opal as OpalType } from '../src/opal.js'
 import { OPAL_PREFIX } from '../src/constants.js'
 
-import { getIpfs, constants } from './utils/index.js'
+import { getIpfs, constants, getIdentity } from './utils/index.js'
 import type { IPFS } from 'ipfs'
-import type { Opal as OpalType } from '../src/opal.js'
 import type { Address, Manifest } from '../src/manifest/index.js'
+import { Database } from '../src/database/index.js'
 
+const getDirectory = (): string => constants.temp.path + OPAL_PREFIX + String(Math.random())
 describe('Opal', () => {
   let ipfs: IPFS, opal: OpalType
 
@@ -16,6 +18,7 @@ describe('Opal', () => {
   })
 
   after(async () => {
+    await opal.stop()
     await ipfs.stop()
   })
 
@@ -34,9 +37,40 @@ describe('Opal', () => {
 
     describe('create', () => {
       it('returns an instance of Opal', async () => {
-        const directory =
-          constants.temp.path + OPAL_PREFIX + String(Math.random())
+        const directory = getDirectory()
+
         opal = await Opal.create({ ipfs, directory })
+      })
+
+      it('returns an instance of Opal with an identity option', async () => {
+        const directory = getDirectory()
+        const got = await getIdentity()
+        await got.storage.close()
+        const identity = got.identity
+
+        await Opal.create({ ipfs, directory, identity })
+      })
+
+      it('rejects if no identity option or Opal.Storage', async () => {
+        const Storage = Opal.Storage
+        Opal.Storage = undefined
+        const directory = getDirectory()
+
+        const promise = Opal.create({ ipfs, directory })
+        await assert.rejects(promise)
+
+        Opal.Storage = Storage
+      })
+
+      it('rejects if no identity option or Opal.Keychain', async () => {
+        const Keychain = Opal.Keychain
+        Opal.Keychain = undefined
+        const directory = getDirectory()
+
+        const promise = Opal.create({ ipfs, directory })
+        await assert.rejects(promise)
+
+        Opal.Keychain = Keychain
       })
     })
   })
@@ -66,8 +100,24 @@ describe('Opal', () => {
     })
 
     describe('open', () => {
+      let database: Database
+
       it('returns an instance of Database for a manifest', async () => {
-        await opal.open(manifest)
+        const promise = opal.open(manifest)
+        assert.equal(opal.opened.size, 0)
+        database = await promise
+        assert.equal(opal.opened.size, 1)
+      })
+
+      it('rejects when opening a database already open', async () => {
+        const promise = opal.open(manifest)
+        await assert.rejects(promise)
+      })
+
+      it('handles database.close events', async () => {
+        assert.equal(opal.opened.size, 1)
+        await database.close()
+        assert.equal(opal.opened.size, 0)
       })
     })
   })

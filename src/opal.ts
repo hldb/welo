@@ -1,6 +1,5 @@
 import EventEmitter from 'events'
 import where from 'wherearewe'
-import path from 'path'
 
 // import * as version from './version.js'
 import { initRegistry, RegistryObj } from './registry.js'
@@ -23,6 +22,7 @@ interface OpalStorage {
   identities: StorageReturn
   keychain: StorageReturn
 }
+
 interface OpalShared {
   directory?: string
   identity?: Identity | undefined
@@ -112,13 +112,9 @@ class Opal {
   }
 
   static async create (options: OpalOptions = {}): Promise<Opal> {
-    let directory
-    if (where.isNode) {
-      options.directory =
-        typeof options.directory === 'string' ? options.directory : OPAL_LOWER
-      directory = path.resolve(options.directory)
-    } else {
-      directory = OPAL_LOWER
+    let directory = OPAL_LOWER
+    if (where.isNode && typeof options.directory === 'string') {
+      directory = options.directory
     }
 
     let identity, identities, keychain, storage
