@@ -10,5 +10,5 @@
         "sourceType": "module",
         "project": "./tsconfig.json"
     },
-    "ignorePatterns": ["/src/mods/keychain/libp2p-keychain/*.ts"]
+    "ignorePatterns": ["dist","/src/mods/keychain/libp2p-keychain/*.ts"]
 }
