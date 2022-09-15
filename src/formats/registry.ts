@@ -8,9 +8,9 @@
  *
  */
 import { Keyvalue } from './store/keyvalue'
-import { StaticAccess } from './access/static'
-import { Entry } from './entry'
-import { Identity } from './identity'
+import { StaticAccess } from './access/default'
+import { Entry } from './entry/default'
+import { Identity } from './identity/default'
 
 type StoreType = typeof Keyvalue
 type AccessType = typeof StaticAccess

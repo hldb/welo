@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
-import { Identity } from '../formats/identity/index.js'
+import { Identity } from '../formats/identity/default/index.js'
 import { Replica } from './replica.js'
 
-import type { Manifest } from '../formats/manifest/index.js'
+import type { Manifest } from '../formats/manifest/default/index.js'
 import type { Blocks } from '../mods/blocks.js'
-import { Keyvalue } from '../formats/store/keyvalue.js'
-import { StaticAccess } from '../formats/access/static.js'
-import { Entry } from '../formats/entry/index.js'
+import { Keyvalue } from '../formats/store/keyvalue/index.js'
+import { StaticAccess } from '../formats/access/default/index.js'
+import { Entry } from '../formats/entry/default/index.js'
 // const typeMismatch = (Component) =>
 //  `${Component}.type does not match manifest.${Component.toLowerCase()}.type`
 

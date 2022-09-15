@@ -1,10 +1,10 @@
 // static access controller
 
 import { base32 } from 'multiformats/bases/base32'
-import { Entry } from '../entry/index.js'
-import { Manifest } from '../manifest/index.js'
-import { wildcard } from './util.js'
-import { ComponentConfig } from '../interfaces.js'
+import { Entry } from '../../entry/default/index.js'
+import { Manifest } from '../../manifest/default/index.js'
+import { wildcard } from '../util.js'
+import { ComponentConfig } from '../../interfaces.js'
 
 const type = '/opal/access/static'
 

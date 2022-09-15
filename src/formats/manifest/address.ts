@@ -1,13 +1,11 @@
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import { OPAL_PREFIX } from '../../constants.js'
-
-const prefix = OPAL_PREFIX
+import prefix from '../prefix'
 
 const parse = function (address: Address | string): CID {
   address = address.toString()
 
-  if (!address.startsWith(prefix)) {
+  if (!address.startsWith(prefix + '/')) {
     throw new Error(`'${prefix}' prefix missing from address: ${address}`)
   }
 

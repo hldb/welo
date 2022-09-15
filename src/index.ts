@@ -2,12 +2,12 @@ import { Opal as _Opal } from './opal.js'
 
 import { LevelStorage } from './mods/storage.js'
 import { Keychain } from './mods/keychain/index.js'
-import { Replicator } from './replicator/index.js'
+import { Replicator } from './database/replicator/index.js'
 
-import { StaticAccess } from './manifest/access/static.js'
-import { Entry } from './manifest/entry/index.js'
-import { Identity } from './manifest/identity/index.js'
-import { Keyvalue } from './manifest/store/keyvalue.js'
+import { StaticAccess } from './formats/access/default/index.js'
+import { Entry } from './formats/entry/default/index.js'
+import { Identity } from './formats/identity/default/index.js'
+import { Keyvalue } from './formats/store/keyvalue/index.js'
 
 _Opal.registry.access.add(StaticAccess)
 _Opal.registry.entry.add(Entry)

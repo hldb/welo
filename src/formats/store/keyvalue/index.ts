@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
-import { Replica } from '../../database/replica.js'
-import { Entry } from '../entry/index.js'
-import { ComponentConfig } from '../interfaces.js'
+import { Replica } from '../../../database/replica.js'
+import { Entry } from '../../entry/default/index.js'
+import { ComponentConfig } from '../../interfaces.js'
 
 const type = '/opal/store/keyvalue'
 

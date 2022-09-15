@@ -1,7 +1,7 @@
-import { StaticAccess } from '../access/static.js'
-import { Entry } from '../entry/index.js'
-import { Identity } from '../identity/index.js'
-import { Keyvalue } from '../store/keyvalue.js'
+import { StaticAccess } from './access/default/index.js'
+import { Entry } from './entry/default/index.js'
+import { Identity } from './identity/default/index.js'
+import { Keyvalue } from './store/keyvalue/index.js'
 
 export interface Components {
   Store: typeof Keyvalue

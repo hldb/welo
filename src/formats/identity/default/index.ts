@@ -1,12 +1,12 @@
 import { keys, PrivateKey, PublicKey } from 'libp2p-crypto'
-import { Blocks } from '../../mods/blocks.js'
+import { Blocks } from '../../../mods/blocks.js'
 
 import { Key } from 'interface-datastore'
 import { Block } from 'multiformats/block.js'
-import { Keychain } from '../../mods/keychain'
-import { StorageReturn } from '../../mods/storage.js'
+import { Keychain } from '../../../mods/keychain'
+import { StorageReturn } from '../../../mods/storage.js'
 import { CID } from 'multiformats/cid.js'
-import { ComponentConfig } from '../interfaces.js'
+import { ComponentConfig } from '../../interfaces.js'
 
 const type = '/opal/identity/base'
 
