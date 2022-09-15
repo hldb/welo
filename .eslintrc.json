@@ -8,8 +8,7 @@
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module",
-        "project": "./tsconfig.json",
-        "createDefaultProgram": true
+        "project": "./tsconfig.json"
     },
     "ignorePatterns": ["dist", "/src/mods/keychain/libp2p-keychain/*.ts"]
 }

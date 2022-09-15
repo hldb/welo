@@ -107,6 +107,6 @@
   "exclude": [
     "node_modules",
     "<node_internals>/**",
-    "dist",
+    "dist"
   ]
 }
