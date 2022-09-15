@@ -7,10 +7,10 @@
  * so an entry isnt registered as an identity
  *
  */
-import { Keyvalue } from './manifest/store/keyvalue'
-import { StaticAccess } from './manifest/access/static'
-import { Entry } from './manifest/entry'
-import { Identity } from './manifest/identity'
+import { Keyvalue } from './store/keyvalue'
+import { StaticAccess } from './access/static'
+import { Entry } from './entry'
+import { Identity } from './identity'
 
 type StoreType = typeof Keyvalue
 type AccessType = typeof StaticAccess

@@ -1,13 +1,13 @@
 import type { Block } from 'multiformats/block.js'
 import { RegistryObj } from '../registry.js'
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../../mods/blocks.js'
 import { Address } from './address.js'
 
 import { Components } from './interfaces.js'
-import { AccessConfig } from './access/static.js'
-import { StoreConfig } from './store/keyvalue.js'
-import { EntryConfig } from './entry/index.js'
-import { IdentityConfig } from './identity/index.js'
+import { AccessConfig } from '../access/static.js'
+import { StoreConfig } from '../store/keyvalue.js'
+import { EntryConfig } from '../entry/index.js'
+import { IdentityConfig } from '../identity/index.js'
 
 export interface ManifestObj {
   readonly name: string

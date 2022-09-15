@@ -2,7 +2,7 @@
 
 import { base32 } from 'multiformats/bases/base32'
 import { Entry } from '../entry/index.js'
-import { Manifest } from '../index.js'
+import { Manifest } from '../manifest/index.js'
 import { wildcard } from './util.js'
 import { ComponentConfig } from '../interfaces.js'
 

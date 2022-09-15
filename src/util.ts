@@ -1,9 +1,9 @@
 import path from 'path'
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import { RegistryObj } from './registry'
-import { ManifestObj } from './manifest'
-import { Identity } from './manifest/identity'
+import { RegistryObj } from './formats/registry'
+import { ManifestObj } from './formats/manifest'
+import { Identity } from './formats/identity'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)

@@ -2,8 +2,8 @@ import EventEmitter from 'events'
 import where from 'wherearewe'
 
 // import * as version from './version.js'
-import { initRegistry, RegistryObj } from './registry.js'
-import { Manifest, Address, ManifestObj } from './manifest/index.js'
+import { initRegistry, RegistryObj } from './formats/registry.js'
+import { Manifest, Address, ManifestObj } from './formats/manifest/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './constants.js'
@@ -11,8 +11,8 @@ import { dirs, DirsReturn, defaultManifest } from './util.js'
 
 import type { StorageFunc, StorageReturn } from './mods/storage.js'
 import type { Keychain } from './mods/keychain/index.js'
-import type { Replicator } from './replicator/index.js'
-import type { Identity } from './manifest/identity/index.js'
+import type { Replicator } from './database/replicator/index.js'
+import type { Identity } from './formats/identity/index.js'
 import type { IPFS } from 'ipfs'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { PubSub } from '@libp2p/interface-pubsub'
@@ -112,7 +112,7 @@ class Opal {
   }
 
   static async create (options: OpalOptions): Promise<Opal> {
-    let directory = OPAL_LOWER
+    let directory: string = OPAL_LOWER
     if (where.isNode && typeof options.directory === 'string') {
       directory = options.directory
     }
@@ -211,7 +211,7 @@ class Opal {
 
   async open (manifest: Manifest, options: OpenOptions = {}): Promise<Database> {
     const address = manifest.address
-    const string = address.toString()
+    const string: string = address.toString()
 
     const isOpen =
       this.opened.get(string) != null || this._opening.get(string) != null
