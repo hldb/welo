@@ -7,10 +7,9 @@ import { Keychain } from '../../../mods/keychain'
 import { StorageReturn } from '../../../mods/storage.js'
 import { CID } from 'multiformats/cid.js'
 import { ComponentConfig } from '../../interfaces.js'
+import protocol from './protocol.js'
 
-const type = '/opal/identity/base'
-
-export type IdentityConfig = ComponentConfig<typeof type>
+export type IdentityConfig = ComponentConfig<string>
 
 const secp256k1 = 'secp256k1'
 const empty = ''
@@ -87,8 +86,8 @@ class Identity {
     if (priv != null) privs.set(this, priv)
   }
 
-  static get type (): typeof type {
-    return type
+  static get protocol (): string {
+    return protocol
   }
 
   static async get ({

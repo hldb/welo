@@ -2,10 +2,9 @@ import EventEmitter from 'events'
 import { Replica } from '../../../database/replica.js'
 import { Entry } from '../../entry/default/index.js'
 import { ComponentConfig } from '../../interfaces.js'
+import protocol from './protocol.js'
 
-const type = '/opal/store/keyvalue'
-
-export interface StoreConfig extends ComponentConfig<typeof type> {
+export interface StoreConfig extends ComponentConfig<string> {
   snap?: any
 }
 
@@ -63,8 +62,8 @@ class Keyvalue {
     return new Keyvalue()
   }
 
-  static get type (): typeof type {
-    return type
+  static get protocol (): string {
+    return protocol
   }
 
   async close (): Promise<void> {

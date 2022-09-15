@@ -1,13 +1,13 @@
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
-import { Blocks } from '../../mods/blocks.js'
-import { Identity } from '../identity/index.js'
-import { ComponentConfig } from '../interfaces.js'
+import { Blocks } from '../../../mods/blocks.js'
+import { Identity } from '../../identity/default/index.js'
+import { ComponentConfig } from '../../interfaces.js'
+import protocol from './protocol'
+
 type IdentityType = typeof Identity
 
-const type = '/opal/entry/base'
-
-export type EntryConfig = ComponentConfig<typeof type>
+export type EntryConfig = ComponentConfig<string>
 
 export interface EntryData {
   tag: Uint8Array
@@ -75,8 +75,8 @@ class Entry {
     })
   }
 
-  static get type (): typeof type {
-    return type
+  static get protocol (): string {
+    return protocol
   }
 
   static async create ({

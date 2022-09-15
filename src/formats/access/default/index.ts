@@ -5,10 +5,9 @@ import { Entry } from '../../entry/default/index.js'
 import { Manifest } from '../../manifest/default/index.js'
 import { wildcard } from '../util.js'
 import { ComponentConfig } from '../../interfaces.js'
+import protocol from './protocol.js'
 
-const type = '/opal/access/static'
-
-export interface AccessConfig extends ComponentConfig<typeof type> {
+export interface AccessConfig extends ComponentConfig<string> {
   write: Array<Uint8Array | string>
 }
 
@@ -25,8 +24,8 @@ class StaticAccess {
     )
   }
 
-  static get type (): typeof type {
-    return type
+  static get protocol (): string {
+    return protocol
   }
 
   static async open ({

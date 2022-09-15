@@ -8,6 +8,7 @@ import { AccessConfig } from '../../access/default/index.js'
 import { StoreConfig } from '../../store/keyvalue/index.js'
 import { EntryConfig } from '../../entry/default/index.js'
 import { IdentityConfig } from '../../identity/default/index.js'
+import protocol from './protocol.js'
 
 export interface ManifestObj {
   readonly name: string
@@ -28,6 +29,10 @@ class Manifest implements ManifestObj {
   readonly meta?: any
   readonly tag?: Uint8Array
   readonly getTag: Uint8Array
+
+  static get protocol (): string {
+    return protocol
+  }
 
   constructor (readonly block: Block<ManifestObj>) {
     const manifest = block.value
