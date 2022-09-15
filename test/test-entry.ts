@@ -26,7 +26,7 @@ describe('Base Entry', () => {
     entry: Entry,
     invalidEntry: Entry
 
-  const expectedType = 'base'
+  const expectedType = '/opal/entry/base'
   const name = names.name0
 
   const tag = new Uint8Array()

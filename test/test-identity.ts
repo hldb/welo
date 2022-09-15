@@ -34,7 +34,7 @@ describe('Base Identity', () => {
   let tempStorage: getStorageReturn,
     tempIdentities: StorageReturn,
     tempKeychain: Keychain
-  const expectedType = 'base'
+  const expectedType = '/opal/identity/base'
   const name = names.name0
   const password = ''
 

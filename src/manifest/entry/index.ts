@@ -5,7 +5,7 @@ import { Identity } from '../identity/index.js'
 import { ComponentConfig } from '../interfaces.js'
 type IdentityType = typeof Identity
 
-const type = 'base'
+const type = '/opal/entry/base'
 
 export type EntryConfig = ComponentConfig<typeof type>
 

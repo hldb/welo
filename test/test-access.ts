@@ -21,7 +21,7 @@ registry.identity.add(Identity)
 describe('Static Access', () => {
   let storage: getStorageReturn, identity: Identity, entry: Entry
   const Access = StaticAccess
-  const expectedType = 'static'
+  const expectedType = '/opal/access/static'
   const name = 'name'
 
   let yesaccess: AccessConfig

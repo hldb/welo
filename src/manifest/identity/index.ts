@@ -8,7 +8,7 @@ import { StorageReturn } from '../../mods/storage.js'
 import { CID } from 'multiformats/cid.js'
 import { ComponentConfig } from '../interfaces.js'
 
-const type = 'base'
+const type = '/opal/identity/base'
 
 export type IdentityConfig = ComponentConfig<typeof type>
 

@@ -3,7 +3,7 @@ import { Replica } from '../../database/replica.js'
 import { Entry } from '../entry/index.js'
 import { ComponentConfig } from '../interfaces.js'
 
-const type = 'keyvalue'
+const type = '/opal/store/keyvalue'
 
 export interface StoreConfig extends ComponentConfig<typeof type> {
   snap?: any

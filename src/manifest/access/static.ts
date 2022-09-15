@@ -6,7 +6,7 @@ import { Manifest } from '../index.js'
 import { wildcard } from './util.js'
 import { ComponentConfig } from '../interfaces.js'
 
-const type = 'static'
+const type = '/opal/access/static'
 
 export interface AccessConfig extends ComponentConfig<typeof type> {
   write: Array<Uint8Array | string>

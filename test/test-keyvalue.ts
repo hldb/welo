@@ -24,7 +24,7 @@ registry.identity.add(Identity)
 
 describe('Keyvalue', () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity, keyvalue: Keyvalue
-  const type = 'keyvalue'
+  const type = '/opal/store/keyvalue'
 
   before(async () => {
     ipfs = await getIpfs()
