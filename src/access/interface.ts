@@ -1,17 +1,17 @@
-import { Instance as EntryInstance } from '../entry/interface'
+import { EntryInstance } from '../entry/interface'
 import { Registrant } from '../registry/registrant'
-import { ManifestInterface } from '../manifest/interface'
+import { ManifestInstance } from '../manifest/interface'
+import { Implements } from '../decorators'
 
-export interface Instance {
+export interface AccessInstance {
   canAppend: (entry: EntryInstance<any>) => Promise<boolean>
-
   close: () => Promise<void>
 }
 
 export interface Open {
-  manifest: ManifestInterface<any>
+  manifest: ManifestInstance<any>
 }
 
-export interface Static extends Registrant<Instance> {
-  open: (open: Open) => Promise<Instance>
+export interface AccessStatic extends Implements<AccessInstance>, Registrant {
+  open: (open: Open) => Promise<AccessInstance>
 }

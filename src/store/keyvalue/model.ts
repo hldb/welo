@@ -1,4 +1,4 @@
-import { EntryData, Instance } from '../../entry/interface'
+import { EntryData, EntryInstance } from '../../entry/interface'
 
 const PUT: 'PUT' = 'PUT'
 const DEL: 'DEL' = 'DEL'
@@ -9,8 +9,8 @@ interface Ops {
 }
 
 const ops: Ops = {
-  PUT: 'PUT',
-  DEL: 'DEL'
+  PUT,
+  DEL
 }
 
 interface Put {
@@ -24,7 +24,7 @@ interface Del {
   key: string
 }
 
-export const actions = {
+export const creators = {
   put: (key: string, value: any): Put => ({ op: ops.PUT, key, value }),
   del: (key: string): Del => ({ op: ops.DEL, key })
 }
@@ -41,7 +41,7 @@ interface EntryValue extends EntryData {
   payload: Put | Del
 }
 
-export function reducer (state: StateMap, entry: Instance<EntryValue>): StateMap {
+export function reducer (state: StateMap, entry: EntryInstance<EntryValue>): StateMap {
   try {
     const { op, key, value } = entry.payload
 

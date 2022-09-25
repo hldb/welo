@@ -1,12 +1,8 @@
 import { Block } from 'multiformats/block'
+import { Implements } from '../decorators'
 import { Blocks } from '../mods/blocks'
 import { Registrant } from '../registry/registrant'
 import { Address } from './address'
-
-// specify manifest, entry, and identity as formats later
-// export interface Format {
-//   protocol: string
-// }
 
 export interface Protocol {
   protocol: string
@@ -23,8 +19,8 @@ export interface ManifestData extends Protocol {
   readonly tag?: Uint8Array
 }
 
-export interface ManifestInterface<ManifestValue> extends ManifestData {
-  readonly block: Block<ManifestValue>
+export interface ManifestInstance<Value> extends ManifestData {
+  readonly block: Block<Value>
   get getTag(): Uint8Array
   get address(): Address
 }
@@ -36,10 +32,10 @@ export interface Fetch {
   address: Address
 }
 
-export type AsManifest<ManifestValue> = ManifestInterface<ManifestValue> | { block: Block<ManifestValue> }
+export type AsManifest<Value> = ManifestInstance<Value> | { block: Block<Value> }
 
-export interface ManifestStatic<ManifestValue> extends Registrant<ManifestInterface<ManifestValue>> {
-  create: (create: Create) => Promise<ManifestInterface<ManifestValue>>
-  fetch: (fetch: Fetch) => Promise<ManifestInterface<ManifestValue>>
-  asManifest: (asManifest: AsManifest<ManifestValue>) => ManifestInterface<ManifestValue> | null
+export interface ManifestStatic<Value> extends Implements<ManifestInstance<Value>>, Registrant {
+  create: (create: Create) => Promise<ManifestInstance<Value>>
+  fetch: (fetch: Fetch) => Promise<ManifestInstance<Value>>
+  asManifest: (asManifest: AsManifest<Value>) => ManifestInstance<Value> | null
 }

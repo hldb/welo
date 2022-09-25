@@ -1,14 +1,14 @@
 import type { Block } from 'multiformats/block.js'
 import { Blocks } from '../../mods/blocks.js'
 import { Address } from '../address.js'
-import { AsManifest, Create, Fetch, ManifestData, ManifestInterface, ManifestStatic, Protocol } from '../interface.js'
-import { staticImplements } from '../../decorators'
+import { AsManifest, Create, Fetch, ManifestData, ManifestInstance, ManifestStatic, Protocol } from '../interface.js'
+import { Extends } from '../../decorators'
 import protocol from './protocol.js'
 
 type ManifestValue = ManifestData
 
-@staticImplements<ManifestStatic<ManifestValue>>()
-class Manifest implements ManifestInterface<ManifestValue> {
+@Extends<ManifestStatic<ManifestValue>>()
+class Manifest implements ManifestInstance<ManifestValue> {
   readonly protocol: string
   readonly name: string
   readonly store: Protocol

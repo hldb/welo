@@ -3,23 +3,23 @@
 import { base32 } from 'multiformats/bases/base32'
 import { Manifest } from '../../manifest/default/index.js'
 import { wildcard } from '../util.js'
-import { Instance, Static, Open } from '../interface.js'
-import { staticImplements } from '../../decorators'
+import { AccessInstance, AccessStatic, Open } from '../interface.js'
+import { Extends } from '../../decorators'
 import protocol, { Access, Config } from './protocol.js'
-import { Instance as EntryInstance } from '../../entry/interface.js'
-import { ManifestInterface, ManifestData } from '../../manifest/interface.js'
+import { EntryInstance } from '../../entry/interface.js'
+import { ManifestInstance, ManifestData } from '../../manifest/interface.js'
 
 interface ManifestValue extends ManifestData {
   access: Access
 }
 
-@staticImplements<Static>()
-class StaticAccess implements Instance {
+@Extends<AccessStatic>()
+class StaticAccess implements AccessInstance {
   readonly manifest: Manifest
   readonly config: Config
   readonly write: Set<string>
 
-  constructor ({ manifest }: { manifest: ManifestInterface<ManifestValue> }) {
+  constructor ({ manifest }: { manifest: ManifestInstance<ManifestValue> }) {
     this.manifest = manifest
     this.config = manifest.access.config
     this.write = new Set(

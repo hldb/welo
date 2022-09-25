@@ -1,6 +1,7 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
+import { Implements } from '../decorators'
 import { Blocks } from '../mods/blocks'
 import { Keychain } from '../mods/keychain'
 import { StorageReturn } from '../mods/storage'
@@ -19,7 +20,7 @@ export interface Fetch {
   auth: CID
 }
 
-export type AsIdentity<IdentityValue> = Instance<IdentityValue> | { block: Block<IdentityValue> }
+export type AsIdentity<Value> = IdentityInstance<Value> | { block: Block<Value> }
 
 export type Export = Get
 
@@ -30,22 +31,22 @@ export interface Import {
   kpi: Uint8Array
 }
 
-export interface Instance<IdentityValue> {
+export interface IdentityInstance<Value> {
   name?: string
-  block: Block<IdentityValue>
+  block: Block<Value>
   readonly auth: CID
   readonly id: Uint8Array
   sign: (data: Uint8Array) => Promise<Uint8Array>
   verify: (data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }
 
-export interface Static<IdentityValue> extends Registrant<Instance<IdentityValue>> {
-  gen: (gen: Gen) => Promise<Instance<IdentityValue>>
-  get: (get: Get) => Promise<Instance<IdentityValue>>
-  fetch: (fetch: Fetch) => Promise<Instance<IdentityValue>>
-  asIdentity: (asIdentity: AsIdentity<IdentityValue>) => Instance<IdentityValue> | null
-  import: (imp: Import) => Promise<Instance<IdentityValue>>
+export interface IdentityStatic<Value> extends Implements<IdentityInstance<Value>>, Registrant {
+  gen: (gen: Gen) => Promise<IdentityInstance<Value>>
+  get: (get: Get) => Promise<IdentityInstance<Value>>
+  fetch: (fetch: Fetch) => Promise<IdentityInstance<Value>>
+  asIdentity: (asIdentity: AsIdentity<Value>) => IdentityInstance<Value> | null
+  import: (imp: Import) => Promise<IdentityInstance<Value>>
   export: (exp: Export) => Promise<Uint8Array>
-  sign: (identity: Instance<IdentityValue>, data: Uint8Array) => Promise<Uint8Array>
-  verify: (identity: Instance<IdentityValue>, data: Uint8Array, sig: Uint8Array) => Promise<boolean>
+  sign: (identity: IdentityInstance<Value>, data: Uint8Array) => Promise<Uint8Array>
+  verify: (identity: IdentityInstance<Value>, data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }

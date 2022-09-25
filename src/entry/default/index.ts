@@ -2,8 +2,8 @@ import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { Blocks } from '../../mods/blocks.js'
 import { Identity } from '../../identity/default/index.js'
-import { Instance, Static, Create, Fetch, AsEntry } from '../interface.js'
-import { staticImplements } from '../../decorators'
+import { EntryInstance, EntryStatic, Create, Fetch, AsEntry } from '../interface.js'
+import { Extends } from '../../decorators'
 import protocol from './protocol'
 
 export interface EntryData {
@@ -27,8 +27,8 @@ interface SignedEntry {
 
 export type SignedEntryBlock = Block<SignedEntry>
 
-@staticImplements<Static<SignedEntry>>()
-class Entry implements Instance<SignedEntry> {
+@Extends<EntryStatic<SignedEntry>>()
+class Entry implements EntryInstance<SignedEntry> {
   readonly block: SignedEntryBlock
   readonly identity: Identity
 

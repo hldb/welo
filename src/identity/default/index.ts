@@ -3,8 +3,8 @@ import { Blocks } from '../../mods/blocks.js'
 import { Key } from 'interface-datastore'
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
-import { Instance, Static, AsIdentity, Export, Fetch, Get, Import } from '../interface.js'
-import { staticImplements } from '../../decorators.js'
+import { IdentityInstance, IdentityStatic, AsIdentity, Export, Fetch, Get, Import } from '../interface.js'
+import { Extends } from '../../decorators.js'
 import protocol from './protocol.js'
 
 const secp256k1 = 'secp256k1'
@@ -37,8 +37,8 @@ const signIdentity = async (
 
 const privs = new WeakMap()
 
-@staticImplements<Static<IdentityValue>>()
-class Identity implements Instance<IdentityValue> {
+@Extends<IdentityStatic<IdentityValue>>()
+class Identity implements IdentityInstance<IdentityValue> {
   name?: string
   block: Block<IdentityValue>
   pubkey: PublicKey
@@ -198,7 +198,7 @@ class Identity implements Instance<IdentityValue> {
     return block.bytes
   }
 
-  static async sign (identity: Instance<IdentityValue>, data: Uint8Array): Promise<Uint8Array> {
+  static async sign (identity: IdentityInstance<IdentityValue>, data: Uint8Array): Promise<Uint8Array> {
     const _identity = this.asIdentity(identity)
 
     if (_identity === null) {
@@ -213,7 +213,7 @@ class Identity implements Instance<IdentityValue> {
     return privs.get(identity).sign(data)
   }
 
-  static async verify (identity: Instance<IdentityValue>, data: Uint8Array, sig: Uint8Array): Promise<boolean> {
+  static async verify (identity: IdentityInstance<IdentityValue>, data: Uint8Array, sig: Uint8Array): Promise<boolean> {
     const _identity = this.asIdentity(identity)
     if (_identity === null) {
       throw new Error('invalid identity used')

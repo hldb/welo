@@ -1,23 +1,24 @@
 import EventEmitter from 'events'
 
 import { Replica } from '../../database/replica.js'
-import { staticImplements } from '../../decorators.js'
-import { ManifestData, ManifestInterface } from '../../manifest/interface.js'
-import { actions, selectors, init, reducer } from './model'
+import { Extends } from '../../decorators.js'
+import { StoreStatic, StoreInstance, Open } from '../interface'
+import { ManifestData, ManifestInstance } from '../../manifest/interface.js'
+import { creators, selectors, init, reducer } from './model'
 import protocol, { Store, Config } from './protocol.js'
 
 interface ManifestValue extends ManifestData {
   store: Store
 }
 
-@staticImplements(StoreStatic)
-class Keyvalue implements StoreInterface {
+@Extends<StoreStatic>()
+export class Keyvalue implements StoreInstance {
   static get protocol (): string {
     return protocol
   }
 
-  get actions (): typeof actions {
-    return actions
+  get creators (): typeof creators {
+    return creators
   }
 
   get selectors (): typeof selectors {
@@ -30,12 +31,12 @@ class Keyvalue implements StoreInterface {
 
   private _index: Map<string, any>
 
-  readonly manifest: ManifestInterface<ManifestValue>
+  readonly manifest: ManifestInstance<ManifestValue>
   readonly config?: Config
   readonly replica: Replica
   events: EventEmitter
 
-  constructor ({ manifest, replica }: { manifest: ManifestInterface<ManifestValue>, replica: Replica }) {
+  constructor ({ manifest, replica }: { manifest: ManifestInstance<ManifestValue>, replica: Replica }) {
     this.manifest = manifest
     this.replica = replica
 
@@ -65,5 +66,3 @@ class Keyvalue implements StoreInterface {
     this.events.emit('update')
   }
 }
-
-export { Keyvalue }
