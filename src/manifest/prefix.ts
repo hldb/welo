@@ -1,4 +1,4 @@
-import prefix from '../prefix'
+import { OPAL_PREFIX as prefix } from '../constants'
 
 const type = 'manifest'
 const protocolPrefix = prefix + type

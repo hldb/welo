@@ -1,13 +1,10 @@
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
-import { Blocks } from '../../../mods/blocks.js'
+import { Blocks } from '../../mods/blocks.js'
 import { Identity } from '../../identity/default/index.js'
-import { ComponentConfig } from '../../interfaces.js'
+import { Instance, Static, Create, Fetch, AsEntry } from '../interface.js'
+import { staticImplements } from '../../decorators'
 import protocol from './protocol'
-
-type IdentityType = typeof Identity
-
-export type EntryConfig = ComponentConfig<string>
 
 export interface EntryData {
   tag: Uint8Array
@@ -30,7 +27,8 @@ interface SignedEntry {
 
 export type SignedEntryBlock = Block<SignedEntry>
 
-class Entry {
+@staticImplements<Static<SignedEntry>>()
+class Entry implements Instance<SignedEntry> {
   readonly block: SignedEntryBlock
   readonly identity: Identity
 
@@ -85,7 +83,7 @@ class Entry {
     payload,
     next,
     refs
-  }: CreateParams): Promise<Entry> {
+  }: Create): Promise<Entry> {
     const data: EntryDataBlock = await Blocks.encode({
       value: { tag, payload, next, refs }
     })
@@ -105,11 +103,7 @@ class Entry {
     blocks,
     Identity,
     cid
-  }: {
-    blocks: Blocks
-    Identity: IdentityType
-    cid: CID
-  }): Promise<Entry> {
+  }: Fetch): Promise<Entry> {
     const block: SignedEntryBlock = await blocks.get(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
@@ -128,9 +122,7 @@ class Entry {
     return entry
   }
 
-  static async asEntry (
-    entry: Entry | { block: SignedEntryBlock, identity: Identity }
-  ): Promise<Entry | null> {
+  static async asEntry (entry: AsEntry<SignedEntry>): Promise<Entry | null> {
     if (entry instanceof Entry) {
       return entry
     }

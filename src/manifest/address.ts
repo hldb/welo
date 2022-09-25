@@ -1,12 +1,12 @@
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import prefix from '../prefix'
+import { OPAL_PREFIX } from '../constants'
 
 const parse = function (address: Address | string): CID {
   address = address.toString()
 
-  if (!address.startsWith(prefix + '/')) {
-    throw new Error(`'${prefix}' prefix missing from address: ${address}`)
+  if (!address.startsWith(OPAL_PREFIX + '/')) {
+    throw new Error(`'${OPAL_PREFIX}' prefix missing from address: ${address}`)
   }
 
   try {
@@ -19,8 +19,8 @@ const parse = function (address: Address | string): CID {
 export class Address {
   constructor (public readonly cid: CID) {}
 
-  static get prefix (): typeof prefix {
-    return prefix
+  static get prefix (): typeof OPAL_PREFIX {
+    return OPAL_PREFIX
   }
 
   static asAddress (address?: any): Address | null {
@@ -41,7 +41,7 @@ export class Address {
   }
 
   toString (base = base32): string {
-    return prefix + this.cid.toString(base)
+    return OPAL_PREFIX + this.cid.toString(base)
   }
 
   // static fromBytes (bytes) {

@@ -1,20 +1,16 @@
 import { keys, PrivateKey, PublicKey } from 'libp2p-crypto'
-import { Blocks } from '../../../mods/blocks.js'
-
+import { Blocks } from '../../mods/blocks.js'
 import { Key } from 'interface-datastore'
 import { Block } from 'multiformats/block.js'
-import { Keychain } from '../../../mods/keychain'
-import { StorageReturn } from '../../../mods/storage.js'
 import { CID } from 'multiformats/cid.js'
-import { ComponentConfig } from '../../interfaces.js'
+import { Instance, Static, AsIdentity, Export, Fetch, Get, Import } from '../interface.js'
+import { staticImplements } from '../../decorators.js'
 import protocol from './protocol.js'
-
-export type IdentityConfig = ComponentConfig<string>
 
 const secp256k1 = 'secp256k1'
 const empty = ''
 
-interface SignedIdentity {
+interface IdentityValue {
   id: Uint8Array
   pub: Uint8Array
   sig: Uint8Array
@@ -28,9 +24,9 @@ interface KpiValue {
 const signIdentity = async (
   keypair: PrivateKey,
   pub: PublicKey
-): Promise<SignedIdentity> => {
+): Promise<IdentityValue> => {
   const marshalled = keys.marshalPublicKey(pub)
-  const signedIdentity: SignedIdentity = {
+  const signedIdentity: IdentityValue = {
     id: keys.marshalPublicKey(keypair.public),
     pub: marshalled,
     sig: await keypair.sign(marshalled)
@@ -39,33 +35,12 @@ const signIdentity = async (
   return signedIdentity
 }
 
-interface GetParams {
-  name: string
-  identities: StorageReturn
-  keychain: Keychain
-}
-
-type ExportParams = GetParams
-
-interface ImportParams {
-  name: string
-  identities?: StorageReturn
-  keychain?: Keychain
-  kpi: Uint8Array
-}
-
 const privs = new WeakMap()
 
-interface IdentityObj {
+@staticImplements<Static<IdentityValue>>()
+class Identity implements Instance<IdentityValue> {
   name?: string
-  priv?: PrivateKey
-  pubkey: PublicKey
-  block: Block<SignedIdentity>
-}
-
-class Identity {
-  name?: string
-  block: Block<SignedIdentity>
+  block: Block<IdentityValue>
   pubkey: PublicKey
 
   readonly auth: CID
@@ -73,7 +48,7 @@ class Identity {
   readonly pub: Uint8Array
   readonly sig: Uint8Array
 
-  constructor ({ name, priv, pubkey, block }: IdentityObj) {
+  constructor ({ name, priv, pubkey, block }: { name?: string, priv?: PrivateKey, pubkey: PublicKey, block: Block<IdentityValue> }) {
     this.name = name
     this.block = block
     this.pubkey = pubkey
@@ -90,41 +65,46 @@ class Identity {
     return protocol
   }
 
+  static async gen (name: string): Promise<Identity> {
+    const keypair = await keys.generateKeyPair(secp256k1, 256)
+    const value = await signIdentity(keypair, keypair.public)
+    const block = await Blocks.encode({ value })
+
+    return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
+  }
+
   static async get ({
     name,
     identities,
     keychain
-  }: GetParams): Promise<Identity> {
+  }: Get): Promise<Identity> {
     const key = new Key(name)
     const exists = await identities.has(key)
 
-    let keypair, block
     if (!exists) {
-      keypair = await keys.generateKeyPair(secp256k1, 256)
+      const identity = await this.gen(name)
+      const keypair = privs.get(identity)
+      const block = identity.block
 
       const pem = await keypair.export(empty)
       await keychain.importKey(name, pem, empty)
-
-      const value = await signIdentity(keypair, keypair.public)
-      block = await Blocks.encode({ value })
       await identities.put(key, block.bytes)
+
+      return identity
     } else {
       const bytes = await identities.get(key)
-      block = await Blocks.decode<SignedIdentity>({ bytes })
+      const block = await Blocks.decode<IdentityValue>({ bytes })
       const pem = await keychain.exportKey(name, empty)
-      keypair = await keys.import(pem, empty)
-    }
+      const keypair = await keys.import(pem, empty)
 
-    return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
+      return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
+    }
   }
 
   static async fetch ({
     blocks,
     auth: cid
-  }: {
-    blocks: Blocks
-    auth: CID
-  }): Promise<Identity> {
+  }: Fetch): Promise<Identity> {
     const block = await blocks.get(cid)
 
     const identity = await this.asIdentity({ block })
@@ -135,9 +115,9 @@ class Identity {
     return identity
   }
 
-  static async asIdentity (
-    identity: Identity | { block: Block<SignedIdentity> }
-  ): Promise<Identity | null> {
+  static asIdentity (
+    identity: AsIdentity<IdentityValue>
+  ): Identity | null {
     if (identity instanceof Identity) {
       return identity
     }
@@ -154,32 +134,12 @@ class Identity {
     return new Identity({ pubkey, block })
   }
 
-  static async export ({
-    name,
-    identities,
-    keychain
-  }: ExportParams): Promise<Uint8Array> {
-    const key = new Key(name)
-    const exists = await identities.has(key)
-
-    if (!exists) {
-      throw new Error('no identity with that name exists; export failed')
-    }
-
-    const pem = await keychain.exportKey(name, empty)
-    const bytes = await identities.get(key)
-
-    const value = { pem, identity: bytes }
-    const block: Block<KpiValue> = await Blocks.encode({ value })
-    return block.bytes
-  }
-
   static async import ({
     name,
     identities,
     keychain,
     kpi
-  }: ImportParams): Promise<Identity> {
+  }: Import): Promise<Identity> {
     const persist = identities !== undefined && keychain !== undefined
 
     const block: Block<KpiValue> = await Blocks.decode({ bytes: kpi })
@@ -206,7 +166,7 @@ class Identity {
       await identities.put(key, identity)
     }
 
-    const identityBlock = await Blocks.decode<SignedIdentity>({
+    const identityBlock = await Blocks.decode<IdentityValue>({
       bytes: identity
     })
 
@@ -218,13 +178,33 @@ class Identity {
     })
   }
 
-  static async sign ({
-    identity,
-    data
-  }: {
-    identity: Identity
-    data: Uint8Array
-  }): Promise<Uint8Array> {
+  static async export ({
+    name,
+    identities,
+    keychain
+  }: Export): Promise<Uint8Array> {
+    const key = new Key(name)
+    const exists = await identities.has(key)
+
+    if (!exists) {
+      throw new Error('no identity with that name exists; export failed')
+    }
+
+    const pem = await keychain.exportKey(name, empty)
+    const bytes = await identities.get(key)
+
+    const value = { pem, identity: bytes }
+    const block: Block<KpiValue> = await Blocks.encode({ value })
+    return block.bytes
+  }
+
+  static async sign (identity: Instance<IdentityValue>, data: Uint8Array): Promise<Uint8Array> {
+    const _identity = this.asIdentity(identity)
+
+    if (_identity === null) {
+      throw new Error('invalid identity used')
+    }
+
     if (!privs.has(identity)) {
       throw new Error('private key required to sign data')
     }
@@ -233,28 +213,25 @@ class Identity {
     return privs.get(identity).sign(data)
   }
 
-  static async verify ({
-    identity,
-    data,
-    sig
-  }: {
-    identity: Identity
-    data: Uint8Array
-    sig: Uint8Array
-  }): Promise<boolean> {
-    if (identity.pubkey == null) {
+  static async verify (identity: Instance<IdentityValue>, data: Uint8Array, sig: Uint8Array): Promise<boolean> {
+    const _identity = this.asIdentity(identity)
+    if (_identity === null) {
+      throw new Error('invalid identity used')
+    }
+
+    if (_identity.pubkey == null) {
       throw new Error('public key required to verify signed data')
     }
 
-    return await identity.pubkey.verify(data, sig)
+    return await _identity.pubkey.verify(data, sig)
   }
 
   async sign (data: Uint8Array): Promise<Uint8Array> {
-    return await Identity.sign({ identity: this, data })
+    return await Identity.sign(this, data)
   }
 
   async verify (data: Uint8Array, sig: Uint8Array): Promise<boolean> {
-    return await Identity.verify({ identity: this, data, sig })
+    return await Identity.verify(this, data, sig)
   }
 }
 
