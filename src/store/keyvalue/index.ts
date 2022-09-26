@@ -36,13 +36,40 @@ export class Keyvalue implements StoreInstance {
   readonly replica: Replica
   events: EventEmitter
 
+  private _isStarted: boolean
+  private _isMid: boolean // is starting or stopping
+
+  isStarted (): boolean {
+    return this._isStarted
+  }
+
+  async start (): Promise<void> {
+    if (this.isStarted() || this._isMid) { return }
+    this._isMid = true
+
+    this._index = init()
+    await this.update()
+
+    this._isStarted = true
+    this._isMid = false
+  }
+
+  async stop (): Promise<void> {
+    if (this.isStarted() || this._isMid) { return }
+    this._isMid = true
+
+    this._index = init()
+
+    this._isStarted = false
+    this._isMid = false
+  }
+
   constructor ({ manifest, replica }: { manifest: ManifestInstance<ManifestValue>, replica: Replica }) {
     this.manifest = manifest
+    this.config = manifest.store.config
     this.replica = replica
-
-    if (manifest.store.config != null) {
-      this.config = manifest.store.config
-    }
+    this._isStarted = false
+    this._isMid = false
 
     this._index = init()
 
