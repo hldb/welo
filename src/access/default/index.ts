@@ -3,7 +3,7 @@
 import { base32 } from 'multiformats/bases/base32'
 import { Manifest } from '../../manifest/default/index.js'
 import { wildcard } from '../util.js'
-import { AccessInstance, AccessStatic, Open } from '../interface.js'
+import { AccessInstance, AccessStatic } from '../interface.js'
 import { Extends } from '../../decorators'
 import protocol, { Access, Config } from './protocol.js'
 import { EntryInstance } from '../../entry/interface.js'
@@ -19,9 +19,34 @@ class StaticAccess implements AccessInstance {
   readonly config: Config
   readonly write: Set<string>
 
+  private _isStarted: boolean
+
+  isStarted (): boolean {
+    return this._isStarted
+  }
+
+  start (): void {
+    if (this.isStarted()) { return }
+
+    if (!Array.isArray(this.config?.write) || this.config?.write.length === 0) {
+      throw new Error(
+        'manifest.access.write does not grant access to any writers'
+      )
+    }
+
+    this._isStarted = true
+  }
+
+  stop (): void {
+    if (!this.isStarted()) { return }
+    this._isStarted = false
+  }
+
   constructor ({ manifest }: { manifest: ManifestInstance<ManifestValue> }) {
     this.manifest = manifest
     this.config = manifest.access.config
+    this._isStarted = false
+
     this.write = new Set(
       this.config.write.map((w: Uint8Array | string) =>
         typeof w === 'string' ? w : base32.encode(w)
@@ -31,19 +56,6 @@ class StaticAccess implements AccessInstance {
 
   static get protocol (): string {
     return protocol
-  }
-
-  static async open ({
-    manifest
-  }: Open): Promise<StaticAccess> {
-    const config: Config = manifest.access.config
-    if (!Array.isArray(config?.write) || config?.write.length === 0) {
-      throw new Error(
-        'manifest.access.write does not grant access to any writers'
-      )
-    }
-
-    return new StaticAccess({ manifest })
   }
 
   async close (): Promise<void> {
