@@ -1,52 +1,75 @@
 import EventEmitter from 'events'
-import { Identity } from '../formats/identity/default/index.js'
+
 import { Replica } from './replica.js'
+import { Blocks } from '../mods/blocks.js'
+import { start, stop, Startable } from '@libp2p/interfaces/dist/src/startable.js'
+import { EntryStatic } from '../entry/interface.js'
+import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
+import { ManifestInstance } from '../manifest/interface.js'
+import { Config, Hanlders, Open } from './interface.js'
+import { AccessInstance } from '../access/interface.js'
+import { StoreInstance } from '../store/interface.js'
 
-import type { Manifest } from '../formats/manifest/default/index.js'
-import type { Blocks } from '../mods/blocks.js'
-import { Keyvalue } from '../formats/store/keyvalue/index.js'
-import { StaticAccess } from '../formats/access/default/index.js'
-import { Entry } from '../formats/entry/default/index.js'
-// const typeMismatch = (Component) =>
-//  `${Component}.type does not match manifest.${Component.toLowerCase()}.type`
-
-interface DatabaseShared {
+export class Database implements Startable {
+  manifest: ManifestInstance<any>
   blocks: Blocks
-  identity: Identity
-  manifest: Manifest
-  Entry: typeof Entry
-  Identity: typeof Identity
-}
 
-interface DatabaseOptions extends DatabaseShared {
-  Store: typeof Keyvalue
-  Access: typeof StaticAccess
-}
-
-interface DatabaseConfig extends DatabaseShared {
+  identity: IdentityInstance<any>
   replica: Replica
-  store: Keyvalue
-  access: StaticAccess
-}
 
-export class Database {
-  blocks: Blocks
-  identity: Identity
-  manifest: Manifest
-  replica: Replica
-  store: Keyvalue
-  access: StaticAccess
-  Entry: typeof Entry
-  Identity: typeof Identity
+  access: AccessInstance
+  store: StoreInstance
+
+  Entry: EntryStatic<any>
+  Identity: IdentityStatic<any>
+
   events: EventEmitter
-  open: Boolean
-  _handlers: any
+  private readonly _handlers: Hanlders
 
-  constructor (config: DatabaseConfig) {
+  private _isStarted: boolean
+
+  isStarted (): boolean {
+    return this._isStarted
+  }
+
+  async start (): Promise<void> {
+    if (!this.isStarted()) { return }
+
+    await start(this.access)
+    await start(this.store)
+
+    this._isStarted = true
+  }
+
+  async stop (): Promise<void> {
+    if (!this.isStarted()) { return }
+
+    // await this.replicator.stop()
+
+    // this.store.events.removeListener('update', this._handlers.storeUpdate)
+    // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
+    // this.replica.events.removeListener('write', this._handlers.replicaWrite)
+
+    await stop(this.store)
+    await this.replica.close()
+    await stop(this.access)
+
+    // await Promise.all([
+    //   this.replicator.close(),
+    //   this.store.close(),
+    //   this.replica.close(),
+    //   this.access.close()
+    // ])
+
+    this._isStarted = false
+    this.events.emit('closed')
+  }
+
+  constructor (config: Config) {
     // this.storage = config.storage
+    this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
-    this.manifest = config.manifest
     this.replica = config.replica
 
     // this.replicator = config.replicator
@@ -84,11 +107,16 @@ export class Database {
     )
 
     this.events = new EventEmitter()
+    this._handlers = {
+      storeUpdate: () => this.events.emit('update'),
+      // replicatorReplicate: () => database.events.emit('replicate'),
+      replicaWrite: () => this.events.emit('write')
+    }
 
-    this.open = true
+    this._isStarted = false
   }
 
-  static async open (options: DatabaseOptions): Promise<Database> {
+  static async open (options: Open): Promise<Database> {
     const {
       // createStorage,
       manifest,
@@ -109,7 +137,8 @@ export class Database {
 
     const common = { manifest, blocks } // createStorage }
 
-    const access = await Access.open({ ...common })
+    const access = new Access(common)
+    await start(access)
     const replica = await Replica.open({
       ...common,
       identity,
@@ -117,60 +146,36 @@ export class Database {
       Identity,
       access
     })
-    const store = await Store.open()
+    const store = new Store({ replica })
+    await start(store)
 
     // no replication yet
     // config.replicator = new Replicator({ peerId, pubsub, ...common, access, replica })
     // options.replicate && await config.replicator.start()
 
-    const config: DatabaseConfig = {
+    const config: Config = {
       blocks,
       identity,
       manifest,
       replica,
       store,
       access,
+      Access,
       Entry,
-      Identity
+      Identity,
+      Store
     }
 
     const database = new Database(config)
 
-    database._handlers = {
-      storeUpdate: () => database.events.emit('update'),
-      // replicatorReplicate: () => database.events.emit('replicate'),
-      replicaWrite: () => database.events.emit('write')
-    }
-    database.store.events.on('update', database._handlers.storeUpdate)
+    // database.store.events.on('update', database._handlers.storeUpdate)
     // database.replicator.events.on('replicate', database._handlers.replicatorReplicate)
-    database.replica.events.on('write', database._handlers.replicaWrite)
+    // database.replica.events.on('write', database._handlers.replicaWrite)
+
+    if (options.start !== false) {
+      await start(database)
+    }
 
     return database
-  }
-
-  async close (): Promise<void> {
-    if (this.open === false) {
-      return
-    }
-    this.open = false
-
-    // await this.replicator.stop()
-
-    this.store.events.removeListener('update', this._handlers.storeUpdate)
-    // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
-    this.replica.events.removeListener('write', this._handlers.replicaWrite)
-
-    await this.store.close()
-    await this.replica.close()
-    await this.access.close()
-
-    // await Promise.all([
-    //   this.replicator.close(),
-    //   this.store.close(),
-    //   this.replica.close(),
-    //   this.access.close()
-    // ])
-
-    this.events.emit('closed')
   }
 }
