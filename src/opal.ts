@@ -2,58 +2,29 @@ import EventEmitter from 'events'
 import where from 'wherearewe'
 
 // import * as version from './version.js'
-import { initRegistry, RegistryObj } from './formats/registry.js'
-import { Manifest, Address, ManifestObj } from './formats/manifest/default/index.js'
+import { initRegistry, Registry } from './registry'
+import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './constants.js'
-import { dirs, DirsReturn, defaultManifest } from './util.js'
-
-import type { StorageFunc, StorageReturn } from './mods/storage.js'
-import type { Keychain } from './mods/keychain/index.js'
-import type { Replicator } from './database/replicator/index.js'
-import type { Identity } from './formats/identity/default/index.js'
-import type { IPFS } from 'ipfs'
-import type { PeerId } from '@libp2p/interface-peer-id'
-import type { PubSub } from '@libp2p/interface-pubsub'
-type IdentityType = typeof Identity
-
-interface OpalStorage {
-  identities: StorageReturn
-  keychain: StorageReturn
-}
-
-interface OpalShared {
-  directory?: string
-  identity?: Identity | undefined
-  storage?: OpalStorage
-  identities?: StorageReturn | undefined
-  keychain?: Keychain | undefined
-}
-
-interface OpalConfig extends OpalShared {
-  directory: string
-  identity: Identity
-  blocks: Blocks
-  peerId?: PeerId
-  pubsub?: PubSub
-}
-
-interface OpalOptions extends OpalShared {
-  ipfs: IPFS
-}
-
-interface OpenOptions {
-  identity?: Identity
-  Storage?: StorageReturn
-  Replicator?: typeof Replicator
-}
+import { dirs, DirsReturn, defaultManifest, createIdentity } from './util.js'
+import { StorageFunc, StorageReturn } from './mods/storage.js'
+import { Keychain } from './mods/keychain/index.js'
+import { Replicator } from './mods/replicator/index.js'
+import { IPFS } from 'ipfs'
+import { PeerId } from '@libp2p/interface-peer-id'
+import { PubSub } from '@libp2p/interface-pubsub'
+import { Extends } from './decorators'
+import { Config, Create, Determine, OpalInstance, OpalStatic, OpalStorage, Options } from './interface'
+import { IdentityInstance } from './identity/interface'
+import { ManifestData } from './manifest/interface'
+import { start } from '@libp2p/interfaces/dist/src/startable'
 
 const registry = initRegistry()
 
-// database factory
-class Opal {
-  static get registry (): RegistryObj {
+@Extends<OpalStatic>()
+class Opal implements OpalInstance {
+  static get registry (): Registry {
     return registry
   }
 
@@ -66,42 +37,78 @@ class Opal {
   static Replicator?: typeof Replicator
 
   private readonly dirs: DirsReturn
-
   directory: string
-  identity: Identity
+
+  identity: IdentityInstance<any>
   blocks: Blocks
   events: EventEmitter
 
-  storage?: OpalStorage
-  identities?: StorageReturn
-  keychain?: Keychain
+  storage: OpalStorage | null
+  identities: StorageReturn | null
+  keychain: Keychain | null
 
-  ipfs?: IPFS
-  peerId?: PeerId
-  pubsub?: PubSub
+  ipfs: IPFS | null
+  peerId: PeerId | null
+  pubsub: PubSub | null
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
 
+  private _isStarted: boolean
+  private _isMid: boolean
+
+  isStarted (): boolean {
+    return this._isStarted
+  }
+
+  async start (): Promise<void> {
+    if (!this.isStarted()) { return }
+
+    // in the future it might make sense to open some stores automatically here
+
+    this.events.emit('start')
+    this._isStarted = true
+  }
+
+  async stop (): Promise<void> {
+    if (this.isStarted()) { return }
+    this._isMid = true
+
+    await Promise.all(Object.values(this._opening))
+    await Promise.all(
+      Object.values(this.opened).map(async (db: Database) => await db.close())
+    )
+
+    this.events.emit('stop')
+    this.events.removeAllListeners('opened')
+    this.events.removeAllListeners('closed')
+
+    this._isStarted = false
+    this._isMid = false
+  }
+
   constructor ({
     directory,
     identity,
+    blocks,
     storage,
     identities,
     keychain,
-    blocks,
+    ipfs,
     peerId,
     pubsub
-  }: OpalConfig) {
+  }: Config) {
     this.directory = directory
     this.dirs = dirs(this.directory)
 
     this.identity = identity
+    this.blocks = blocks
+
     this.storage = storage
     this.identities = identities
     this.keychain = keychain
 
-    this.blocks = blocks
+    this.ipfs = ipfs
     this.peerId = peerId
     this.pubsub = pubsub
 
@@ -109,15 +116,18 @@ class Opal {
 
     this.opened = new Map()
     this._opening = new Map()
+
+    this._isStarted = false
+    this._isMid = false
   }
 
-  static async create (options: OpalOptions): Promise<Opal> {
+  static async create (options: Create): Promise<Opal> {
     let directory: string = OPAL_LOWER
     if (where.isNode && typeof options.directory === 'string') {
       directory = options.directory
     }
 
-    let identity, identities, keychain, storage
+    let identity, storage, identities, keychain
 
     if (options.identity != null) {
       identity = options.identity
@@ -128,38 +138,49 @@ class Opal {
         )
       }
 
-      const _storage: OpalStorage = {
+      storage = {
         identities: await this.Storage(dirs(directory).identities),
         keychain: await this.Storage(dirs(directory).keychain)
       }
-      storage = _storage
-      await _storage.identities.open()
-      await _storage.keychain.open()
 
       identities = storage.identities
-      keychain = new this.Keychain(storage.keychain)
+      keychain = await Keychain.create(storage.keychain)
 
-      const Identity: IdentityType = this.registry.identity.star
-      identity = await Identity.get({
-        name: 'default',
-        identities,
-        keychain
+      identity = await createIdentity({
+        Identity: registry.identity.star,
+        Keychain: this.Keychain,
+        storage
       })
     }
 
-    const config: OpalConfig = {
-      directory,
-      identity,
-      storage,
-      identities,
-      keychain,
-      blocks: new Blocks(options.ipfs)
-      // peerId and pubsub is not required but for some replicators
-      // peerId: options.peerId || null,
-      // pubsub: options.pubsub || options.ipfs.pubsub || null
+    let blocks
+    if (options.blocks != null) {
+      blocks = options.blocks
+    } else if (options.ipfs != null) {
+      blocks = new Blocks(options.ipfs)
+    } else {
+      throw new Error('need blocks or ipfs as option')
     }
 
-    return new Opal(config)
+    const config: Config = {
+      directory,
+      identity,
+      blocks,
+      storage: storage ?? null,
+      identities: identities ?? null,
+      keychain: keychain ?? null,
+      ipfs: options.ipfs ?? null,
+      peerId: options.peerId ?? null,
+      pubsub: options.pubsub ?? null
+    }
+
+    const opal = new Opal(config)
+
+    if (options.start !== false) {
+      await start(opal)
+    }
+
+    return opal
   }
 
   // static get version () { return version }
@@ -168,28 +189,9 @@ class Opal {
     return Manifest
   }
 
-  async stop (): Promise<void> {
-    await Promise.all(Object.values(this._opening))
-    await Promise.all(
-      Object.values(this.opened).map(async (db: Database) => await db.close())
-    )
-
-    this.events.emit('stop')
-    this.events.removeAllListeners('opened')
-    this.events.removeAllListeners('closed')
-
-    if (this.storage != null) {
-      await this.storage.identities.close()
-      await this.storage.keychain.close()
-    }
-  }
-
-  async determineManifest (
-    name: string,
-    options: Partial<ManifestObj> = {}
-  ): Promise<Manifest> {
-    const manifestObj: ManifestObj = {
-      ...defaultManifest(name, this.identity, this.registry),
+  async determine (options: Determine): Promise<Manifest> {
+    const manifestObj: ManifestData = {
+      ...defaultManifest(options.name, this.identity, this.registry),
       ...options
     }
 
@@ -205,11 +207,11 @@ class Opal {
     return manifest
   }
 
-  async fetchManifest (address: Address): Promise<Manifest> {
+  async fetch (address: Address): Promise<Manifest> {
     return await Manifest.fetch({ blocks: this.blocks, address })
   }
 
-  async open (manifest: Manifest, options: OpenOptions = {}): Promise<Database> {
+  async open (manifest: Manifest, options: Options = {}): Promise<Database> {
     const address = manifest.address
     const string: string = address.toString()
 
