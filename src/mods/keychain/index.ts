@@ -5,6 +5,7 @@
 import { KeyChain, KeyChainInit } from './libp2p-keychain/index.js'
 import { Components } from '@libp2p/interfaces/components.js'
 import type { StorageReturn } from '../storage.js'
+import { LevelDatastore } from 'datastore-level/src/index.js'
 
 export const defaultOptions = {
   // See https://cryptosense.com/parametesr-choice-for-pbkdf2/
@@ -20,6 +21,15 @@ class Keychain extends KeyChain {
   constructor (datastore: StorageReturn, options?: KeyChainInit) {
     const components: any = { getDatastore: () => datastore }
     super(components as Components, defaultOptions)
+  }
+
+  static async create (datastore: StorageReturn, options?: KeyChainInit): Promise<Keychain> {
+    // keychain unresponsive if datastore isnt open for initialization
+    await datastore.open()
+    const keychain = new Keychain(datastore, options)
+    await datastore.close()
+
+    return keychain
   }
 }
 
