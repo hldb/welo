@@ -1,18 +1,14 @@
 import { PubSub } from '@libp2p/interface-pubsub'
-import { Startable } from '@libp2p/interfaces/dist/src/startable'
 import { PeerId } from '@libp2p/interfaces/peer-id'
 import { IPFS } from 'ipfs'
+
 import { AccessProtocol } from './access/default/protocol'
-import { Database } from './database'
 import { EntryProtocol } from './entry/default/protocol'
 import { IdentityProtocol } from './identity/default/protocol'
 import { IdentityInstance } from './identity/interface'
-import { Address } from './manifest/address'
-import { ManifestStatic, ManifestInstance } from './manifest/interface'
 import { Blocks } from './mods/blocks'
 import { Keychain } from './mods/keychain'
-import { StorageFunc, StorageReturn } from './mods/storage'
-import { Registry } from './registry'
+import { StorageReturn } from './mods/storage'
 import { StoreProtocol } from './store/keyvalue/protocol'
 
 export interface OpalStorage {
@@ -37,29 +33,6 @@ export interface Options {
   // Replicator?: typeof Replicator
 }
 
-export interface OpalInstance extends Startable {
-  get registry(): Registry
-
-  directory: string
-
-  identity: IdentityInstance<any> | null
-  blocks: Blocks
-
-  storage: OpalStorage | null
-  identities: StorageReturn | null
-  keychain: Keychain | null
-
-  ipfs: IPFS | null
-  peerId: PeerId | null
-  pubsub: PubSub | null
-
-  readonly opened: Map<string, Database>
-
-  determine: (determine: Determine) => Promise<ManifestInstance<any>>
-  fetch: (fetch: Address) => Promise<ManifestInstance<any>>
-  open: (manifest: ManifestInstance<any>, options?: Options) => Promise<Database>
-}
-
 export interface Config {
   directory: string
   identity: IdentityInstance<any>
@@ -82,12 +55,35 @@ export interface Create {
   start?: boolean
 }
 
-export interface OpalStatic {
-  get registry(): Registry
-  new(config: Config): OpalInstance
-  create: (create: Create) => Promise<OpalInstance>
-  Storage?: StorageFunc
-  Keychain?: typeof Keychain
-  // static Replicator?: typeof Replicator
-  get Manifest(): ManifestStatic<any>
-}
+// export interface OpalInstance extends Startable {
+//   get registry(): Registry
+//
+//   directory: string
+//
+//   identity: IdentityInstance<any> | null
+//   blocks: Blocks
+//
+//   storage: OpalStorage | null
+//   identities: StorageReturn | null
+//   keychain: Keychain | null
+//
+//   ipfs: IPFS | null
+//   peerId: PeerId | null
+//   pubsub: PubSub | null
+//
+//   readonly opened: Map<string, Database>
+//
+//   determine: (determine: Determine) => Promise<ManifestInstance<any>>
+//   fetch: (fetch: Address) => Promise<ManifestInstance<any>>
+//   open: (manifest: ManifestInstance<any>, options?: Options) => Promise<Database>
+// }
+
+// export interface OpalStatic {
+//   get registry(): Registry
+//   new(config: Config): OpalInstance
+//   create: (create: Create) => Promise<OpalInstance>
+//   Storage?: StorageFunc
+//   Keychain?: typeof Keychain
+//   // static Replicator?: typeof Replicator
+//   get Manifest(): ManifestStatic<any>
+// }

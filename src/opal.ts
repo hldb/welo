@@ -14,16 +14,14 @@ import { Replicator } from './mods/replicator/index.js'
 import { IPFS } from 'ipfs'
 import { PeerId } from '@libp2p/interface-peer-id'
 import { PubSub } from '@libp2p/interface-pubsub'
-import { Extends } from './decorators'
-import { Config, Create, Determine, OpalInstance, OpalStatic, OpalStorage, Options } from './interface'
+import { Config, Create, Determine, OpalStorage, Options } from './interface'
 import { IdentityInstance } from './identity/interface'
 import { ManifestData } from './manifest/interface'
-import { start } from '@libp2p/interfaces/dist/src/startable'
+import { start, Startable } from '@libp2p/interfaces/dist/src/startable'
 
 const registry = initRegistry()
 
-@Extends<OpalStatic>()
-class Opal implements OpalInstance {
+class Opal implements Startable {
   static get registry (): Registry {
     return registry
   }
