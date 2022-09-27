@@ -7,7 +7,7 @@ import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './constants.js'
-import { dirs, DirsReturn, defaultManifest, createIdentity } from './util.js'
+import { dirs, DirsReturn, defaultManifest } from './util.js'
 import { StorageFunc, StorageReturn } from './mods/storage.js'
 import { Keychain } from './mods/keychain/index.js'
 import { Replicator } from './mods/replicator/index.js'
@@ -53,36 +53,57 @@ class Opal implements Startable {
   private readonly _opening: Map<string, Promise<Database>>
 
   private _isStarted: boolean
-  private _isMid: boolean
+  private _starting: Promise<void> | null
+  private _stopping: Promise<void> | null
 
   isStarted (): boolean {
     return this._isStarted
   }
 
   async start (): Promise<void> {
-    if (!this.isStarted()) { return }
+    if (this.isStarted()) { return }
 
-    // in the future it might make sense to open some stores automatically here
+    if (this._starting != null) {
+      return await this._starting
+    }
 
-    this.events.emit('start')
-    this._isStarted = true
+    if (this._stopping != null) {
+      await this._stopping
+    }
+
+    this._starting = (async () => {
+      // in the future it might make sense to open some stores automatically here
+
+      this._isStarted = true
+      this.events.emit('start')
+    })()
+
+    return await this._starting.finally(() => { this._starting = null })
   }
 
   async stop (): Promise<void> {
-    if (this.isStarted()) { return }
-    this._isMid = true
+    if (!this.isStarted()) { return }
 
-    await Promise.all(Object.values(this._opening))
-    await Promise.all(
-      Object.values(this.opened).map(async (db: Database) => await db.close())
-    )
+    if (this._stopping != null) {
+      return await this._stopping
+    }
 
-    this.events.emit('stop')
-    this.events.removeAllListeners('opened')
-    this.events.removeAllListeners('closed')
+    if (this._starting != null) {
+      await this._starting
+    }
 
-    this._isStarted = false
-    this._isMid = false
+    this._stopping = (async () => {
+      await Promise.all(Object.values(this._opening))
+      await Promise.all(Object.values(this.opened).map(async (db: Database) => await db.stop()))
+
+      this.events.emit('stop')
+      this.events.removeAllListeners('opened')
+      this.events.removeAllListeners('closed')
+
+      this._isStarted = false
+    })()
+
+    return await this._stopping.finally(() => { this._stopping = null })
   }
 
   constructor ({
@@ -116,7 +137,8 @@ class Opal implements Startable {
     this._opening = new Map()
 
     this._isStarted = false
-    this._isMid = false
+    this._starting = null
+    this._stopping = null
   }
 
   static async create (options: Create): Promise<Opal> {
@@ -144,10 +166,11 @@ class Opal implements Startable {
       identities = storage.identities
       keychain = await Keychain.create(storage.keychain)
 
-      identity = await createIdentity({
-        Identity: registry.identity.star,
-        Keychain: this.Keychain,
-        storage
+      const Identity = this.registry.identity.star
+      identity = await Identity.get({
+        name: 'default',
+        identities,
+        keychain
       })
     }
 
