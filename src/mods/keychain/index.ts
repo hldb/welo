@@ -5,7 +5,6 @@
 import { KeyChain, KeyChainInit } from './libp2p-keychain/index.js'
 import { Components } from '@libp2p/interfaces/components.js'
 import type { StorageReturn } from '../storage.js'
-import { LevelDatastore } from 'datastore-level/src/index.js'
 
 export const defaultOptions = {
   // See https://cryptosense.com/parametesr-choice-for-pbkdf2/
