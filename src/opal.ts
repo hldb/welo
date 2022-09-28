@@ -7,7 +7,7 @@ import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './constants.js'
-import { dirs, DirsReturn, defaultManifest } from './util.js'
+import { dirs, DirsReturn, defaultManifest, getComponents } from './util.js'
 import { StorageFunc, StorageReturn } from './mods/storage.js'
 import { Keychain } from './mods/keychain/index.js'
 import { Replicator } from './mods/replicator/index.js'
@@ -21,7 +21,7 @@ import { start, Startable } from '@libp2p/interfaces/dist/src/startable'
 
 const registry = initRegistry()
 
-class Opal implements Startable {
+export class Opal implements Startable {
   static get registry (): Registry {
     return registry
   }
@@ -73,12 +73,14 @@ class Opal implements Startable {
 
     this._starting = (async () => {
       // in the future it might make sense to open some stores automatically here
-
-      this._isStarted = true
-      this.events.emit('start')
     })()
 
-    return await this._starting.finally(() => { this._starting = null })
+    return await this._starting
+      .then(() => {
+        this._isStarted = true
+        this.events.emit('start')
+      })
+      .finally(() => { this._starting = null })
   }
 
   async stop (): Promise<void> {
@@ -99,11 +101,14 @@ class Opal implements Startable {
       this.events.emit('stop')
       this.events.removeAllListeners('opened')
       this.events.removeAllListeners('closed')
-
-      this._isStarted = false
     })()
 
-    return await this._stopping.finally(() => { this._stopping = null })
+    return await this._stopping
+      .then(() => {
+        this._isStarted = false
+        this.events.emit('stop')
+      })
+      .finally(() => { this._stopping = null })
   }
 
   constructor ({
@@ -220,7 +225,7 @@ class Opal implements Startable {
     await this.blocks.put(manifest.block)
 
     try {
-      Manifest.getComponents(this.registry, manifest)
+      getComponents(this.registry, manifest)
     } catch (e) {
       console.warn('manifest configuration contains unregistered components')
     }
@@ -234,16 +239,16 @@ class Opal implements Startable {
 
   async open (manifest: Manifest, options: Options = {}): Promise<Database> {
     const address = manifest.address
-    const string: string = address.toString()
+    const addr: string = address.toString()
 
     const isOpen =
-      this.opened.get(string) != null || this._opening.get(string) != null
+      this.opened.get(addr) != null || this._opening.get(addr) != null
 
     if (isOpen) {
-      throw new Error(`database ${string} is already open or being opened`)
+      throw new Error(`database ${addr} is already open or being opened`)
     }
 
-    const components = Manifest.getComponents(this.registry, manifest)
+    const components = getComponents(this.registry, manifest)
 
     // this will return a duplicate instance of the identity (not epic) until the instances cache is used by Identity.get
 
@@ -269,24 +274,24 @@ class Opal implements Startable {
       ...components
     })
       .then((db) => {
-        this.opened.set(string, db)
-        this._opening.delete(string)
+        this.opened.set(addr, db)
         this.events.emit('opened', db)
         db.events.once('closed', () => {
-          this.opened.delete(string)
+          this.opened.delete(addr)
           this.events.emit('closed', db)
         })
         return db
       })
       .catch((e) => {
         console.error(e)
-        throw new Error(`failed opening database with address: ${string}`)
+        throw new Error(`failed opening database with address: ${addr}`)
+      })
+      .finally(() => {
+        this._opening.delete(addr)
       })
 
-    this._opening.set(string, promise)
+    this._opening.set(addr, promise)
 
     return await promise
   }
 }
-
-export { Opal }
