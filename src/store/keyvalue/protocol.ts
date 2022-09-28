@@ -10,7 +10,7 @@ export interface Config {
   snap: CID
 }
 
-export interface Store extends Protocol {
+export interface StoreProtocol extends Protocol {
   protocol: typeof protocol
   config?: Config
 }

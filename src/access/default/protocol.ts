@@ -7,7 +7,7 @@ export interface Config {
   write: Array<string | Uint8Array>
 }
 
-export interface Access extends Protocol {
+export interface AccessProtocol extends Protocol {
   protocol: typeof protocol
   config: Config
 }

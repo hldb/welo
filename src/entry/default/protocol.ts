@@ -3,7 +3,7 @@ import protocolPrefix from '../prefix'
 
 const protocol = protocolPrefix
 
-export interface Entry extends Protocol {
+export interface EntryProtocol extends Protocol {
   protocol: typeof protocol
 }
 
