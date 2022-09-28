@@ -1,7 +1,6 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
-import { Implements } from '../decorators'
 import { Blocks } from '../mods/blocks'
 import { Keychain } from '../mods/keychain'
 import { StorageReturn } from '../mods/storage'
@@ -40,7 +39,8 @@ export interface IdentityInstance<Value> {
   verify: (data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }
 
-export interface IdentityStatic<Value> extends Implements<IdentityInstance<Value>>, Registrant {
+export interface IdentityStatic<Value> extends Registrant {
+  new(props: any): IdentityInstance<Value>
   gen: (gen: Gen) => Promise<IdentityInstance<Value>>
   get: (get: Get) => Promise<IdentityInstance<Value>>
   fetch: (fetch: Fetch) => Promise<IdentityInstance<Value>>

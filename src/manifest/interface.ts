@@ -1,5 +1,4 @@
 import { Block } from 'multiformats/block'
-import { Implements } from '../decorators'
 import { Blocks } from '../mods/blocks'
 import { Registrant } from '../registry/registrant'
 import { Address } from './address'
@@ -34,7 +33,8 @@ export interface Fetch {
 
 export type AsManifest<Value> = ManifestInstance<Value> | { block: Block<Value> }
 
-export interface ManifestStatic<Value> extends Implements<ManifestInstance<Value>>, Registrant {
+export interface ManifestStatic<Value> extends Registrant {
+  new(props: any): ManifestInstance<Value>
   create: (create: Create) => Promise<ManifestInstance<Value>>
   fetch: (fetch: Fetch) => Promise<ManifestInstance<Value>>
   asManifest: (asManifest: AsManifest<Value>) => ManifestInstance<Value> | null

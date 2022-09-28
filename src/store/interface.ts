@@ -1,6 +1,5 @@
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
 import { Replica } from '../database/replica'
-import { Implements } from '../decorators'
 import { ManifestInstance } from '../manifest/interface'
 import { Registrant } from '../registry/registrant'
 
@@ -19,4 +18,6 @@ export interface StoreInstance extends Startable {
   update: () => Promise<void>
 }
 
-export interface StoreStatic extends Implements<StoreInstance>, Registrant {}
+export interface StoreStatic extends Registrant {
+  new(props: any): StoreInstance
+}

@@ -3,7 +3,6 @@ import { CID } from 'multiformats/cid'
 import { Blocks } from '../mods/blocks'
 import { Identity } from '../identity/default'
 import { Registrant } from '../registry/registrant'
-import { Implements } from '../decorators'
 
 export interface EntryData {
   tag: Uint8Array
@@ -30,7 +29,8 @@ export interface Fetch {
 
 export type AsEntry<Value> = EntryInstance<Value> | { block: Block<Value>, identity: Identity }
 
-export interface EntryStatic<Value> extends Implements<EntryInstance<Value>>, Registrant {
+export interface EntryStatic<Value> extends Registrant {
+  new(props: any): EntryInstance<Value>
   create: (create: Create) => Promise<EntryInstance<Value>>
   fetch: (fetch: Fetch) => Promise<EntryInstance<Value>>
   asEntry: (entry: AsEntry<Value>) => Promise<EntryInstance<Value> | null>
