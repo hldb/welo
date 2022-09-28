@@ -2,11 +2,13 @@ import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import { OPAL_PREFIX } from '../constants'
 
+const prefix: '/opal/' = `${OPAL_PREFIX}/`
+
 const parse = function (address: Address | string): CID {
   address = address.toString()
 
-  if (!address.startsWith(OPAL_PREFIX + '/')) {
-    throw new Error(`'${OPAL_PREFIX}' prefix missing from address: ${address}`)
+  if (!address.startsWith(prefix)) {
+    throw new Error(`'${prefix}' prefix missing from address: ${address}`)
   }
 
   try {
@@ -18,10 +20,6 @@ const parse = function (address: Address | string): CID {
 
 export class Address {
   constructor (public readonly cid: CID) {}
-
-  static get prefix (): typeof OPAL_PREFIX {
-    return OPAL_PREFIX
-  }
 
   static asAddress (address?: any): Address | null {
     if (address instanceof Address) {
@@ -41,9 +39,10 @@ export class Address {
   }
 
   toString (base = base32): string {
-    return OPAL_PREFIX + this.cid.toString(base)
+    return prefix + this.cid.toString(base)
   }
 
+  // may add this later with prefix in multicodec
   // static fromBytes (bytes) {
   //   return new Address(CID.decode(bytes))
   // }

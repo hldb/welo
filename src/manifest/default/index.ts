@@ -5,10 +5,10 @@ import { AsManifest, Create, Fetch, ManifestData, ManifestInstance, ManifestStat
 import { Extends } from '../../decorators'
 import protocol from './protocol.js'
 
-type ManifestValue = ManifestData
+export { Address }
 
-@Extends<ManifestStatic<ManifestValue>>()
-class Manifest implements ManifestInstance<ManifestValue> {
+@Extends<ManifestStatic<ManifestData>>()
+export class Manifest implements ManifestInstance<ManifestData> {
   readonly protocol: string
   readonly name: string
   readonly store: Protocol
@@ -18,6 +18,12 @@ class Manifest implements ManifestInstance<ManifestValue> {
   readonly meta?: any
   readonly tag?: Uint8Array
   readonly getTag: Uint8Array
+
+  private readonly _address: Address
+
+  get address (): Address {
+    return this._address
+  }
 
   static get protocol (): string {
     return protocol
@@ -35,6 +41,7 @@ class Manifest implements ManifestInstance<ManifestValue> {
     if (manifest.tag != null) this.tag = manifest.tag
 
     this.getTag = manifest.tag != null ? manifest.tag : block.cid.bytes
+    this._address = new Address(block.cid)
   }
 
   static async create (manifest: Create): Promise<Manifest> {
@@ -56,7 +63,7 @@ class Manifest implements ManifestInstance<ManifestValue> {
     return manifest
   }
 
-  static asManifest (manifest: AsManifest<ManifestValue>): Manifest | null {
+  static asManifest (manifest: AsManifest<ManifestData>): Manifest | null {
     if (manifest instanceof Manifest) {
       return manifest
     }
@@ -68,10 +75,4 @@ class Manifest implements ManifestInstance<ManifestValue> {
       return null
     }
   }
-
-  get address (): Address {
-    return new Address(this.block.cid)
-  }
 }
-
-export { Manifest, Address }

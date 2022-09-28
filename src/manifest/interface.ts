@@ -4,8 +4,8 @@ import { Registrant } from '../registry/registrant'
 import { Address } from './address'
 
 export interface Protocol {
-  protocol: string
-  config?: any
+  readonly protocol: string
+  readonly config?: any
 }
 
 export interface ManifestData extends Protocol {
