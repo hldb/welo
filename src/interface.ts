@@ -54,36 +54,3 @@ export interface Create {
   pubsub?: PubSub
   start?: boolean
 }
-
-// export interface OpalInstance extends Startable {
-//   get registry(): Registry
-//
-//   directory: string
-//
-//   identity: IdentityInstance<any> | null
-//   blocks: Blocks
-//
-//   storage: OpalStorage | null
-//   identities: StorageReturn | null
-//   keychain: Keychain | null
-//
-//   ipfs: IPFS | null
-//   peerId: PeerId | null
-//   pubsub: PubSub | null
-//
-//   readonly opened: Map<string, Database>
-//
-//   determine: (determine: Determine) => Promise<ManifestInstance<any>>
-//   fetch: (fetch: Address) => Promise<ManifestInstance<any>>
-//   open: (manifest: ManifestInstance<any>, options?: Options) => Promise<Database>
-// }
-
-// export interface OpalStatic {
-//   get registry(): Registry
-//   new(config: Config): OpalInstance
-//   create: (create: Create) => Promise<OpalInstance>
-//   Storage?: StorageFunc
-//   Keychain?: typeof Keychain
-//   // static Replicator?: typeof Replicator
-//   get Manifest(): ManifestStatic<any>
-// }
