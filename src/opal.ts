@@ -17,11 +17,12 @@ import { PubSub } from '@libp2p/interface-pubsub'
 import { Config, Create, Determine, OpalStorage, Options } from './interface'
 import { IdentityInstance } from './identity/interface'
 import { ManifestData } from './manifest/interface'
-import { start, Startable } from '@libp2p/interfaces/dist/src/startable'
+import { start } from '@libp2p/interfaces/dist/src/startable'
+import { Pausable } from './pausable'
 
 const registry = initRegistry()
 
-export class Opal implements Startable {
+export class Opal extends Pausable {
   static get registry (): Registry {
     return registry
   }
@@ -52,65 +53,6 @@ export class Opal implements Startable {
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
 
-  private _isStarted: boolean
-  private _starting: Promise<void> | null
-  private _stopping: Promise<void> | null
-
-  isStarted (): boolean {
-    return this._isStarted
-  }
-
-  async start (): Promise<void> {
-    if (this.isStarted()) { return }
-
-    if (this._starting != null) {
-      return await this._starting
-    }
-
-    if (this._stopping != null) {
-      await this._stopping
-    }
-
-    this._starting = (async () => {
-      // in the future it might make sense to open some stores automatically here
-    })()
-
-    return await this._starting
-      .then(() => {
-        this._isStarted = true
-        this.events.emit('start')
-      })
-      .finally(() => { this._starting = null })
-  }
-
-  async stop (): Promise<void> {
-    if (!this.isStarted()) { return }
-
-    if (this._stopping != null) {
-      return await this._stopping
-    }
-
-    if (this._starting != null) {
-      await this._starting
-    }
-
-    this._stopping = (async () => {
-      await Promise.all(Object.values(this._opening))
-      await Promise.all(Object.values(this.opened).map(async (db: Database) => await db.stop()))
-
-      this.events.emit('stop')
-      this.events.removeAllListeners('opened')
-      this.events.removeAllListeners('closed')
-    })()
-
-    return await this._stopping
-      .then(() => {
-        this._isStarted = false
-        this.events.emit('stop')
-      })
-      .finally(() => { this._stopping = null })
-  }
-
   constructor ({
     directory,
     identity,
@@ -122,6 +64,19 @@ export class Opal implements Startable {
     peerId,
     pubsub
   }: Config) {
+    const starting = async (): Promise<void> => {
+      // in the future it might make sense to open some stores automatically here
+    }
+    const stopping = async (): Promise<void> => {
+      await Promise.all(Object.values(this._opening))
+      await Promise.all(Object.values(this.opened).map(async (db: Database) => await db.stop()))
+
+      this.events.emit('stop')
+      this.events.removeAllListeners('opened')
+      this.events.removeAllListeners('closed')
+    }
+    super({ starting, stopping })
+
     this.directory = directory
     this.dirs = dirs(this.directory)
 
@@ -140,10 +95,6 @@ export class Opal implements Startable {
 
     this.opened = new Map()
     this._opening = new Map()
-
-    this._isStarted = false
-    this._starting = null
-    this._stopping = null
   }
 
   static async create (options: Create): Promise<Opal> {
