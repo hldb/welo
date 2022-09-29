@@ -3,11 +3,11 @@
 import { base32 } from 'multiformats/bases/base32'
 import { wildcard } from '../util.js'
 import { AccessInstance, AccessStatic } from '../interface.js'
-import { Extends } from '../../decorators'
+import { Extends } from '../../utils/decorators'
 import protocol, { AccessProtocol, Config } from './protocol.js'
 import { EntryInstance } from '../../entry/interface.js'
 import { ManifestInstance, ManifestData } from '../../manifest/interface.js'
-import { Playable } from '../../pausable.js'
+import { Playable } from '../../utils/playable.js'
 
 interface ManifestValue extends ManifestData {
   access: AccessProtocol

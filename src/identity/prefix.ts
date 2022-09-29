@@ -1,4 +1,4 @@
-import { OPAL_PREFIX as prefix } from '../constants'
+import { OPAL_PREFIX as prefix } from '../utils/constants'
 
 const type = 'identity'
 const protocolPrefix: '/opal/identity' = `${prefix}/${type}`

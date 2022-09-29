@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
 
 import { Replica } from '../../database/replica.js'
-import { Extends } from '../../decorators.js'
+import { Extends } from '../../utils/decorators.js'
 import { StoreStatic, StoreInstance } from '../interface'
 import { ManifestData, ManifestInstance } from '../../manifest/interface.js'
 import { creators, selectors, init, reducer } from './model'
 import protocol, { StoreProtocol, Config } from './protocol.js'
-import { Playable } from '../../pausable.js'
+import { Playable } from '../../utils/playable.js'
 
 interface ManifestValue extends ManifestData {
   store: StoreProtocol
