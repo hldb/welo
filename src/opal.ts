@@ -18,11 +18,11 @@ import { Config, Create, Determine, OpalStorage, Options } from './interface'
 import { IdentityInstance } from './identity/interface'
 import { ManifestData } from './manifest/interface'
 import { start } from '@libp2p/interfaces/dist/src/startable'
-import { Pausable } from './pausable'
+import { Playable } from './pausable'
 
 const registry = initRegistry()
 
-export class Opal extends Pausable {
+export class Opal extends Playable {
   static get registry (): Registry {
     return registry
   }

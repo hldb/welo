@@ -6,14 +6,14 @@ import { StoreStatic, StoreInstance } from '../interface'
 import { ManifestData, ManifestInstance } from '../../manifest/interface.js'
 import { creators, selectors, init, reducer } from './model'
 import protocol, { StoreProtocol, Config } from './protocol.js'
-import { Pausable } from '../../pausable.js'
+import { Playable } from '../../pausable.js'
 
 interface ManifestValue extends ManifestData {
   store: StoreProtocol
 }
 
 @Extends<StoreStatic>()
-export class Keyvalue extends Pausable implements StoreInstance {
+export class Keyvalue extends Playable implements StoreInstance {
   static get protocol (): string {
     return protocol
   }

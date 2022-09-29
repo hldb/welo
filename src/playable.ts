@@ -5,7 +5,7 @@ export interface Lifecycle {
   stopping: () => Promise<void>
 }
 
-export class Pausable implements Startable {
+export class Playable implements Startable {
   private _isStarted: boolean
 
   isStarted (): boolean {

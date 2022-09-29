@@ -7,7 +7,7 @@ import { Extends } from '../../decorators'
 import protocol, { AccessProtocol, Config } from './protocol.js'
 import { EntryInstance } from '../../entry/interface.js'
 import { ManifestInstance, ManifestData } from '../../manifest/interface.js'
-import { Pausable } from '../../pausable.js'
+import { Playable } from '../../pausable.js'
 
 interface ManifestValue extends ManifestData {
   access: AccessProtocol
@@ -15,7 +15,7 @@ interface ManifestValue extends ManifestData {
 
 @Extends<AccessStatic>()
 // the Static in StaticAccess means the ACL is immutable and does not change
-export class StaticAccess extends Pausable implements AccessInstance {
+export class StaticAccess extends Playable implements AccessInstance {
   readonly manifest: ManifestInstance<ManifestValue>
   readonly config: Config
   readonly write: Set<string>
