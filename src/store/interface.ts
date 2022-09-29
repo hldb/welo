@@ -3,7 +3,7 @@ import { Replica } from '../database/replica'
 import { ManifestInstance } from '../manifest/interface'
 import { Registrant } from '../registry/registrant'
 
-export interface Open {
+export interface Props {
   manifest: ManifestInstance<any>
   replica: Replica
 }
@@ -15,9 +15,9 @@ export interface StoreInstance extends Startable {
   selectors: {
     [key: string]: Function
   }
-  update: () => Promise<void>
+  latest: () => Promise<any>
 }
 
 export interface StoreStatic extends Registrant {
-  new(props: any): StoreInstance
+  new(props: Props): StoreInstance
 }

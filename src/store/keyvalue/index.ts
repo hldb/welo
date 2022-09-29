@@ -2,34 +2,35 @@ import EventEmitter from 'events'
 
 import { Replica } from '../../database/replica.js'
 import { Extends } from '../../decorators.js'
-import { StoreStatic, StoreInstance, Open } from '../interface'
+import { StoreStatic, StoreInstance } from '../interface'
 import { ManifestData, ManifestInstance } from '../../manifest/interface.js'
 import { creators, selectors, init, reducer } from './model'
-import protocol, { Store, Config } from './protocol.js'
+import protocol, { StoreProtocol, Config } from './protocol.js'
+import { Startable } from '@libp2p/interfaces/dist/src/startable.js'
 
 interface ManifestValue extends ManifestData {
-  store: Store
+  store: StoreProtocol
 }
 
 @Extends<StoreStatic>()
-export class Keyvalue implements StoreInstance {
+export class Keyvalue implements StoreInstance, Startable {
   static get protocol (): string {
     return protocol
   }
 
-  get creators (): typeof creators {
-    return creators
+  private _index: Map<string, any>
+
+  get index (): Map<string, any> {
+    return this._index
   }
 
   get selectors (): typeof selectors {
     return selectors
   }
 
-  get index (): Map<string, any> {
-    return this._index
+  get creators (): typeof creators {
+    return creators
   }
-
-  private _index: Map<string, any>
 
   readonly manifest: ManifestInstance<ManifestValue>
   readonly config?: Config
@@ -37,31 +38,50 @@ export class Keyvalue implements StoreInstance {
   events: EventEmitter
 
   private _isStarted: boolean
-  private _isMid: boolean // is starting or stopping
+  private _starting: Promise<void> | null
+  private _stopping: Promise<void> | null
 
   isStarted (): boolean {
     return this._isStarted
   }
 
   async start (): Promise<void> {
-    if (this.isStarted() || this._isMid) { return }
-    this._isMid = true
+    if (this.isStarted()) { return }
 
-    this._index = init()
-    await this.update()
+    if (this._starting != null) {
+      return await this._starting
+    }
 
-    this._isStarted = true
-    this._isMid = false
+    if (this._stopping != null) {
+      await this._stopping
+    }
+
+    this._starting = (async () => {
+    })()
+
+    await this._starting
+      .then(() => { this._isStarted = true })
+      .finally(() => { this._starting = null })
   }
 
   async stop (): Promise<void> {
-    if (this.isStarted() || this._isMid) { return }
-    this._isMid = true
+    if (!this.isStarted()) { return }
 
-    this._index = init()
+    if (this._stopping != null) {
+      return await this._stopping
+    }
 
-    this._isStarted = false
-    this._isMid = false
+    if (this._starting != null) {
+      await this._starting
+    }
+
+    this._stopping = (async () => {
+      this._index = init()
+    })()
+
+    await this._stopping
+      .then(() => { this._isStarted = false })
+      .finally(() => { this._stopping = null })
   }
 
   constructor ({ manifest, replica }: { manifest: ManifestInstance<ManifestValue>, replica: Replica }) {
@@ -69,27 +89,21 @@ export class Keyvalue implements StoreInstance {
     this.config = manifest.store.config
     this.replica = replica
     this._isStarted = false
-    this._isMid = false
+    this._starting = null
+    this._stopping = null
 
     this._index = init()
 
     this.events = new EventEmitter()
   }
 
-  static async open (open: Open): Promise<Keyvalue> {
-    return new Keyvalue(open)
-  }
-
-  async close (): Promise<void> {
-    this._index = init()
-  }
-
-  async update (): Promise<void> {
+  // will return the latest reduced state to hand to selectors
+  async latest (): Promise<any> {
     const index = init()
     for await (const entry of await this.replica.traverse()) {
       reducer(index, entry)
     }
-    this._index = index
     this.events.emit('update')
+    return index
   }
 }
