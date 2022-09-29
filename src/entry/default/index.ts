@@ -1,23 +1,10 @@
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { Blocks } from '../../mods/blocks.js'
-import { Identity } from '../../identity/default/index.js'
-import { EntryInstance, EntryStatic, Create, Fetch, AsEntry } from '../interface.js'
+import { EntryData, EntryInstance, EntryStatic, Create, Fetch, AsEntry } from '../interface.js'
 import { Extends } from '../../decorators'
 import protocol from './protocol'
-
-export interface EntryData {
-  tag: Uint8Array
-  payload: any
-  next: CID[]
-  refs: CID[]
-}
-
-export type EntryDataBlock = Block<EntryData>
-
-export interface CreateParams extends EntryData {
-  identity: Identity
-}
+import { IdentityInstance } from '../../identity/interface.js'
 
 interface SignedEntry {
   auth: CID
@@ -25,12 +12,10 @@ interface SignedEntry {
   sig: Uint8Array
 }
 
-export type SignedEntryBlock = Block<SignedEntry>
-
 @Extends<EntryStatic<SignedEntry>>()
 class Entry implements EntryInstance<SignedEntry> {
-  readonly block: SignedEntryBlock
-  readonly identity: Identity
+  readonly identity: IdentityInstance<any>
+  readonly block: Block<SignedEntry>
 
   readonly cid: CID
   readonly auth: CID
@@ -46,12 +31,12 @@ class Entry implements EntryInstance<SignedEntry> {
     data,
     identity
   }: {
-    block: SignedEntryBlock
-    data: EntryDataBlock
-    identity: Identity
+    block: Block<SignedEntry>
+    data: Block<EntryData>
+    identity: IdentityInstance<any>
   }) {
-    this.block = block
     this.identity = identity
+    this.block = block
 
     this.cid = block.cid
     this.auth = block.value.auth
@@ -61,16 +46,6 @@ class Entry implements EntryInstance<SignedEntry> {
     this.payload = data.value.payload
     this.next = data.value.next
     this.refs = data.value.refs
-
-    Object.defineProperties(this, {
-      cid: { get: () => block.cid },
-      auth: { get: () => block.value.auth },
-      sig: { get: () => block.value.sig },
-      tag: { get: () => data.value.tag },
-      payload: { get: () => data.value.payload },
-      next: { get: () => data.value.next },
-      refs: { get: () => data.value.refs }
-    })
   }
 
   static get protocol (): string {
@@ -84,16 +59,15 @@ class Entry implements EntryInstance<SignedEntry> {
     next,
     refs
   }: Create): Promise<Entry> {
-    const data: EntryDataBlock = await Blocks.encode({
+    const data: Block<EntryData> = await Blocks.encode({
       value: { tag, payload, next, refs }
     })
-    const bytes = data.bytes
 
     const auth = identity.auth
-    const sig = await identity.sign(bytes)
+    const sig = await identity.sign(data.bytes)
 
-    const block: SignedEntryBlock = await Blocks.encode({
-      value: { auth, data: bytes, sig }
+    const block: Block<SignedEntry> = await Blocks.encode({
+      value: { auth, data: data.bytes, sig }
     })
 
     return new Entry({ block, data, identity })
@@ -104,7 +78,7 @@ class Entry implements EntryInstance<SignedEntry> {
     Identity,
     cid
   }: Fetch): Promise<Entry> {
-    const block: SignedEntryBlock = await blocks.get(cid)
+    const block: Block<SignedEntry> = await blocks.get(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
 
@@ -128,7 +102,7 @@ class Entry implements EntryInstance<SignedEntry> {
     }
 
     const { block, identity } = entry
-    const data: EntryDataBlock = await Blocks.decode({
+    const data: Block<EntryData> = await Blocks.decode({
       bytes: block.value.data
     })
 
@@ -139,8 +113,8 @@ class Entry implements EntryInstance<SignedEntry> {
     block,
     identity
   }: {
-    block: SignedEntryBlock
-    identity: Identity
+    block: Block<SignedEntry>
+    identity: IdentityInstance<any>
   }): Promise<boolean> {
     const { auth, data, sig } = block.value
 

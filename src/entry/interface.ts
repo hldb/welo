@@ -1,8 +1,8 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 import { Blocks } from '../mods/blocks'
-import { Identity } from '../identity/default'
 import { Registrant } from '../registry/registrant'
+import { IdentityInstance, IdentityStatic } from '../identity/interface'
 
 export interface EntryData {
   tag: Uint8Array
@@ -13,21 +13,21 @@ export interface EntryData {
 
 export interface EntryInstance<Value> extends EntryData {
   readonly block: Block<Value>
-  readonly identity: Identity
+  readonly identity: IdentityInstance<any>
   readonly cid: CID
 }
 
 export interface Create extends EntryData {
-  identity: Identity
+  identity: IdentityInstance<any>
 }
 
 export interface Fetch {
   blocks: Blocks
-  Identity: typeof Identity
+  Identity: IdentityStatic<any>
   cid: CID
 }
 
-export type AsEntry<Value> = EntryInstance<Value> | { block: Block<Value>, identity: Identity }
+export type AsEntry<Value> = EntryInstance<Value> | { block: Block<Value>, identity: IdentityInstance<any> }
 
 export interface EntryStatic<Value> extends Registrant {
   new(props: any): EntryInstance<Value>
