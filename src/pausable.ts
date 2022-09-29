@@ -1,6 +1,6 @@
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
 
-export interface Handlers {
+export interface Lifecycle {
   starting: () => Promise<void>
   stopping: () => Promise<void>
 }
@@ -15,7 +15,7 @@ export class Pausable implements Startable {
   private _starting: Promise<void> | null
   private _stopping: Promise<void> | null
 
-  constructor (private readonly _handlers: Handlers) {
+  constructor (private readonly _lifecycle: Lifecycle) {
     this._isStarted = false
     this._starting = null
     this._stopping = null
@@ -32,7 +32,7 @@ export class Pausable implements Startable {
       await this._stopping
     }
 
-    this._starting = this._handlers.starting()
+    this._starting = this._lifecycle.starting()
 
     return await this._starting
       .then(() => { this._isStarted = true })
@@ -50,7 +50,7 @@ export class Pausable implements Startable {
       await this._starting
     }
 
-    this._stopping = this._handlers.stopping()
+    this._stopping = this._lifecycle.stopping()
 
     return await this._stopping
       .then(() => { this._isStarted = false })
