@@ -79,33 +79,6 @@ export class Database implements Startable {
     this.Entry = config.Entry
     this.Identity = config.Identity
 
-    // expose actions as database write methods (e.g. database.put)
-    // todo: handle async action creators
-    Object.defineProperties(
-      this,
-      Object.fromEntries(
-        Object.entries(this.store.actions).map(([key, action]) => [
-          key,
-          {
-            value: async (key: string, value?: any) =>
-              await this.replica.write(action(key, value))
-          }
-        ])
-      )
-    )
-
-    // expose selectors as database read methods (e.g. database.get)
-    // todo: async reads/lazy state calculation
-    Object.defineProperties(
-      this,
-      Object.fromEntries(
-        Object.entries(this.store.selectors).map(([key, selector]) => [
-          key,
-          { value: selector(this.store.state) }
-        ])
-      )
-    )
-
     this.events = new EventEmitter()
     this._handlers = {
       storeUpdate: () => this.events.emit('update'),
@@ -114,6 +87,34 @@ export class Database implements Startable {
     }
 
     this._isStarted = false
+    // expose actions as database write methods (e.g. database.put)
+    // todo: handle async action creators
+
+    interface CreatorProps {
+      value: (...args: any[]) => Promise<CID>
+    }
+
+    const handleCreator = ([key, creator]: [string, Creator]): [string, CreatorProps] => [
+      key,
+      { value: async (...args: any[]): Promise<CID> => await this.replica.write(creator(...args)) }
+    ]
+
+    interface SelectorProps {
+      value: (...args: any[]) => Promise<any>
+    }
+
+    const handleSelector = ([key, selector]: [string, Selector]): [string, SelectorProps] => [
+      key,
+      { value: async (...args: any[]) => selector(await this.store.latest())(...args) }
+    ]
+
+    Object.defineProperties(
+      this,
+      Object.fromEntries([
+        ...Object.entries(this.store.creators).map(handleCreator),
+        ...Object.entries(this.store.selectors).map(handleSelector)
+      ])
+    )
   }
 
   static async open (options: Open): Promise<Database> {
