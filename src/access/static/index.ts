@@ -8,18 +8,14 @@ import { EntryInstance } from '../../entry/interface.js'
 import { ManifestInstance, ManifestData } from '../../manifest/interface.js'
 import { Playable } from '../../utils/playable.js'
 
-interface ManifestValue extends ManifestData {
-  access: AccessProtocol
-}
-
 @Extends<AccessStatic>()
 // the Static in StaticAccess means the ACL is immutable and does not change
 export class StaticAccess extends Playable implements AccessInstance {
-  readonly manifest: ManifestInstance<ManifestValue>
+  readonly manifest: ManifestInstance<ManifestData>
   readonly config: Config
   readonly write: Set<string>
 
-  constructor ({ manifest }: { manifest: ManifestInstance<ManifestValue> }) {
+  constructor ({ manifest }: { manifest: ManifestInstance<ManifestData> }) {
     const starting = async (): Promise<void> => {
       if (!Array.isArray(this.config.write) || this.config.write.length === 0) {
         throw new Error(
@@ -44,7 +40,7 @@ export class StaticAccess extends Playable implements AccessInstance {
     )
   }
 
-  static get protocol (): string {
+  static get protocol (): typeof protocol {
     return protocol
   }
 

@@ -1,14 +1,15 @@
 import { Protocol } from '../../manifest/interface.js'
 import protocolPrefix from '../prefix.js'
 
-const protocol = protocolPrefix
+const type = 'static'
+const protocol: '/opal/access/static' = `${protocolPrefix}/${type}`
 
 export interface Config {
   write: Array<string | Uint8Array>
 }
 
 export interface AccessProtocol extends Protocol {
-  protocol: typeof protocol
+  protocol: string
   config: Config
 }
 
