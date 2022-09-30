@@ -1,14 +1,13 @@
 import { Block } from 'multiformats/block'
 import { Blocks } from '../mods/blocks'
-import { Registrant } from '../registry/registrant'
 import { Address } from './address'
 
 export interface Protocol {
   readonly protocol: string
-  readonly config?: any
+  readonly config: any
 }
 
-export interface ManifestData extends Protocol {
+export interface ManifestData {
   readonly name: string
   readonly access: Protocol
   readonly entry: Protocol
@@ -33,7 +32,7 @@ export interface Fetch {
 
 export type AsManifest<Value> = ManifestInstance<Value> | { block: Block<Value> }
 
-export interface ManifestStatic<Value> extends Registrant {
+export interface ManifestStatic<Value> {
   new(props: any): ManifestInstance<Value>
   create: (create: Create) => Promise<ManifestInstance<Value>>
   fetch: (fetch: Fetch) => Promise<ManifestInstance<Value>>

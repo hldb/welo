@@ -2,14 +2,12 @@ import type { Block } from 'multiformats/block.js'
 import { Blocks } from '../../mods/blocks.js'
 import { Address } from '../address.js'
 import { AsManifest, Create, Fetch, ManifestData, ManifestInstance, ManifestStatic, Protocol } from '../interface.js'
-import { Extends } from '../../decorators'
-import protocol from './protocol.js'
+import { Extends } from '../../utils/decorators'
 
 export { Address }
 
 @Extends<ManifestStatic<ManifestData>>()
 export class Manifest implements ManifestInstance<ManifestData> {
-  readonly protocol: string
   readonly name: string
   readonly store: Protocol
   readonly access: Protocol
@@ -25,13 +23,8 @@ export class Manifest implements ManifestInstance<ManifestData> {
     return this._address
   }
 
-  static get protocol (): string {
-    return protocol
-  }
-
   constructor (readonly block: Block<ManifestData>) {
     const manifest = block.value
-    this.protocol = manifest.protocol
     this.name = manifest.name
     this.store = manifest.store
     this.access = manifest.access
