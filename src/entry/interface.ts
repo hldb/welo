@@ -1,8 +1,9 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
-import { Blocks } from '../mods/blocks'
-import { Registrant } from '../registry/registrant'
-import { IdentityInstance, IdentityStatic } from '../identity/interface'
+
+import { Blocks } from '../mods/blocks.js'
+import { Registrant } from '../registry/registrant.js'
+import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 
 export interface EntryData {
   tag: Uint8Array

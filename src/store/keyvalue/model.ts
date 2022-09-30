@@ -1,4 +1,4 @@
-import { EntryData, EntryInstance } from '../../entry/interface'
+import { EntryData, EntryInstance } from '../../entry/interface.js'
 
 const PUT: 'PUT' = 'PUT'
 const DEL: 'DEL' = 'DEL'

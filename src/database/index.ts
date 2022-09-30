@@ -1,14 +1,16 @@
 import EventEmitter from 'events'
+import { start, stop } from '@libp2p/interfaces/startable'
+import { CID } from 'multiformats/cid'
 
 import { Replica } from './replica.js'
 import { Blocks } from '../mods/blocks.js'
-import { start, stop, Startable } from '@libp2p/interfaces/dist/src/startable.js'
 import { EntryStatic } from '../entry/interface.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 import { ManifestInstance } from '../manifest/interface.js'
-import { Config, Hanlders, Open } from './interface.js'
+import { Config, Handlers, Open } from './interface.js'
 import { AccessInstance } from '../access/interface.js'
-import { StoreInstance } from '../store/interface.js'
+import { Creator, Selector, StoreInstance } from '../store/interface.js'
+import { Playable } from '../utils/playable.js'
 
 export class Database implements Startable {
   manifest: ManifestInstance<any>

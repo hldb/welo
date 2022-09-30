@@ -2,14 +2,14 @@ import { PubSub } from '@libp2p/interface-pubsub'
 import { PeerId } from '@libp2p/interfaces/peer-id'
 import { IPFS } from 'ipfs'
 
-import { AccessProtocol } from './access/default/protocol'
-import { EntryProtocol } from './entry/default/protocol'
-import { IdentityProtocol } from './identity/default/protocol'
-import { IdentityInstance } from './identity/interface'
-import { Blocks } from './mods/blocks'
-import { Keychain } from './mods/keychain'
-import { StorageReturn } from './mods/storage'
-import { StoreProtocol } from './store/keyvalue/protocol'
+import { AccessProtocol } from './access/default/protocol.js'
+import { EntryProtocol } from './entry/default/protocol.js'
+import { IdentityProtocol } from './identity/default/protocol.js'
+import { IdentityInstance } from './identity/interface.js'
+import { Blocks } from './mods/blocks.js'
+import { Keychain } from './mods/keychain/index.js'
+import { StorageReturn } from './mods/storage.js'
+import { StoreProtocol } from './store/keyvalue/protocol.js'
 
 export interface OpalStorage {
   identities: StorageReturn

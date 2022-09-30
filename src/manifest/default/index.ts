@@ -1,8 +1,9 @@
-import type { Block } from 'multiformats/block.js'
+import { Block } from 'multiformats/block'
+
 import { Blocks } from '../../mods/blocks.js'
 import { Address } from '../address.js'
 import { AsManifest, Create, Fetch, ManifestData, ManifestInstance, ManifestStatic, Protocol } from '../interface.js'
-import { Extends } from '../../utils/decorators'
+import { Extends } from '../../utils/decorators.js'
 
 export { Address }
 

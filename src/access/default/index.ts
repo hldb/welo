@@ -1,10 +1,9 @@
-// static access controller
-
 import { base32 } from 'multiformats/bases/base32'
+
 import { wildcard } from '../util.js'
 import { AccessInstance, AccessStatic } from '../interface.js'
-import { Extends } from '../../utils/decorators'
-import protocol, { AccessProtocol, Config } from './protocol.js'
+import { Extends } from '../../utils/decorators.js'
+import protocol, { Config } from './protocol.js'
 import { EntryInstance } from '../../entry/interface.js'
 import { ManifestInstance, ManifestData } from '../../manifest/interface.js'
 import { Playable } from '../../utils/playable.js'

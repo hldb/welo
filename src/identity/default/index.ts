@@ -1,10 +1,11 @@
 import { keys, PrivateKey, PublicKey } from 'libp2p-crypto'
-import { Blocks } from '../../mods/blocks.js'
 import { Key } from 'interface-datastore'
+
+import { Blocks } from '../../mods/blocks.js'
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { IdentityInstance, IdentityStatic, AsIdentity, Export, Fetch, Get, Import } from '../interface.js'
-import { Extends } from '../../decorators.js'
+import { Extends } from '../../utils/decorators.js'
 import protocol from './protocol.js'
 
 const secp256k1 = 'secp256k1'

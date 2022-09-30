@@ -2,8 +2,8 @@ import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { Blocks } from '../../mods/blocks.js'
 import { EntryData, EntryInstance, EntryStatic, Create, Fetch, AsEntry } from '../interface.js'
-import { Extends } from '../../decorators'
-import protocol from './protocol'
+import { Extends } from '../../utils/decorators.js'
+import protocol from './protocol.js'
 import { IdentityInstance } from '../../identity/interface.js'
 
 interface SignedEntry {

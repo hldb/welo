@@ -1,7 +1,7 @@
 // Adjacency List Graph inside of a js Map with some stateful assistants
 
 import type { CID } from 'multiformats/cid.js'
-import { cidstring } from '../util.js'
+import { cidstring } from '../utils/index.js'
 
 export type Edge = 'in' | 'out'
 

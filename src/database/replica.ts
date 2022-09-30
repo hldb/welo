@@ -1,14 +1,15 @@
 import EventEmitter from 'events'
 import { CID } from 'multiformats/cid'
-import { StaticAccess } from '../formats/access/default/index.js'
-import { Entry } from '../formats/entry/default/index.js'
-import { Identity } from '../formats/identity/default/index.js'
-import { Manifest } from '../formats/manifest/default/index.js'
-import { Blocks } from '../mods/blocks.js'
-// import { compare } from 'uint8arrays/compare'
 import { equals } from 'uint8arrays/equals'
+import { start, stop } from '@libp2p/interfaces/startable'
 
+import { Blocks } from '../mods/blocks.js'
 import { Edge, Graph } from './graph.js'
+import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
+import { EntryInstance, EntryStatic } from '../entry/interface.js'
+import { ManifestInstance } from '../manifest/interface.js'
+import { AccessInstance } from '../access/interface.js'
+import { Playable } from '../utils/playable.js'
 import {
   loadEntry,
   graphLinks,

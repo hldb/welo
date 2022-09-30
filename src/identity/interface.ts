@@ -1,10 +1,10 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
-import { Blocks } from '../mods/blocks'
-import { Keychain } from '../mods/keychain'
-import { StorageReturn } from '../mods/storage'
-import { Registrant } from '../registry/registrant'
+import { Blocks } from '../mods/blocks.js'
+import { Keychain } from '../mods/keychain/index.js'
+import { StorageReturn } from '../mods/storage.js'
+import { Registrant } from '../registry/registrant.js'
 
 export type Gen = string
 

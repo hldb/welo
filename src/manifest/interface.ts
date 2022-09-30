@@ -1,6 +1,7 @@
 import { Block } from 'multiformats/block'
-import { Blocks } from '../mods/blocks'
-import { Address } from './address'
+
+import { Blocks } from '../mods/blocks.js'
+import { Address } from './address.js'
 
 export interface Protocol {
   readonly protocol: string

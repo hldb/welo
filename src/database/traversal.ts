@@ -1,17 +1,14 @@
-// the goal is to make a traverser that can read and replicate entries
-// when reading entries we want the traverser to visit only known entries and in order
-// when replicating entries we want the traverser to visit only unknown entries in any order
-
+import { CID } from 'multiformats/cid'
+import { compare } from 'uint8arrays/compare'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
-import { CID } from 'multiformats/cid.js'
-import { StaticAccess } from '../formats/access/default/index.js'
-import { Entry } from '../formats/entry/default/index.js'
-import { Identity } from '../formats/identity/default/index.js'
+
 import { Blocks } from '../mods/blocks.js'
-import { compare } from 'uint8arrays/compare'
-import { cidstring, parsedcid } from '../util.js'
+import { cidstring, parsedcid } from '../utils/index.js'
 import { Graph, Edge } from './graph.js'
+import { EntryInstance, EntryStatic } from '../entry/interface.js'
+import { IdentityStatic } from '../identity/interface.js'
+import { AccessInstance } from '../access/interface.js'
 
 type EntryType = typeof Entry
 type IdentityType = typeof Identity

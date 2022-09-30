@@ -1,5 +1,4 @@
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
-import { CID } from 'multiformats/cid'
 import { Replica } from '../database/replica'
 import { ManifestInstance } from '../manifest/interface'
 import { Registrant } from '../registry/registrant'

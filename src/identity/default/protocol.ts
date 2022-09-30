@@ -1,5 +1,5 @@
-import { Protocol } from '../../manifest/interface'
-import protocolPrefix from '../prefix'
+import { Protocol } from '../../manifest/interface.js'
+import protocolPrefix from '../prefix.js'
 
 const protocol = protocolPrefix
 

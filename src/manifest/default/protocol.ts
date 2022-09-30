@@ -1,4 +1,4 @@
-import protocolPrefix from '../prefix'
+import protocolPrefix from '../prefix.js'
 
 const protocol = protocolPrefix
 

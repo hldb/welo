@@ -1,14 +1,14 @@
 import path from 'path'
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import { Registry } from '../registry'
-import protocol from '../manifest/default/protocol'
-import { ManifestData } from '../manifest/interface'
-import { IdentityInstance, IdentityStatic } from '../identity/interface'
-import { AccessStatic } from '../access/interface'
-import { StoreStatic } from '../store/interface'
-import { EntryStatic } from '../entry/interface'
-import { Manifest } from '../manifest/default'
+
+import { Registry } from '../registry/index.js'
+import { ManifestData } from '../manifest/interface.js'
+import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
+import { AccessStatic } from '../access/interface.js'
+import { StoreStatic } from '../store/interface.js'
+import { EntryStatic } from '../entry/interface.js'
+import { Manifest } from '../manifest/default/index.js'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)
