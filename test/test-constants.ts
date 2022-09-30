@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import * as constants from '../src/constants.js'
+import * as constants from '../src/utils/constants.js'
 
 describe('Constants', () => {
   it('exports OPAL_LOWER', () => {
@@ -7,6 +7,6 @@ describe('Constants', () => {
   })
 
   it('exports OPAL_PREFIX', () => {
-    assert.equal(constants.OPAL_PREFIX, '/opal/')
+    assert.equal(constants.OPAL_PREFIX, '/opal')
   })
 })

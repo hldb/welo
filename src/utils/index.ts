@@ -27,7 +27,6 @@ export const defaultManifest = (
   identity: IdentityInstance<any>,
   registry: Registry
 ): ManifestData => ({
-  protocol,
   name,
   store: {
     protocol: registry.store.star.protocol

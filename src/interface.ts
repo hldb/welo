@@ -2,7 +2,7 @@ import { PubSub } from '@libp2p/interface-pubsub'
 import { PeerId } from '@libp2p/interfaces/peer-id'
 import { IPFS } from 'ipfs'
 
-import { AccessProtocol } from './access/default/protocol.js'
+import { AccessProtocol } from './access/static/protocol.js'
 import { EntryProtocol } from './entry/default/protocol.js'
 import { IdentityProtocol } from './identity/default/protocol.js'
 import { IdentityInstance } from './identity/interface.js'

@@ -1,3 +1,3 @@
 export interface Registrant {
-  get protocol(): string
+  protocol: string
 }

@@ -7,12 +7,12 @@ const type = 'keyvalue'
 const protocol = `${prefix}/${type}`
 
 export interface Config {
-  snap: CID
+  snap?: CID
 }
 
 export interface StoreProtocol extends Protocol {
   protocol: typeof protocol
-  config?: Config
+  config: Config
 }
 
 export default protocol

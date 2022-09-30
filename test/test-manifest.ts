@@ -1,15 +1,17 @@
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs'
+import { Block } from 'multiformats/block'
 
 import { Blocks } from '../src/mods/blocks.js'
-import { Manifest, Address } from '../src/manifest/index.js'
-import { StaticAccess } from '../src/manifest/access/static.js'
-import { Entry } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
-import { Keyvalue } from '../src/manifest/store/keyvalue.js'
-import { initRegistry } from '../src/registry.js'
+import { Manifest, Address } from '../src/manifest/default/index.js'
+import { StaticAccess } from '../src/access/static/index.js'
+import { Entry } from '../src/entry/default/index.js'
+import { Identity } from '../src/identity/default/index.js'
+import { Keyvalue } from '../src/store/keyvalue/index.js'
+import { initRegistry } from '../src/registry/index.js'
+import { getComponents } from '../src/utils/index.js'
 
 import { getIpfs } from './utils/index.js'
-import { IPFS } from 'ipfs'
 
 const registry = initRegistry()
 registry.store.add(Keyvalue)
@@ -20,17 +22,17 @@ registry.identity.add(Identity)
 const config = {
   name: 'test',
   store: {
-    type: registry.store.star.type
+    protocol: registry.store.star.protocol
   },
   access: {
-    type: registry.access.star.type,
+    protocol: registry.access.star.protocol,
     write: []
   },
   entry: {
-    type: registry.entry.star.type
+    protocol: registry.entry.star.protocol
   },
   identity: {
-    type: registry.identity.star.type
+    protocol: registry.identity.star.protocol
   }
 }
 
@@ -52,7 +54,7 @@ describe('Manifest', () => {
         manifest = await Manifest.create(config)
         assert.equal(
           manifest.block.cid.toString(),
-          'bafyreihemmmd2fw2xziuyk3i7ifafkjo7hjlvjjfz5nvxman5ik33pzfpm'
+          'bafyreihtia76lhsj6y4fn4q7nwwvgg46umsulqde4dnmpnk7z6mrl4qq5q'
         )
         assert.equal(manifest.meta, undefined)
         assert.deepEqual(manifest.getTag, manifest.block.cid.bytes)
@@ -63,7 +65,7 @@ describe('Manifest', () => {
         const _manifest = await Manifest.create({ ...config, meta })
         assert.equal(
           _manifest.block.cid.toString(),
-          'bafyreid4hlz7bzlvojqux53opnnx2yatrgknbntznycqvgmp5bwuzofjni'
+          'bafyreidmyhpdg3lzzylyhznfa2fqerpq32f4bjn5wqfbg6icqn4f6p4nju'
         )
         assert.equal(_manifest.meta, meta)
         assert.deepEqual(_manifest.getTag, _manifest.block.cid.bytes)
@@ -74,7 +76,7 @@ describe('Manifest', () => {
         const _manifest = await Manifest.create({ ...config, tag })
         assert.equal(
           _manifest.block.cid.toString(),
-          'bafyreidsqmalkuv2emaknt6d3gg2joamgm6abiddc4f4bwkg2brzir2qba'
+          'bafyreibzyfs4xxtpuxsphpq2xaz7rrhqwtsjyrxpq6qsk4mepbbdiezkb4'
         )
         assert.equal(_manifest.meta, undefined)
         assert.deepEqual(_manifest.tag, tag)
@@ -116,14 +118,14 @@ describe('Manifest', () => {
       })
 
       it('returns null if unable to coerce', () => {
-        const _manifest = Manifest.asManifest({ block: false })
+        const _manifest = Manifest.asManifest({ block: false as unknown as Block<any> })
         assert.equal(_manifest, null)
       })
     })
 
     describe('.getComponents', () => {
       it('returns the components for the manifest', () => {
-        const components = Manifest.getComponents(registry, manifest)
+        const components = getComponents(registry, manifest)
         assert.equal(components.Store, Keyvalue)
         assert.equal(components.Access, StaticAccess)
         assert.equal(components.Entry, Entry)

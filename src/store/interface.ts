@@ -8,7 +8,7 @@ export interface Props {
   replica: Replica
 }
 
-export type Creator = (...args: any[]) => Promise<CID>
+export type Creator = (...args: any[]) => any
 
 export type Selector = (state: any) => (...args: any[]) => any
 

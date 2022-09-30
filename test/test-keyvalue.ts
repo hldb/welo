@@ -1,19 +1,18 @@
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs'
+import { start } from '@libp2p/interfaces/startable'
 
-import { Keyvalue } from '../src/manifest/store/keyvalue.js'
+import { Keyvalue } from '../src/store/keyvalue/index.js'
 
 import { Replica } from '../src/database/replica.js'
-
 import { Blocks } from '../src/mods/blocks.js'
-import { StaticAccess } from '../src/manifest/access/static.js'
-import { Entry } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
-import { initRegistry } from '../src/registry.js'
-
+import { StaticAccess } from '../src/access/static/index.js'
+import { Entry } from '../src/entry/default/index.js'
+import { Identity } from '../src/identity/default/index.js'
+import { initRegistry } from '../src/registry/index.js'
 import { getIpfs, getIdentity } from './utils/index.js'
-import { IPFS } from 'ipfs'
-import { Manifest } from '../src/manifest/index.js'
-import { defaultManifest } from '../src/util.js'
+import { Manifest } from '../src/manifest/default/index.js'
+import { defaultManifest } from '../src/utils/index.js'
 
 const registry = initRegistry()
 
@@ -24,7 +23,7 @@ registry.identity.add(Identity)
 
 describe('Keyvalue', () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity, keyvalue: Keyvalue
-  const type = '/opal/store/keyvalue'
+  const expectedProtocol = '/opal/store/keyvalue'
 
   before(async () => {
     ipfs = await getIpfs()
@@ -42,25 +41,20 @@ describe('Keyvalue', () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Keyvalue.open)
-      assert.equal(Keyvalue.type, type)
-    })
-
-    describe('open', () => {
-      it('returns a new instance of Keyvalue', async () => {
-        keyvalue = await Keyvalue.open()
-      })
+      assert.ok(Keyvalue)
+      assert.equal(Keyvalue.protocol, expectedProtocol)
     })
   })
 
   describe('instance', () => {
     it('exposes instance properties', () => {
-      assert.ok(keyvalue.state)
+      assert.ok(keyvalue.start)
+      assert.ok(keyvalue.stop)
       assert.ok(keyvalue.events)
-      assert.ok(keyvalue.close)
+      assert.ok(keyvalue.index)
+      assert.ok(keyvalue.creators)
       assert.ok(keyvalue.selectors)
-      assert.ok(keyvalue.reducer)
-      assert.ok(keyvalue.update)
+      assert.ok(keyvalue.latest)
     })
 
     describe('update', () => {
@@ -71,10 +65,11 @@ describe('Keyvalue', () => {
       before(async () => {
         manifest = await Manifest.create({
           ...defaultManifest('name', identity, registry),
-          access: { type: StaticAccess.type, write: [identity.id] }
+          access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
         })
-        access = await StaticAccess.open({ manifest })
-        replica = await Replica.open({
+        access = new StaticAccess({ manifest })
+        await start(access)
+        replica = new Replica({
           manifest,
           blocks,
           access,
@@ -82,6 +77,7 @@ describe('Keyvalue', () => {
           Entry,
           Identity
         })
+        await start(replica)
       })
 
       after(async () => {
@@ -89,40 +85,33 @@ describe('Keyvalue', () => {
       })
 
       it('sets a key value pair to value', async () => {
-        const payload = keyvalue.actions.put(key, value)
+        const payload = keyvalue.creators.put(key, value)
         const entry = await replica.write(payload)
 
-        await keyvalue.update({ replica })
+        const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.state.get(key), value)
+        assert.equal(keyvalue.selectors.get(index)(key), value)
       })
 
       it('updates a key value pair to new value', async () => {
-        const payload = keyvalue.actions.put(key, value + 1)
+        const payload = keyvalue.creators.put(key, value + 1)
         const entry = await replica.write(payload)
 
-        await keyvalue.update({ replica })
+        const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.state.get(key), value + 1)
+        assert.equal(keyvalue.selectors.get(index)(key), value + 1)
       })
 
       it('deletes a key value pair', async () => {
-        const payload = keyvalue.actions.del(key)
+        const payload = keyvalue.creators.del(key)
         const entry = await replica.write(payload)
 
-        await keyvalue.update({ replica })
+        const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.state.get(key), undefined)
-      })
-    })
-
-    describe('close', () => {
-      it('resets the keyvalue state', async () => {
-        await keyvalue.close()
-        assert.deepEqual(keyvalue.state, new Map())
+        assert.equal(keyvalue.selectors.get(index)(key), undefined)
       })
     })
   })

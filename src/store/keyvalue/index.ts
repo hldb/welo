@@ -8,10 +8,6 @@ import { creators, selectors, init, reducer } from './model.js'
 import protocol, { Config } from './protocol.js'
 import { Playable } from '../../utils/playable.js'
 
-interface ManifestValue extends ManifestData {
-  store: StoreProtocol
-}
-
 @Extends<StoreStatic>()
 export class Keyvalue extends Playable implements StoreInstance {
   static get protocol (): string {
@@ -32,12 +28,12 @@ export class Keyvalue extends Playable implements StoreInstance {
     return creators
   }
 
-  readonly manifest: ManifestInstance<ManifestValue>
+  readonly manifest: ManifestInstance<ManifestData>
   readonly config?: Config
   readonly replica: Replica
   events: EventEmitter
 
-  constructor ({ manifest, replica }: { manifest: ManifestInstance<ManifestValue>, replica: Replica }) {
+  constructor ({ manifest, replica }: { manifest: ManifestInstance<ManifestData>, replica: Replica }) {
     const starting = async (): Promise<void> => {
     }
     const stopping = async (): Promise<void> => {

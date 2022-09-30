@@ -4,7 +4,7 @@ import { LevelStorage } from './mods/storage.js'
 import { Keychain } from './mods/keychain/index.js'
 // import { Replicator } from './mods/replicator/index.js'
 
-import { StaticAccess } from './access/default/index.js'
+import { StaticAccess } from './access/static/index.js'
 import { Entry } from './entry/default/index.js'
 import { Identity } from './identity/default/index.js'
 import { Keyvalue } from './store/keyvalue/index.js'

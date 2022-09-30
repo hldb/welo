@@ -13,7 +13,7 @@ interface SignedEntry {
 }
 
 @Extends<EntryStatic<SignedEntry>>()
-class Entry implements EntryInstance<SignedEntry> {
+export class Entry implements EntryInstance<SignedEntry> {
   readonly identity: IdentityInstance<any>
   readonly block: Block<SignedEntry>
 
@@ -123,5 +123,3 @@ class Entry implements EntryInstance<SignedEntry> {
     )
   }
 }
-
-export { Entry }

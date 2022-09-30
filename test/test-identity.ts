@@ -5,7 +5,7 @@ import { Keychain } from '../src/mods/keychain/index.js'
 import { StorageReturn } from '../src/mods/storage.js'
 
 import { Blocks } from '../src/mods/blocks.js'
-import { Identity } from '../src/manifest/identity/index.js'
+import { Identity } from '../src/identity/default/index.js'
 
 import {
   getIpfs,
@@ -34,7 +34,7 @@ describe('Base Identity', () => {
   let tempStorage: getStorageReturn,
     tempIdentities: StorageReturn,
     tempKeychain: Keychain
-  const expectedType = '/opal/identity/base'
+  const expectedProtocol = '/opal/identity'
   const name = names.name0
   const password = ''
 
@@ -67,7 +67,7 @@ describe('Base Identity', () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.ok(Identity.type)
+      assert.ok(Identity.protocol)
       assert.ok(Identity.get)
       assert.ok(Identity.fetch)
       assert.ok(Identity.asIdentity)
@@ -76,8 +76,8 @@ describe('Base Identity', () => {
       assert.ok(Identity.verify)
     })
 
-    it(`.type is equal to '${expectedType}'`, () => {
-      assert.equal(Identity.type, expectedType)
+    it(`.type is equal to '${expectedProtocol}'`, () => {
+      assert.equal(Identity.protocol, expectedProtocol)
     })
 
     describe('.get', () => {
@@ -200,7 +200,7 @@ describe('Base Identity', () => {
     describe('.sign', () => {
       it('signs an empty byte array', async () => {
         const data = dataEmpty
-        const sig = await Identity.sign({ identity, data })
+        const sig = await Identity.sign(identity, data)
         assert.ok(sig instanceof Uint8Array)
         assert.equal(sig.toString(), signedEmpty.toString())
       })
@@ -210,14 +210,14 @@ describe('Base Identity', () => {
       it('verifies a valid signature', async () => {
         const data = dataEmpty
         const sig = signedEmpty
-        const verified = await Identity.verify({ identity, data, sig })
+        const verified = await Identity.verify(identity, data, sig)
         assert.equal(verified, true)
       })
 
       it('unverifies an invalid signature', async () => {
         const data = new Uint8Array([1])
         const sig = signedEmpty
-        const verified = await Identity.verify({ identity, data, sig })
+        const verified = await Identity.verify(identity, data, sig)
         assert.equal(verified, false)
       })
 
@@ -227,7 +227,7 @@ describe('Base Identity', () => {
 
         const data = new Uint8Array([1])
         const sig = signedEmpty
-        const promise = Identity.verify({ identity: _identity, data, sig })
+        const promise = Identity.verify(_identity, data, sig)
         await assert.rejects(promise)
       })
     })

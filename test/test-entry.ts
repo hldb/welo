@@ -2,8 +2,9 @@ import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
 
 import { Blocks } from '../src/mods/blocks.js'
-import { Entry, EntryData } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
+import { Entry } from '../src/entry/default/index.js'
+import { EntryData } from '../src/entry/interface.js'
+import { Identity } from '../src/identity/default/index.js'
 import { Keychain } from '../src/mods/keychain/index.js'
 
 import {
@@ -26,7 +27,7 @@ describe('Base Entry', () => {
     entry: Entry,
     invalidEntry: Entry
 
-  const expectedType = '/opal/entry/base'
+  const expectedProtocol = '/opal/entry'
   const name = names.name0
 
   const tag = new Uint8Array()
@@ -57,15 +58,15 @@ describe('Base Entry', () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.ok(Entry.type)
+      assert.ok(Entry.protocol)
       assert.ok(Entry.create)
       assert.ok(Entry.fetch)
       assert.ok(Entry.asEntry)
       assert.ok(Entry.verify)
     })
 
-    it(`.type is equal to '${expectedType}'`, () => {
-      assert.equal(Entry.type, expectedType)
+    it(`.type is equal to '${expectedProtocol}'`, () => {
+      assert.equal(Entry.protocol, expectedProtocol)
     })
 
     it('.create returns a new entry', async () => {

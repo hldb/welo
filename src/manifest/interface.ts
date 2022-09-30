@@ -5,7 +5,7 @@ import { Address } from './address.js'
 
 export interface Protocol {
   readonly protocol: string
-  readonly config: any
+  readonly config?: any
 }
 
 export interface ManifestData {

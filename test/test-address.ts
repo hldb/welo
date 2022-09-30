@@ -10,7 +10,7 @@ describe('Address', () => {
 
   describe('Class', () => {
     it('exposes class properties', () => {
-      assert.equal(Address.prefix, prefix)
+      assert.ok(Address.asAddress)
     })
 
     describe('.asAddress', () => {
