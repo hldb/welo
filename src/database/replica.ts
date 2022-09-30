@@ -18,29 +18,15 @@ import {
   traverser
 } from './traversal.js'
 
-type EntryType = typeof Entry
-type IdentityType = typeof Identity
-
-interface ReplicaParams {
-  manifest: Manifest
-  // storage: StorageReturn;
-  blocks: Blocks
-  identity: Identity
-  access: StaticAccess
-  Entry: typeof Entry
-  Identity: typeof Identity
-  _graph: Graph
-}
-
-export class Replica {
-  readonly manifest: Manifest
+export class Replica extends Playable {
+  readonly manifest: ManifestInstance<any>
   // readonly storage: StorageReturn;
   readonly blocks: Blocks
-  readonly identity: Identity
-  readonly access: StaticAccess
-  readonly Entry: EntryType
-  readonly Identity: IdentityType
-  readonly _graph: Graph
+  readonly identity: IdentityInstance<any>
+  readonly access: AccessInstance
+  readonly Entry: EntryStatic<any>
+  readonly Identity: IdentityStatic<any>
+  readonly graph: Graph
   readonly events: EventEmitter
 
   constructor ({
@@ -50,9 +36,24 @@ export class Replica {
     access,
     identity,
     Entry,
-    Identity,
-    _graph
-  }: ReplicaParams) {
+    Identity
+  }: {
+    manifest: ManifestInstance<any>
+    // storage: StorageReturn;
+    blocks: Blocks
+    identity: IdentityInstance<any>
+    access: AccessInstance
+    Entry: EntryStatic<any>
+    Identity: IdentityStatic<any>
+  }) {
+    const starting = async (): Promise<void> => {
+      await start(this.graph)
+    }
+    const stopping = async (): Promise<void> => {
+      await stop(this.graph)
+    }
+    super({ starting, stopping })
+
     this.manifest = manifest
     // this.storage = storage // storage isnt used yet as states are not being persisted
     this.blocks = blocks
@@ -60,32 +61,9 @@ export class Replica {
     this.identity = identity
     this.Entry = Entry
     this.Identity = Identity
-    this._graph = _graph
+    this.graph = new Graph({ storage })
 
     this.events = new EventEmitter()
-  }
-
-  static async open ({
-    manifest,
-    blocks,
-    access,
-    identity,
-    Entry,
-    Identity
-  }: Omit<ReplicaParams, '_graph'>): Promise<Replica> {
-    // const storage = createStorage('replica')
-    // await storage.open()
-    const _graph = Graph.init()
-
-    return new Replica({
-      manifest,
-      blocks,
-      access,
-      identity,
-      Entry,
-      Identity,
-      _graph
-    })
   }
 
   async close (): Promise<void> {
@@ -93,30 +71,30 @@ export class Replica {
   }
 
   get heads (): Set<string> {
-    return this._graph.heads
+    return this.graph.heads
   }
 
   get tails (): Set<string> {
-    return this._graph.tails
+    return this.graph.tails
   }
 
   get missing (): Set<string> {
-    return this._graph.missing
+    return this.graph.missing
   }
 
   get denied (): Set<string> {
-    return this._graph.denied
+    return this.graph.denied
   }
 
   get size (): number {
-    return this._graph.size
+    return this.graph.size
   }
 
-  async traverse ({ direction } = { direction: 'descend' }): Promise<Entry[]> {
+  async traverse ({ direction } = { direction: 'descend' }): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
     const Entry = this.Entry
     const Identity = this.Identity
-    const graph = Graph.clone(this._graph)
+    const graph = Graph.clone(this.graph)
 
     const headsAndTails = [graph.heads, graph.tails]
 
@@ -143,14 +121,14 @@ export class Replica {
   }
 
   async has (cid: CID | string): Promise<boolean> {
-    return this._graph.has(cid)
+    return this.graph.has(cid)
   }
 
   async known (cid: CID | string): Promise<boolean> {
-    return this._graph.known(cid)
+    return this.graph.known(cid)
   }
 
-  async add (entries: Entry[]): Promise<void> {
+  async add (entries: Array<EntryInstance<any>>): Promise<void> {
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag)) {
         console.warn('replica received entry with mismatched tag')
@@ -159,16 +137,16 @@ export class Replica {
 
       await this.blocks.put(entry.block)
 
-      if (this.access.canAppend(entry)) {
-        Graph.add(this._graph, entry.cid, entry.next)
+      if (await this.access.canAppend(entry)) {
+        Graph.add(this.graph, entry.cid, entry.next)
       } else {
-        Graph.deny(this._graph, entry.cid)
+        Graph.deny(this.graph, entry.cid)
       }
     }
     this.events.emit('update')
   }
 
-  async write (payload: any): Promise<Entry> {
+  async write (payload: any): Promise<EntryInstance<any>> {
     const entry = await this.Entry.create({
       identity: this.identity,
       tag: this.manifest.getTag,

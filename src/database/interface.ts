@@ -23,7 +23,7 @@ export interface Config extends Omit<Open, 'start'> {
   access: AccessInstance
 }
 
-export interface Hanlders {
+export interface Handlers {
   storeUpdate: () => boolean
   replicaWrite: () => boolean
 }

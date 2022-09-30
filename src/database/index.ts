@@ -12,68 +12,53 @@ import { AccessInstance } from '../access/interface.js'
 import { Creator, Selector, StoreInstance } from '../store/interface.js'
 import { Playable } from '../utils/playable.js'
 
-export class Database implements Startable {
-  manifest: ManifestInstance<any>
-  blocks: Blocks
+export class Database extends Playable {
+  readonly blocks: Blocks
+  readonly manifest: ManifestInstance<any>
+  readonly identity: IdentityInstance<any>
 
-  identity: IdentityInstance<any>
-  replica: Replica
+  readonly replica: Replica
+  readonly access: AccessInstance
+  readonly store: StoreInstance
 
-  access: AccessInstance
-  store: StoreInstance
+  readonly Entry: EntryStatic<any>
+  readonly Identity: IdentityStatic<any>
 
-  Entry: EntryStatic<any>
-  Identity: IdentityStatic<any>
+  readonly events: EventEmitter
 
-  events: EventEmitter
-  private readonly _handlers: Hanlders
-
-  private _isStarted: boolean
-
-  isStarted (): boolean {
-    return this._isStarted
-  }
-
-  async start (): Promise<void> {
-    if (!this.isStarted()) { return }
-
-    await start(this.access)
-    await start(this.store)
-
-    this._isStarted = true
-  }
-
-  async stop (): Promise<void> {
-    if (!this.isStarted()) { return }
-
-    // await this.replicator.stop()
-
-    // this.store.events.removeListener('update', this._handlers.storeUpdate)
-    // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
-    // this.replica.events.removeListener('write', this._handlers.replicaWrite)
-
-    await stop(this.store)
-    await this.replica.close()
-    await stop(this.access)
-
-    // await Promise.all([
-    //   this.replicator.close(),
-    //   this.store.close(),
-    //   this.replica.close(),
-    //   this.access.close()
-    // ])
-
-    this._isStarted = false
-    this.events.emit('closed')
-  }
+  private readonly _handlers: Handlers
 
   constructor (config: Config) {
-    // this.storage = config.storage
+    const starting = async (): Promise<void> => {
+      await start(this.access)
+      await start(this.store)
+    }
+    const stopping = async (): Promise<void> => {
+      // await this.replicator.stop()
+
+      // this.store.events.removeListener('update', this._handlers.storeUpdate)
+      // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
+      // this.replica.events.removeListener('write', this._handlers.replicaWrite)
+
+      await stop(this.store)
+      await this.replica.close()
+      await stop(this.access)
+
+      // await Promise.all([
+      //   this.replicator.close(),
+      //   this.store.close(),
+      //   this.replica.close(),
+      //   this.access.close()
+      // ])
+    }
+    super({ starting, stopping })
+
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
     this.replica = config.replica
 
+    // this.storage = config.storage
     // this.replicator = config.replicator
 
     this.store = config.store
@@ -88,7 +73,6 @@ export class Database implements Startable {
       replicaWrite: () => this.events.emit('write')
     }
 
-    this._isStarted = false
     // expose actions as database write methods (e.g. database.put)
     // todo: handle async action creators
 
@@ -149,7 +133,7 @@ export class Database implements Startable {
       Identity,
       access
     })
-    const store = new Store({ replica })
+    const store = new Store({ ...common, replica })
     await start(store)
 
     // no replication yet
@@ -180,5 +164,10 @@ export class Database implements Startable {
     }
 
     return database
+  }
+
+  async close (): Promise<void> {
+    await stop(this)
+    this.events.emit('closed')
   }
 }
