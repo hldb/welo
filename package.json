@@ -43,7 +43,7 @@
     "@ipld/dag-cbor": "^7.0.2",
     "@libp2p/interface-pubsub": "^2.0.1",
     "@libp2p/interfaces": "^2.0.4",
-    "datastore-level": "^8.0.0",
+    "datastore-level": "^9.0.1",
     "interface-datastore": "^6.1.1",
     "libp2p": "^0.37.3",
     "libp2p-crypto": "^0.21.2",
