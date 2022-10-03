@@ -45,6 +45,8 @@
     "@libp2p/interfaces": "^2.0.4",
     "datastore-level": "^9.0.1",
     "interface-datastore": "^6.1.1",
+    "ipfs-core-types": "^0.11.1",
+    "ipld-hashmap": "^2.1.12",
     "libp2p": "^0.37.3",
     "libp2p-crypto": "^0.21.2",
     "make-dir": "^3.1.0",
