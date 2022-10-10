@@ -1,112 +1,83 @@
 import { strict as assert } from 'assert'
-import { Node, NodeObj } from '../src/database/graph.js'
+import { base32 } from 'multiformats/bases/base32'
+import { Block } from 'multiformats/block'
+
+import {
+  initialNode,
+  Node,
+  NodeValue,
+  NodeObj
+} from '../src/database/graph-node.js'
 
 describe('Graph Node', () => {
-  const initialNode: NodeObj = {
+  const initNode: NodeObj = {
     in: new Set(),
     out: new Set(),
-    miss: false,
-    deny: false
+    missing: false,
+    denied: false
   }
   const newNode = new Node(initialNode)
-  const mutatedNode = new Node({
-    ...initialNode,
-    in: new Set(['3']),
-    out: new Set(['1'])
-  })
-  const missNode = new Node({
-    ...initialNode,
-    miss: true
-  })
-  const denyNode = new Node({
-    ...initialNode,
-    deny: true
+
+  describe('initialNode', () => {
+    it('exposes NodeObj interface', () => {
+      assert.deepEqual(initialNode, initNode)
+    })
   })
 
   describe('class', () => {
     it('exposes static properties', () => {
       assert.ok(Node.init)
-      assert.ok(Node.clone)
+      assert.ok(Node.decode)
+      assert.ok(Node.exists)
     })
 
     describe('.init', () => {
       it('returns a new node', () => {
         const node = newNode
         const init = Node.init()
+
         assert.deepEqual(init, node)
         assert.notEqual(init.in, node.in)
         assert.notEqual(init.out, node.out)
-        assert.equal(init.miss, node.miss)
-        assert.equal(init.deny, node.deny)
+        assert.equal(init.missing, node.missing)
+        assert.equal(init.denied, node.denied)
 
-        assert.deepEqual(init.in, initialNode.in)
-        assert.deepEqual(init.out, initialNode.out)
-        assert.notEqual(init.in, initialNode.in)
-        assert.notEqual(init.out, initialNode.out)
-        assert.equal(init.miss, initialNode.miss)
-        assert.equal(init.deny, initialNode.deny)
+        assert.deepEqual(init.in, initNode.in)
+        assert.deepEqual(init.out, initNode.out)
+        assert.notEqual(init.in, initNode.in)
+        assert.notEqual(init.out, initNode.out)
+        assert.equal(init.missing, initNode.missing)
+        assert.equal(init.denied, initNode.denied)
+
+        assert.deepEqual(initNode.in, initialNode.in)
+        assert.deepEqual(initNode.out, initialNode.out)
+        assert.equal(initNode.missing, initialNode.missing)
+        assert.equal(initNode.denied, initialNode.denied)
       })
     })
 
-    describe('.clone', () => {
-      it('returns a cloned new node', () => {
-        const node = newNode
-        const clone = Node.clone(node)
-        assert.deepEqual(clone, node)
-        assert.notEqual(clone.in, node.in)
-        assert.notEqual(clone.out, node.out)
-        assert.equal(clone.miss, node.miss)
-        assert.equal(clone.deny, node.deny)
-
-        assert.deepEqual(clone.in, new Set())
-        assert.deepEqual(clone.out, new Set())
-        assert.equal(clone.miss, false)
-        assert.equal(clone.deny, false)
+    describe('.decode', () => {
+      it('returns a Node from byte encoding', async () => {
+        const bytes = base32.decode('burrgs3uamnxxk5eamzsgk3tjmvspiz3nnfzxg2lom72a')
+        const node = await Node.decode(bytes)
+        assert.deepEqual(node, newNode)
       })
+    })
 
-      it('returns a cloned mutated node', () => {
-        const node = mutatedNode
-        const clone = Node.clone(node)
-        assert.deepEqual(clone, node)
-        assert.notEqual(clone.in, node.in)
-        assert.notEqual(clone.out, node.out)
-        assert.equal(clone.miss, node.miss)
-        assert.equal(clone.deny, node.deny)
-
-        assert.deepEqual(clone.in, new Set(['3']))
-        assert.deepEqual(clone.out, new Set(['1']))
-        assert.equal(clone.miss, false)
-        assert.equal(clone.deny, false)
+    describe('.exists', () => {
+      it('returns true if the node is not missing or denied', () => {
+        const node = Node.init()
+        assert.equal(Node.exists(node), true)
       })
-
-      it('returns a cloned missing node', () => {
-        const node = missNode
-        const clone = Node.clone(node)
-        assert.deepEqual(clone, node)
-        assert.notEqual(clone.in, node.in)
-        assert.notEqual(clone.out, node.out)
-        assert.equal(clone.miss, node.miss)
-        assert.equal(clone.deny, node.deny)
-
-        assert.deepEqual(clone.in, new Set())
-        assert.deepEqual(clone.out, new Set())
-        assert.equal(clone.miss, true)
-        assert.equal(clone.deny, false)
+      it('returns false if the node is missing', () => {
+        const node = Node.init()
+        node.missing = true
+        assert.equal(Node.exists(node), false)
       })
-
-      it('returns a cloned denied node', () => {
-        const node = denyNode
-        const clone = Node.clone(node)
-        assert.deepEqual(clone, node)
-        assert.notEqual(clone.in, node.in)
-        assert.notEqual(clone.out, node.out)
-        assert.equal(clone.miss, node.miss)
-        assert.equal(clone.deny, node.deny)
-
-        assert.deepEqual(clone.in, new Set())
-        assert.deepEqual(clone.out, new Set())
-        assert.equal(clone.miss, false)
-        assert.equal(clone.deny, true)
+      it('returns false if the node is denied', () => {
+        const node = Node.init()
+        node.denied = true
+        assert.equal(Node.exists(node), false)
       })
     })
   })
@@ -116,8 +87,22 @@ describe('Graph Node', () => {
       const node = Node.init()
       assert.ok(node.in)
       assert.ok(node.out)
-      assert.equal(node.miss, false)
-      assert.equal(node.deny, false)
+      assert.equal(node.missing, false)
+      assert.equal(node.denied, false)
+      assert.ok(node.encode)
+    })
+
+    describe('.encode', () => {
+      it('returns a Block with a value of NodeValue', async () => {
+        const node = Node.init()
+        const block: Block<NodeValue> = await node.encode()
+        assert.equal(Array.isArray(block.value.out), true)
+        assert.equal(Array.isArray(block.value.in), true)
+        assert.equal(block.value.out.length === 0, true)
+        assert.equal(block.value.in.length === 0, true)
+        assert.equal(block.value.missing, false)
+        assert.equal(block.value.denied, false)
+      })
     })
   })
 })
