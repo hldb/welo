@@ -1,7 +1,3 @@
 {
-  "exclude": [
-    "test",
-    "src/mods/keychain/libp2p-keychain",
-    "src/replicator"
-  ]
+  "exclude": ["test", "src/replicator"]
 }

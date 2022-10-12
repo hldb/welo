@@ -2,9 +2,9 @@
  * this folder is just a copy of js-libp2p's keychain
  */
 
-import { KeyChain, KeyChainInit } from './libp2p-keychain/index.js'
-import { Components } from '@libp2p/interfaces/components.js'
-import type { StorageReturn } from '../storage.js'
+import { KeyChain, KeyChainInit } from 'libp2p/keychain'
+import { Components } from '@libp2p/components'
+import type { StorageReturn } from './storage.js'
 
 export const defaultOptions = {
   // See https://cryptosense.com/parametesr-choice-for-pbkdf2/
@@ -22,7 +22,10 @@ class Keychain extends KeyChain {
     super(components as Components, defaultOptions)
   }
 
-  static async create (datastore: StorageReturn, options?: KeyChainInit): Promise<Keychain> {
+  static async create (
+    datastore: StorageReturn,
+    options?: KeyChainInit
+  ): Promise<Keychain> {
     // keychain unresponsive if datastore isnt open for initialization
     await datastore.open()
     const keychain = new Keychain(datastore, options)
