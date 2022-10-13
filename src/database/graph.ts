@@ -18,7 +18,7 @@ const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
   bucketSize: 3
 }
 
-const loader = (blocks: Blocks): Loader => ({
+export const loader = (blocks: Blocks): Loader => ({
   get: async (cid: CID): Promise<Uint8Array> =>
     await blocks.get(cid).then((b) => b.bytes),
   put: async (cid: CID, bytes: Uint8Array): Promise<void> => {
@@ -27,7 +27,7 @@ const loader = (blocks: Blocks): Loader => ({
   }
 })
 
-const loadHashMap = async <V>(blocks: Blocks, cid?: CID): Promise<HashMap<V>> =>
+export const loadHashMap = async <V>(blocks: Blocks, cid?: CID): Promise<HashMap<V>> =>
   cid != null
     ? await load(loader(blocks), cid, hashmapOptions)
     : await create(loader(blocks), hashmapOptions)
@@ -86,7 +86,7 @@ export class Graph extends Playable {
   readonly events: EventEmitter
   readonly queue: PQueue
 
-  constructor ({ root, blocks }: { root?: Root, blocks: Blocks }) {
+  constructor ({ blocks, root }: { blocks: Blocks, root?: Root }) {
     const starting = async (): Promise<void> => {
       this._state = await getState(blocks, root)
       this._root = getRoot(this._state)
@@ -102,6 +102,10 @@ export class Graph extends Playable {
     this._state = null
     this.events = new EventEmitter()
     this.queue = new PQueue({ concurrency: 1 })
+  }
+
+  clone (): Graph {
+    return new Graph({ blocks: this.blocks, root: this._root ?? undefined })
   }
 
   get root (): Root {
@@ -144,11 +148,11 @@ export class Graph extends Playable {
     return await this.nodes.has(cidstring(cid))
   }
 
-  async get (cid: CID): Promise<Node | undefined> {
+  async get (cid: CID | string): Promise<Node | undefined> {
     return await get(this.state, cidstring(cid))
   }
 
-  async has (cid: CID): Promise<boolean> {
+  async has (cid: CID | string): Promise<boolean> {
     return Node.exists(await this.get(cid))
   }
 

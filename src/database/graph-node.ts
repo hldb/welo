@@ -2,6 +2,8 @@ import { Block } from 'multiformats/block'
 
 import { Blocks } from '../mods/blocks.js'
 
+export type Edge = 'out' | 'in'
+
 export interface NodeValue {
   in: string[]
   out: string[]

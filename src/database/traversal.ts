@@ -5,10 +5,12 @@ import { compare } from 'uint8arrays/compare'
 
 import { Blocks } from '../mods/blocks.js'
 import { cidstring, parsedcid } from '../utils/index.js'
-import { Graph, Edge } from './graph.js'
+import { Graph } from './graph.js'
 import { EntryInstance, EntryStatic } from '../entry/interface.js'
 import { IdentityStatic } from '../identity/interface.js'
 import { AccessInstance } from '../access/interface.js'
+import { Edge } from './graph-node.js'
+import { HashMap } from 'ipld-hashmap'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order
@@ -53,16 +55,18 @@ export function dagLinks ({
   const seen: Set<string> = new Set()
 
   const links: LinksFunc = async function (entry: EntryInstance<any>) {
-    if (!await access.canAppend(entry)) {
+    if (!(await access.canAppend(entry))) {
       return []
     }
 
     const cids: CID[] = []
     for (const cid of entry.next) {
       const str = cidstring(cid)
-      if (seen.has(str) || graph.has(str)) continue
 
+      if (seen.has(str)) continue
       seen.add(str)
+
+      if (await graph.has(str)) continue
       cids.push(cid)
     }
 
@@ -79,7 +83,7 @@ export function graphLinks ({
   edge
 }: {
   graph: Graph
-  tails: Set<string>
+  tails: HashMap<null>
   edge: Edge
 }): LinksFunc {
   const seen: Set<string> = new Set()
@@ -88,11 +92,11 @@ export function graphLinks ({
     const str = cidstring(entry.cid)
 
     // do not traverse past the tails
-    if (tails.has(str)) {
+    if (await tails.has(str)) {
       return []
     }
 
-    const node = graph.get(str)
+    const node = await graph.get(str)
     if (node === undefined) {
       throw new Error('graphLinks: graph has entered corrupted state')
     }
@@ -101,9 +105,10 @@ export function graphLinks ({
 
     const cids: CID[] = []
     for (const str of adjacents) {
-      if (seen.has(str) || !graph.has(str)) continue
-
+      if (seen.has(str)) continue
       seen.add(str)
+
+      if (!await graph.has(str)) continue
       cids.push(parsedcid(str))
     }
 
@@ -147,9 +152,11 @@ export async function traverser ({
     entries.forEach((entry) => result.push(entry))
 
     // get next cids; links function must only return unseen cids so there are no duplicate cids in nexts
-    const nexts: CID[] = await Promise.all(entries.map(async (entry) => await links(entry)))
+    const nexts: CID[] = await Promise.all(
+      entries.map(async (entry) => await links(entry))
+    )
       // flatten array of links which is an array of CIDs
-      .then(arr => arr.flatMap(links => links).sort(sortCids))
+      .then((arr) => arr.flatMap((links) => links).sort(sortCids))
 
     if (nexts.length > 0) {
       // order(nexts)

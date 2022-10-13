@@ -1,11 +1,8 @@
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs'
+import { CID } from 'multiformats/cid'
+import { start } from '@libp2p/interfaces/startable'
 
-import { Blocks } from '../src/mods/blocks.js'
-import { Entry } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
-import { Keyvalue } from '../src/manifest/store/keyvalue.js'
-import { StaticAccess } from '../src/manifest/access/static.js'
-import { Graph } from '../src/database/graph.js'
 import {
   sortCids,
   sortEntries,
@@ -15,9 +12,15 @@ import {
   graphLinks,
   traverser
 } from '../src/database/traversal.js'
-import { cidstring, defaultManifest } from '../src/util.js'
-import { initRegistry } from '../src/registry.js'
 
+import { Blocks } from '../src/mods/blocks.js'
+import { Entry } from '../src/entry/default/index.js'
+import { Identity } from '../src/identity/default/index.js'
+import { Keyvalue } from '../src/store/keyvalue/index.js'
+import { StaticAccess } from '../src/access/static/index.js'
+import { Graph, loadHashMap } from '../src/database/graph.js'
+import { cidstring, defaultManifest } from '../src/utils/index.js'
+import { initRegistry } from '../src/registry/index.js'
 import {
   getIpfs,
   getIdentity,
@@ -25,9 +28,8 @@ import {
   concurrentEntries,
   getStorageReturn
 } from './utils/index.js'
-import { IPFS } from 'ipfs'
-import { Manifest } from '../src/manifest/index.js'
-import { CID } from 'multiformats/cid.js'
+import { Manifest } from '../src/manifest/default/index.js'
+import { HashMap } from 'ipld-hashmap'
 
 const registry = initRegistry()
 
@@ -61,18 +63,19 @@ describe('traversal', () => {
     storage = got.storage
     identity = got.identity
 
-    access = await StaticAccess.open({
+    access = new StaticAccess({
       manifest: await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { type: StaticAccess.type, write: [identity.id] }
+        access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
       })
     })
-    noaccess = await StaticAccess.open({
+    noaccess = new StaticAccess({
       manifest: await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { type: StaticAccess.type, write: ['nobody'] }
+        access: { protocol: StaticAccess.protocol, config: { write: ['nobody'] } }
       })
     })
+    await start(access, noaccess)
 
     entries[0] = await Entry.create({
       identity,
@@ -139,117 +142,138 @@ describe('traversal', () => {
   })
 
   describe('dagLinks', () => {
-    it('returns an array of cids from the dag node', () => {
-      const graph = Graph.init()
+    it('returns an array of cids from the dag node', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
       const links = dagLinks({ graph, access })
       const entry = entries[1]
 
-      assert.deepEqual(links(entry), [entries[0].cid])
+      assert.deepEqual(await links(entry), [entries[0].cid])
     })
 
-    it('returns an empty array if there are no links in the dag node', () => {
-      const graph = Graph.init()
+    it('returns an empty array if there are no links in the dag node', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
       const links = dagLinks({ graph, access })
       const entry = entries[0]
 
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [])
     })
 
-    it('returns an empty array if entry cannot be appended', () => {
-      const graph = Graph.init()
+    it('returns an empty array if entry cannot be appended', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
       const links = dagLinks({ graph, access: noaccess })
       const entry = entries[1]
 
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [])
     })
 
-    it('returns an empty array if all cids have been seen', () => {
-      const graph = Graph.init()
+    it('returns an empty array if all cids have been seen', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
       const links = dagLinks({ graph, access })
       const entry = entries[1]
 
-      assert.deepEqual(links(entry), [entries[0].cid])
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [entries[0].cid])
+      assert.deepEqual(await links(entry), [])
     })
 
-    it('returns an empty array if all cids are already added to the graph', () => {
-      const graph = Graph.init()
+    it('returns an empty array if all cids are already added to the graph', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
       const links = dagLinks({ graph, access })
       const entry = entries[1]
 
-      Graph.add(graph, entry.cid, entry.next)
-      Graph.add(graph, entries[0].cid, [])
+      await graph.add(entry.cid, entry.next)
+      await graph.add(entries[0].cid, [])
 
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [])
     })
   })
 
   describe('graphLinks', () => {
-    it('returns an array if cids from the graph node', () => {
-      const graph = Graph.init()
-      const tails: Set<string> = new Set()
+    it('returns an array if cids from the graph node', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
+      const tails: HashMap<null> = await loadHashMap(blocks)
       const edge = 'out'
       const entry = entries[1]
 
-      Graph.add(graph, entries[0].cid, [])
-      Graph.add(graph, entries[1].cid, [entries[0].cid])
+      await graph.add(entries[0].cid, [])
+      await graph.add(entries[1].cid, [entries[0].cid])
 
       const links = graphLinks({ graph, tails, edge })
 
-      assert.deepEqual(links(entry), [entries[0].cid])
+      assert.deepEqual(await links(entry), [entries[0].cid])
     })
 
-    it('returns an emtpy array if graph node edge is empty', () => {
-      const graph = Graph.init()
-      const tails: Set<string> = new Set()
+    it('returns an emtpy array if graph node edge is empty', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
+      const tails: HashMap<null> = await loadHashMap(blocks)
       const edge = 'out'
       const entry = entries[0]
 
-      Graph.add(graph, entries[0].cid, [])
-      Graph.add(graph, entries[1].cid, [entries[0].cid])
+      await graph.add(entries[0].cid, [])
+      await graph.add(entries[1].cid, [entries[0].cid])
 
       const links = graphLinks({ graph, tails, edge })
 
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [])
     })
 
-    it('returns an array of cids for a specified direction', () => {
-      const graph = Graph.init()
-      const tails: Set<string> = new Set()
+    it('returns an array of cids for a specified direction', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
+      const tails: HashMap<null> = await loadHashMap(blocks)
       const edge = 'in'
       const entry = entries[0]
 
-      Graph.add(graph, entries[0].cid, [])
-      Graph.add(graph, entries[1].cid, [entries[0].cid])
+      await graph.add(entries[0].cid, [])
+      await graph.add(entries[1].cid, [entries[0].cid])
 
       const links = graphLinks({ graph, tails, edge })
 
-      assert.deepEqual(links(entry), [entries[1].cid])
+      assert.deepEqual(await links(entry), [entries[1].cid])
     })
 
-    it('returns an empty array if entry cid exists in tails', () => {
-      const graph = Graph.init()
-      const tails = new Set([cidstring(entries[1].cid)])
+    it('returns an empty array if entry cid exists in tails', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
+      const tails: HashMap<null> = await loadHashMap(blocks)
+      await tails.set(cidstring(entries[1].cid), null)
       const edge = 'out'
       const entry = entries[1]
 
-      Graph.add(graph, entries[0].cid, [])
-      Graph.add(graph, entries[1].cid, [entries[0].cid])
+      await graph.add(entries[0].cid, [])
+      await graph.add(entries[1].cid, [entries[0].cid])
 
       const links = graphLinks({ graph, tails, edge })
 
-      assert.deepEqual(links(entry), [])
+      assert.deepEqual(await links(entry), [])
     })
 
-    it('throws if there is no node in graph for referenced cid', () => {
-      const graph = Graph.init()
-      const tails: Set<string> = new Set()
+    it('throws if there is no node in graph for referenced cid', async () => {
+      const graph = new Graph({ blocks })
+      await start(graph)
+
+      const tails: HashMap<null> = await loadHashMap(blocks)
       const edge = 'out'
       const entry = entries[1]
 
       const links = graphLinks({ graph, tails, edge })
 
-      assert.throws(() => links(entry))
+      await assert.rejects(async () => await links(entry))
     })
   })
 
@@ -295,9 +319,10 @@ describe('traversal', () => {
 
       const manifest = await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { type: StaticAccess.type, write: [id0.id, id1.id] }
+        access: { protocol: StaticAccess.protocol, config: { write: [id0.id, id1.id] } }
       })
-      sharedAccess = await StaticAccess.open({ manifest })
+      sharedAccess = new StaticAccess({ manifest })
+      await start(sharedAccess)
 
       stick[0] = await single(id0)([])
       stick[1] = await single(id0)([stick[0]])
@@ -367,7 +392,9 @@ describe('traversal', () => {
             }
             await Promise.all(promises)
 
-            const graph = Graph.init()
+            const graph = new Graph({ blocks })
+            await start(graph)
+
             const load = loadEntry({ blocks, Entry, Identity })
             const links = dagLinks({ graph, access: sharedAccess })
 
@@ -398,9 +425,11 @@ describe('traversal', () => {
           const topology = topologies[key]
 
           it(`yields ordered entries in a ${key} topology`, async () => {
-            const graph = Graph.init()
+            const graph = new Graph({ blocks })
+            await start(graph)
+
             for (const entry of topology) {
-              Graph.add(graph, entry.cid, entry.next)
+              await graph.add(entry.cid, entry.next)
             }
 
             const tails = graph.tails
@@ -433,9 +462,11 @@ describe('traversal', () => {
           const topology = topologies[key]
 
           it(`yields ordered entries in a ${key} topology`, async () => {
-            const graph = Graph.init()
+            const graph = new Graph({ blocks })
+            await start(graph)
+
             for (const entry of topology) {
-              Graph.add(graph, entry.cid, entry.next)
+              await graph.add(entry.cid, entry.next)
             }
 
             const tails = graph.heads
