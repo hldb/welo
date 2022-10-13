@@ -1,15 +1,20 @@
+import path from 'path'
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs'
+import { CID } from 'multiformats/cid'
+import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Replica } from '../src/database/replica.js'
 
 import { Blocks } from '../src/mods/blocks.js'
-import { Keyvalue } from '../src/manifest/store/keyvalue.js'
-import { StaticAccess } from '../src/manifest/access/static.js'
-import { Entry } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
-import { cidstring, defaultManifest } from '../src/util.js'
-import { Manifest } from '../src/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
+import { Keyvalue } from '../src/store/keyvalue/index.js'
+import { StaticAccess } from '../src/access/static/index.js'
+import { Entry } from '../src/entry/default/index.js'
+import { Identity } from '../src/identity/default/index.js'
+import { cidstring, defaultManifest } from '../src/utils/index.js'
+import { Manifest } from '../src/manifest/default/index.js'
+import { initRegistry } from '../src/registry/index.js'
+import { LevelStorage, StorageReturn } from '../src/mods/storage.js'
 
 import {
   getIpfs,
@@ -17,8 +22,7 @@ import {
   singleEntry,
   getStorageReturn
 } from './utils/index.js'
-import { IPFS } from 'ipfs'
-import { CID } from 'multiformats/cid.js'
+import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()
 
@@ -37,6 +41,8 @@ describe('Replica', () => {
     identity: Identity,
     tempIdentity: Identity
 
+  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, name))
+
   before(async () => {
     ipfs = await getIpfs()
     blocks = new Blocks(ipfs)
@@ -51,7 +57,8 @@ describe('Replica', () => {
       ...defaultManifest('name', identity, registry),
       tag: new Uint8Array()
     })
-    access = await StaticAccess.open({ manifest })
+    access = new StaticAccess({ manifest })
+    await start(access)
 
     const temp = await getIdentity()
     await temp.storage.close()
@@ -59,19 +66,15 @@ describe('Replica', () => {
   })
 
   after(async () => {
-    await replica.close()
     await storage.close()
     await ipfs.stop()
   })
 
   describe('class', () => {
-    it('exposes static properties', () => {
-      assert.ok(Replica.open)
-    })
-
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
-        replica = await Replica.open({
+        replica = new Replica({
+          Storage,
           manifest,
           blocks,
           access,
@@ -79,6 +82,7 @@ describe('Replica', () => {
           Entry,
           Identity
         })
+        await start(replica)
       })
     })
   })
@@ -95,13 +99,11 @@ describe('Replica', () => {
       assert.ok(replica.Entry)
       assert.ok(replica.Identity)
       assert.ok(replica.events)
-      assert.ok(replica._graph)
-      assert.ok(replica.close)
       assert.ok(replica.heads)
       assert.ok(replica.tails)
       assert.ok(replica.missing)
       assert.ok(replica.denied)
-      assert.ok(replica.size === 0)
+      assert.ok(replica.size)
       assert.ok(replica.traverse)
       assert.ok(replica.has)
       assert.ok(replica.known)
@@ -113,24 +115,34 @@ describe('Replica', () => {
       it('adds an entry to the replica', async () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
-        cids.push(cid)
 
         await replica.add([entry])
 
-        assert.deepEqual(replica.heads, new Set([cidstring(cid)]))
-        assert.deepEqual(replica.tails, new Set([cidstring(cid)]))
-        assert.deepEqual(replica.missing, new Set())
-        assert.deepEqual(replica.denied, new Set())
-        assert.equal(replica.size, 1)
+        assert.equal(await replica.size(), 1)
         assert.equal(await replica.has(cid), true)
         assert.equal(await replica.known(cid), true)
+        assert.equal(await replica.heads.has(cidstring(cid)), true)
+        assert.equal(await replica.heads.size(), 1)
+        assert.equal(await replica.tails.has(cidstring(cid)), true)
+        assert.equal(await replica.tails.size(), 1)
+        assert.equal(await replica.missing.size(), 0)
+        assert.equal(await replica.denied.size(), 0)
+
+        await stop(replica)
       })
 
       it('does not add entry with mismatched tag', async () => {
         const tag = new Uint8Array([7])
-        const entry = await Entry.create({ identity, tag, payload, next: [], refs: [] })
+        const entry = await Entry.create({
+          identity,
+          tag,
+          payload,
+          next: [],
+          refs: []
+        })
         const cid = entry.cid
-        const replica = await Replica.open({
+        const replica = new Replica({
+          Storage,
           manifest,
           blocks,
           access,
@@ -138,23 +150,28 @@ describe('Replica', () => {
           Entry,
           Identity
         })
+        await start(replica)
 
         await replica.add([entry])
 
-        assert.deepEqual(replica.heads, new Set())
-        assert.deepEqual(replica.tails, new Set())
-        assert.deepEqual(replica.missing, new Set())
-        assert.deepEqual(replica.denied, new Set())
-        assert.equal(replica.size, 0)
+        assert.equal(await replica.size(), 0)
         assert.equal(await replica.has(cid), false)
         assert.equal(await replica.known(cid), false)
-        await replica.close()
+        assert.equal(await replica.heads.has(cidstring(cid)), false)
+        assert.equal(await replica.heads.size(), 0)
+        assert.equal(await replica.tails.has(cidstring(cid)), false)
+        assert.equal(await replica.tails.size(), 0)
+        assert.equal(await replica.missing.size(), 0)
+        assert.equal(await replica.denied.size(), 0)
+
+        await stop(replica)
       })
 
       it('does not add entry without access', async () => {
         const entry = await singleEntry(tempIdentity)()
         const cid = entry.cid
-        const replica = await Replica.open({
+        const replica = new Replica({
+          Storage,
           manifest,
           blocks,
           access,
@@ -162,33 +179,40 @@ describe('Replica', () => {
           Entry,
           Identity
         })
+        await start(replica)
 
         await replica.add([entry])
 
-        assert.deepEqual(replica.heads, new Set())
-        assert.deepEqual(replica.tails, new Set())
-        assert.deepEqual(replica.missing, new Set())
-        assert.deepEqual(replica.denied, new Set())
-        assert.equal(replica.size, 0)
+        assert.equal(await replica.size(), 0)
         assert.equal(await replica.has(cid), false)
         assert.equal(await replica.known(cid), false)
-        await replica.close()
+        assert.equal(await replica.heads.has(cidstring(cid)), false)
+        assert.equal(await replica.heads.size(), 0)
+        assert.equal(await replica.tails.has(cidstring(cid)), false)
+        assert.equal(await replica.tails.size(), 0)
+        assert.equal(await replica.missing.size(), 0)
+        assert.equal(await replica.denied.size(), 0)
+
+        await stop(replica)
       })
     })
 
     describe('write', () => {
       it('writes an entry to the replica', async () => {
+        await start(replica)
         const entry = await replica.write(payload)
         const cid = entry.cid
         cids.push(cid)
 
-        assert.deepEqual(replica.heads, new Set([cidstring(cid)]))
-        assert.deepEqual(replica.tails, new Set([cidstring(cids[0])]))
-        assert.deepEqual(replica.missing, new Set())
-        assert.deepEqual(replica.denied, new Set())
-        assert.equal(replica.size, 2)
+        assert.equal(await replica.size(), 1)
         assert.equal(await replica.has(cid), true)
         assert.equal(await replica.known(cid), true)
+        assert.equal(await replica.heads.has(cidstring(cid)), true)
+        assert.equal(await replica.heads.size(), 1)
+        assert.equal(await replica.tails.has(cidstring(cid)), true)
+        assert.equal(await replica.tails.size(), 1)
+        assert.equal(await replica.missing.size(), 0)
+        assert.equal(await replica.denied.size(), 0)
       })
     })
 
@@ -207,7 +231,7 @@ describe('Replica', () => {
         const entries = await replica.traverse({ direction })
 
         assert.deepEqual(
-          entries.map((entry) => entry.cid, cids),
+          entries.map((entry) => entry.cid),
           cids
         )
       })

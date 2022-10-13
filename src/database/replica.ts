@@ -4,7 +4,8 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Blocks } from '../mods/blocks.js'
-import { Edge, Graph } from './graph.js'
+import { Graph } from './graph.js'
+import { Edge } from './graph-node.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 import { EntryInstance, EntryStatic } from '../entry/interface.js'
 import { ManifestInstance } from '../manifest/interface.js'
@@ -17,21 +18,27 @@ import {
   sortEntriesRev,
   traverser
 } from './traversal.js'
+import { StorageFunc, StorageReturn } from '../mods/storage.js'
+import all from 'it-all'
+import { parsedcid } from '../utils/index.js'
 
 export class Replica extends Playable {
   readonly manifest: ManifestInstance<any>
-  // readonly storage: StorageReturn;
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
   readonly Entry: EntryStatic<any>
   readonly Identity: IdentityStatic<any>
-  readonly graph: Graph
   readonly events: EventEmitter
+
+  Storage: StorageFunc
+
+  _storage: StorageReturn | null
+  _graph: Graph | null
 
   constructor ({
     manifest,
-    // storage,
+    Storage,
     blocks,
     access,
     identity,
@@ -39,7 +46,7 @@ export class Replica extends Playable {
     Identity
   }: {
     manifest: ManifestInstance<any>
-    // storage: StorageReturn;
+    Storage: StorageFunc
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
@@ -47,58 +54,88 @@ export class Replica extends Playable {
     Identity: IdentityStatic<any>
   }) {
     const starting = async (): Promise<void> => {
-      await start(this.graph)
+      this._storage = await this.Storage('replica')
+      await this._storage.open()
+
+      // const rootHash = await this._storage.get()
+      // const root = {}
+
+      this._graph = new Graph({ blocks, root: undefined })
+      await start(this._graph)
     }
     const stopping = async (): Promise<void> => {
-      await stop(this.graph)
+      await stop(this._graph)
+      await this.storage.close()
+
+      this._storage = null
+      this._graph = null
     }
     super({ starting, stopping })
 
     this.manifest = manifest
-    // this.storage = storage // storage isnt used yet as states are not being persisted
     this.blocks = blocks
     this.access = access
     this.identity = identity
     this.Entry = Entry
     this.Identity = Identity
-    this.graph = new Graph({ storage })
+
+    this.Storage = Storage
+
+    this._storage = null
+    this._graph = null
 
     this.events = new EventEmitter()
   }
 
-  async close (): Promise<void> {
-    // await this.storage.close()
+  private get storage (): StorageReturn {
+    if (!this.isStarted()) {
+      throw new Error()
+    }
+
+    return this._storage as StorageReturn
   }
 
-  get heads (): Set<string> {
+  private get graph (): Graph {
+    if (!this.isStarted()) {
+      throw new Error()
+    }
+
+    return this._graph as Graph
+  }
+
+  get heads (): typeof this.graph.heads {
     return this.graph.heads
   }
 
-  get tails (): Set<string> {
+  get tails (): typeof this.graph.tails {
     return this.graph.tails
   }
 
-  get missing (): Set<string> {
+  get missing (): typeof this.graph.missing {
     return this.graph.missing
   }
 
-  get denied (): Set<string> {
+  get denied (): typeof this.graph.denied {
     return this.graph.denied
   }
 
-  get size (): number {
-    return this.graph.size
+  get size (): typeof this.graph.size {
+    return this.graph.size.bind(this.graph)
   }
 
-  async traverse ({ direction } = { direction: 'descend' }): Promise<Array<EntryInstance<any>>> {
+  async traverse (
+    { direction } = { direction: 'descend' }
+  ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
     const Entry = this.Entry
     const Identity = this.Identity
-    const graph = Graph.clone(this.graph)
+
+    const graph = this.graph.clone()
+    await start(graph)
 
     const headsAndTails = [graph.heads, graph.tails]
 
-    let edge: Edge, orderFn
+    let edge: Edge, orderFn: typeof sortEntries | typeof sortEntriesRev
     if (direction === 'descend') {
       edge = 'out'
       orderFn = sortEntries
@@ -113,7 +150,7 @@ export class Replica extends Playable {
     // todo: less wordy way to assign heads and tails from direction
     const [heads, tails] = headsAndTails
 
-    const cids = Array.from(heads).map((string) => CID.parse(string))
+    const cids = (await all(heads.keys())).map(parsedcid)
     const load = loadEntry({ blocks, Entry, Identity })
     const links = graphLinks({ graph, tails, edge })
 
@@ -121,11 +158,11 @@ export class Replica extends Playable {
   }
 
   async has (cid: CID | string): Promise<boolean> {
-    return this.graph.has(cid)
+    return await this.graph.has(cid)
   }
 
   async known (cid: CID | string): Promise<boolean> {
-    return this.graph.known(cid)
+    return await this.graph.known(cid)
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
@@ -138,9 +175,9 @@ export class Replica extends Playable {
       await this.blocks.put(entry.block)
 
       if (await this.access.canAppend(entry)) {
-        Graph.add(this.graph, entry.cid, entry.next)
+        await this.graph.add(entry.cid, entry.next)
       } else {
-        Graph.deny(this.graph, entry.cid)
+        await this.graph.deny(entry.cid)
       }
     }
     this.events.emit('update')
@@ -151,7 +188,7 @@ export class Replica extends Playable {
       identity: this.identity,
       tag: this.manifest.getTag,
       payload,
-      next: Array.from(this.heads).map((string) => CID.parse(string)),
+      next: (await all(this.heads.keys())).map(string => CID.parse(string)),
       refs: [] // refs are empty for now
     })
 
