@@ -12,7 +12,7 @@
     "exports-keychain": "json -I -f ./node_modules/libp2p/package.json -e 'this.exports[\"./keychain\"] = { \"types\": \"./dist/src/keychain/index.d.ts\", \"import\": \"./dist/src/keychain/index.js\" }'",
     "build": "tsc",
     "test": "c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json ; npm run clean",
-    "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop && rm -rf test/temp"
+    "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop ; rm -rf test/temp"
   },
   "repository": {
     "type": "git",
