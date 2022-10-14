@@ -11,7 +11,7 @@ import { Keyvalue } from '../src/store/keyvalue/index.js'
 import { StaticAccess } from '../src/access/static/index.js'
 import { Entry } from '../src/entry/default/index.js'
 import { Identity } from '../src/identity/default/index.js'
-import { cidstring, defaultManifest } from '../src/utils/index.js'
+import { cidstring, decodedcid, defaultManifest } from '../src/utils/index.js'
 import { Manifest } from '../src/manifest/default/index.js'
 import { initRegistry } from '../src/registry/index.js'
 import { LevelStorage, StorageReturn } from '../src/mods/storage.js'
@@ -23,6 +23,7 @@ import {
   getStorageReturn
 } from './utils/index.js'
 import { tempPath } from './utils/constants.js'
+import { Key } from 'interface-datastore'
 
 const registry = initRegistry()
 
@@ -241,6 +242,50 @@ describe('Replica', () => {
         const promise = replica.traverse({ direction })
 
         await assert.rejects(promise)
+      })
+    })
+
+    describe('data persistence', () => {
+      it('writes the graph root to disk on update', async () => {
+        const rootHashKey = new Key('rootHash')
+        const block = await blocks.encode({ value: replica.graph.root })
+
+        await stop(replica)
+
+        const storage = await Storage('replica')
+        await storage.open()
+
+        assert.equal(await storage.has(rootHashKey), true)
+
+        assert.deepEqual(decodedcid(await storage.get(rootHashKey)), block.cid)
+        await storage.close()
+      })
+
+      it('loads the graph root from disk on start', async () => {
+        const entry = await singleEntry(identity)()
+        const cid = entry.cid
+        const replica = new Replica({
+          Storage,
+          manifest,
+          blocks,
+          access,
+          identity,
+          Entry,
+          Identity
+        })
+        await start(replica)
+
+        assert.equal(await replica.size(), 1)
+        assert.equal(await replica.has(cid), true)
+        assert.equal(await replica.known(cid), true)
+        assert.equal(await replica.heads.has(cidstring(cid)), true)
+        assert.equal(await replica.heads.size(), 1)
+        assert.equal(await replica.tails.has(cidstring(cid)), true)
+        assert.equal(await replica.tails.size(), 1)
+        assert.equal(await replica.missing.size(), 0)
+        assert.equal(await replica.denied.size(), 0)
+
+        await stop(replica)
       })
     })
   })

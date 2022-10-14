@@ -1,10 +1,12 @@
 import EventEmitter from 'events'
 import { CID } from 'multiformats/cid'
+import { Block } from 'multiformats/block'
+import { Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Blocks } from '../mods/blocks.js'
-import { Graph } from './graph.js'
+import { Graph, Root } from './graph.js'
 import { Edge } from './graph-node.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 import { EntryInstance, EntryStatic } from '../entry/interface.js'
@@ -20,7 +22,9 @@ import {
 } from './traversal.js'
 import { StorageFunc, StorageReturn } from '../mods/storage.js'
 import all from 'it-all'
-import { parsedcid } from '../utils/index.js'
+import { decodedcid, encodedcid, parsedcid } from '../utils/index.js'
+
+const rootHashKey = new Key('rootHash')
 
 export class Replica extends Playable {
   readonly manifest: ManifestInstance<any>
@@ -53,23 +57,27 @@ export class Replica extends Playable {
     Entry: EntryStatic<any>
     Identity: IdentityStatic<any>
   }) {
+    const onUpdate = async (): Promise<void> => await this.setRoot(this.graph.root)
     const starting = async (): Promise<void> => {
       this._storage = await this.Storage('replica')
       await this._storage.open()
 
-      // const rootHash = await this._storage.get()
-      // const root = {}
+      const root: Root | undefined = await this.getRoot().catch(() => undefined)
 
-      this._graph = new Graph({ blocks, root: undefined })
+      this._graph = new Graph({ blocks, root })
+
+      this.events.on('update', onUpdate)
       await start(this._graph)
     }
     const stopping = async (): Promise<void> => {
       await stop(this._graph)
+      this.events.removeListener('update', onUpdate)
       await this.storage.close()
 
       this._storage = null
       this._graph = null
     }
+
     super({ starting, stopping })
 
     this.manifest = manifest
@@ -87,20 +95,20 @@ export class Replica extends Playable {
     this.events = new EventEmitter()
   }
 
-  private get storage (): StorageReturn {
-    if (!this.isStarted()) {
+  get storage (): StorageReturn {
+    if (this._storage === null) {
       throw new Error()
     }
 
-    return this._storage as StorageReturn
+    return this._storage
   }
 
-  private get graph (): Graph {
-    if (!this.isStarted()) {
+  get graph (): Graph {
+    if (this._graph === null) {
       throw new Error()
     }
 
-    return this._graph as Graph
+    return this._graph
   }
 
   get heads (): typeof this.graph.heads {
@@ -121,6 +129,26 @@ export class Replica extends Playable {
 
   get size (): typeof this.graph.size {
     return this.graph.size.bind(this.graph)
+  }
+
+  async getRoot (): Promise<Root> {
+    try {
+      const rootHash = await this.storage.get(rootHashKey)
+      const block: Block<Root> = await this.blocks.get(decodedcid(rootHash))
+      return block.value
+    } catch (e) {
+      throw new Error('failed to get root')
+    }
+  }
+
+  async setRoot (root: Root): Promise<void> {
+    try {
+      const block = await this.blocks.encode({ value: root })
+      await this.blocks.put(block)
+      await this._storage?.put(rootHashKey, encodedcid(block.cid))
+    } catch (e) {
+      throw new Error('failed to set root')
+    }
   }
 
   async traverse (
@@ -180,6 +208,7 @@ export class Replica extends Playable {
         await this.graph.deny(entry.cid)
       }
     }
+
     this.events.emit('update')
   }
 

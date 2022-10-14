@@ -40,7 +40,7 @@ interface State {
   tails: HashMap<null> // used as sets
 }
 
-interface Root {
+export interface Root {
   nodes: CID
   missing: CID
   denied: CID
