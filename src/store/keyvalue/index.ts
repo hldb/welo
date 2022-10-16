@@ -12,7 +12,9 @@ import { HashMap } from 'ipld-hashmap'
 import { Key } from 'interface-datastore'
 import { loadHashMap } from '../../database/graph.js'
 import { Blocks } from '../../mods/blocks.js'
-import { decodedcid } from '../../utils/index.js'
+import { decodedcid, encodedcid } from '../../utils/index.js'
+
+const indexesKey = new Key('indexes')
 
 @Extends<StoreStatic>()
 export class Keyvalue extends Playable implements StoreInstance {
@@ -53,7 +55,7 @@ export class Keyvalue extends Playable implements StoreInstance {
       this._storage = await Storage('store')
       await this._storage.open()
 
-      const indexesCID = await this.storage.get(new Key('indexes')).catch(() => undefined)
+      const indexesCID = await this.storage.get(indexesKey).catch(() => undefined)
       this._indexes = await loadHashMap(blocks, indexesCID === undefined ? undefined : decodedcid(indexesCID))
 
       const indexCID = await this.indexes.get('latest')
@@ -113,6 +115,8 @@ export class Keyvalue extends Playable implements StoreInstance {
     for await (const entry of await this.replica.traverse()) {
       await reducer(index, entry)
     }
+    await this.indexes.set('latest', encodedcid(index.cid))
+    await this.storage.put(indexesKey, encodedcid(this.indexes.cid))
     this._index = index
     return index
   }

@@ -52,6 +52,8 @@ describe('Keyvalue', () => {
 
   describe('instance', () => {
     let keyvalue: Keyvalue, replica: Replica, manifest: Manifest, access: StaticAccess
+    const key = 'key'
+    const value = 0
 
     before(async () => {
       manifest = await Manifest.create({
@@ -93,9 +95,6 @@ describe('Keyvalue', () => {
     })
 
     describe('update', () => {
-      const key = 'key'
-      const value = 0
-
       it('sets a key value pair to value', async () => {
         const payload = keyvalue.creators.put(key, value)
         const entry = await replica.write(payload)
@@ -104,6 +103,16 @@ describe('Keyvalue', () => {
 
         assert.deepEqual(entry.payload, payload)
         assert.equal(await keyvalue.selectors.get(index)(key), value)
+      })
+
+      it('deletes a key value pair', async () => {
+        const payload = keyvalue.creators.del(key)
+        const entry = await replica.write(payload)
+
+        const index = await keyvalue.latest()
+
+        assert.deepEqual(entry.payload, payload)
+        assert.equal(await keyvalue.selectors.get(index)(key), undefined)
       })
 
       it('updates a key value pair to new value', async () => {
@@ -115,15 +124,16 @@ describe('Keyvalue', () => {
         assert.deepEqual(entry.payload, payload)
         assert.equal(await keyvalue.selectors.get(index)(key), value + 1)
       })
+    })
 
-      it('deletes a key value pair', async () => {
-        const payload = keyvalue.creators.del(key)
-        const entry = await replica.write(payload)
+    describe('reading persisted state', () => {
+      it('can read persisted keyvalue state', async () => {
+        await stop(keyvalue)
+        await start(keyvalue)
 
-        const index = await keyvalue.latest()
+        const index = keyvalue.index
 
-        assert.deepEqual(entry.payload, payload)
-        assert.equal(await keyvalue.selectors.get(index)(key), undefined)
+        assert.equal(await keyvalue.selectors.get(index)(key), value + 1)
       })
     })
   })

@@ -33,10 +33,7 @@ export const creators = {
 }
 
 export const selectors = {
-  get: (state: StateMap) => async (key: string) => {
-    const value = await state.get(key)
-    return value === deleted ? undefined : value
-  }
+  get: (state: StateMap) => async (key: string) => await state.get(key) ?? undefined
 }
 
 export type StateMap = HashMap<any>
@@ -46,9 +43,6 @@ export const init = async (blocks: Blocks): Promise<StateMap> => await loadHashM
 interface EntryValue extends EntryData {
   payload: Put | Del
 }
-
-// hack for now
-const deleted = '__deleted__'
 
 export async function reducer (
   state: StateMap,
@@ -66,7 +60,7 @@ export async function reducer (
         await state.set(key, value)
         break
       case ops.DEL:
-        await state.set(key, deleted) // set to undefined so we know this key is handled
+        await state.set(key, null) // set to undefined so we know this key is handled
         break
       default:
         break
