@@ -1,6 +1,7 @@
+import path from 'path'
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
-import { start } from '@libp2p/interfaces/startable'
+import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Keyvalue } from '../src/store/keyvalue/index.js'
 
@@ -13,6 +14,8 @@ import { initRegistry } from '../src/registry/index.js'
 import { getIpfs, getIdentity } from './utils/index.js'
 import { Manifest } from '../src/manifest/default/index.js'
 import { defaultManifest } from '../src/utils/index.js'
+import { LevelStorage, StorageReturn } from '../src/mods/storage.js'
+import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()
 
@@ -22,8 +25,9 @@ registry.entry.add(Entry)
 registry.identity.add(Identity)
 
 describe('Keyvalue', () => {
-  let ipfs: IPFS, blocks: Blocks, identity: Identity, keyvalue: Keyvalue
+  let ipfs: IPFS, blocks: Blocks, identity: Identity
   const expectedProtocol = '/opal/store/keyvalue'
+  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, name))
 
   before(async () => {
     ipfs = await getIpfs()
@@ -47,6 +51,37 @@ describe('Keyvalue', () => {
   })
 
   describe('instance', () => {
+    let keyvalue: Keyvalue, replica: Replica, manifest: Manifest, access: StaticAccess
+
+    before(async () => {
+      manifest = await Manifest.create({
+        ...defaultManifest('name', identity, registry),
+        access: {
+          protocol: StaticAccess.protocol,
+          config: { write: [identity.id] }
+        }
+      })
+      access = new StaticAccess({ manifest })
+      await start(access)
+      replica = new Replica({
+        Storage,
+        manifest,
+        blocks,
+        access,
+        identity,
+        Entry,
+        Identity
+      })
+      await start(replica)
+      keyvalue = new Keyvalue({ manifest, blocks, replica, Storage })
+      await start(keyvalue)
+    })
+
+    after(async () => {
+      await stop(keyvalue)
+      await stop(replica)
+    })
+
     it('exposes instance properties', () => {
       assert.ok(keyvalue.start)
       assert.ok(keyvalue.stop)
@@ -58,31 +93,8 @@ describe('Keyvalue', () => {
     })
 
     describe('update', () => {
-      let replica: Replica, manifest: Manifest, access: StaticAccess
       const key = 'key'
       const value = 0
-
-      before(async () => {
-        manifest = await Manifest.create({
-          ...defaultManifest('name', identity, registry),
-          access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
-        })
-        access = new StaticAccess({ manifest })
-        await start(access)
-        replica = new Replica({
-          manifest,
-          blocks,
-          access,
-          identity,
-          Entry,
-          Identity
-        })
-        await start(replica)
-      })
-
-      after(async () => {
-        await replica.close()
-      })
 
       it('sets a key value pair to value', async () => {
         const payload = keyvalue.creators.put(key, value)
@@ -91,7 +103,7 @@ describe('Keyvalue', () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.selectors.get(index)(key), value)
+        assert.equal(await keyvalue.selectors.get(index)(key), value)
       })
 
       it('updates a key value pair to new value', async () => {
@@ -101,7 +113,7 @@ describe('Keyvalue', () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.selectors.get(index)(key), value + 1)
+        assert.equal(await keyvalue.selectors.get(index)(key), value + 1)
       })
 
       it('deletes a key value pair', async () => {
@@ -111,7 +123,7 @@ describe('Keyvalue', () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(keyvalue.selectors.get(index)(key), undefined)
+        assert.equal(await keyvalue.selectors.get(index)(key), undefined)
       })
     })
   })

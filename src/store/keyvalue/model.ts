@@ -1,4 +1,7 @@
+import { HashMap } from 'ipld-hashmap'
+import { loadHashMap } from '../../database/graph.js'
 import { EntryData, EntryInstance } from '../../entry/interface.js'
+import { Blocks } from '../../mods/blocks.js'
 
 const PUT: 'PUT' = 'PUT'
 const DEL: 'DEL' = 'DEL'
@@ -30,31 +33,40 @@ export const creators = {
 }
 
 export const selectors = {
-  get: (state: StateMap) => (key: string) => state.get(key)
+  get: (state: StateMap) => async (key: string) => {
+    const value = await state.get(key)
+    return value === deleted ? undefined : value
+  }
 }
 
-export type StateMap = Map<string, any>
+export type StateMap = HashMap<any>
 
-export const init = (): StateMap => new Map()
+export const init = async (blocks: Blocks): Promise<StateMap> => await loadHashMap(blocks)
 
 interface EntryValue extends EntryData {
   payload: Put | Del
 }
 
-export function reducer (state: StateMap, entry: EntryInstance<EntryValue>): StateMap {
+// hack for now
+const deleted = '__deleted__'
+
+export async function reducer (
+  state: StateMap,
+  entry: EntryInstance<EntryValue>
+): Promise<StateMap> {
   try {
     const { op, key, value } = entry.payload
 
-    if (state.has(key)) {
+    if (await state.has(key)) {
       return state
     }
 
     switch (op) {
       case ops.PUT:
-        state.set(key, value)
+        await state.set(key, value)
         break
       case ops.DEL:
-        state.set(key, undefined) // set to undefined so we know this key is handled
+        await state.set(key, deleted) // set to undefined so we know this key is handled
         break
       default:
         break

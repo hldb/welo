@@ -1,11 +1,15 @@
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
 import { Replica } from '../database/replica'
 import { ManifestInstance } from '../manifest/interface'
+import { Blocks } from '../mods/blocks'
+import { StorageFunc } from '../mods/storage'
 import { Registrant } from '../registry/registrant'
 
 export interface Props {
   manifest: ManifestInstance<any>
+  blocks: Blocks
   replica: Replica
+  Storage: StorageFunc
 }
 
 export type Creator = (...args: any[]) => any
@@ -23,5 +27,5 @@ export interface StoreInstance extends Startable {
 }
 
 export interface StoreStatic extends Registrant {
-  new(props: Props): StoreInstance
+  new (props: Props): StoreInstance
 }
