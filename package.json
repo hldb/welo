@@ -11,7 +11,7 @@
     "format": "prettier -w src test && eslint --fix src test",
     "exports-keychain": "json -I -f ./node_modules/libp2p/package.json -e 'this.exports[\"./keychain\"] = { \"types\": \"./dist/src/keychain/index.d.ts\", \"import\": \"./dist/src/keychain/index.js\" }'",
     "build": "tsc",
-    "test": "c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json ; npm run clean",
+    "test": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json",
     "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop ; rm -rf test/temp"
   },
   "repository": {
