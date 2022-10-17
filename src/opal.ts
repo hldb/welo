@@ -1,9 +1,11 @@
+import path from 'path'
 import EventEmitter from 'events'
 import where from 'wherearewe'
 import { IPFS } from 'ipfs'
 import { PeerId } from '@libp2p/interface-peer-id'
 import { PubSub } from '@libp2p/interface-pubsub'
-import { start } from '@libp2p/interfaces/dist/src/startable'
+import { start } from '@libp2p/interfaces/startable'
+import { base32 } from 'multiformats/bases/base32'
 
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry/index.js'
@@ -11,9 +13,14 @@ import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './utils/constants.js'
-import { dirs, DirsReturn, defaultManifest, getComponents } from './utils/index.js'
+import {
+  dirs,
+  DirsReturn,
+  defaultManifest,
+  getComponents
+} from './utils/index.js'
 import { StorageFunc, StorageReturn } from './mods/storage.js'
-import { Keychain } from './mods/keychain/index.js'
+import { Keychain } from './mods/keychain.js'
 import { Replicator } from './mods/replicator/index.js'
 import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
 import { IdentityInstance } from './identity/interface.js'
@@ -69,7 +76,9 @@ export class Opal extends Playable {
     }
     const stopping = async (): Promise<void> => {
       await Promise.all(Object.values(this._opening))
-      await Promise.all(Object.values(this.opened).map(async (db: Database) => await db.stop()))
+      await Promise.all(
+        Object.values(this.opened).map(async (db: Database) => await db.stop())
+      )
 
       this.events.emit('stop')
       this.events.removeAllListeners('opened')
@@ -122,12 +131,16 @@ export class Opal extends Playable {
       identities = storage.identities
       keychain = await Keychain.create(storage.keychain)
 
+      await storage.identities.open()
+      await storage.keychain.open()
       const Identity = this.registry.identity.star
       identity = await Identity.get({
         name: 'default',
         identities,
         keychain
       })
+      await storage.identities.close()
+      await storage.keychain.close()
     }
 
     let blocks
@@ -201,27 +214,42 @@ export class Opal extends Playable {
 
     const components = getComponents(this.registry, manifest)
 
-    // this will return a duplicate instance of the identity (not epic) until the instances cache is used by Identity.get
+    let identity: IdentityInstance<any>
+    if (options.identity != null) {
+      identity = options.identity
+    } else if (this.identity != null) {
+      identity = this.identity
+    } else {
+      throw new Error('no identity available')
+    }
 
-    const identity = options.identity != null ? options.identity : this.identity
+    let Storage: StorageFunc
+    if (options.Storage != null) {
+      Storage = options.Storage
+    } else if (Opal.Storage != null) {
+      Storage = Opal.Storage
+    } else {
+      throw new Error('no Storage available')
+    }
 
-    // const Storage = options.Storage || Opal.Storage
     // const Replicator = options.Replicator || Opal.Replicator;
 
-    // const location = path.join(this.dirs.databases, manifest.address.cid.toString(base32))
-
-    // not worrying about persistent databases for now
-    // const createStorage = name => new Storage(path.join(location, name), this.storageOps)
-    // const createStorage = () => {};
+    const dbPath = path.join(
+      this.dirs.databases,
+      manifest.address.cid.toString(base32)
+    )
+    const dbStorage = async (_path: string): Promise<StorageReturn> =>
+      await Storage(path.join(dbPath, _path))
 
     const promise = Database.open({
+      directory: dbPath,
+      Storage: dbStorage,
       manifest,
       blocks: this.blocks,
       // peerId: this.peerId,
       // pubsub: this.pubsub,
       identity,
       // Replicator,
-      // createStorage,
       ...components
     })
       .then((db) => {

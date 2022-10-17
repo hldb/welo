@@ -1,11 +1,13 @@
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
+import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
-import { Keychain } from '../src/mods/keychain/index.js'
-import { StorageReturn } from '../src/mods/storage.js'
 
-import { Blocks } from '../src/mods/blocks.js'
 import { Identity } from '../src/identity/default/index.js'
+
+import { Keychain } from '../src/mods/keychain.js'
+import { StorageReturn } from '../src/mods/storage.js'
+import { Blocks } from '../src/mods/blocks.js'
 
 import {
   getIpfs,
@@ -15,7 +17,6 @@ import {
   getStorageReturn,
   getStorage
 } from './utils/index.js'
-import { PublicKey } from 'libp2p-crypto'
 const { fixt, names } = constants
 
 const dataEmpty = new Uint8Array()
@@ -222,7 +223,9 @@ describe('Base Identity', () => {
       })
 
       it('rejects verifying signatures without a pubkey', async () => {
-        const _identity = await Identity.asIdentity({ block: identity.block }) as Identity
+        const _identity = (await Identity.asIdentity({
+          block: identity.block
+        })) as Identity
         _identity.pubkey = undefined as unknown as PublicKey
 
         const data = new Uint8Array([1])
@@ -263,7 +266,9 @@ describe('Base Identity', () => {
       })
 
       it('rejects signing data without private key', async () => {
-        const _identity = await Identity.asIdentity({ block: identity.block }) as Identity
+        const _identity = (await Identity.asIdentity({
+          block: identity.block
+        })) as Identity
         const data = dataEmpty
         const promise = _identity.sign(data)
         await assert.rejects(promise)

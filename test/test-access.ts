@@ -25,7 +25,10 @@ describe('Static Access', () => {
   const Access = StaticAccess
   const name = 'name'
 
-  const makeaccess = (write: Array<Uint8Array | string>): AccessProtocol => ({ protocol: Access.protocol, config: { write } })
+  const makeaccess = (write: Array<Uint8Array | string>): AccessProtocol => ({
+    protocol: Access.protocol,
+    config: { write }
+  })
 
   let yesaccess: AccessProtocol
   const anyaccess: AccessProtocol = makeaccess([wildcard])

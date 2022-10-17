@@ -14,5 +14,5 @@ export interface Open {
 }
 
 export interface AccessStatic extends Registrant {
-  new(props: any): AccessInstance
+  new (props: any): AccessInstance
 }

@@ -34,7 +34,7 @@ export const LevelStorage: StorageFunc = async function LevelStorage (
     options.prefix = '' // removes the 'level' prefix from the path in indexeddb
   }
   if (where.isNode) {
-    await makedir(path)
+    if (typeof path === 'string') await makedir(path)
   }
 
   return new LevelDatastore(path, options)

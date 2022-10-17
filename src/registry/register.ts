@@ -38,7 +38,10 @@ export class Register<T> {
     this.starKey = $tar
   }
 
-  add (registrant: Registrant, star = Object.keys(this.registered).length === 0): void {
+  add (
+    registrant: Registrant,
+    star = Object.keys(this.registered).length === 0
+  ): void {
     if (!registrant.protocol.startsWith(this.namespace)) {
       throw errors.namespaceMismatch(this.namespace, registrant.protocol)
     }

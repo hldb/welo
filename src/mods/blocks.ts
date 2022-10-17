@@ -5,9 +5,9 @@ import { IPFS } from 'ipfs'
 import { CID } from 'multiformats/cid'
 
 import type { AbortOptions } from 'ipfs-core-types'
-import type { PreloadOptions } from 'ipfs-core-types/utils'
 import type { MultihashHasher } from 'multiformats/hashes/hasher'
-import type { PutOptions } from 'ipfs-core-types/block'
+import type { PreloadOptions } from 'ipfs-core-types/src/utils'
+import type { PutOptions } from 'ipfs-core-types/src/block'
 
 type Codec = typeof cbor
 

@@ -2,14 +2,15 @@ import { strict as assert } from 'assert'
 
 import { Opal } from '../src/index.js'
 import { Opal as OpalType } from '../src/opal.js'
-import { OPAL_PREFIX } from '../src/constants.js'
+import { OPAL_PREFIX } from '../src/utils/constants.js'
 
 import { getIpfs, constants, getIdentity } from './utils/index.js'
 import type { IPFS } from 'ipfs'
-import type { Address, Manifest } from '../src/manifest/index.js'
+import type { Address, Manifest } from '../src/manifest/default/index.js'
 import { Database } from '../src/database/index.js'
 
-const getDirectory = (): string => constants.temp.path + OPAL_PREFIX + String(Math.random())
+const getDirectory = (): string =>
+  constants.temp.path + '/test-opal' + OPAL_PREFIX + String(Math.random())
 describe('Opal', () => {
   let ipfs: IPFS, opal: OpalType
 
@@ -30,7 +31,7 @@ describe('Opal', () => {
       assert.ok(Opal.registry.store)
       assert.ok(Opal.Storage)
       assert.ok(Opal.Keychain)
-      assert.ok(Opal.Replicator)
+      // assert.ok(Opal.Replicator)
       assert.ok(Opal.create)
       assert.ok(Opal.Manifest)
     })
@@ -80,21 +81,21 @@ describe('Opal', () => {
 
     it('exposes instance properties', () => {
       assert.ok(opal.stop)
-      assert.ok(opal.determineManifest)
-      assert.ok(opal.fetchManifest)
+      assert.ok(opal.determine)
+      assert.ok(opal.fetch)
       assert.ok(opal.open)
     })
 
     describe('determineManifest', () => {
       it('returns an instance of Manifest based on some options', async () => {
-        manifest = await opal.determineManifest('test')
+        manifest = await opal.determine({ name: 'test' })
         address = manifest.address
       })
     })
 
     describe('fetchManifest', () => {
       it('returns an instance of Manifest from a manifest address', async () => {
-        const _manifest = await opal.fetchManifest(address)
+        const _manifest = await opal.fetch(address)
         assert.deepEqual(_manifest.block.cid, manifest.block.cid)
       })
     })

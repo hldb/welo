@@ -1,21 +1,23 @@
+import path from 'path'
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs'
 
 import { Database } from '../src/database/index.js'
 
-import { Keyvalue, Keyvalue as Store } from '../src/manifest/store/keyvalue.js'
+import { Keyvalue, Keyvalue as Store } from '../src/store/keyvalue/index.js'
 import {
   StaticAccess as Access,
   StaticAccess
-} from '../src/manifest/access/static.js'
-import { Entry } from '../src/manifest/entry/index.js'
-import { Identity } from '../src/manifest/identity/index.js'
-import { Manifest } from '../src/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
-
-import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
-import { IPFS } from 'ipfs'
+} from '../src/access/static/index.js'
+import { Entry } from '../src/entry/default/index.js'
+import { Identity } from '../src/identity/default/index.js'
+import { Manifest } from '../src/manifest/default/index.js'
+import { initRegistry } from '../src/registry/index.js'
 import { Blocks } from '../src/mods/blocks.js'
-import { defaultManifest } from '../src/util.js'
+import { defaultManifest } from '../src/utils/index.js'
+import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
+import { LevelStorage, StorageFunc, StorageReturn } from '../src/mods/storage.js'
+import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()
 
@@ -30,7 +32,9 @@ describe('Database', () => {
     storage: getStorageReturn,
     database: Database,
     manifest: Manifest,
-    identity: Identity
+    identity: Identity,
+    directory: string,
+    Storage: StorageFunc
 
   before(async () => {
     ipfs = await getIpfs()
@@ -43,8 +47,10 @@ describe('Database', () => {
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity, registry),
-      access: { type: StaticAccess.type, write: [identity.id] }
+      access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
     })
+    directory = path.join(tempPath, 'test-database', manifest.address.toString())
+    Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(directory, name))
   })
 
   after(async () => {
@@ -60,6 +66,8 @@ describe('Database', () => {
     describe('open', () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
+          directory,
+          Storage,
           manifest,
           identity,
           blocks,
@@ -87,14 +95,14 @@ describe('Database', () => {
       // assert.ok(database.del);
       // assert.ok(database.get);
       assert.ok(database.events)
-      assert.ok(database.open)
       assert.ok(database.close)
     })
 
     describe('close', () => {
       it('resets the database state', async () => {
+        assert.equal(database.isStarted(), true)
         await database.close()
-        assert.equal(database.open, false)
+        assert.equal(database.isStarted(), false)
       })
     })
   })

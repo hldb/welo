@@ -54,7 +54,7 @@ describe('Manifest', () => {
         manifest = await Manifest.create(config)
         assert.equal(
           manifest.block.cid.toString(),
-          'bafyreihtia76lhsj6y4fn4q7nwwvgg46umsulqde4dnmpnk7z6mrl4qq5q'
+          'bafyreidaqbln54tc6zg2n2oylgx7l5nqnbua7lelsvg3zuoxadr4rqvfiq'
         )
         assert.equal(manifest.meta, undefined)
         assert.deepEqual(manifest.getTag, manifest.block.cid.bytes)
@@ -65,7 +65,7 @@ describe('Manifest', () => {
         const _manifest = await Manifest.create({ ...config, meta })
         assert.equal(
           _manifest.block.cid.toString(),
-          'bafyreidmyhpdg3lzzylyhznfa2fqerpq32f4bjn5wqfbg6icqn4f6p4nju'
+          'bafyreigyn3jgyyzntuaefrurwqksnbjfzuocgayfnryttnx2hemr2vkrty'
         )
         assert.equal(_manifest.meta, meta)
         assert.deepEqual(_manifest.getTag, _manifest.block.cid.bytes)
@@ -76,7 +76,7 @@ describe('Manifest', () => {
         const _manifest = await Manifest.create({ ...config, tag })
         assert.equal(
           _manifest.block.cid.toString(),
-          'bafyreibzyfs4xxtpuxsphpq2xaz7rrhqwtsjyrxpq6qsk4mepbbdiezkb4'
+          'bafyreiajfis5gnuv5eep36ybb4u6u3pophafqcddx3hqgzg2hvpd2er6om'
         )
         assert.equal(_manifest.meta, undefined)
         assert.deepEqual(_manifest.tag, tag)
@@ -118,7 +118,9 @@ describe('Manifest', () => {
       })
 
       it('returns null if unable to coerce', () => {
-        const _manifest = Manifest.asManifest({ block: false as unknown as Block<any> })
+        const _manifest = Manifest.asManifest({
+          block: false as unknown as Block<any>
+        })
         assert.equal(_manifest, null)
       })
     })

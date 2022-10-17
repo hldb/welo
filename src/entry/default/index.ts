@@ -1,7 +1,14 @@
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import { Blocks } from '../../mods/blocks.js'
-import { EntryData, EntryInstance, EntryStatic, Create, Fetch, AsEntry } from '../interface.js'
+import {
+  EntryData,
+  EntryInstance,
+  EntryStatic,
+  Create,
+  Fetch,
+  AsEntry
+} from '../interface.js'
 import { Extends } from '../../utils/decorators.js'
 import protocol from './protocol.js'
 import { IdentityInstance } from '../../identity/interface.js'
@@ -73,11 +80,7 @@ export class Entry implements EntryInstance<SignedEntry> {
     return new Entry({ block, data, identity })
   }
 
-  static async fetch ({
-    blocks,
-    Identity,
-    cid
-  }: Fetch): Promise<Entry> {
+  static async fetch ({ blocks, Identity, cid }: Fetch): Promise<Entry> {
     const block: Block<SignedEntry> = await blocks.get(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })

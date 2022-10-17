@@ -1,10 +1,19 @@
-import { keys, PrivateKey, PublicKey } from 'libp2p-crypto'
+import { keys } from '@libp2p/crypto'
+import type { PrivateKey, PublicKey } from '@libp2p/interface-keys'
 import { Key } from 'interface-datastore'
 
 import { Blocks } from '../../mods/blocks.js'
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
-import { IdentityInstance, IdentityStatic, AsIdentity, Export, Fetch, Get, Import } from '../interface.js'
+import {
+  IdentityInstance,
+  IdentityStatic,
+  AsIdentity,
+  Export,
+  Fetch,
+  Get,
+  Import
+} from '../interface.js'
 import { Extends } from '../../utils/decorators.js'
 import protocol from './protocol.js'
 
@@ -49,7 +58,17 @@ class Identity implements IdentityInstance<IdentityValue> {
   readonly pub: Uint8Array
   readonly sig: Uint8Array
 
-  constructor ({ name, priv, pubkey, block }: { name?: string, priv?: PrivateKey, pubkey: PublicKey, block: Block<IdentityValue> }) {
+  constructor ({
+    name,
+    priv,
+    pubkey,
+    block
+  }: {
+    name?: string
+    priv?: PrivateKey
+    pubkey: PublicKey
+    block: Block<IdentityValue>
+  }) {
     this.name = name
     this.block = block
     this.pubkey = pubkey
@@ -74,11 +93,7 @@ class Identity implements IdentityInstance<IdentityValue> {
     return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
   }
 
-  static async get ({
-    name,
-    identities,
-    keychain
-  }: Get): Promise<Identity> {
+  static async get ({ name, identities, keychain }: Get): Promise<Identity> {
     const key = new Key(name)
     const exists = await identities.has(key)
 
@@ -96,16 +111,18 @@ class Identity implements IdentityInstance<IdentityValue> {
       const bytes = await identities.get(key)
       const block = await Blocks.decode<IdentityValue>({ bytes })
       const pem = await keychain.exportKey(name, empty)
-      const keypair = await keys.import(pem, empty)
+      const keypair = await keys.importKey(pem, empty)
 
-      return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
+      return new Identity({
+        name,
+        priv: keypair,
+        pubkey: keypair.public,
+        block
+      })
     }
   }
 
-  static async fetch ({
-    blocks,
-    auth: cid
-  }: Fetch): Promise<Identity> {
+  static async fetch ({ blocks, auth: cid }: Fetch): Promise<Identity> {
     const block = await blocks.get(cid)
 
     const identity = await this.asIdentity({ block })
@@ -116,9 +133,7 @@ class Identity implements IdentityInstance<IdentityValue> {
     return identity
   }
 
-  static asIdentity (
-    identity: AsIdentity<IdentityValue>
-  ): Identity | null {
+  static asIdentity (identity: AsIdentity<IdentityValue>): Identity | null {
     if (identity instanceof Identity) {
       return identity
     }
@@ -152,7 +167,7 @@ class Identity implements IdentityInstance<IdentityValue> {
     } catch (e) {
       throw new Error('Identity.import: failed to read kpi')
     }
-    const keypair = await keys.import(pem, empty)
+    const keypair = await keys.importKey(pem, empty)
 
     if (persist) {
       const key = new Key(name)
@@ -199,7 +214,10 @@ class Identity implements IdentityInstance<IdentityValue> {
     return block.bytes
   }
 
-  static async sign (identity: IdentityInstance<IdentityValue>, data: Uint8Array): Promise<Uint8Array> {
+  static async sign (
+    identity: IdentityInstance<IdentityValue>,
+    data: Uint8Array
+  ): Promise<Uint8Array> {
     const _identity = this.asIdentity(identity)
 
     if (_identity === null) {
@@ -214,7 +232,11 @@ class Identity implements IdentityInstance<IdentityValue> {
     return privs.get(identity).sign(data)
   }
 
-  static async verify (identity: IdentityInstance<IdentityValue>, data: Uint8Array, sig: Uint8Array): Promise<boolean> {
+  static async verify (
+    identity: IdentityInstance<IdentityValue>,
+    data: Uint8Array,
+    sig: Uint8Array
+  ): Promise<boolean> {
     const _identity = this.asIdentity(identity)
     if (_identity === null) {
       throw new Error('invalid identity used')

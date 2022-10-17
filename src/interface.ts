@@ -1,5 +1,5 @@
 import { PubSub } from '@libp2p/interface-pubsub'
-import { PeerId } from '@libp2p/interfaces/peer-id'
+import { PeerId } from '@libp2p/interface-peer-id'
 import { IPFS } from 'ipfs'
 
 import { AccessProtocol } from './access/static/protocol.js'
@@ -7,8 +7,8 @@ import { EntryProtocol } from './entry/default/protocol.js'
 import { IdentityProtocol } from './identity/default/protocol.js'
 import { IdentityInstance } from './identity/interface.js'
 import { Blocks } from './mods/blocks.js'
-import { Keychain } from './mods/keychain/index.js'
-import { StorageReturn } from './mods/storage.js'
+import { Keychain } from './mods/keychain.js'
+import { StorageFunc, StorageReturn } from './mods/storage.js'
 import { StoreProtocol } from './store/keyvalue/protocol.js'
 
 export interface OpalStorage {
@@ -29,7 +29,7 @@ export interface Determine {
 
 export interface Options {
   identity?: IdentityInstance<any>
-  Storage?: StorageReturn
+  Storage?: StorageFunc
   // Replicator?: typeof Replicator
 }
 

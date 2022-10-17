@@ -5,7 +5,7 @@ import { Blocks } from '../src/mods/blocks.js'
 import { Entry } from '../src/entry/default/index.js'
 import { EntryData } from '../src/entry/interface.js'
 import { Identity } from '../src/identity/default/index.js'
-import { Keychain } from '../src/mods/keychain/index.js'
+import { Keychain } from '../src/mods/keychain.js'
 
 import {
   getIpfs,

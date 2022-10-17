@@ -28,10 +28,12 @@ export interface Fetch {
   cid: CID
 }
 
-export type AsEntry<Value> = EntryInstance<Value> | { block: Block<Value>, identity: IdentityInstance<any> }
+export type AsEntry<Value> =
+  | EntryInstance<Value>
+  | { block: Block<Value>, identity: IdentityInstance<any> }
 
 export interface EntryStatic<Value> extends Registrant {
-  new(props: any): EntryInstance<Value>
+  new (props: any): EntryInstance<Value>
   create: (create: Create) => Promise<EntryInstance<Value>>
   fetch: (fetch: Fetch) => Promise<EntryInstance<Value>>
   asEntry: (entry: AsEntry<Value>) => Promise<EntryInstance<Value> | null>

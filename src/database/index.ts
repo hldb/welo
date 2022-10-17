@@ -11,8 +11,11 @@ import { Config, Handlers, Open } from './interface.js'
 import { AccessInstance } from '../access/interface.js'
 import { Creator, Selector, StoreInstance } from '../store/interface.js'
 import { Playable } from '../utils/playable.js'
+import { StorageFunc } from '../mods/storage.js'
 
 export class Database extends Playable {
+  readonly directory: string
+  readonly Storage: StorageFunc
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>
@@ -30,19 +33,15 @@ export class Database extends Playable {
 
   constructor (config: Config) {
     const starting = async (): Promise<void> => {
-      await start(this.access)
-      await start(this.store)
+      await start(this.access, this.replica, this.store)
     }
     const stopping = async (): Promise<void> => {
+      await stop(this.store, this.replica, this.access)
       // await this.replicator.stop()
 
       // this.store.events.removeListener('update', this._handlers.storeUpdate)
       // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
       // this.replica.events.removeListener('write', this._handlers.replicaWrite)
-
-      await stop(this.store)
-      await this.replica.close()
-      await stop(this.access)
 
       // await Promise.all([
       //   this.replicator.close(),
@@ -53,6 +52,8 @@ export class Database extends Playable {
     }
     super({ starting, stopping })
 
+    this.Storage = config.Storage
+    this.directory = config.directory
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
@@ -80,18 +81,30 @@ export class Database extends Playable {
       value: (...args: any[]) => Promise<CID>
     }
 
-    const handleCreator = ([key, creator]: [string, Creator]): [string, CreatorProps] => [
+    const handleCreator = ([key, creator]: [string, Creator]): [
+      string,
+      CreatorProps
+    ] => [
       key,
-      { value: async (...args: any[]): Promise<CID> => await this.replica.write(creator(...args)) }
+      {
+        value: async (...args: any[]): Promise<CID> =>
+          await this.replica.write(creator(...args)).then((entry) => entry.cid)
+      }
     ]
 
     interface SelectorProps {
       value: (...args: any[]) => Promise<any>
     }
 
-    const handleSelector = ([key, selector]: [string, Selector]): [string, SelectorProps] => [
+    const handleSelector = ([key, selector]: [string, Selector]): [
+      string,
+      SelectorProps
+    ] => [
       key,
-      { value: async (...args: any[]) => selector(await this.store.latest())(...args) }
+      {
+        value: async (...args: any[]) =>
+          selector(await this.store.latest())(...args)
+      }
     ]
 
     Object.defineProperties(
@@ -105,7 +118,8 @@ export class Database extends Playable {
 
   static async open (options: Open): Promise<Database> {
     const {
-      // createStorage,
+      directory,
+      Storage,
       manifest,
       identity,
       // peerId,
@@ -125,22 +139,23 @@ export class Database extends Playable {
     const common = { manifest, blocks } // createStorage }
 
     const access = new Access(common)
-    await start(access)
-    const replica = await Replica.open({
+    const replica = new Replica({
       ...common,
+      Storage,
       identity,
       Entry,
       Identity,
       access
     })
-    const store = new Store({ ...common, replica })
-    await start(store)
+    const store = new Store({ ...common, Storage, replica })
 
     // no replication yet
     // config.replicator = new Replicator({ peerId, pubsub, ...common, access, replica })
     // options.replicate && await config.replicator.start()
 
     const config: Config = {
+      directory,
+      Storage,
       blocks,
       identity,
       manifest,

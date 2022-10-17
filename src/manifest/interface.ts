@@ -31,10 +31,12 @@ export interface Fetch {
   address: Address
 }
 
-export type AsManifest<Value> = ManifestInstance<Value> | { block: Block<Value> }
+export type AsManifest<Value> =
+  | ManifestInstance<Value>
+  | { block: Block<Value> }
 
 export interface ManifestStatic<Value> {
-  new(props: any): ManifestInstance<Value>
+  new (props: any): ManifestInstance<Value>
   create: (create: Create) => Promise<ManifestInstance<Value>>
   fetch: (fetch: Fetch) => Promise<ManifestInstance<Value>>
   asManifest: (asManifest: AsManifest<Value>) => ManifestInstance<Value> | null

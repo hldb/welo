@@ -2,11 +2,11 @@ import * as factories from './factories.js'
 import * as options from './options.js'
 import * as constants from './constants.js'
 
-import { Entry } from '../../src/manifest/entry/index.js'
+import { Entry } from '../../src/entry/default/index.js'
 import { sortEntriesRev } from '../../src/database/traversal.js'
 
-import { Identity } from '../../src/manifest/identity/index.js'
-import { Keychain } from '../../src/mods/keychain/index.js'
+import { Identity } from '../../src/identity/default/index.js'
+import { Keychain } from '../../src/mods/keychain.js'
 import { LevelStorage, StorageReturn } from '../../src/mods/storage.js'
 import { base32 } from 'multiformats/bases/base32'
 import { IPFS } from 'ipfs'
@@ -69,7 +69,7 @@ export const getIpfs = async (path?: string, opts?: any): Promise<IPFS> => {
   path = path != null ? path : temp.path
   opts = opts != null ? opts : options.ipfs.offline
 
-  const ipfs: IPFS = await factories.IPFS.create(opts(path + ipfsPath))
+  const ipfs: IPFS = await factories.IPFS.create(opts(path + ipfsPath)) as unknown as IPFS
 
   return ipfs
 }

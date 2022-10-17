@@ -27,7 +27,7 @@ registry.identity.add(Identity)
 describe('Keyvalue', () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity
   const expectedProtocol = '/opal/store/keyvalue'
-  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, name))
+  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, 'test-keyvalue', name))
 
   before(async () => {
     ipfs = await getIpfs()

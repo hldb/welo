@@ -2,7 +2,7 @@ import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
 import { Blocks } from '../mods/blocks.js'
-import { Keychain } from '../mods/keychain/index.js'
+import { Keychain } from '../mods/keychain.js'
 import { StorageReturn } from '../mods/storage.js'
 import { Registrant } from '../registry/registrant.js'
 
@@ -19,7 +19,9 @@ export interface Fetch {
   auth: CID
 }
 
-export type AsIdentity<Value> = IdentityInstance<Value> | { block: Block<Value> }
+export type AsIdentity<Value> =
+  | IdentityInstance<Value>
+  | { block: Block<Value> }
 
 export type Export = Get
 
@@ -40,13 +42,20 @@ export interface IdentityInstance<Value> {
 }
 
 export interface IdentityStatic<Value> extends Registrant {
-  new(props: any): IdentityInstance<Value>
+  new (props: any): IdentityInstance<Value>
   gen: (gen: Gen) => Promise<IdentityInstance<Value>>
   get: (get: Get) => Promise<IdentityInstance<Value>>
   fetch: (fetch: Fetch) => Promise<IdentityInstance<Value>>
   asIdentity: (asIdentity: AsIdentity<Value>) => IdentityInstance<Value> | null
   import: (imp: Import) => Promise<IdentityInstance<Value>>
   export: (exp: Export) => Promise<Uint8Array>
-  sign: (identity: IdentityInstance<Value>, data: Uint8Array) => Promise<Uint8Array>
-  verify: (identity: IdentityInstance<Value>, data: Uint8Array, sig: Uint8Array) => Promise<boolean>
+  sign: (
+    identity: IdentityInstance<Value>,
+    data: Uint8Array
+  ) => Promise<Uint8Array>
+  verify: (
+    identity: IdentityInstance<Value>,
+    data: Uint8Array,
+    sig: Uint8Array
+  ) => Promise<boolean>
 }

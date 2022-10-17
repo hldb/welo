@@ -3,10 +3,13 @@ import { EntryStatic } from '../entry/interface'
 import { IdentityInstance, IdentityStatic } from '../identity/interface'
 import { ManifestInstance } from '../manifest/interface'
 import { Blocks } from '../mods/blocks'
+import { StorageFunc } from '../mods/storage'
 import { StoreInstance, StoreStatic } from '../store/interface'
 import { Replica } from './replica'
 
 export interface Open {
+  directory: string
+  Storage: StorageFunc
   start?: boolean
   blocks: Blocks
   identity: IdentityInstance<any>

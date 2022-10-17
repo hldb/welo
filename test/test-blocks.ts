@@ -7,7 +7,7 @@ import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import { Blocks } from '../src/mods/blocks.js'
 
 import { getIpfs } from './utils/index.js'
-import type { IPFS } from 'ipfs'
+import { IPFS } from 'ipfs-core-types'
 
 describe('Blocks', () => {
   let block: Block.Block<Uint8Array>

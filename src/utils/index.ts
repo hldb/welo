@@ -13,6 +13,9 @@ import { Manifest } from '../manifest/default/index.js'
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)
 
+export const encodedcid = (cid: CID): Uint8Array => cid.bytes
+export const decodedcid = (bytes: Uint8Array): CID => CID.decode(bytes)
+
 export interface DirsReturn {
   [name: string]: string
 }

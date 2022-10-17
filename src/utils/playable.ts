@@ -1,12 +1,15 @@
+import type EventEmitter from 'events'
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
 
 export interface Lifecycle {
   starting: () => Promise<void>
   stopping: () => Promise<void>
+  events?: EventEmitter
 }
 
 export class Playable implements Startable {
   private _isStarted: boolean
+  private readonly _events?: EventEmitter
 
   isStarted (): boolean {
     return this._isStarted
@@ -22,7 +25,9 @@ export class Playable implements Startable {
   }
 
   async start (): Promise<void> {
-    if (this.isStarted()) { return }
+    if (this.isStarted()) {
+      return
+    }
 
     if (this._starting != null) {
       return await this._starting
@@ -35,12 +40,21 @@ export class Playable implements Startable {
     this._starting = this._lifecycle.starting()
 
     return await this._starting
-      .then(() => { this._isStarted = true })
-      .finally(() => { this._starting = null })
+      .then(() => {
+        this._isStarted = true
+        if (this._events !== undefined) {
+          this._events.emit('start')
+        }
+      })
+      .finally(() => {
+        this._starting = null
+      })
   }
 
   async stop (): Promise<void> {
-    if (!this.isStarted()) { return }
+    if (!this.isStarted()) {
+      return
+    }
 
     if (this._stopping != null) {
       return await this._stopping
@@ -53,7 +67,14 @@ export class Playable implements Startable {
     this._stopping = this._lifecycle.stopping()
 
     return await this._stopping
-      .then(() => { this._isStarted = false })
-      .finally(() => { this._stopping = null })
+      .then(() => {
+        this._isStarted = false
+        if (this._events !== undefined) {
+          this._events.emit('stop')
+        }
+      })
+      .finally(() => {
+        this._stopping = null
+      })
   }
 }

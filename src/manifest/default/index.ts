@@ -2,7 +2,15 @@ import { Block } from 'multiformats/block'
 
 import { Blocks } from '../../mods/blocks.js'
 import { Address } from '../address.js'
-import { AsManifest, Create, Fetch, ManifestData, ManifestInstance, ManifestStatic, Protocol } from '../interface.js'
+import {
+  AsManifest,
+  Create,
+  Fetch,
+  ManifestData,
+  ManifestInstance,
+  ManifestStatic,
+  Protocol
+} from '../interface.js'
 import { Extends } from '../../utils/decorators.js'
 
 export { Address }
@@ -43,10 +51,7 @@ export class Manifest implements ManifestInstance<ManifestData> {
     return new Manifest(block)
   }
 
-  static async fetch ({
-    blocks,
-    address
-  }: Fetch): Promise<Manifest> {
+  static async fetch ({ blocks, address }: Fetch): Promise<Manifest> {
     const block: Block<ManifestData> = await blocks.get(address.cid)
     const manifest = this.asManifest({ block })
 
