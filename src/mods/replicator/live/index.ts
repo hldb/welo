@@ -2,9 +2,9 @@ import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import { base32 } from 'multiformats/bases/base32'
-import { Monitor } from './pubsub/monitor.js'
-import { Direct } from './pubsub/direct.js'
-import { traverser } from '../database/traversal.js'
+import { Monitor } from '../utils/pubsub/monitor.js'
+import { Direct } from '../utils/pubsub/direct.js'
+import { traverser } from '../../../database/traversal.js'
 import EventEmitter from 'events'
 
 const timeout = 30000

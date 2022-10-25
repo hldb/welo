@@ -12,6 +12,7 @@ import { AccessInstance } from '../access/interface.js'
 import { Creator, Selector, StoreInstance } from '../store/interface.js'
 import { Playable } from '../utils/playable.js'
 import { StorageFunc } from '../mods/storage.js'
+import { MultiReplicator } from '../mods/replicator/multi.js'
 
 export class Database extends Playable {
   readonly directory: string
@@ -19,6 +20,7 @@ export class Database extends Playable {
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>
+  readonly replicator: MultiReplicator
 
   readonly replica: Replica
   readonly access: AccessInstance
@@ -33,10 +35,10 @@ export class Database extends Playable {
 
   constructor (config: Config) {
     const starting = async (): Promise<void> => {
-      await start(this.access, this.replica, this.store)
+      await start(this.access, this.replica, this.store, this.replicator)
     }
     const stopping = async (): Promise<void> => {
-      await stop(this.store, this.replica, this.access)
+      await stop(this.store, this.replica, this.access, this.replicator)
       // await this.replicator.stop()
 
       // this.store.events.removeListener('update', this._handlers.storeUpdate)
@@ -57,6 +59,7 @@ export class Database extends Playable {
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
+    this.replicator = config.replicator
     this.replica = config.replica
 
     // this.storage = config.storage
@@ -121,13 +124,14 @@ export class Database extends Playable {
       directory,
       Storage,
       manifest,
+      Replicator,
+      ipfs,
+      pubsub,
+      peerId,
       identity,
-      // peerId,
-      // pubsub,
       blocks,
       Store,
       Access,
-      // Replicator,
       Entry,
       Identity
     } = options
@@ -136,32 +140,36 @@ export class Database extends Playable {
       throw new Error('identity instance type does not match Identity class')
     }
 
-    const common = { manifest, blocks } // createStorage }
+    const common = { manifest, blocks, Storage } // createStorage }
 
     const access = new Access(common)
     const replica = new Replica({
       ...common,
-      Storage,
       identity,
       Entry,
       Identity,
       access
     })
-    const store = new Store({ ...common, Storage, replica })
-
-    // no replication yet
-    // config.replicator = new Replicator({ peerId, pubsub, ...common, access, replica })
-    // options.replicate && await config.replicator.start()
+    const store = new Store({ ...common, replica })
+    const replicator = new Replicator({
+      ...common,
+      ipfs,
+      pubsub,
+      peerId,
+      replica
+    })
 
     const config: Config = {
       directory,
       Storage,
       blocks,
+      replicator,
       identity,
       manifest,
       replica,
       store,
       access,
+      Replicator,
       Access,
       Entry,
       Identity,

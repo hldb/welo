@@ -10,6 +10,7 @@ import { Blocks } from './mods/blocks.js'
 import { Keychain } from './mods/keychain.js'
 import { StorageFunc, StorageReturn } from './mods/storage.js'
 import { StoreProtocol } from './store/keyvalue/protocol.js'
+import { Replicator } from './mods/replicator/index.js'
 
 export interface OpalStorage {
   identities: StorageReturn
@@ -30,7 +31,7 @@ export interface Determine {
 export interface Options {
   identity?: IdentityInstance<any>
   Storage?: StorageFunc
-  // Replicator?: typeof Replicator
+  Replicator?: typeof Replicator
 }
 
 export interface Config {

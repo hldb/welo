@@ -13,19 +13,19 @@ import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './mods/blocks.js'
 import { OPAL_LOWER } from './utils/constants.js'
+import { StorageFunc, StorageReturn } from './mods/storage.js'
+import { Keychain } from './mods/keychain.js'
+import type { Replicator as ReplicatorClass } from './mods/replicator/index.js'
+import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
+import { IdentityInstance } from './identity/interface.js'
+import { ManifestData } from './manifest/interface.js'
+import { Playable } from './utils/playable.js'
 import {
   dirs,
   DirsReturn,
   defaultManifest,
   getComponents
 } from './utils/index.js'
-import { StorageFunc, StorageReturn } from './mods/storage.js'
-import { Keychain } from './mods/keychain.js'
-import { Replicator } from './mods/replicator/index.js'
-import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
-import { IdentityInstance } from './identity/interface.js'
-import { ManifestData } from './manifest/interface.js'
-import { Playable } from './utils/playable.js'
 
 const registry = initRegistry()
 
@@ -40,7 +40,7 @@ export class Opal extends Playable {
 
   static Storage?: StorageFunc
   static Keychain?: typeof Keychain
-  static Replicator?: typeof Replicator
+  static Replicator?: typeof ReplicatorClass
 
   private readonly dirs: DirsReturn
   directory: string
@@ -232,7 +232,14 @@ export class Opal extends Playable {
       throw new Error('no Storage available')
     }
 
-    // const Replicator = options.Replicator || Opal.Replicator;
+    let Replicator: typeof ReplicatorClass
+    if (options.Replicator != null) {
+      Replicator = options.Replicator
+    } else if (Opal.Replicator != null) {
+      Replicator = Opal.Replicator
+    } else {
+      throw new Error('no replicator supplied')
+    }
 
     const dbPath = path.join(
       this.dirs.databases,
@@ -244,12 +251,13 @@ export class Opal extends Playable {
     const promise = Database.open({
       directory: dbPath,
       Storage: dbStorage,
+      Replicator,
       manifest,
       blocks: this.blocks,
-      // peerId: this.peerId,
-      // pubsub: this.pubsub,
+      ipfs: this.ipfs ?? undefined,
+      pubsub: this.pubsub ?? undefined,
+      peerId: this.peerId ?? undefined,
       identity,
-      // Replicator,
       ...components
     })
       .then((db) => {
