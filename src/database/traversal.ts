@@ -24,7 +24,7 @@ export const sortCids: SortCids = (c1, c2) => compare(c1.bytes, c2.bytes)
 export const sortEntries: SortEntries = (e1, e2) => sortCids(e1.cid, e2.cid)
 export const sortEntriesRev: SortEntries = (e1, e2) => sortCids(e2.cid, e1.cid)
 
-export type LoadFunc = (cid: CID) => Promise<EntryInstance<any>>
+export type LoadFunc = (cid: CID) => Promise<EntryInstance<any> | null>
 export type LinksFunc = (entry: EntryInstance<any>) => Promise<CID[]>
 
 export function loadEntry ({
@@ -37,7 +37,7 @@ export function loadEntry ({
   Identity: IdentityStatic<any>
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await Entry.fetch({ blocks, cid, Identity })
+    return await Entry.fetch({ blocks, cid, Identity }).catch(() => null)
   }
   return load
 }
@@ -142,9 +142,10 @@ export async function traverser ({
   async function walk (cids: CID[]): Promise<void> {
     // trivial abort for now; later pass abort to load function
 
-    const entries = await Promise.all(cids.map(load)).then((entries) =>
-      entries.filter(Boolean)
-    ) // eliminate null load returns
+    const entries = await Promise.all(cids.map(load))
+      .then(
+        (entries) => entries.filter(entry => entry !== null) // eliminate null load returns
+      ) as Array<EntryInstance<any>>
 
     if (ordered) entries.sort(orderFn)
 

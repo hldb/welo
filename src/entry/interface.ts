@@ -26,6 +26,7 @@ export interface Fetch {
   blocks: Blocks
   Identity: IdentityStatic<any>
   cid: CID
+  timeout?: number
 }
 
 export type AsEntry<Value> =

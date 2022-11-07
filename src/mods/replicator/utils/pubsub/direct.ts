@@ -42,7 +42,7 @@ const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
 // The Direct Channel spec for the Live Replicator specifies that the channel is not unique per database
 // This implementation makes it easier to handle messages per store while the pubsub channel is still shared
 
-export class Direct extends Playable {
+export class DirectChannel extends Playable {
   readonly ipfs: IPFS
   readonly address: Address
   readonly localPeerId: PeerId

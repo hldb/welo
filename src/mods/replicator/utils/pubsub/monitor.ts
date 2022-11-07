@@ -6,14 +6,12 @@ const peerJoin = 'peer-join'
 const peerLeave = 'peer-leave'
 const update = 'update'
 
-export class Monitor implements Startable {
+export class Monitor extends EventEmitter implements Startable {
   readonly ipfs: IPFS
   readonly topic: string
   readonly interval: number
 
   peers: Set<string>
-
-  readonly events: EventEmitter
 
   private _isStarted: boolean
 
@@ -28,15 +26,15 @@ export class Monitor implements Startable {
 
     this._isStarted = true
 
-    const recall = (): void => {
+    const refresh = (): void => {
       void this._poll().then(() => {
         if (this.isStarted()) {
-          setTimeout(recall, this.interval)
+          setTimeout(refresh, this.interval)
         }
       })
     }
 
-    recall()
+    refresh()
   }
 
   stop (): void {
@@ -48,15 +46,15 @@ export class Monitor implements Startable {
   }
 
   constructor (ipfs: IPFS, topic: string, interval: number = 1000) {
+    super()
     this.ipfs = ipfs
     this.topic = topic
     this.interval = 1000
 
     this.peers = new Set()
 
-    this.events = new EventEmitter()
-    this.events.on(peerJoin, () => this.events.emit(update))
-    this.events.on(peerLeave, () => this.events.emit(update))
+    this.on(peerJoin, () => this.emit(update))
+    this.on(peerLeave, () => this.emit(update))
 
     this._isStarted = false
   }
@@ -72,11 +70,11 @@ export class Monitor implements Startable {
     this.peers = peers
 
     for (const peer of this.peers) {
-      !_peers.has(peer) && this.events.emit(peerJoin, peer)
+      !_peers.has(peer) && this.emit(peerJoin, peer)
     }
 
     for (const peer of _peers) {
-      !this.peers.has(peer) && this.events.emit(peerLeave, peer)
+      !this.peers.has(peer) && this.emit(peerLeave, peer)
     }
   }
 }

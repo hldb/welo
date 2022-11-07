@@ -57,7 +57,7 @@ export class Replica extends Playable {
     Entry: EntryStatic<any>
     Identity: IdentityStatic<any>
   }) {
-    const onUpdate = async (): Promise<void> => await this.setRoot(this.graph.root)
+    const onUpdate = (): void => { void this.setRoot(this.graph.root) }
     const starting = async (): Promise<void> => {
       this._storage = await this.Storage('replica')
       await this._storage.open()
