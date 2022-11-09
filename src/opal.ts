@@ -205,11 +205,12 @@ export class Opal extends Playable {
     const address = manifest.address
     const addr: string = address.toString()
 
-    const isOpen =
-      this.opened.get(addr) != null || this._opening.get(addr) != null
+    if (this.opened.get(addr) != null) {
+      throw new Error(`database ${addr} is already open`)
+    }
 
-    if (isOpen) {
-      throw new Error(`database ${addr} is already open or being opened`)
+    if (this._opening.get(addr) != null) {
+      throw new Error(`database ${addr} is already being opened`)
     }
 
     const components = getComponents(this.registry, manifest)
@@ -238,7 +239,7 @@ export class Opal extends Playable {
     } else if (Opal.Replicator != null) {
       Replicator = Opal.Replicator
     } else {
-      throw new Error('no replicator supplied')
+      throw new Error('no Replicator supplied')
     }
 
     const dbPath = path.join(
