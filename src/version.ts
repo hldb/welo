@@ -1,2 +1,2 @@
-export const commit = ''
-export const semver = ''
+// export const commit = ''
+// export const semver = ''
