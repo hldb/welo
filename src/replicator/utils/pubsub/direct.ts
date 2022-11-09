@@ -5,9 +5,9 @@ import { Message } from '@libp2p/interface-pubsub'
 import { base32 } from 'multiformats/bases/base32'
 import { CID } from 'multiformats/cid'
 
-import { Playable } from '../../../../utils/playable.js'
+import { Playable } from '../../../utils/playable.js'
 import { Monitor } from './monitor.js'
-import { Address } from '../../../../manifest/address.js'
+import { Address } from '../../../manifest/address.js'
 import * as Advert from '../../live/message.js'
 
 const prefix = '/dps/1.0.0/'

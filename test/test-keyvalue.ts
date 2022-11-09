@@ -6,7 +6,7 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import { Keyvalue } from '../src/store/keyvalue/index.js'
 
 import { Replica } from '../src/database/replica.js'
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 import { StaticAccess } from '../src/access/static/index.js'
 import { Entry } from '../src/entry/default/index.js'
 import { Identity } from '../src/identity/default/index.js'
@@ -14,7 +14,7 @@ import { initRegistry } from '../src/registry/index.js'
 import { getIpfs, getIdentity } from './utils/index.js'
 import { Manifest } from '../src/manifest/default/index.js'
 import { defaultManifest } from '../src/utils/index.js'
-import { LevelStorage, StorageReturn } from '../src/mods/storage.js'
+import { LevelStorage, StorageReturn } from '../src/storage/index.js'
 import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()

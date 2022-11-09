@@ -4,7 +4,7 @@
 
 import { KeyChain, KeyChainInit } from 'libp2p/keychain'
 import { Components } from '@libp2p/components'
-import type { StorageReturn } from './storage.js'
+import type { StorageReturn } from '../storage/index.js'
 
 export const defaultOptions = {
   // See https://cryptosense.com/parametesr-choice-for-pbkdf2/

@@ -2,7 +2,7 @@ import { keys } from '@libp2p/crypto'
 import type { PrivateKey, PublicKey } from '@libp2p/interface-keys'
 import { Key } from 'interface-datastore'
 
-import { Blocks } from '../../mods/blocks.js'
+import { Blocks } from '../../blocks/index.js'
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
 import {

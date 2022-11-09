@@ -3,7 +3,7 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import { CID } from 'multiformats/cid'
 
 import { Replica } from './replica.js'
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { EntryStatic } from '../entry/interface.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 import { ManifestInstance } from '../manifest/interface.js'
@@ -11,8 +11,8 @@ import { Config, Handlers, Open } from './interface.js'
 import { AccessInstance } from '../access/interface.js'
 import { Creator, Selector, StoreInstance } from '../store/interface.js'
 import { Playable } from '../utils/playable.js'
-import { StorageFunc } from '../mods/storage.js'
-import { MultiReplicator } from '../mods/replicator/multi.js'
+import { StorageFunc } from '../storage/index.js'
+import { MultiReplicator } from '../replicator/multi.js'
 
 export class Database extends Playable {
   readonly directory: string

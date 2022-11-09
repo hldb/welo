@@ -13,10 +13,10 @@ import { Entry } from '../src/entry/default/index.js'
 import { Identity } from '../src/identity/default/index.js'
 import { Manifest } from '../src/manifest/default/index.js'
 import { initRegistry } from '../src/registry/index.js'
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 import { defaultManifest } from '../src/utils/index.js'
 import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
-import { LevelStorage, StorageFunc, StorageReturn } from '../src/mods/storage.js'
+import { LevelStorage, StorageFunc, StorageReturn } from '../src/storage/index.js'
 import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()

@@ -1,7 +1,7 @@
 import { HashMap } from 'ipld-hashmap'
 import { loadHashMap } from '../../database/graph.js'
 import { EntryData, EntryInstance } from '../../entry/interface.js'
-import { Blocks } from '../../mods/blocks.js'
+import { Blocks } from '../../blocks/index.js'
 
 const PUT: 'PUT' = 'PUT'
 const DEL: 'DEL' = 'DEL'

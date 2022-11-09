@@ -7,11 +7,11 @@ import { ManifestData, ManifestInstance } from '../../manifest/interface.js'
 import { creators, selectors, reducer } from './model.js'
 import protocol, { Config } from './protocol.js'
 import { Playable } from '../../utils/playable.js'
-import { StorageFunc, StorageReturn } from '../../mods/storage.js'
+import { StorageFunc, StorageReturn } from '../../storage/index.js'
 import { HashMap } from 'ipld-hashmap'
 import { Key } from 'interface-datastore'
 import { loadHashMap } from '../../database/graph.js'
-import { Blocks } from '../../mods/blocks.js'
+import { Blocks } from '../../blocks/index.js'
 import { decodedcid, encodedcid } from '../../utils/index.js'
 
 const indexesKey = new Key('indexes')

@@ -5,7 +5,7 @@ import { start } from '@libp2p/interfaces/startable'
 
 import { Graph } from '../src/database/graph.js'
 import { Node } from '../src/database/graph-node.js'
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 import { getIpfs } from './utils/index.js'
 
 describe('Graph', () => {

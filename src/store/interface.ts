@@ -1,8 +1,8 @@
 import { Startable } from '@libp2p/interfaces/dist/src/startable'
 import { Replica } from '../database/replica'
 import { ManifestInstance } from '../manifest/interface'
-import { Blocks } from '../mods/blocks'
-import { StorageFunc } from '../mods/storage'
+import { Blocks } from '../blocks'
+import { StorageFunc } from '../storage'
 import { Registrant } from '../registry/registrant'
 
 export interface Props {

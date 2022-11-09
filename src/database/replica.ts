@@ -5,7 +5,7 @@ import { Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { Graph, Root } from './graph.js'
 import { Edge } from './graph-node.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
@@ -20,7 +20,7 @@ import {
   sortEntriesRev,
   traverser
 } from './traversal.js'
-import { StorageFunc, StorageReturn } from '../mods/storage.js'
+import { StorageFunc, StorageReturn } from '../storage/index.js'
 import all from 'it-all'
 import { decodedcid, encodedcid, parsedcid } from '../utils/index.js'
 

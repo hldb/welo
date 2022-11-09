@@ -3,7 +3,7 @@ import { compare } from 'uint8arrays/compare'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
 
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { cidstring, parsedcid } from '../utils/index.js'
 import { Graph } from './graph.js'
 import { EntryInstance, EntryStatic } from '../entry/interface.js'

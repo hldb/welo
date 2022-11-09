@@ -1,6 +1,6 @@
 import { Block } from 'multiformats/block.js'
 import { CID } from 'multiformats/cid.js'
-import { Blocks } from '../../mods/blocks.js'
+import { Blocks } from '../../blocks/index.js'
 import {
   EntryData,
   EntryInstance,

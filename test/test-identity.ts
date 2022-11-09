@@ -6,8 +6,8 @@ import { base32 } from 'multiformats/bases/base32'
 import { Identity } from '../src/identity/default/index.js'
 
 import { Keychain } from '../src/mods/keychain.js'
-import { StorageReturn } from '../src/mods/storage.js'
-import { Blocks } from '../src/mods/blocks.js'
+import { StorageReturn } from '../src/storage/index.js'
+import { Blocks } from '../src/blocks/index.js'
 
 import {
   getIpfs,

@@ -1,8 +1,8 @@
 import { Opal as _Opal } from './opal.js'
 
-import { LevelStorage } from './mods/storage.js'
-import { Keychain } from './mods/keychain.js'
-import { Replicator } from './mods/replicator/index.js'
+import { LevelStorage } from './storage/index.js'
+import { Keychain } from './keychain/index.js'
+import { Replicator } from './replicator/index.js'
 
 import { StaticAccess } from './access/static/index.js'
 import { Entry } from './entry/default/index.js'

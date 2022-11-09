@@ -5,7 +5,7 @@ import { CID } from 'multiformats/cid'
 import * as blockCodec from '@ipld/dag-cbor'
 import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
 
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { Playable } from '../utils/playable.js'
 import { Node } from './graph-node.js'
 import { cidstring } from '../utils/index.js'

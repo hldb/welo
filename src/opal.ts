@@ -3,7 +3,6 @@ import EventEmitter from 'events'
 import where from 'wherearewe'
 import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
-import { PubSub } from '@libp2p/interface-pubsub'
 import { start } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
 
@@ -11,11 +10,11 @@ import { base32 } from 'multiformats/bases/base32'
 import { initRegistry, Registry } from './registry/index.js'
 import { Manifest, Address } from './manifest/default/index.js'
 import { Database } from './database/index.js'
-import { Blocks } from './mods/blocks.js'
+import { Blocks } from './blocks/index.js'
 import { OPAL_LOWER } from './utils/constants.js'
-import { StorageFunc, StorageReturn } from './mods/storage.js'
-import { Keychain } from './mods/keychain.js'
-import type { Replicator as ReplicatorClass } from './mods/replicator/index.js'
+import { StorageFunc, StorageReturn } from './storage/index.js'
+import { Keychain } from './keychain/index.js'
+import type { Replicator as ReplicatorClass } from './replicator/index.js'
 import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
 import { IdentityInstance } from './identity/interface.js'
 import { ManifestData } from './manifest/interface.js'
@@ -55,7 +54,6 @@ export class Opal extends Playable {
 
   ipfs: IPFS | null
   peerId: PeerId | null
-  pubsub: PubSub | null
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
@@ -68,8 +66,7 @@ export class Opal extends Playable {
     identities,
     keychain,
     ipfs,
-    peerId,
-    pubsub
+    peerId
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -98,7 +95,6 @@ export class Opal extends Playable {
 
     this.ipfs = ipfs
     this.peerId = peerId
-    this.pubsub = pubsub
 
     this.events = new EventEmitter()
 
@@ -160,8 +156,7 @@ export class Opal extends Playable {
       identities: identities ?? null,
       keychain: keychain ?? null,
       ipfs: options.ipfs ?? null,
-      peerId: options.peerId ?? null,
-      pubsub: options.pubsub ?? null
+      peerId: options.peerId ?? null
     }
 
     const opal = new Opal(config)

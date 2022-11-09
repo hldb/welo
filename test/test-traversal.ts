@@ -13,7 +13,7 @@ import {
   traverser
 } from '../src/database/traversal.js'
 
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 import { Entry } from '../src/entry/default/index.js'
 import { Identity } from '../src/identity/default/index.js'
 import { Keyvalue } from '../src/store/keyvalue/index.js'

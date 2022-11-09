@@ -5,11 +5,11 @@ import { AccessProtocol } from './access/static/protocol.js'
 import { EntryProtocol } from './entry/default/protocol.js'
 import { IdentityProtocol } from './identity/default/protocol.js'
 import { IdentityInstance } from './identity/interface.js'
-import { Blocks } from './mods/blocks.js'
-import { Keychain } from './mods/keychain.js'
-import { StorageFunc, StorageReturn } from './mods/storage.js'
+import { Blocks } from './blocks/index.js'
+import { Keychain } from './keychain/index.js'
+import { StorageFunc, StorageReturn } from './storage/index.js'
 import { StoreProtocol } from './store/keyvalue/protocol.js'
-import { Replicator } from './mods/replicator/index.js'
+import { Replicator } from './replicator/index.js'
 
 export interface OpalStorage {
   identities: StorageReturn

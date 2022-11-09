@@ -4,7 +4,7 @@ import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
 
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 
 import { getIpfs } from './utils/index.js'
 import { IPFS } from 'ipfs-core-types'

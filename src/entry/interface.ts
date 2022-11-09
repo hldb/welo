@@ -1,7 +1,7 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { Registrant } from '../registry/registrant.js'
 import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
 

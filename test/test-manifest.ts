@@ -2,7 +2,7 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import { Block } from 'multiformats/block'
 
-import { Blocks } from '../src/mods/blocks.js'
+import { Blocks } from '../src/blocks/index.js'
 import { Manifest, Address } from '../src/manifest/default/index.js'
 import { StaticAccess } from '../src/access/static/index.js'
 import { Entry } from '../src/entry/default/index.js'

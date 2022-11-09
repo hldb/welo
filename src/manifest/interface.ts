@@ -1,6 +1,6 @@
 import { Block } from 'multiformats/block'
 
-import { Blocks } from '../mods/blocks.js'
+import { Blocks } from '../blocks/index.js'
 import { Address } from './address.js'
 
 export interface Protocol {
