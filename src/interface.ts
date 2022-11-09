@@ -1,6 +1,5 @@
-import { PubSub } from '@libp2p/interface-pubsub'
+import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
-import { IPFS } from 'ipfs'
 
 import { AccessProtocol } from './access/static/protocol.js'
 import { EntryProtocol } from './entry/default/protocol.js'
@@ -43,7 +42,6 @@ export interface Config {
   keychain: Keychain | null
   ipfs: IPFS | null
   peerId: PeerId | null
-  pubsub: PubSub | null
 }
 
 export interface Create {
@@ -52,6 +50,5 @@ export interface Create {
   ipfs?: IPFS
   blocks?: Blocks
   peerId?: PeerId
-  pubsub?: PubSub
   start?: boolean
 }

@@ -1,7 +1,7 @@
 import path from 'path'
 import EventEmitter from 'events'
 import where from 'wherearewe'
-import { IPFS } from 'ipfs'
+import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
 import { PubSub } from '@libp2p/interface-pubsub'
 import { start } from '@libp2p/interfaces/startable'
@@ -256,7 +256,6 @@ export class Opal extends Playable {
       manifest,
       blocks: this.blocks,
       ipfs: this.ipfs ?? undefined,
-      pubsub: this.pubsub ?? undefined,
       peerId: this.peerId ?? undefined,
       identity,
       ...components
