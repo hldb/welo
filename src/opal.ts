@@ -8,7 +8,7 @@ import { base32 } from 'multiformats/bases/base32'
 
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry/index.js'
-import { Manifest, Address } from './manifest/default/index.js'
+import { Manifest, Address } from './manifest/index.js'
 import { Database } from './database/index.js'
 import { Blocks } from './blocks/index.js'
 import { OPAL_LOWER } from './utils/constants.js'
