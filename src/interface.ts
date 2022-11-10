@@ -2,7 +2,7 @@ import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
 
 import { AccessProtocol } from './access/static/protocol.js'
-import { EntryProtocol } from './entry/default/protocol.js'
+import { EntryProtocol } from './entry/basal/protocol.js'
 import { IdentityProtocol } from './identity/basal/protocol.js'
 import { IdentityInstance } from './identity/interface.js'
 import { Blocks } from './blocks/index.js'

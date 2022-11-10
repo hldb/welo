@@ -14,7 +14,7 @@ import {
 } from '../src/database/traversal.js'
 
 import { Blocks } from '../src/blocks/index.js'
-import { Entry } from '../src/entry/default/index.js'
+import { Entry } from '../src/entry/basal/index.js'
 import { Identity } from '../src/identity/basal/index.js.js'
 import { Keyvalue } from '../src/store/keyvalue/index.js'
 import { StaticAccess } from '../src/access/static/index.js'
