@@ -6,7 +6,7 @@ import { Replicator } from './replicator/index.js'
 
 import { StaticAccess } from './access/static/index.js'
 import { Entry } from './entry/default/index.js'
-import { Identity } from './identity/default/index.js'
+import { Identity } from './identity/basal/index.js.js'
 import { Keyvalue } from './store/keyvalue/index.js'
 
 _Opal.registry.access.add(StaticAccess)

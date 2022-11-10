@@ -4,7 +4,7 @@ import { base32 } from 'multiformats/bases/base32'
 import { Blocks } from '../src/blocks/index.js'
 import { Entry } from '../src/entry/default/index.js'
 import { EntryData } from '../src/entry/interface.js'
-import { Identity } from '../src/identity/default/index.js'
+import { Identity } from '../src/identity/basal/index.js.js'
 import { Keychain } from '../src/mods/keychain.js'
 
 import {

@@ -3,7 +3,7 @@ import { IPFS } from 'ipfs'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 
-import { Identity } from '../src/identity/default/index.js'
+import { Identity } from '../src/identity/basal/index.js.js'
 
 import { Keychain } from '../src/mods/keychain.js'
 import { StorageReturn } from '../src/storage/index.js'
