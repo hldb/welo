@@ -5,7 +5,25 @@ const offlineIpfsOptions = (repo: string) => ({
   config: {
     profile: 'test',
     Addresses: {
-      Swarm: [],
+      Swarm: ['/ip4/127.0.0.1/tcp/0'],
+      Announce: [],
+      NoAnnounce: [],
+      Delegates: []
+    },
+    Bootstrap: [],
+    Pubsub: {
+      Router: 'gossipsub',
+      Enabled: true
+    }
+  }
+})
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const localIpfsOptions = (repo: string) => ({
+  repo,
+  config: {
+    Addresses: {
+      Swarm: ['/ip4/127.0.0.1/tcp/0'],
       Announce: [],
       NoAnnounce: [],
       Delegates: []
@@ -19,5 +37,6 @@ const offlineIpfsOptions = (repo: string) => ({
 })
 
 export const ipfs = {
-  offline: offlineIpfsOptions
+  offline: offlineIpfsOptions,
+  local: localIpfsOptions
 }
