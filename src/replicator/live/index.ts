@@ -16,8 +16,8 @@ import { Replica } from '~database/replica.js'
 import { AccessInstance } from '~access/interface.js'
 import { parsedcid } from '~utils/index.js'
 import { Playable } from '~utils/playable.js'
-import { DirectChannel } from '~utils/pubsub/direct.js'
-import { SharedChannel } from '~utils/pubsub/shared.js'
+import { DirectChannel } from '~pubsub/direct.js'
+import { SharedChannel } from '~pubsub/shared.js'
 
 import * as ReplicatorMessage from './message.js'
 

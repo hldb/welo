@@ -38,6 +38,7 @@
       "~identity/*": ["src/identity/*"],
       "~keychain/*": ["src/keychain/*"],
       "~manifest/*": ["src/manifest/*"],
+      "~pubsub/*": ["src/pubsub/*"],
       "~registry/*": ["src/registry/*"],
       "~replicator/*": ["src/replicator/*"],
       "~storage/*": ["src/storage/*"],

@@ -1,7 +1,9 @@
 import { IPFS } from 'ipfs-core-types'
 import { base32 } from 'multiformats/bases/base32'
-import { Address } from '../../../manifest/address'
-import { Playable } from '../../../utils/playable'
+
+import { Address } from '~manifest/address'
+import { Playable } from '~utils/playable'
+
 import { Monitor } from './monitor'
 
 const topicPrefix = '/opal/replicator/live/1.0.0/'
