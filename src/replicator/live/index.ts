@@ -97,7 +97,7 @@ export class LiveReplicator extends Playable {
   async broadcast (heads: CID[]): Promise<void> {
     const promises: Array<Promise<void>> = []
     for (const direct of this.directs.values()) {
-      if (direct.isOpen()) {
+      if (direct.isOpen() === true) {
         promises.push(direct.publish(heads))
       }
     }
