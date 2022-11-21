@@ -1,4 +1,5 @@
-import { Protocol } from '../../manifest/interface.js'
+import { Protocol } from '~manifest/interface.js'
+
 import protocolPrefix from '../prefix.js'
 
 const protocol: '/opal/identity/basal' = `${protocolPrefix}/basal`

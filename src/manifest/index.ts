@@ -1,6 +1,8 @@
 import { Block } from 'multiformats/block'
 
-import { Blocks } from '../blocks/index.js'
+import { Blocks } from '~blocks/index.js'
+import { Extends } from '~utils/decorators.js'
+
 import { Address } from './address.js'
 import {
   AsManifest,
@@ -11,7 +13,6 @@ import {
   ManifestStatic,
   Protocol
 } from './interface.js'
-import { Extends } from '../utils/decorators.js'
 
 export { Address }
 

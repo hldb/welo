@@ -1,4 +1,5 @@
-import { Protocol } from '../../manifest/interface.js'
+import { Protocol } from '~manifest/interface.js'
+
 import protocolPrefix from '../prefix.js'
 
 const type = 'static'

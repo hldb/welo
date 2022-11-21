@@ -1,30 +1,31 @@
 import path from 'path'
 import EventEmitter from 'events'
 import where from 'wherearewe'
+import { base32 } from 'multiformats/bases/base32'
+import { start, stop } from '@libp2p/interfaces/startable'
+
 import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
-import { start } from '@libp2p/interfaces/startable'
-import { base32 } from 'multiformats/bases/base32'
 
 // import * as version from './version.js'
-import { initRegistry, Registry } from './registry/index.js'
-import { Manifest, Address } from './manifest/index.js'
-import { Database } from './database/index.js'
-import { Blocks } from './blocks/index.js'
-import { OPAL_LOWER } from './utils/constants.js'
-import { StorageFunc, StorageReturn } from './storage/index.js'
-import { Keychain } from './keychain/index.js'
-import type { Replicator as ReplicatorClass } from './replicator/index.js'
 import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
-import { IdentityInstance } from './identity/interface.js'
-import { ManifestData } from './manifest/interface.js'
-import { Playable } from './utils/playable.js'
+import { initRegistry, Registry } from './registry/index.js'
+import { Manifest, Address } from '~manifest/index.js'
+import { Database } from '~database/index.js'
+import { Blocks } from '~blocks/index.js'
+import { OPAL_LOWER } from '~utils/constants.js'
+import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { Keychain } from '~keychain/index.js'
+import type { Replicator as ReplicatorClass } from '~replicator/index.js'
+import { IdentityInstance } from '~identity/interface.js'
+import { ManifestData } from '~manifest/interface.js'
+import { Playable } from '~utils/playable.js'
 import {
   dirs,
   DirsReturn,
   defaultManifest,
   getComponents
-} from './utils/index.js'
+} from '~utils/index.js'
 
 const registry = initRegistry()
 
@@ -73,9 +74,7 @@ export class Opal extends Playable {
     }
     const stopping = async (): Promise<void> => {
       await Promise.all(Object.values(this._opening))
-      await Promise.all(
-        Object.values(this.opened).map(async (db: Database) => await db.stop())
-      )
+      await Promise.all(Object.values(this.opened).map(stop))
 
       this.events.emit('stop')
       this.events.removeAllListeners('opened')

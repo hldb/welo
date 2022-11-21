@@ -5,10 +5,11 @@ import { CID } from 'multiformats/cid'
 import * as blockCodec from '@ipld/dag-cbor'
 import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
 
-import { Blocks } from '../blocks/index.js'
-import { Playable } from '../utils/playable.js'
+import { Blocks } from '~blocks/index.js'
+import { Playable } from '~utils/playable.js'
+import { cidstring } from '~utils/index.js'
+
 import { Node } from './graph-node.js'
-import { cidstring } from '../utils/index.js'
 
 const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
   blockCodec,

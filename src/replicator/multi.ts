@@ -1,8 +1,8 @@
 import { start, stop } from '@libp2p/interfaces/dist/src/startable.js'
 import EventEmitter from 'events'
-import { Database } from '../database/index.js'
 
-import { Playable } from '../utils/playable.js'
+import { Database } from '~database/index.js'
+import { Playable } from '~utils/playable.js'
 import { Config } from './interface.js'
 
 export class MultiReplicator extends Playable {

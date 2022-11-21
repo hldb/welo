@@ -1,15 +1,15 @@
 import { IPFS } from 'ipfs-core-types'
 import { PeerId } from '@libp2p/interface-peer-id'
 
-import { AccessProtocol } from './access/static/protocol.js'
-import { EntryProtocol } from './entry/basal/protocol.js'
-import { IdentityProtocol } from './identity/basal/protocol.js'
-import { IdentityInstance } from './identity/interface.js'
-import { Blocks } from './blocks/index.js'
-import { Keychain } from './keychain/index.js'
-import { StorageFunc, StorageReturn } from './storage/index.js'
-import { StoreProtocol } from './store/keyvalue/protocol.js'
-import { Replicator } from './replicator/index.js'
+import { AccessProtocol } from '~access/static/protocol.js'
+import { EntryProtocol } from '~entry/basal/protocol.js'
+import { IdentityProtocol } from '~identity/basal/protocol.js'
+import { IdentityInstance } from '~identity/interface.js'
+import { Blocks } from '~blocks/index.js'
+import { Keychain } from '~keychain/index.js'
+import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { StoreProtocol } from '~store/keyvalue/protocol.js'
+import { Replicator } from '~replicator/index.js'
 
 export interface OpalStorage {
   identities: StorageReturn

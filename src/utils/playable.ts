@@ -1,5 +1,5 @@
 import type EventEmitter from 'events'
-import { Startable } from '@libp2p/interfaces/dist/src/startable'
+import { Startable } from '@libp2p/interfaces/startable'
 
 export interface Lifecycle {
   starting: () => Promise<void>

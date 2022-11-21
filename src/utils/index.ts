@@ -2,13 +2,13 @@ import path from 'path'
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 
-import { Registry } from '../registry/index.js'
-import { ManifestData } from '../manifest/interface.js'
-import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
-import { AccessStatic } from '../access/interface.js'
-import { StoreStatic } from '../store/interface.js'
-import { EntryStatic } from '../entry/interface.js'
-import { Manifest } from '../manifest/default/index.js'
+import { Registry } from '~src/registry/index.js'
+import { ManifestData } from '~manifest/interface.js'
+import { IdentityInstance, IdentityStatic } from '~identity/interface.js'
+import { AccessStatic } from '~access/interface.js'
+import { StoreStatic } from '~store/interface.js'
+import { EntryStatic } from '~entry/interface.js'
+import { Manifest } from '~manifest/index.js'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)

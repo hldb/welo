@@ -1,12 +1,13 @@
+import { AccessStatic } from '~access/interface.js'
+import { EntryStatic } from '~entry/interface.js'
+import { IdentityStatic } from '~identity/interface.js'
+import { StoreStatic } from '~store/interface.js'
+import accessPrefix from '~access/prefix.js'
+import entryPrefix from '~entry/prefix.js'
+import identityPrefix from '~identity/prefix.js'
+import storePrefix from '~store/prefix.js'
+
 import { Register } from './register.js'
-import { AccessStatic } from '../access/interface.js'
-import { EntryStatic } from '../entry/interface.js'
-import { IdentityStatic } from '../identity/interface.js'
-import { StoreStatic } from '../store/interface.js'
-import accessPrefix from '../access/prefix.js'
-import entryPrefix from '../entry/prefix.js'
-import identityPrefix from '../identity/prefix.js'
-import storePrefix from '../store/prefix.js'
 
 export interface Registry {
   access: Register<AccessStatic>

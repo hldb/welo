@@ -1,8 +1,9 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
 
-import { Blocks } from '../../blocks'
-import { protocol } from './protocol'
+import { Blocks } from '~blocks/index.js'
+
+import { protocol } from './protocol.js'
 
 interface BlockData<Protocol> {
   protocol: Protocol

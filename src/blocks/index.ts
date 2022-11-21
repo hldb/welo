@@ -1,9 +1,8 @@
+import { IPFS } from 'ipfs'
+import { CID } from 'multiformats/cid'
 import * as Block from 'multiformats/block'
 import * as cbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
-import { IPFS } from 'ipfs'
-import { CID } from 'multiformats/cid'
-
 import type { AbortOptions } from 'ipfs-core-types'
 import type { MultihashHasher } from 'multiformats/hashes/hasher'
 import type { PreloadOptions } from 'ipfs-core-types/src/utils'

@@ -4,15 +4,19 @@ import { Block } from 'multiformats/block'
 import { Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
+import all from 'it-all'
 
-import { Blocks } from '../blocks/index.js'
+import { Blocks } from '~blocks/index.js'
+import { IdentityInstance, IdentityStatic } from '~identity/interface.js'
+import { EntryInstance, EntryStatic } from '~entry/interface.js'
+import { ManifestInstance } from '~manifest/interface.js'
+import { AccessInstance } from '~access/interface.js'
+import { Playable } from '~utils/playable.js'
+import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
+
 import { Graph, Root } from './graph.js'
 import { Edge } from './graph-node.js'
-import { IdentityInstance, IdentityStatic } from '../identity/interface.js'
-import { EntryInstance, EntryStatic } from '../entry/interface.js'
-import { ManifestInstance } from '../manifest/interface.js'
-import { AccessInstance } from '../access/interface.js'
-import { Playable } from '../utils/playable.js'
 import {
   loadEntry,
   graphLinks,
@@ -20,9 +24,6 @@ import {
   sortEntriesRev,
   traverser
 } from './traversal.js'
-import { StorageFunc, StorageReturn } from '../storage/index.js'
-import all from 'it-all'
-import { decodedcid, encodedcid, parsedcid } from '../utils/index.js'
 
 const rootHashKey = new Key('rootHash')
 

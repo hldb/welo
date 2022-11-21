@@ -1,6 +1,11 @@
-import { Block } from 'multiformats/block.js'
-import { CID } from 'multiformats/cid.js'
-import { Blocks } from '../../blocks/index.js'
+import { Block } from 'multiformats/block'
+import { CID } from 'multiformats/cid'
+
+import { Blocks } from '~blocks/index.js'
+import { Extends } from '~utils/decorators.js'
+import { IdentityInstance } from '~identity/interface.js'
+
+import protocol from './protocol.js'
 import {
   EntryData,
   EntryInstance,
@@ -9,9 +14,6 @@ import {
   Fetch,
   AsEntry
 } from '../interface.js'
-import { Extends } from '../../utils/decorators.js'
-import protocol from './protocol.js'
-import { IdentityInstance } from '../../identity/interface.js'
 
 interface SignedEntry {
   auth: CID

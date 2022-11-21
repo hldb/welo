@@ -1,14 +1,16 @@
 import { IPFS } from 'ipfs'
 import { PeerId } from '@libp2p/interface-peer-id'
 import { PubSub } from '@libp2p/interface-pubsub'
-import { AccessInstance, AccessStatic } from '../access/interface'
-import { EntryStatic } from '../entry/interface'
-import { IdentityInstance, IdentityStatic } from '../identity/interface'
-import { ManifestInstance } from '../manifest/interface'
-import { Blocks } from '../blocks'
-import { MultiReplicator } from '../replicator/multi.js'
-import { StorageFunc } from '../storage'
-import { StoreInstance, StoreStatic } from '../store/interface'
+
+import { AccessInstance, AccessStatic } from '~access/interface'
+import { EntryStatic } from '~entry/interface'
+import { IdentityInstance, IdentityStatic } from '~identity/interface'
+import { ManifestInstance } from '~manifest/interface'
+import { Blocks } from '~blocks/index.js'
+import { MultiReplicator } from '~replicator/multi.js'
+import { StorageFunc } from '~storage/index.js'
+import { StoreInstance, StoreStatic } from '~store/interface'
+
 import { Replica } from './replica'
 
 export interface Open {

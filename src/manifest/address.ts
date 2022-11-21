@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 
-import { OPAL_PREFIX } from '../utils/constants.js'
+import { OPAL_PREFIX } from '~utils/constants.js'
 
 const prefix: '/opal/' = `${OPAL_PREFIX}/`
 
