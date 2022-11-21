@@ -3,11 +3,10 @@ import { IPFS } from 'ipfs'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 
-import { Identity } from '../src/identity/basal/index.js.js'
-
-import { Keychain } from '../src/mods/keychain.js'
-import { StorageReturn } from '../src/storage/index.js'
-import { Blocks } from '../src/blocks/index.js'
+import { Identity } from '~identity/basal/index.js'
+import { Keychain } from '~keychain/index.js'
+import { StorageReturn } from '~storage/index.js'
+import { Blocks } from '~blocks/index.js'
 
 import {
   getIpfs,

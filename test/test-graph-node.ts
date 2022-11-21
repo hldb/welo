@@ -7,7 +7,7 @@ import {
   Node,
   NodeValue,
   NodeObj
-} from '../src/database/graph-node.js'
+} from '~database/graph-node.js'
 
 describe('Graph Node', () => {
   const initNode: NodeObj = {

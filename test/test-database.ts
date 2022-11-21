@@ -2,21 +2,21 @@ import path from 'path'
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 
-import { Database } from '../src/database/index.js'
-
-import { Keyvalue, Keyvalue as Store } from '../src/store/keyvalue/index.js'
+import { Database } from '~database/index.js'
+import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
 import {
   StaticAccess as Access,
   StaticAccess
-} from '../src/access/static/index.js'
-import { Entry } from '../src/entry/basal/index.js'
-import { Identity } from '../src/identity/basal/index.js.js'
-import { Manifest } from '../src/manifest/default/index.js'
-import { initRegistry } from '../src/registry/index.js'
-import { Blocks } from '../src/blocks/index.js'
-import { defaultManifest } from '../src/utils/index.js'
+} from '~access/static/index.js'
+import { Entry } from '~entry/basal/index.js'
+import { Identity } from '~identity/basal/index.js'
+import { Manifest } from '~manifest/index.js'
+import { initRegistry } from '~registry/index.js'
+import { Blocks } from '~blocks/index.js'
+import { defaultManifest } from '~utils/index.js'
 import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
-import { LevelStorage, StorageFunc, StorageReturn } from '../src/storage/index.js'
+import { LevelStorage, StorageFunc, StorageReturn } from '~storage/index.js'
+
 import { tempPath } from './utils/constants.js'
 
 const registry = initRegistry()

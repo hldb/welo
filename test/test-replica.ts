@@ -4,17 +4,16 @@ import { IPFS } from 'ipfs'
 import { CID } from 'multiformats/cid'
 import { start, stop } from '@libp2p/interfaces/startable'
 
-import { Replica } from '../src/database/replica.js'
-
-import { Blocks } from '../src/blocks/index.js'
-import { Keyvalue } from '../src/store/keyvalue/index.js'
-import { StaticAccess } from '../src/access/static/index.js'
-import { Entry } from '../src/entry/basal/index.js'
-import { Identity } from '../src/identity/basal/index.js.js'
-import { cidstring, decodedcid, defaultManifest } from '../src/utils/index.js'
-import { Manifest } from '../src/manifest/default/index.js'
-import { initRegistry } from '../src/registry/index.js'
-import { LevelStorage, StorageReturn } from '../src/storage/index.js'
+import { Replica } from '~database/replica.js'
+import { Blocks } from '~blocks/index.js'
+import { Keyvalue } from '~store/keyvalue/index.js'
+import { StaticAccess } from '~access/static/index.js'
+import { Entry } from '~entry/basal/index.js'
+import { Identity } from '~identity/basal/index.js'
+import { cidstring, decodedcid, defaultManifest } from '~utils/index.js'
+import { Manifest } from '~manifest/index.js'
+import { initRegistry } from '~registry/index.js'
+import { LevelStorage, StorageReturn } from '~storage/index.js'
 
 import {
   getIpfs,

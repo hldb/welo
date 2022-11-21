@@ -2,6 +2,7 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import { CID } from 'multiformats/cid'
 import { start } from '@libp2p/interfaces/startable'
+import { HashMap } from 'ipld-hashmap'
 
 import {
   sortCids,
@@ -11,16 +12,17 @@ import {
   dagLinks,
   graphLinks,
   traverser
-} from '../src/database/traversal.js'
+} from '~database/traversal.js'
+import { Blocks } from '~blocks/index.js'
+import { Entry } from '~entry/basal/index.js'
+import { Identity } from '~identity/basal/index.js'
+import { Keyvalue } from '~store/keyvalue/index.js'
+import { StaticAccess } from '~access/static/index.js'
+import { Graph, loadHashMap } from '~database/graph.js'
+import { cidstring, defaultManifest } from '~utils/index.js'
+import { initRegistry } from '~registry/index.js'
+import { Manifest } from '~manifest/index.js'
 
-import { Blocks } from '../src/blocks/index.js'
-import { Entry } from '../src/entry/basal/index.js'
-import { Identity } from '../src/identity/basal/index.js.js'
-import { Keyvalue } from '../src/store/keyvalue/index.js'
-import { StaticAccess } from '../src/access/static/index.js'
-import { Graph, loadHashMap } from '../src/database/graph.js'
-import { cidstring, defaultManifest } from '../src/utils/index.js'
-import { initRegistry } from '../src/registry/index.js'
 import {
   getIpfs,
   getIdentity,
@@ -28,8 +30,6 @@ import {
   concurrentEntries,
   getStorageReturn
 } from './utils/index.js'
-import { Manifest } from '../src/manifest/default/index.js'
-import { HashMap } from 'ipld-hashmap'
 
 const registry = initRegistry()
 

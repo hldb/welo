@@ -2,11 +2,10 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs-core-types'
 import type { PubSub } from '@libp2p/interface-pubsub'
 
-import { Monitor } from '../src/replicator/utils/pubsub/monitor.js'
+import { Monitor } from '~pubsub/monitor.js'
 
 import { getIpfs } from './utils/index.js'
 import { ipfs } from './utils/options.js'
-import { start } from '@libp2p/interfaces/dist/src/startable.js'
 
 const sharedTopic = 'shared-topic'
 

@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import * as constants from '../src/utils/constants.js'
+import * as constants from '~utils/constants.js'
 
 describe('Constants', () => {
   it('exports OPAL_LOWER', () => {

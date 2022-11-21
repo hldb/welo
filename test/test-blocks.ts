@@ -1,13 +1,13 @@
 import { strict as assert } from 'assert'
+import { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
 import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
 
-import { Blocks } from '../src/blocks/index.js'
+import { Blocks } from '~blocks/index.js'
 
 import { getIpfs } from './utils/index.js'
-import { IPFS } from 'ipfs-core-types'
 
 describe('Blocks', () => {
   let block: Block.Block<Uint8Array>

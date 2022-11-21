@@ -1,13 +1,13 @@
 import { strict as assert } from 'assert'
+import type { IPFS } from 'ipfs'
 
-import { Opal } from '../src/index.js'
-import { Opal as OpalType } from '../src/opal.js'
-import { OPAL_PREFIX } from '../src/utils/constants.js'
+import { Opal } from '~src/index.js'
+import { Opal as OpalType } from '~src/opal.js'
+import { OPAL_PREFIX } from '~utils/constants.js'
+import type { Address, Manifest } from '~manifest/index.js'
+import { Database } from '~database/index.js'
 
 import { getIpfs, constants, getIdentity } from './utils/index.js'
-import type { IPFS } from 'ipfs'
-import type { Address, Manifest } from '../src/manifest/default/index.js'
-import { Database } from '../src/database/index.js'
 
 const getDirectory = (): string =>
   constants.temp.path + '/test-opal' + OPAL_PREFIX + String(Math.random())

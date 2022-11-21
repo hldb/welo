@@ -1,8 +1,8 @@
 import { strict as assert } from 'assert'
 
-import { initRegistry } from '../src/registry/index.js'
-import { Register } from '../src/registry/register.js'
-import { Registrant } from '../src/registry/registrant.js'
+import { initRegistry } from '~registry/index.js'
+import { Register } from '~registry/register.js'
+import { Registrant } from '~registry/registrant.js'
 
 const namespace = '/namespace/'
 

@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import { CID } from 'multiformats/cid'
-import { Address } from '../src/manifest/address.js'
+import { Address } from '~manifest/address.js'
 
 describe('Address', () => {
   let address: Address
