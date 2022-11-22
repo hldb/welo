@@ -44,6 +44,12 @@
       "~store/*": ["src/store/*"],
       "~utils/*": ["src/utils/*"]
     },                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
+    "plugins": [
+      // Transform paths in output .js files
+      { "transform": "typescript-transform-paths" },
+      // Transform paths in output .d.ts files (Include this line if you output declarations files)
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ],
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
@@ -122,5 +128,9 @@
     "node_modules",
     "<node_internals>/**",
     "dist"
-  ]
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "require": [ "typescript-transform-paths/register" ]
+  }
 }
