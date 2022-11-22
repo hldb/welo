@@ -7,6 +7,7 @@
   "prettier": "prettier-config-standard",
   "scripts": {
     "postinstall": "npm run exports-keychain",
+    "prepare": "ts-patch install -s",
     "lint": "eslint src test",
     "format": "prettier -w src test && eslint --fix src test",
     "exports-keychain": "json -I -f ./node_modules/libp2p/package.json -e 'this.exports[\"./keychain\"] = { \"types\": \"./dist/src/keychain/index.d.ts\", \"import\": \"./dist/src/keychain/index.js\" }'",
@@ -42,7 +43,9 @@
     "prettier": "^2.7.1",
     "prettier-config-standard": "^5.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.2"
+    "ts-patch": "^2.0.2",
+    "typescript": "^4.8.2",
+    "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
     "@ipld/dag-cbor": "^7.0.2",
