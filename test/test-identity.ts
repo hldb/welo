@@ -8,41 +8,41 @@ import { Keychain } from '~keychain/index.js'
 import { StorageReturn } from '~storage/index.js'
 import { Blocks } from '~blocks/index.js'
 
-import {
-  getIpfs,
-  getIdentity,
-  kpi,
-  constants,
-  getStorageReturn,
-  getStorage
-} from './utils/index.js'
-const { fixt, names } = constants
+import { getTestStorage, TestStorage } from './utils/persistence'
+import { fixtPath, getTestPaths, names, tempPath } from './utils/constants'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
+import { kpi } from './utils/identities'
 
-const dataEmpty = new Uint8Array()
-const signedEmpty = base32.decode(
-  'bgbcqeiiayc2skoa4am3u3kmq4io6zjspbroxyfw2duj2lzxagrxfoafes4eaeid3eayxiin7neu6s4jhngwj2uoxoxxhzrdcckhtinpqtugc64tyze'
-)
-const authstring = 'bafyreibvk33g3t2jktm3i7q7vwugu3mqoc3oajlymb7u46qn6kqpsexl4u'
+const testName = 'basal identity'
 
-describe('Base Identity', () => {
+describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: getStorageReturn,
+    storage: TestStorage,
     identities: StorageReturn,
     keychain: Keychain,
     identity: Identity
-  let tempStorage: getStorageReturn,
+  let tempStorage: TestStorage,
     tempIdentities: StorageReturn,
     tempKeychain: Keychain
   const expectedProtocol = '/opal/identity'
   const name = names.name0
   const password = ''
 
+  const dataEmpty = new Uint8Array()
+  const signedEmpty = base32.decode(
+    'bgbcqeiiayc2skoa4am3u3kmq4io6zjspbroxyfw2duj2lzxagrxfoafes4eaeid3eayxiin7neu6s4jhngwj2uoxoxxhzrdcckhtinpqtugc64tyze'
+  )
+  const authstring = 'bafyreibvk33g3t2jktm3i7q7vwugu3mqoc3oajlymb7u46qn6kqpsexl4u'
+
   before(async () => {
-    ipfs = await getIpfs(fixt.identity)
+    const fixtTestPaths = getTestPaths(fixtPath, testName)
+    ipfs = await getTestIpfs(fixtTestPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getStorage(fixt.identity)
+    storage = await getTestStorage(fixtTestPaths)
+    await storage.open()
+
     identities = storage.identities
     keychain = new Keychain(storage.keychain)
 
@@ -53,10 +53,12 @@ describe('Base Identity', () => {
       kpi
     }).catch(async () => await Identity.get({ name, identities, keychain }))
 
-    const gotTemp = await getIdentity()
-    tempStorage = gotTemp.storage
-    tempIdentities = tempStorage.identities
-    tempKeychain = gotTemp.keychain
+    const tempTestPaths = getTestPaths(tempPath, testName)
+    tempStorage = await getTestStorage(tempTestPaths)
+    await tempStorage.open()
+
+    tempIdentities = storage.identities
+    tempKeychain = new Keychain(storage.keychain)
   })
 
   after(async () => {

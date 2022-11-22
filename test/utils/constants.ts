@@ -3,18 +3,22 @@ export const fixtPath = './test/fixtures'
 export const identitiesPath = '/identities'
 export const keychainPath = '/keychain'
 export const ipfsPath = '/ipfs'
-export const entryTest = '/test-entry'
-export const identityTest = '/test-identity'
 
-export const temp = {
-  path: tempPath
+export type TestRoot = typeof tempPath | typeof fixtPath
+
+export interface TestPaths {
+  test: string
+  identities: string
+  keychain: string
+  ipfs: string
 }
 
-export const fixt = {
-  path: fixtPath,
-  entry: fixtPath + entryTest,
-  identity: fixtPath + identityTest
-}
+export const getTestPaths = (testRoot: TestRoot, testName: string): TestPaths => ({
+  test: testRoot + testName,
+  identities: testRoot + testName + identitiesPath,
+  keychain: testRoot + testName + keychainPath,
+  ipfs: testRoot + testName + ipfsPath
+})
 
 export const names = {
   name0: 'name0',

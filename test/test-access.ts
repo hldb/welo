@@ -12,19 +12,24 @@ import { StaticAccess } from '~access/static/index.js'
 import protocol, { AccessProtocol } from '~access/static/protocol.js'
 import { wildcard } from '~access/util.js'
 
-import { getStorageReturn, getIdentity, singleEntry } from './utils/index.js'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { singleEntry } from './utils/entries.js'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import { getTestIdentity } from './utils/identities.js'
 
-const registry = initRegistry()
+const testName = 'static access'
 
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
-
-describe('Static Access', () => {
-  let storage: getStorageReturn, identity: Identity, entry: Entry
+describe(testName, () => {
+  let storage: TestStorage, identity: Identity, entry: Entry
   const Access = StaticAccess
   const name = 'name'
+
+  const registry = initRegistry()
+
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
 
   const makeaccess = (write: Array<Uint8Array | string>): AccessProtocol => ({
     protocol: Access.protocol,
@@ -37,16 +42,12 @@ describe('Static Access', () => {
   const emptyaccess: AccessProtocol = makeaccess([])
 
   before(async () => {
-    const obj = await getIdentity()
+    const testPaths = getTestPaths(tempPath, testName)
+    storage = await getTestStorage(testPaths)
 
-    storage = obj.storage
-    identity = obj.identity
+    identity = await getTestIdentity(storage, name)
     entry = await singleEntry(identity)()
     yesaccess = makeaccess([identity.id])
-  })
-
-  after(async () => {
-    await storage.close()
   })
 
   describe('Class', () => {

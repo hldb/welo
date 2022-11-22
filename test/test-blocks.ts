@@ -7,9 +7,12 @@ import { sha256 as hasher } from 'multiformats/hashes/sha2'
 
 import { Blocks } from '~blocks/index.js'
 
-import { getIpfs } from './utils/index.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestPaths, tempPath } from './utils/constants.js'
 
-describe('Blocks', () => {
+const testName = 'blocks'
+
+describe(testName, () => {
   let block: Block.Block<Uint8Array>
   const value = new Uint8Array()
   const bytes = new Uint8Array([64])
@@ -59,7 +62,8 @@ describe('Blocks', () => {
     let ipfs: IPFS, blocks: Blocks
 
     before(async () => {
-      ipfs = await getIpfs()
+      const testPaths = getTestPaths(tempPath, testName)
+      ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
       blocks = new Blocks(ipfs)
     })
 

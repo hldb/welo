@@ -14,42 +14,51 @@ import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Blocks } from '~blocks/index.js'
 import { defaultManifest } from '~utils/index.js'
-import { getIpfs, getIdentity, getStorageReturn } from './utils/index.js'
 import { LevelStorage, StorageFunc, StorageReturn } from '~storage/index.js'
+import { MultiReplicator } from '~replicator/multi.js'
 
-import { tempPath } from './utils/constants.js'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { getTestIdentity } from './utils/identities.js'
 
-const registry = initRegistry()
+const testName = 'database'
 
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
-
-describe('Database', () => {
+describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: getStorageReturn,
+    storage: TestStorage,
     database: Database,
     manifest: Manifest,
     identity: Identity,
     directory: string,
     Storage: StorageFunc
 
+  const registry = initRegistry()
+
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
+
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    const obj = await getIdentity()
+    storage = await getTestStorage(testPaths)
 
-    storage = obj.storage
-    identity = obj.identity
+    identity = await getTestIdentity(storage, testName)
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity, registry),
-      access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
+      access: {
+        protocol: StaticAccess.protocol,
+        config: { write: [identity.id] }
+      }
     })
-    directory = path.join(tempPath, 'test-database', manifest.address.toString())
+
+    directory = path.join(testPaths.test, manifest.address.toString())
     Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(directory, name))
   })
 
@@ -74,7 +83,8 @@ describe('Database', () => {
           Store,
           Access,
           Entry,
-          Identity
+          Identity,
+          Replicator: MultiReplicator // empty replicator
         })
       })
     })

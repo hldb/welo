@@ -1,4 +1,6 @@
 import { strict as assert } from 'assert'
+import type { IPFS } from 'ipfs'
+import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 
 import { Blocks } from '~blocks/index.js'
@@ -7,22 +9,17 @@ import { EntryData } from '~entry/interface.js'
 import { Identity } from '~identity/basal/index.js'
 import { Keychain } from '~keychain/index.js'
 
-import {
-  getIpfs,
-  getIdentity,
-  kpi,
-  getStorage,
-  constants,
-  getStorageReturn
-} from './utils/index.js'
-import type { IPFS } from 'ipfs'
-import type { CID } from 'multiformats/cid.js'
-const { fixt, names } = constants
+import { fixtPath, getTestPaths, names } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { getTestIdentity, kpi } from './utils/identities.js'
 
-describe('Base Entry', () => {
+const testName = 'basal entry'
+
+describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: getStorageReturn,
+    storage: TestStorage,
     identity: Identity,
     entry: Entry,
     invalidEntry: Entry
@@ -36,10 +33,14 @@ describe('Base Entry', () => {
   const refs: CID[] = []
 
   before(async () => {
-    ipfs = await getIpfs(fixt.entry)
+    const testPaths = getTestPaths(fixtPath, testName)
+
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getStorage(fixt.entry)
+    storage = await getTestStorage(testPaths)
+    await storage.open()
+
     const identities = storage.identities
     const keychain = new Keychain(storage.keychain)
 
@@ -130,8 +131,7 @@ describe('Base Entry', () => {
       })
 
       it('unverifies entry with mismatched identity', async () => {
-        const { identity, storage } = await getIdentity()
-        await storage.close()
+        const identity = await getTestIdentity(storage, names.name1)
 
         const _entry = (await Entry.asEntry({
           block: entry.block,

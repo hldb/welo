@@ -7,9 +7,12 @@ import { Graph } from '~database/graph.js'
 import { Node } from '~database/graph-node.js'
 import { Blocks } from '~blocks/index.js'
 
-import { getIpfs } from './utils/index.js'
+import { getTestPaths, tempPath } from './utils/constants'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
 
-describe('Graph', () => {
+const testName = 'graph'
+
+describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks
 
   let nodes: CID[], missing: CID[], denied: CID[]
@@ -29,7 +32,8 @@ describe('Graph', () => {
     new Node({ ...muteNode({ in: ni }), denied: true })
 
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
     // make 8 of each cid

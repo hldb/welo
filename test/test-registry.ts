@@ -4,16 +4,18 @@ import { initRegistry } from '~registry/index.js'
 import { Register } from '~registry/register.js'
 import { Registrant } from '~registry/registrant.js'
 
-const namespace = '/namespace/'
+const testName = 'register'
 
-const one: Registrant = { protocol: namespace + '1' }
-const two: Registrant = { protocol: namespace + '2' }
-const three: Registrant = { protocol: '3' }
-
-const components = { one, two, three }
-
-describe('Register', () => {
+describe(testName, () => {
   let register: Register<Registrant>
+
+  const namespace = '/namespace/'
+
+  const one: Registrant = { protocol: namespace + '1' }
+  const two: Registrant = { protocol: namespace + '2' }
+  const three: Registrant = { protocol: '3' }
+
+  const components = { one, two, three }
 
   describe('Class', () => {
     it('returns an instance', () => {

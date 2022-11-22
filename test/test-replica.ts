@@ -3,6 +3,7 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import { CID } from 'multiformats/cid'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { Key } from 'interface-datastore'
 
 import { Replica } from '~database/replica.js'
 import { Blocks } from '~blocks/index.js'
@@ -15,26 +16,17 @@ import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '~registry/index.js'
 import { LevelStorage, StorageReturn } from '~storage/index.js'
 
-import {
-  getIpfs,
-  getIdentity,
-  singleEntry,
-  getStorageReturn
-} from './utils/index.js'
-import { tempPath } from './utils/constants.js'
-import { Key } from 'interface-datastore'
+import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestIdentity } from './utils/identities.js'
 
-const registry = initRegistry()
+const testName = 'replica'
 
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
-
-describe('Replica', () => {
+describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: getStorageReturn,
+    storage: TestStorage,
     replica: Replica,
     manifest: Manifest,
     access: StaticAccess,
@@ -43,13 +35,20 @@ describe('Replica', () => {
 
   const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, name))
 
+  const registry = initRegistry()
+
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
+
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    const got = await getIdentity()
-    storage = got.storage
-    identity = got.identity
+    storage = await getTestStorage(testPaths)
+    identity = await getTestIdentity(storage, names.name0)
 
     await blocks.put(identity.block)
 
@@ -60,9 +59,9 @@ describe('Replica', () => {
     access = new StaticAccess({ manifest })
     await start(access)
 
-    const temp = await getIdentity()
-    await temp.storage.close()
-    tempIdentity = temp.identity
+    const testPaths1 = getTestPaths(tempPath, testName + '1')
+    const tempStorage = await getTestStorage(testPaths1)
+    tempIdentity = await getTestIdentity(tempStorage, names.name1)
   })
 
   after(async () => {

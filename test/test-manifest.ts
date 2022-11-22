@@ -11,36 +11,40 @@ import { Keyvalue } from '~store/keyvalue/index.js'
 import { initRegistry } from '~registry/index.js'
 import { getComponents } from '~utils/index.js'
 
-import { getIpfs } from './utils/index.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestPaths, tempPath } from './utils/constants.js'
 
-const registry = initRegistry()
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
+const testName = 'manifest'
 
-const config = {
-  name: 'test',
-  store: {
-    protocol: registry.store.star.protocol
-  },
-  access: {
-    protocol: registry.access.star.protocol,
-    write: []
-  },
-  entry: {
-    protocol: registry.entry.star.protocol
-  },
-  identity: {
-    protocol: registry.identity.star.protocol
-  }
-}
-
-describe('Manifest', () => {
+describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks, manifest: Manifest
 
+  const registry = initRegistry()
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
+
+  const config = {
+    name: 'test',
+    store: {
+      protocol: registry.store.star.protocol
+    },
+    access: {
+      protocol: registry.access.star.protocol,
+      write: []
+    },
+    entry: {
+      protocol: registry.entry.star.protocol
+    },
+    identity: {
+      protocol: registry.identity.star.protocol
+    }
+  }
+
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
   })
 

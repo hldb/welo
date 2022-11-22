@@ -1,21 +1,32 @@
 import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs'
 
-import { Opal } from '~src/index.js'
-import { Opal as OpalType } from '~src/opal.js'
+import { Opal } from '../src/index.js'
+import { Opal as OpalType } from '../src/opal.js'
 import { OPAL_PREFIX } from '~utils/constants.js'
 import type { Address, Manifest } from '~manifest/index.js'
 import { Database } from '~database/index.js'
 
-import { getIpfs, constants, getIdentity } from './utils/index.js'
+import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { Identity } from '~identity/basal/index.js'
+import { getTestIdentity } from './utils/identities.js'
+import { getTestStorage } from './utils/persistence.js'
 
-const getDirectory = (): string =>
-  constants.temp.path + '/test-opal' + OPAL_PREFIX + String(Math.random())
-describe('Opal', () => {
-  let ipfs: IPFS, opal: OpalType
+const testName = 'opal'
+
+describe(testName, () => {
+  let ipfs: IPFS, opal: OpalType, directory: string, identity: Identity, directory1: string
 
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
+
+    const testStorage = await getTestStorage(testPaths)
+    identity = await getTestIdentity(testStorage, names.name0)
+
+    directory = testPaths.test + OPAL_PREFIX
+    directory1 = directory + '1'
   })
 
   after(async () => {
@@ -38,24 +49,18 @@ describe('Opal', () => {
 
     describe('create', () => {
       it('returns an instance of Opal', async () => {
-        const directory = getDirectory()
-
         opal = await Opal.create({ ipfs, directory })
       })
 
       it('returns an instance of Opal with an identity option', async () => {
-        const directory = getDirectory()
-        const got = await getIdentity()
-        await got.storage.close()
-        const identity = got.identity
-
-        await Opal.create({ ipfs, directory, identity })
+        const directory = directory1
+        const opal = await Opal.create({ ipfs, directory, identity })
+        await opal.stop()
       })
 
       it('rejects if no identity option or Opal.Storage', async () => {
         const Storage = Opal.Storage
         Opal.Storage = undefined
-        const directory = getDirectory()
 
         const promise = Opal.create({ ipfs, directory })
         await assert.rejects(promise)
@@ -66,7 +71,6 @@ describe('Opal', () => {
       it('rejects if no identity option or Opal.Keychain', async () => {
         const Keychain = Opal.Keychain
         Opal.Keychain = undefined
-        const directory = getDirectory()
 
         const promise = Opal.create({ ipfs, directory })
         await assert.rejects(promise)

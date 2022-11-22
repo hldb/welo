@@ -1,6 +1,6 @@
 import path from 'path'
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs'
+import { IPFS } from 'ipfs-core-types'
 import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Keyvalue } from '~store/keyvalue/index.js'
@@ -10,30 +10,36 @@ import { StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { initRegistry } from '~registry/index.js'
-import { getIpfs, getIdentity } from './utils/index.js'
 import { Manifest } from '~manifest/index.js'
 import { defaultManifest } from '~utils/index.js'
 import { LevelStorage, StorageReturn } from '~storage/index.js'
-import { tempPath } from './utils/constants.js'
 
-const registry = initRegistry()
+import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestStorage } from './utils/persistence.js'
+import { getTestIdentity } from './utils/identities.js'
 
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
+const testName = 'keyvalue'
 
-describe('Keyvalue', () => {
+describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity
   const expectedProtocol = '/opal/store/keyvalue'
   const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, 'test-keyvalue', name))
 
+  const registry = initRegistry()
+
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
+
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    const got = await getIdentity()
-    identity = got.identity
+    const testStorage = await getTestStorage(testPaths)
+    identity = await getTestIdentity(testStorage, names.name0)
 
     await blocks.put(identity.block)
   })

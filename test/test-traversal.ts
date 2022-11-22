@@ -22,27 +22,21 @@ import { Graph, loadHashMap } from '~database/graph.js'
 import { cidstring, defaultManifest } from '~utils/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Manifest } from '~manifest/index.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
+import { getTestPaths, names, tempPath } from './utils/constants'
+import { getTestStorage, TestStorage } from './utils/persistence'
+import { getTestIdentity } from './utils/identities'
+import { EntryInstance } from '~entry/interface'
+import { concurrentEntries, singleEntry } from './utils/entries'
 
-import {
-  getIpfs,
-  getIdentity,
-  singleEntry,
-  concurrentEntries,
-  getStorageReturn
-} from './utils/index.js'
-
-const registry = initRegistry()
-
-registry.store.add(Keyvalue)
-registry.access.add(StaticAccess)
-registry.entry.add(Entry)
-registry.identity.add(Identity)
+const testName = 'traversal'
 
 describe('traversal', () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: getStorageReturn,
+    storage: TestStorage,
     identity: Identity,
+    identity1: Identity,
     access: StaticAccess,
     noaccess: StaticAccess
 
@@ -55,13 +49,21 @@ describe('traversal', () => {
   const refs: CID[] = []
   const payload = {}
 
+  const registry = initRegistry()
+
+  registry.store.add(Keyvalue)
+  registry.access.add(StaticAccess)
+  registry.entry.add(Entry)
+  registry.identity.add(Identity)
+
   before(async () => {
-    ipfs = await getIpfs()
+    const testPaths = getTestPaths(tempPath, testName)
+    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    const got = await getIdentity()
-    storage = got.storage
-    identity = got.identity
+    storage = await getTestStorage(testPaths)
+    identity = await getTestIdentity(storage, names.name0)
+    identity1 = await getTestIdentity(storage, names.name1)
 
     access = new StaticAccess({
       manifest: await Manifest.create({
@@ -106,7 +108,6 @@ describe('traversal', () => {
   })
 
   after(async () => {
-    await storage.close()
     await ipfs.stop()
   })
 
@@ -134,7 +135,7 @@ describe('traversal', () => {
       const entry = entries[0]
       const cid = entry.cid
 
-      const loaded = await load(cid)
+      const loaded = await load(cid) as EntryInstance<any>
       assert.equal(cidstring(loaded.cid), cidstring(entry.cid)) // one is a buffer and one is a uint8array if not stringified
     })
 
@@ -313,8 +314,7 @@ describe('traversal', () => {
 
     before(async () => {
       const id0 = identity
-      const { storage, identity: id1 } = await getIdentity()
-      await storage.close()
+      const id1 = identity1
       await blocks.put(id1.block)
 
       const manifest = await Manifest.create({
