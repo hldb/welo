@@ -14,6 +14,7 @@ import {
   traverser
 } from '~database/traversal.js'
 import { Blocks } from '~blocks/index.js'
+import { EntryInstance } from '~entry/interface.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { Keyvalue } from '~store/keyvalue/index.js'
@@ -22,12 +23,12 @@ import { Graph, loadHashMap } from '~database/graph.js'
 import { cidstring, defaultManifest } from '~utils/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Manifest } from '~manifest/index.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
-import { getTestPaths, names, tempPath } from './utils/constants'
-import { getTestStorage, TestStorage } from './utils/persistence'
-import { getTestIdentity } from './utils/identities'
-import { EntryInstance } from '~entry/interface'
-import { concurrentEntries, singleEntry } from './utils/entries'
+
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { getTestIdentity } from './utils/identities.js'
+import { concurrentEntries, singleEntry } from './utils/entries.js'
 
 const testName = 'traversal'
 

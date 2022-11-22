@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert'
+
 import * as constants from '~utils/constants.js'
 
 describe('Constants', () => {

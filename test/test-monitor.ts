@@ -4,8 +4,9 @@ import { IPFS } from 'ipfs-core-types'
 import type { PubSub } from '@libp2p/interface-pubsub'
 
 import { Monitor } from '~pubsub/monitor.js'
-import { getTestIpfs, localIpfsOptions } from './utils/ipfs'
-import { getTestPaths, tempPath } from './utils/constants'
+
+import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getTestPaths, tempPath } from './utils/constants.js'
 
 const testName = 'pubsub peer monitor'
 

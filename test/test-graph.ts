@@ -7,8 +7,8 @@ import { Graph } from '~database/graph.js'
 import { Node } from '~database/graph-node.js'
 import { Blocks } from '~blocks/index.js'
 
-import { getTestPaths, tempPath } from './utils/constants'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 
 const testName = 'graph'
 

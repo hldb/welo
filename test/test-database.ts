@@ -4,10 +4,7 @@ import { IPFS } from 'ipfs'
 
 import { Database } from '~database/index.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
-import {
-  StaticAccess as Access,
-  StaticAccess
-} from '~access/static/index.js'
+import { StaticAccess as Access, StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { Manifest } from '~manifest/index.js'

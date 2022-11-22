@@ -20,6 +20,7 @@ import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestStorage, TestStorage } from './utils/persistence.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentity } from './utils/identities.js'
+import { singleEntry } from './utils/entries.js'
 
 const testName = 'replica'
 

@@ -8,10 +8,10 @@ import { Keychain } from '~keychain/index.js'
 import { StorageReturn } from '~storage/index.js'
 import { Blocks } from '~blocks/index.js'
 
-import { getTestStorage, TestStorage } from './utils/persistence'
-import { fixtPath, getTestPaths, names, tempPath } from './utils/constants'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs'
-import { kpi } from './utils/identities'
+import { getTestStorage, TestStorage } from './utils/persistence.js'
+import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { kpi } from './utils/identities.js'
 
 const testName = 'basal identity'
 
