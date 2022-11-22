@@ -14,10 +14,10 @@ export interface TestPaths {
 }
 
 export const getTestPaths = (testRoot: TestRoot, testName: string): TestPaths => ({
-  test: testRoot + testName,
-  identities: testRoot + testName + identitiesPath,
-  keychain: testRoot + testName + keychainPath,
-  ipfs: testRoot + testName + ipfsPath
+  test: testRoot + '/' + testName,
+  identities: testRoot + '/' + testName + identitiesPath,
+  keychain: testRoot + '/' + testName + keychainPath,
+  ipfs: testRoot + '/' + testName + ipfsPath
 })
 
 export const names = {
