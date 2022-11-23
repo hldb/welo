@@ -1,15 +1,12 @@
-import type EventEmitter from 'events'
 import { Startable } from '@libp2p/interfaces/startable'
 
 export interface Lifecycle {
   starting: () => Promise<void>
   stopping: () => Promise<void>
-  events?: EventEmitter
 }
 
 export class Playable implements Startable {
   private _isStarted: boolean
-  private readonly _events?: EventEmitter
 
   isStarted (): boolean {
     return this._isStarted
@@ -42,9 +39,6 @@ export class Playable implements Startable {
     return await this._starting
       .then(() => {
         this._isStarted = true
-        if (this._events !== undefined) {
-          this._events.emit('start')
-        }
       })
       .finally(() => {
         this._starting = null
@@ -69,9 +63,6 @@ export class Playable implements Startable {
     return await this._stopping
       .then(() => {
         this._isStarted = false
-        if (this._events !== undefined) {
-          this._events.emit('stop')
-        }
       })
       .finally(() => {
         this._stopping = null
