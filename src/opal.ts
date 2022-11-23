@@ -4,8 +4,9 @@ import where from 'wherearewe'
 import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
 
-import { IPFS } from 'ipfs-core-types'
-import { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { IPFS } from 'ipfs-core-types'
+import type { Libp2p } from 'libp2p'
 
 // import * as version from './version.js'
 import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
@@ -53,8 +54,9 @@ export class Opal extends Playable {
   identities: StorageReturn | null
   keychain: Keychain | null
 
-  ipfs: IPFS | null
   peerId: PeerId | null
+  ipfs: IPFS | null
+  libp2p: Libp2p | null
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
@@ -66,8 +68,9 @@ export class Opal extends Playable {
     storage,
     identities,
     keychain,
+    peerId,
     ipfs,
-    peerId
+    libp2p
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -92,8 +95,9 @@ export class Opal extends Playable {
     this.identities = identities
     this.keychain = keychain
 
-    this.ipfs = ipfs
     this.peerId = peerId
+    this.ipfs = ipfs
+    this.libp2p = libp2p
 
     this.events = new EventEmitter()
 
@@ -154,8 +158,10 @@ export class Opal extends Playable {
       storage: storage ?? null,
       identities: identities ?? null,
       keychain: keychain ?? null,
+      peerId: options.peerId ?? null,
       ipfs: options.ipfs ?? null,
-      peerId: options.peerId ?? null
+      // @ts-expect-error
+      libp2p: options.libp2p ?? options.ipfs?.libp2p ?? null
     }
 
     const opal = new Opal(config)
@@ -249,8 +255,9 @@ export class Opal extends Playable {
       Replicator,
       manifest,
       blocks: this.blocks,
-      ipfs: this.ipfs ?? undefined,
       peerId: this.peerId ?? undefined,
+      ipfs: this.ipfs ?? undefined,
+      libp2p: this.libp2p ?? undefined,
       identity,
       ...components
     })

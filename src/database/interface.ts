@@ -1,6 +1,6 @@
-import { IPFS } from 'ipfs'
-import { PeerId } from '@libp2p/interface-peer-id'
-import { PubSub } from '@libp2p/interface-pubsub'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { IPFS } from 'ipfs'
+import type { Libp2p } from 'libp2p'
 
 import { AccessInstance, AccessStatic } from '~access/interface'
 import { EntryStatic } from '~entry/interface'
@@ -19,9 +19,9 @@ export interface Open {
   start?: boolean
   blocks: Blocks
   Replicator: typeof MultiReplicator
-  ipfs?: IPFS
-  pubsub?: PubSub
   peerId?: PeerId
+  ipfs?: IPFS
+  libp2p?: Libp2p
   identity: IdentityInstance<any>
   manifest: ManifestInstance<any>
   Access: AccessStatic

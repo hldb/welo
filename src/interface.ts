@@ -1,5 +1,6 @@
-import { IPFS } from 'ipfs-core-types'
-import { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { IPFS } from 'ipfs-core-types'
+import type { Libp2p } from 'libp2p'
 
 import { AccessProtocol } from '~access/static/protocol.js'
 import { EntryProtocol } from '~entry/basal/protocol.js'
@@ -40,15 +41,17 @@ export interface Config {
   storage: OpalStorage | null
   identities: StorageReturn | null
   keychain: Keychain | null
-  ipfs: IPFS | null
   peerId: PeerId | null
+  ipfs: IPFS | null
+  libp2p: Libp2p | null
 }
 
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
-  ipfs?: IPFS
-  blocks?: Blocks
   peerId?: PeerId
+  ipfs?: IPFS
+  libp2p?: Libp2p
+  blocks?: Blocks
   start?: boolean
 }

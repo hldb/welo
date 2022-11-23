@@ -126,9 +126,9 @@ export class Database extends Playable {
       Storage,
       manifest,
       Replicator,
-      ipfs,
-      pubsub,
       peerId,
+      ipfs,
+      libp2p,
       identity,
       blocks,
       Store,
@@ -154,9 +154,9 @@ export class Database extends Playable {
     const store = new Store({ ...common, replica })
     const replicator = new Replicator({
       ...common,
-      ipfs,
-      pubsub,
       peerId,
+      ipfs,
+      libp2p,
       replica
     })
 
