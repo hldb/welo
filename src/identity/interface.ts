@@ -1,16 +1,16 @@
 import { Block } from 'multiformats/block'
 import { CID } from 'multiformats/cid'
+import { Datastore } from 'interface-datastore'
 
 import { Blocks } from '~blocks/index.js'
 import { Keychain } from '~keychain/index.js'
-import { StorageReturn } from '~storage/index.js'
 import { Registrant } from '~registry/registrant.js'
 
 export type Gen = string
 
 export interface Get {
   name: string
-  identities: StorageReturn
+  identities: Datastore
   keychain: Keychain
 }
 
@@ -27,7 +27,7 @@ export type Export = Get
 
 export interface Import {
   name: string
-  identities?: StorageReturn
+  identities?: Datastore
   keychain?: Keychain
   kpi: Uint8Array
 }

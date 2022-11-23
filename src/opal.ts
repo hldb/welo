@@ -3,20 +3,18 @@ import EventEmitter from 'events'
 import where from 'wherearewe'
 import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
-
-import type { PeerId } from '@libp2p/interface-peer-id'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
+import { Datastore } from 'datastore-level'
 
 // import * as version from './version.js'
-import { Config, Create, Determine, OpalStorage, Options } from './interface.js'
+import { Config, Create, Determine, Options } from './interface.js'
 import { initRegistry, Registry } from './registry/index.js'
 import { Manifest, Address } from '~manifest/index.js'
 import { Database } from '~database/index.js'
 import { Blocks } from '~blocks/index.js'
 import { OPAL_LOWER } from '~utils/constants.js'
-import { StorageFunc, StorageReturn } from '~storage/index.js'
-import { Keychain } from '~keychain/index.js'
+import { getStorage } from '~storage/index.js'
 import type { Replicator as ReplicatorClass } from '~replicator/index.js'
 import { IdentityInstance } from '~identity/interface.js'
 import { ManifestData } from '~manifest/interface.js'
@@ -27,6 +25,7 @@ import {
   defaultManifest,
   getComponents
 } from '~utils/index.js'
+import { KeyChain } from '~utils/types.js'
 
 const registry = initRegistry()
 
@@ -39,24 +38,22 @@ export class Opal extends Playable {
     return Opal.registry
   }
 
-  static Storage?: StorageFunc
-  static Keychain?: typeof Keychain
+  static Storage?: getStorage
   static Replicator?: typeof ReplicatorClass
 
   private readonly dirs: DirsReturn
-  directory: string
+  readonly directory: string
 
-  identity: IdentityInstance<any>
-  blocks: Blocks
-  events: EventEmitter
+  readonly ipfs: IPFS
+  readonly libp2p: Libp2p
+  readonly blocks: Blocks
 
-  storage: OpalStorage | null
-  identities: StorageReturn | null
-  keychain: Keychain | null
+  readonly identities: Datastore | null
+  readonly keychain: KeyChain
 
-  peerId: PeerId | null
-  ipfs: IPFS | null
-  libp2p: Libp2p | null
+  readonly identity: IdentityInstance<any>
+
+  readonly events: EventEmitter
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
@@ -65,10 +62,8 @@ export class Opal extends Playable {
     directory,
     identity,
     blocks,
-    storage,
     identities,
     keychain,
-    peerId,
     ipfs,
     libp2p
   }: Config) {
@@ -91,11 +86,9 @@ export class Opal extends Playable {
     this.identity = identity
     this.blocks = blocks
 
-    this.storage = storage
     this.identities = identities
     this.keychain = keychain
 
-    this.peerId = peerId
     this.ipfs = ipfs
     this.libp2p = libp2p
 
@@ -111,57 +104,46 @@ export class Opal extends Playable {
       directory = options.directory
     }
 
-    let identity, storage, identities, keychain
+    const ipfs = options.ipfs
+    if (ipfs == null) {
+      throw new Error('ipfs is a required option')
+    }
+
+    const libp2p = options.libp2p
+    if (libp2p == null) {
+      throw new Error('libp2p is a required option')
+    }
+
+    let identity: IdentityInstance<any>
+    let identities: Datastore | null = null
 
     if (options.identity != null) {
       identity = options.identity
     } else {
-      if (this.Storage === undefined || this.Keychain === undefined) {
-        throw new Error(
-          'Opal.create: missing Storage and Keychain; unable to create Identity'
-        )
+      if (this.Storage == null) {
+        throw new Error('Opal.create: missing Storage')
       }
 
-      storage = {
-        identities: await this.Storage(dirs(directory).identities),
-        keychain: await this.Storage(dirs(directory).keychain)
-      }
+      identities = await this.Storage(dirs(directory).identities)
 
-      identities = storage.identities
-      keychain = await Keychain.create(storage.keychain)
-
-      await storage.identities.open()
-      await storage.keychain.open()
+      await identities.open()
       const Identity = this.registry.identity.star
       identity = await Identity.get({
         name: 'default',
         identities,
-        keychain
+        keychain: libp2p.keychain
       })
-      await storage.identities.close()
-      await storage.keychain.close()
-    }
-
-    let blocks
-    if (options.blocks != null) {
-      blocks = options.blocks
-    } else if (options.ipfs != null) {
-      blocks = new Blocks(options.ipfs)
-    } else {
-      throw new Error('need blocks or ipfs as option')
+      await identities.close()
     }
 
     const config: Config = {
       directory,
       identity,
-      blocks,
-      storage: storage ?? null,
-      identities: identities ?? null,
-      keychain: keychain ?? null,
-      peerId: options.peerId ?? null,
-      ipfs: options.ipfs ?? null,
-      // @ts-expect-error
-      libp2p: options.libp2p ?? options.ipfs?.libp2p ?? null
+      identities,
+      ipfs,
+      blocks: new Blocks(ipfs),
+      libp2p,
+      keychain: libp2p.keychain
     }
 
     const opal = new Opal(config)
@@ -213,8 +195,6 @@ export class Opal extends Playable {
       throw new Error(`database ${addr} is already being opened`)
     }
 
-    const components = getComponents(this.registry, manifest)
-
     let identity: IdentityInstance<any>
     if (options.identity != null) {
       identity = options.identity
@@ -224,7 +204,7 @@ export class Opal extends Playable {
       throw new Error('no identity available')
     }
 
-    let Storage: StorageFunc
+    let Storage: getStorage
     if (options.Storage != null) {
       Storage = options.Storage
     } else if (Opal.Storage != null) {
@@ -246,7 +226,7 @@ export class Opal extends Playable {
       this.dirs.databases,
       manifest.address.cid.toString(base32)
     )
-    const dbStorage = async (_path: string): Promise<StorageReturn> =>
+    const dbStorage = async (_path: string): Promise<Datastore> =>
       await Storage(path.join(dbPath, _path))
 
     const promise = Database.open({
@@ -255,11 +235,10 @@ export class Opal extends Playable {
       Replicator,
       manifest,
       blocks: this.blocks,
-      peerId: this.peerId ?? undefined,
-      ipfs: this.ipfs ?? undefined,
-      libp2p: this.libp2p ?? undefined,
+      ipfs: this.ipfs,
+      libp2p: this.libp2p,
       identity,
-      ...components
+      ...getComponents(this.registry, manifest)
     })
       .then((db) => {
         this.opened.set(addr, db)

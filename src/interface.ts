@@ -1,21 +1,16 @@
-import type { PeerId } from '@libp2p/interface-peer-id'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
+import { Datastore } from 'interface-datastore'
 
 import { AccessProtocol } from '~access/static/protocol.js'
 import { EntryProtocol } from '~entry/basal/protocol.js'
 import { IdentityProtocol } from '~identity/basal/protocol.js'
 import { IdentityInstance } from '~identity/interface.js'
 import { Blocks } from '~blocks/index.js'
-import { Keychain } from '~keychain/index.js'
-import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { getStorage } from '~storage/index.js'
 import { StoreProtocol } from '~store/keyvalue/protocol.js'
 import { Replicator } from '~replicator/index.js'
-
-export interface OpalStorage {
-  identities: StorageReturn
-  keychain: StorageReturn
-}
+import { KeyChain } from '~utils/types.js'
 
 export interface Determine {
   protocol?: string
@@ -30,7 +25,7 @@ export interface Determine {
 
 export interface Options {
   identity?: IdentityInstance<any>
-  Storage?: StorageFunc
+  Storage?: getStorage
   Replicator?: typeof Replicator
 }
 
@@ -38,20 +33,16 @@ export interface Config {
   directory: string
   identity: IdentityInstance<any>
   blocks: Blocks
-  storage: OpalStorage | null
-  identities: StorageReturn | null
-  keychain: Keychain | null
-  peerId: PeerId | null
-  ipfs: IPFS | null
-  libp2p: Libp2p | null
+  identities: Datastore | null
+  keychain: KeyChain
+  ipfs: IPFS
+  libp2p: Libp2p
 }
 
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
-  peerId?: PeerId
-  ipfs?: IPFS
-  libp2p?: Libp2p
-  blocks?: Blocks
+  ipfs: IPFS
+  libp2p: Libp2p
   start?: boolean
 }

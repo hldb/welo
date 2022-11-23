@@ -1,6 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs-core-types'
+import { Datastore } from 'interface-datastore'
 import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Keyvalue } from '~store/keyvalue/index.js'
@@ -12,19 +13,19 @@ import { Identity } from '~identity/basal/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Manifest } from '~manifest/index.js'
 import { defaultManifest } from '~utils/index.js'
-import { LevelStorage, StorageReturn } from '~storage/index.js'
+import { getLevelStorage } from '~storage/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestStorage } from './utils/persistence.js'
-import { getTestIdentity } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'keyvalue'
 
 describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity
   const expectedProtocol = '/opal/store/keyvalue'
-  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, 'test-keyvalue', name))
+  const Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(tempPath, 'test-keyvalue', name))
 
   const registry = initRegistry()
 
@@ -38,8 +39,11 @@ describe(testName, () => {
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    const testStorage = await getTestStorage(testPaths)
-    identity = await getTestIdentity(testStorage, names.name0)
+    const identities = await getTestIdentities(testPaths)
+    const libp2p = await getTestLibp2p(ipfs)
+    const keychain = libp2p.keychain
+
+    identity = await getTestIdentity(identities, keychain, names.name0)
 
     await blocks.put(identity.block)
   })

@@ -3,7 +3,7 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import { CID } from 'multiformats/cid'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { Key } from 'interface-datastore'
+import { Datastore, Key } from 'interface-datastore'
 
 import { Replica } from '~database/replica.js'
 import { Blocks } from '~blocks/index.js'
@@ -14,27 +14,26 @@ import { Identity } from '~identity/basal/index.js'
 import { cidstring, decodedcid, defaultManifest } from '~utils/index.js'
 import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '~registry/index.js'
-import { LevelStorage, StorageReturn } from '~storage/index.js'
+import { getLevelStorage } from '~storage/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestStorage, TestStorage } from './utils/persistence.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestIdentity } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'replica'
 
 describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: TestStorage,
     replica: Replica,
     manifest: Manifest,
     access: StaticAccess,
     identity: Identity,
     tempIdentity: Identity
 
-  const Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(tempPath, name))
+  const Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(tempPath, name))
 
   const registry = initRegistry()
 
@@ -48,8 +47,11 @@ describe(testName, () => {
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getTestStorage(testPaths)
-    identity = await getTestIdentity(storage, names.name0)
+    const identities = await getTestIdentities(testPaths)
+    const libp2p = await getTestLibp2p(ipfs)
+    const keychain = libp2p.keychain
+
+    identity = await getTestIdentity(identities, keychain, names.name0)
 
     await blocks.put(identity.block)
 
@@ -61,12 +63,13 @@ describe(testName, () => {
     await start(access)
 
     const testPaths1 = getTestPaths(tempPath, testName + '1')
-    const tempStorage = await getTestStorage(testPaths1)
-    tempIdentity = await getTestIdentity(tempStorage, names.name1)
+    const tempIpfs = await getTestIpfs(testPaths1, offlineIpfsOptions)
+    const tempLibp2p = await getTestLibp2p(tempIpfs)
+    const tempIdentities = await getTestIdentities(testPaths1)
+    tempIdentity = await getTestIdentity(tempIdentities, tempLibp2p.keychain, names.name1)
   })
 
   after(async () => {
-    await storage.close()
     await ipfs.stop()
   })
 

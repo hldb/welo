@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
 import { HashMap } from 'ipld-hashmap'
-import { Key } from 'interface-datastore'
+import { Datastore, Key } from 'interface-datastore'
 
 import { Replica } from '~database/replica.js'
 import { Extends } from '~utils/decorators.js'
 import { ManifestData, ManifestInstance } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
-import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { getStorage } from '~storage/index.js'
 import { loadHashMap } from '~database/graph.js'
 import { Blocks } from '~blocks/index.js'
 import { decodedcid, encodedcid } from '~utils/index.js'
@@ -35,8 +35,8 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
-  readonly Storage: StorageFunc
-  private _storage: StorageReturn | null
+  readonly Storage: getStorage
+  private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter
@@ -50,7 +50,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     manifest: ManifestInstance<ManifestData>
     blocks: Blocks
     replica: Replica
-    Storage: StorageFunc
+    Storage: getStorage
   }) {
     const starting = async (): Promise<void> => {
       this._storage = await Storage('store')
@@ -86,7 +86,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.events = new EventEmitter()
   }
 
-  get storage (): StorageReturn {
+  get storage (): Datastore {
     if (this._storage === null) {
       throw new Error()
     }

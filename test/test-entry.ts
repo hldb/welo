@@ -2,27 +2,29 @@ import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
+import { Datastore } from 'interface-datastore'
 
 import { Blocks } from '~blocks/index.js'
 import { Entry } from '~entry/basal/index.js'
 import { EntryData } from '~entry/interface.js'
 import { Identity } from '~identity/basal/index.js'
-import { Keychain } from '~keychain/index.js'
+import { KeyChain } from '~utils/types.js'
 
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestStorage, TestStorage } from './utils/persistence.js'
-import { getTestIdentity, kpi } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'basal entry'
 
 describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: TestStorage,
     identity: Identity,
     entry: Entry,
-    invalidEntry: Entry
+    invalidEntry: Entry,
+    identities: Datastore,
+    keychain: KeyChain
 
   const expectedProtocol = '/opal/entry'
   const name = names.name0
@@ -38,11 +40,9 @@ describe(testName, () => {
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getTestStorage(testPaths)
-    await storage.open()
-
-    const identities = storage.identities
-    const keychain = new Keychain(storage.keychain)
+    identities = await getTestIdentities(testPaths)
+    const libp2p = await getTestLibp2p(ipfs)
+    keychain = libp2p.keychain
 
     identity = await Identity.import({
       name,
@@ -53,7 +53,6 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await storage.close()
     await ipfs.stop()
   })
 
@@ -131,7 +130,7 @@ describe(testName, () => {
       })
 
       it('unverifies entry with mismatched identity', async () => {
-        const identity = await getTestIdentity(storage, names.name1)
+        const identity = await getTestIdentity(identities, keychain, names.name1)
 
         const _entry = (await Entry.asEntry({
           block: entry.block,

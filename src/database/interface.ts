@@ -8,14 +8,14 @@ import { IdentityInstance, IdentityStatic } from '~identity/interface'
 import { ManifestInstance } from '~manifest/interface'
 import { Blocks } from '~blocks/index.js'
 import { MultiReplicator } from '~replicator/multi.js'
-import { StorageFunc } from '~storage/index.js'
+import { getStorage } from '~storage/index.js'
 import { StoreInstance, StoreStatic } from '~store/interface'
 
 import { Replica } from './replica'
 
 export interface Open {
   directory: string
-  Storage: StorageFunc
+  Storage: getStorage
   start?: boolean
   blocks: Blocks
   Replicator: typeof MultiReplicator

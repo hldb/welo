@@ -1,6 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
+import { Datastore } from 'interface-datastore'
 
 import { Database } from '~database/index.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
@@ -11,25 +12,24 @@ import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Blocks } from '~blocks/index.js'
 import { defaultManifest } from '~utils/index.js'
-import { LevelStorage, StorageFunc, StorageReturn } from '~storage/index.js'
 import { MultiReplicator } from '~replicator/multi.js'
+import { getLevelStorage, getStorage } from '~storage/index.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestStorage, TestStorage } from './utils/persistence.js'
-import { getTestIdentity } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'database'
 
 describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: TestStorage,
     database: Database,
     manifest: Manifest,
     identity: Identity,
     directory: string,
-    Storage: StorageFunc
+    Storage: getStorage
 
   const registry = initRegistry()
 
@@ -43,9 +43,10 @@ describe(testName, () => {
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getTestStorage(testPaths)
+    const identities = await getTestIdentities(testPaths)
+    const libp2p = await getTestLibp2p(ipfs)
 
-    identity = await getTestIdentity(storage, testName)
+    identity = await getTestIdentity(identities, libp2p.keychain, testName)
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity, registry),
@@ -56,11 +57,10 @@ describe(testName, () => {
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
-    Storage = async (name: string): Promise<StorageReturn> => await LevelStorage(path.join(directory, name))
+    Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(directory, name))
   })
 
   after(async () => {
-    await storage.close()
     await ipfs.stop()
   })
 

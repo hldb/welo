@@ -12,15 +12,16 @@ import { StaticAccess } from '~access/static/index.js'
 import protocol, { AccessProtocol } from '~access/static/protocol.js'
 import { wildcard } from '~access/util.js'
 
-import { getTestStorage, TestStorage } from './utils/persistence.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
-import { getTestIdentity } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'static access'
 
 describe(testName, () => {
-  let storage: TestStorage, identity: Identity, entry: Entry
+  let identity: Identity, entry: Entry
   const Access = StaticAccess
   const name = 'name'
 
@@ -43,11 +44,16 @@ describe(testName, () => {
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
-    storage = await getTestStorage(testPaths)
 
-    identity = await getTestIdentity(storage, name)
+    const ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
+    const libp2p = await getTestLibp2p(ipfs)
+    const identities = await getTestIdentities(testPaths)
+
+    identity = await getTestIdentity(identities, libp2p.keychain, name)
     entry = await singleEntry(identity)()
     yesaccess = makeaccess([identity.id])
+
+    await ipfs.stop()
   })
 
   describe('Class', () => {

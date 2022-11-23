@@ -9,7 +9,7 @@ import { ManifestInstance } from '~manifest/interface.js'
 import { AccessInstance } from '~access/interface.js'
 import { Creator, Selector, StoreInstance } from '~store/interface.js'
 import { Playable } from '~utils/playable.js'
-import { StorageFunc } from '~storage/index.js'
+import { getStorage } from '~storage/index.js'
 import { MultiReplicator } from '~replicator/multi.js'
 
 import { Replica } from './replica.js'
@@ -17,7 +17,7 @@ import { Config, Handlers, Open } from './interface.js'
 
 export class Database extends Playable {
   readonly directory: string
-  readonly Storage: StorageFunc
+  readonly Storage: getStorage
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>

@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
 import { CID } from 'multiformats/cid'
 import { Block } from 'multiformats/block'
-import { Key } from 'interface-datastore'
+import { Datastore, Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
@@ -12,7 +12,7 @@ import { EntryInstance, EntryStatic } from '~entry/interface.js'
 import { ManifestInstance } from '~manifest/interface.js'
 import { AccessInstance } from '~access/interface.js'
 import { Playable } from '~utils/playable.js'
-import { StorageFunc, StorageReturn } from '~storage/index.js'
+import { getStorage } from '~storage/index.js'
 import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
 
 import { Graph, Root } from './graph.js'
@@ -36,9 +36,9 @@ export class Replica extends Playable {
   readonly Identity: IdentityStatic<any>
   readonly events: EventEmitter
 
-  Storage: StorageFunc
+  Storage: getStorage
 
-  _storage: StorageReturn | null
+  _storage: Datastore | null
   _graph: Graph | null
 
   constructor ({
@@ -51,7 +51,7 @@ export class Replica extends Playable {
     Identity
   }: {
     manifest: ManifestInstance<any>
-    Storage: StorageFunc
+    Storage: getStorage
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
@@ -96,7 +96,7 @@ export class Replica extends Playable {
     this.events = new EventEmitter()
   }
 
-  get storage (): StorageReturn {
+  get storage (): Datastore {
     if (this._storage === null) {
       throw new Error()
     }

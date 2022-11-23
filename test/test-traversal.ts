@@ -26,16 +26,15 @@ import { Manifest } from '~manifest/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestStorage, TestStorage } from './utils/persistence.js'
-import { getTestIdentity } from './utils/identities.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { concurrentEntries, singleEntry } from './utils/entries.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'traversal'
 
 describe('traversal', () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: TestStorage,
     identity: Identity,
     identity1: Identity,
     access: StaticAccess,
@@ -62,9 +61,12 @@ describe('traversal', () => {
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getTestStorage(testPaths)
-    identity = await getTestIdentity(storage, names.name0)
-    identity1 = await getTestIdentity(storage, names.name1)
+    const identities = await getTestIdentities(testPaths)
+    const libp2p = await getTestLibp2p(ipfs)
+    const keychain = libp2p.keychain
+
+    identity = await getTestIdentity(identities, keychain, names.name0)
+    identity1 = await getTestIdentity(identities, keychain, names.name1)
 
     access = new StaticAccess({
       manifest: await Manifest.create({

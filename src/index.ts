@@ -1,7 +1,6 @@
 import { Opal as _Opal } from './opal.js'
 
-import { LevelStorage } from '~storage/index.js'
-import { Keychain } from '~keychain/index.js'
+import { getLevelStorage } from '~storage/index.js'
 // import { Replicator } from '~replicator/index.js'
 
 import { StaticAccess } from '~access/static/index.js'
@@ -14,8 +13,7 @@ _Opal.registry.entry.add(Entry)
 _Opal.registry.identity.add(Identity)
 _Opal.registry.store.add(Keyvalue)
 
-_Opal.Storage = LevelStorage
-_Opal.Keychain = Keychain
+_Opal.Storage = getLevelStorage
 // _Opal.Replicator = Replicator
 
 export const Opal = _Opal

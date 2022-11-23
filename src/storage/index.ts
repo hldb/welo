@@ -1,6 +1,7 @@
 import where from 'wherearewe'
 import makedir from 'make-dir'
 import { LevelDatastore } from 'datastore-level'
+import { Datastore } from 'interface-datastore'
 
 export interface StorageOptions {
   db?: any
@@ -16,15 +17,13 @@ export interface StorageOptions {
   maxFileSize?: number | undefined
 }
 
-export type StorageReturn = LevelDatastore
-
-export type StorageFunc = (
+export type getStorage = (
   path: string,
   options?: StorageOptions
-) => Promise<StorageReturn>
+) => Promise<Datastore>
 
 // makes easier to handle nodejs and browser environment differences
-export const LevelStorage: StorageFunc = async function LevelStorage (
+export const getLevelStorage: getStorage = async function (
   path,
   options
 ): Promise<LevelDatastore> {

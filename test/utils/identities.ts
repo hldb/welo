@@ -1,22 +1,29 @@
+import { Datastore } from 'interface-datastore'
 import { base32 } from 'multiformats/bases/base32'
 
 import { Identity } from '~identity/basal/index.js'
-import { Keychain } from '~keychain/index.js'
+import { getLevelStorage } from '~storage/index.js'
+import { KeyChain } from '~utils/types.js'
 
-import { TestStorage } from './persistence.js'
+import { TestPaths } from './constants.js'
+
+export const getTestIdentities = async (testPaths: TestPaths): Promise<Datastore> =>
+  await getLevelStorage(testPaths.identities)
 
 export const getTestIdentity = async (
-  testStorage: TestStorage,
+  testIdentities: Datastore,
+  testKeychain: KeyChain,
   name: string
 ): Promise<Identity> => {
-  await testStorage.open()
+  await testIdentities.open()
 
-  const identities = testStorage.identities
-  const keychain = new Keychain(testStorage.keychain)
+  const identity = await Identity.get({
+    name,
+    identities: testIdentities,
+    keychain: testKeychain
+  })
 
-  const identity = await Identity.get({ name, identities, keychain })
-
-  await testStorage.close()
+  await testIdentities.close()
 
   return identity
 }

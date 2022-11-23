@@ -2,29 +2,29 @@ import { strict as assert } from 'assert'
 import { IPFS } from 'ipfs'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
+import { Datastore } from 'interface-datastore'
 
 import { Identity } from '~identity/basal/index.js'
-import { Keychain } from '~keychain/index.js'
-import { StorageReturn } from '~storage/index.js'
 import { Blocks } from '~blocks/index.js'
+import { KeyChain } from '~utils/types.js'
 
-import { getTestStorage, TestStorage } from './utils/persistence.js'
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { kpi } from './utils/identities.js'
+import { getTestIdentities, kpi } from './utils/identities.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'basal identity'
 
 describe(testName, () => {
   let ipfs: IPFS,
     blocks: Blocks,
-    storage: TestStorage,
-    identities: StorageReturn,
-    keychain: Keychain,
+    identities: Datastore,
+    keychain: KeyChain,
     identity: Identity
-  let tempStorage: TestStorage,
-    tempIdentities: StorageReturn,
-    tempKeychain: Keychain
+  let
+    tempIpfs: IPFS,
+    tempIdentities: Datastore,
+    tempKeychain: KeyChain
   const expectedProtocol = '/opal/identity'
   const name = names.name0
   const password = ''
@@ -40,11 +40,9 @@ describe(testName, () => {
     ipfs = await getTestIpfs(fixtTestPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
-    storage = await getTestStorage(fixtTestPaths)
-    await storage.open()
-
-    identities = storage.identities
-    keychain = new Keychain(storage.keychain)
+    identities = await getTestIdentities(fixtTestPaths)
+    const libp2p = await getTestLibp2p(ipfs)
+    keychain = libp2p.keychain
 
     identity = await Identity.import({
       name,
@@ -54,17 +52,16 @@ describe(testName, () => {
     }).catch(async () => await Identity.get({ name, identities, keychain }))
 
     const tempTestPaths = getTestPaths(tempPath, testName)
-    tempStorage = await getTestStorage(tempTestPaths)
-    await tempStorage.open()
+    tempIpfs = await getTestIpfs(tempTestPaths, offlineIpfsOptions)
 
-    tempIdentities = storage.identities
-    tempKeychain = new Keychain(storage.keychain)
+    tempIdentities = await getTestIdentities(tempTestPaths)
+    const tempLibp2p = await getTestLibp2p(ipfs)
+    tempKeychain = tempLibp2p.keychain
   })
 
   after(async () => {
-    await storage.close()
-    await tempStorage.close()
     await ipfs.stop()
+    await tempIpfs.stop()
   })
 
   describe('Class', () => {
