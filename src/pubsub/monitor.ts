@@ -1,80 +1,69 @@
 import EventEmitter from 'events'
-import { IPFS } from 'ipfs-core-types'
-import { Startable } from '@libp2p/interfaces/startable'
+import { Libp2p } from 'libp2p'
 
-const peerJoin = 'peer-join'
-const peerLeave = 'peer-leave'
+import { peerIdString } from '~utils/index'
+
+const peersJoin = 'peers-join'
+const peersLeave = 'peers-leave'
 const update = 'update'
 
-export class Monitor extends EventEmitter implements Startable {
-  readonly ipfs: IPFS
-  readonly topic: string
-  readonly interval: number
-
+export class Monitor extends EventEmitter {
+  private _isConnected: boolean
   peers: Set<string>
 
-  private _isStarted: boolean
-
-  isStarted (): boolean {
-    return this._isStarted
+  isConnected (): boolean {
+    return this._isConnected
   }
 
-  start (): void {
-    if (this.isStarted()) {
-      return
-    }
-
-    this._isStarted = true
-
-    const refresh = (): void => {
-      void this._poll().then(() => {
-        if (this.isStarted()) {
-          setTimeout(refresh, this.interval)
-        }
-      })
-    }
-
-    refresh()
-  }
-
-  stop (): void {
-    if (!this.isStarted()) {
-      return
-    }
-
-    this._isStarted = false
-  }
-
-  constructor (ipfs: IPFS, topic: string, interval: number = 1000) {
+  constructor (
+    readonly libp2p: Libp2p,
+    readonly topic: string
+  ) {
     super()
-    this.ipfs = ipfs
-    this.topic = topic
-    this.interval = 1000
 
+    this._isConnected = false
     this.peers = new Set()
 
-    this.on(peerJoin, () => this.emit(update))
-    this.on(peerLeave, () => this.emit(update))
-
-    this._isStarted = false
+    this.on(peersJoin, () => this.emit(update))
+    this.on(peersLeave, () => this.emit(update))
   }
 
-  async _poll (): Promise<void> {
+  connect (): void {
+    if (!this.isConnected()) {
+      this.libp2p.pubsub.addEventListener('subscription-change', this._refreshPeers)
+      this.peers = new Set(this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString))
+      this._isConnected = true
+    }
+  }
+
+  disconnect (): void {
+    if (this.isConnected()) {
+      this.libp2p.pubsub.removeEventListener('subscription-change', this._refreshPeers)
+      this.peers = new Set()
+      this._isConnected = false
+    }
+  }
+
+  _refreshPeers (): void {
     const _peers = this.peers
-    const peers = new Set((await this.ipfs.pubsub.peers(this.topic)).map(String))
+    this.peers = new Set(this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString))
 
-    if (!this.isStarted()) {
-      return
-    }
-
-    this.peers = peers
-
+    const join = new Set()
     for (const peer of this.peers) {
-      !_peers.has(peer) && this.emit(peerJoin, peer)
+      !_peers.has(peer) && join.add(peer)
     }
 
+    const leave = new Set()
     for (const peer of _peers) {
-      !this.peers.has(peer) && this.emit(peerLeave, peer)
+      !this.peers.has(peer) && leave.add(peer)
+    }
+
+    if (join.size > 0) {
+      this.emit(peersJoin, join)
+    }
+
+    if (leave.size > 0) {
+      this.emit(peersLeave, leave)
     }
   }
 }
