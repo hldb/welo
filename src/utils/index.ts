@@ -2,7 +2,7 @@ import path from 'path'
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 
-import { Registry } from '~src/registry/index.js'
+import { Registry } from '~registry/index.js'
 import { ManifestData } from '~manifest/interface.js'
 import { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import { AccessStatic } from '~access/interface.js'

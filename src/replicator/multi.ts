@@ -1,4 +1,4 @@
-import { start, stop } from '@libp2p/interfaces/dist/src/startable.js'
+import { start, stop } from '@libp2p/interfaces/startable'
 import EventEmitter from 'events'
 
 import { Database } from '~database/index.js'
