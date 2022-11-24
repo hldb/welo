@@ -34,7 +34,6 @@
     "eslint": "^8.23.0",
     "eslint-config-standard-with-typescript": "^22.0.0",
     "eslint-import-resolver-typescript": "^3.5.2",
-    "ipfs": "^0.65.0",
     "json": "^11.0.0",
     "mocha": "^9.2.2",
     "polendina": "^3.1.0",
@@ -46,20 +45,8 @@
     "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
-    "@ipld/dag-cbor": "^7.0.2",
-    "@libp2p/crypto": "^1.0.4",
-    "@libp2p/interface-keys": "^1.0.3",
-    "@libp2p/interface-pubsub": "^2.0.1",
-    "@libp2p/interfaces": "^3.0.3",
-    "datastore-level": "^9.0.1",
-    "interface-datastore": "^7.0.0",
-    "ipfs-core-types": "^0.12.1",
-    "ipld-hashmap": "^2.1.12",
-    "it-all": "^1.0.6",
-    "libp2p": "^0.40.0",
-    "make-dir": "^3.1.0",
-    "multiformats": "^9.7.0",
-    "uint8arrays": "^3.0.0",
-    "wherearewe": "^1.0.2"
+    "ipfs-core": "^0.17.0",
+    "ipld-hashmap": "^2.1.13",
+    "make-dir": "^3.1.0"
   }
 }
