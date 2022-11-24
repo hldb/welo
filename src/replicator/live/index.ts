@@ -97,7 +97,7 @@ export class LiveReplicator extends Playable {
   async broadcast (heads: CID[]): Promise<void> {
     const promises: Array<Promise<void>> = []
     for (const direct of this.directs.values()) {
-      if (direct.isOpen() === true) {
+      if (direct.isOpen()) {
         promises.push(direct.publish(heads))
       }
     }
@@ -106,8 +106,9 @@ export class LiveReplicator extends Playable {
   }
 
   _onReplicaHeadsUpdate (): void {
-    void all(this.replica.heads.keys())
-      .then(heads => { void this.broadcast(Array.from(heads).map(parsedcid)) })
+    void all(this.replica.heads.keys()).then((heads) => {
+      void this.broadcast(Array.from(heads).map(parsedcid))
+    })
   }
 
   _onHeadsMessage (msg: Message): void {
@@ -132,7 +133,12 @@ export class LiveReplicator extends Playable {
   // may need to queue _onPeer* so start and stop arent called concurrently, or check for that in Direct
 
   _onPeerJoin (remotePeerId: PeerId): void {
-    const direct = new DirectChannel(this.ipfs, this.manifest.address, this.localPeerId, remotePeerId)
+    const direct = new DirectChannel(
+      this.ipfs,
+      this.manifest.address,
+      this.localPeerId,
+      remotePeerId
+    )
     this.directs.set(remotePeerId.toCID().toString(base32), direct)
     void start(direct)
   }
