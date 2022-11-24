@@ -42,6 +42,9 @@ export const localIpfsOptions = (repo: string) => ({
 
 type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 
-export const getTestIpfs = async (testPaths: TestPaths, opts: Opts): Promise<IPFSType> => {
-  return await IPFS.create(opts(testPaths.ipfs)) as unknown as IPFSType
+export const getTestIpfs = async (
+  testPaths: TestPaths,
+  opts: Opts
+): Promise<IPFSType> => {
+  return (await IPFS.create(opts(testPaths.ipfs))) as unknown as IPFSType
 }

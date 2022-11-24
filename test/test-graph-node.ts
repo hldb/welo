@@ -2,12 +2,7 @@ import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
 import { Block } from 'multiformats/block'
 
-import {
-  initialNode,
-  Node,
-  NodeValue,
-  NodeObj
-} from '~database/graph-node.js'
+import { initialNode, Node, NodeValue, NodeObj } from '~database/graph-node.js'
 
 describe('Graph Node', () => {
   const initNode: NodeObj = {
@@ -58,7 +53,9 @@ describe('Graph Node', () => {
 
     describe('.decode', () => {
       it('returns a Node from byte encoding', async () => {
-        const bytes = base32.decode('burrgs3uamnxxk5eamzsgk3tjmvspiz3nnfzxg2lom72a')
+        const bytes = base32.decode(
+          'burrgs3uamnxxk5eamzsgk3tjmvspiz3nnfzxg2lom72a'
+        )
         const node = await Node.decode(bytes)
         assert.deepEqual(node, newNode)
       })

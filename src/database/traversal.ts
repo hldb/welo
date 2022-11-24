@@ -109,7 +109,7 @@ export function graphLinks ({
       if (seen.has(str)) continue
       seen.add(str)
 
-      if (!await graph.has(str)) continue
+      if (!(await graph.has(str))) continue
       cids.push(parsedcid(str))
     }
 
@@ -143,10 +143,9 @@ export async function traverser ({
   async function walk (cids: CID[]): Promise<void> {
     // trivial abort for now; later pass abort to load function
 
-    const entries = await Promise.all(cids.map(load))
-      .then(
-        (entries) => entries.filter(entry => entry !== null) // eliminate null load returns
-      ) as Array<EntryInstance<any>>
+    const entries = (await Promise.all(cids.map(load)).then(
+      (entries) => entries.filter((entry) => entry !== null) // eliminate null load returns
+    )) as Array<EntryInstance<any>>
 
     if (ordered) entries.sort(orderFn)
 

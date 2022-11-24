@@ -13,7 +13,10 @@ export interface TestPaths {
   ipfs: string
 }
 
-export const getTestPaths = (testRoot: TestRoot, testName: string): TestPaths => ({
+export const getTestPaths = (
+  testRoot: TestRoot,
+  testName: string
+): TestPaths => ({
   test: testRoot + '/' + testName,
   identities: testRoot + '/' + testName + identitiesPath,
   keychain: testRoot + '/' + testName + keychainPath,

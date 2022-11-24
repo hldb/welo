@@ -7,8 +7,9 @@ import { KeyChain } from '~utils/types.js'
 
 import { TestPaths } from './constants.js'
 
-export const getTestIdentities = async (testPaths: TestPaths): Promise<Datastore> =>
-  await getLevelStorage(testPaths.identities)
+export const getTestIdentities = async (
+  testPaths: TestPaths
+): Promise<Datastore> => await getLevelStorage(testPaths.identities)
 
 export const getTestIdentity = async (
   testIdentities: Datastore,

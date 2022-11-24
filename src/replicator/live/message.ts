@@ -15,7 +15,10 @@ type BlockDataP = BlockData<typeof protocol>
 
 type BlockMessage = Block<BlockDataP>
 
-export async function write (database: CID, heads: CID[]): Promise<BlockMessage> {
+export async function write (
+  database: CID,
+  heads: CID[]
+): Promise<BlockMessage> {
   return await Blocks.encode({ value: { protocol, database, heads } })
 }
 

@@ -11,8 +11,7 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'pubsub peer monitor'
 
 describe(testName, () => {
-  let
-    ipfs1: IPFS,
+  let ipfs1: IPFS,
     ipfs2: IPFS,
     id1: string,
     id2: string,
@@ -33,10 +32,7 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await Promise.all([
-      ipfs1.stop(),
-      ipfs2.stop()
-    ])
+    await Promise.all([ipfs1.stop(), ipfs2.stop()])
   })
 
   describe('instance', () => {
@@ -71,8 +67,8 @@ describe(testName, () => {
         peer2.start()
 
         const promise = Promise.all([
-          new Promise(resolve => peer1.once('join', resolve)),
-          new Promise(resolve => peer2.once('join', resolve))
+          new Promise((resolve) => peer1.once('join', resolve)),
+          new Promise((resolve) => peer2.once('join', resolve))
         ])
 
         pubsub1.subscribe(sharedTopic)
@@ -91,19 +87,13 @@ describe(testName, () => {
     })
 
     describe('peer-leave', () => {
-      it('emitted when a peer leaves', () => {
-
-      })
+      it('emitted when a peer leaves', () => {})
     })
 
     describe('update', () => {
-      it('emitted when peer-join is emitted', () => {
+      it('emitted when peer-join is emitted', () => {})
 
-      })
-
-      it('emitted when peer-join is emitted', () => {
-
-      })
+      it('emitted when peer-join is emitted', () => {})
     })
   })
 })

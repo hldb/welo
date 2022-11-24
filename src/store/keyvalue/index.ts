@@ -56,11 +56,19 @@ export class Keyvalue extends Playable implements StoreInstance {
       this._storage = await Storage('store')
       await this._storage.open()
 
-      const indexesCID = await this.storage.get(indexesKey).catch(() => undefined)
-      this._indexes = await loadHashMap(blocks, indexesCID === undefined ? undefined : decodedcid(indexesCID))
+      const indexesCID = await this.storage
+        .get(indexesKey)
+        .catch(() => undefined)
+      this._indexes = await loadHashMap(
+        blocks,
+        indexesCID === undefined ? undefined : decodedcid(indexesCID)
+      )
 
       const indexCID = await this.indexes.get('latest')
-      this._index = await loadHashMap(blocks, indexCID === undefined ? undefined : decodedcid(indexCID))
+      this._index = await loadHashMap(
+        blocks,
+        indexCID === undefined ? undefined : decodedcid(indexCID)
+      )
 
       // replica.events.on('update', (): void => { void this.latest() })
     }

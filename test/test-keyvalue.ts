@@ -25,7 +25,8 @@ const testName = 'keyvalue'
 describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity
   const expectedProtocol = '/opal/store/keyvalue'
-  const Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(tempPath, 'test-keyvalue', name))
+  const Storage = async (name: string): Promise<Datastore> =>
+    await getLevelStorage(path.join(tempPath, 'test-keyvalue', name))
 
   const registry = initRegistry()
 
@@ -60,7 +61,10 @@ describe(testName, () => {
   })
 
   describe('instance', () => {
-    let keyvalue: Keyvalue, replica: Replica, manifest: Manifest, access: StaticAccess
+    let keyvalue: Keyvalue,
+      replica: Replica,
+      manifest: Manifest,
+      access: StaticAccess
     const key = 'key'
     const value = 0
 

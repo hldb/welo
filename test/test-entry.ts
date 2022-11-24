@@ -130,7 +130,11 @@ describe(testName, () => {
       })
 
       it('unverifies entry with mismatched identity', async () => {
-        const identity = await getTestIdentity(identities, keychain, names.name1)
+        const identity = await getTestIdentity(
+          identities,
+          keychain,
+          names.name1
+        )
 
         const _entry = (await Entry.asEntry({
           block: entry.block,

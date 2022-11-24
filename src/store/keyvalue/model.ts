@@ -34,12 +34,14 @@ export const creators = {
 }
 
 export const selectors = {
-  get: (state: StateMap) => async (key: string) => await state.get(key) ?? undefined
+  get: (state: StateMap) => async (key: string) =>
+    (await state.get(key)) ?? undefined
 }
 
 export type StateMap = HashMap<any>
 
-export const init = async (blocks: Blocks): Promise<StateMap> => await loadHashMap(blocks)
+export const init = async (blocks: Blocks): Promise<StateMap> =>
+  await loadHashMap(blocks)
 
 interface EntryValue extends EntryData {
   payload: Put | Del

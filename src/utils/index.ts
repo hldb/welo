@@ -18,7 +18,8 @@ export const parsedcid = (string: string): CID => CID.parse(string, base32)
 export const encodedcid = (cid: CID): Uint8Array => cid.bytes
 export const decodedcid = (bytes: Uint8Array): CID => CID.decode(bytes)
 
-export const peerIdString = (peerId: PeerId): string => peerId.toCID().toString(base32)
+export const peerIdString = (peerId: PeerId): string =>
+  peerId.toCID().toString(base32)
 export const parsedPeerId = (peerId: string): PeerId => peerIdFromString(peerId)
 
 export interface DirsReturn {

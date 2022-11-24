@@ -71,13 +71,19 @@ describe('traversal', () => {
     access = new StaticAccess({
       manifest: await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { protocol: StaticAccess.protocol, config: { write: [identity.id] } }
+        access: {
+          protocol: StaticAccess.protocol,
+          config: { write: [identity.id] }
+        }
       })
     })
     noaccess = new StaticAccess({
       manifest: await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { protocol: StaticAccess.protocol, config: { write: ['nobody'] } }
+        access: {
+          protocol: StaticAccess.protocol,
+          config: { write: ['nobody'] }
+        }
       })
     })
     await start(access, noaccess)
@@ -138,7 +144,7 @@ describe('traversal', () => {
       const entry = entries[0]
       const cid = entry.cid
 
-      const loaded = await load(cid) as EntryInstance<any>
+      const loaded = (await load(cid)) as EntryInstance<any>
       assert.equal(cidstring(loaded.cid), cidstring(entry.cid)) // one is a buffer and one is a uint8array if not stringified
     })
 
@@ -322,7 +328,10 @@ describe('traversal', () => {
 
       const manifest = await Manifest.create({
         ...defaultManifest(name, identity, registry),
-        access: { protocol: StaticAccess.protocol, config: { write: [id0.id, id1.id] } }
+        access: {
+          protocol: StaticAccess.protocol,
+          config: { write: [id0.id, id1.id] }
+        }
       })
       sharedAccess = new StaticAccess({ manifest })
       await start(sharedAccess)

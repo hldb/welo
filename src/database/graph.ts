@@ -28,7 +28,10 @@ export const loader = (blocks: Blocks): Loader => ({
   }
 })
 
-export const loadHashMap = async <V>(blocks: Blocks, cid?: CID): Promise<HashMap<V>> =>
+export const loadHashMap = async <V>(
+  blocks: Blocks,
+  cid?: CID
+): Promise<HashMap<V>> =>
   cid != null
     ? await load(loader(blocks), cid, hashmapOptions)
     : await create(loader(blocks), hashmapOptions)
@@ -354,8 +357,8 @@ export async function remove (
       } else {
         // remove referenced orphaned node
         await state.nodes.delete(_string)
-        _node.missing === true && await state.missing.delete(_string)
-        _node.denied === true && await state.denied.delete(_string)
+        _node.missing === true && (await state.missing.delete(_string))
+        _node.denied === true && (await state.denied.delete(_string))
       }
     }
   }

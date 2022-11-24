@@ -35,7 +35,9 @@ const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
     throw new Error('no direct channel with self')
   }
 
-  const peerids = [b32PeerId(localPeerId), b32PeerId(remotePeerId)].sort(sortAlphabetical)
+  const peerids = [b32PeerId(localPeerId), b32PeerId(remotePeerId)].sort(
+    sortAlphabetical
+  )
 
   return prefix + peerids.join('/')
 }
@@ -51,7 +53,12 @@ export class DirectChannel extends Playable {
   readonly monitor: Monitor
   readonly events: EventEmitter
 
-  constructor (ipfs: IPFS, address: Address, localPeerId: PeerId, remotePeerId: PeerId) {
+  constructor (
+    ipfs: IPFS,
+    address: Address,
+    localPeerId: PeerId,
+    remotePeerId: PeerId
+  ) {
     const starting = async (): Promise<void> => {
       await this.ipfs.pubsub.subscribe(this.topic, this._onMessage)
       this.monitor.start()
@@ -88,7 +95,7 @@ export class DirectChannel extends Playable {
       return
     }
 
-    void Advert.read(message.data).then(advert => {
+    void Advert.read(message.data).then((advert) => {
       if (advert.value.database.equals(this.address.cid) === true) {
         this.events.emit('message', message)
       }

@@ -21,10 +21,7 @@ describe(testName, () => {
     identities: Datastore,
     keychain: KeyChain,
     identity: Identity
-  let
-    tempIpfs: IPFS,
-    tempIdentities: Datastore,
-    tempKeychain: KeyChain
+  let tempIpfs: IPFS, tempIdentities: Datastore, tempKeychain: KeyChain
   const expectedProtocol = '/opal/identity'
   const name = names.name0
   const password = ''
@@ -33,7 +30,8 @@ describe(testName, () => {
   const signedEmpty = base32.decode(
     'bgbcqeiiayc2skoa4am3u3kmq4io6zjspbroxyfw2duj2lzxagrxfoafes4eaeid3eayxiin7neu6s4jhngwj2uoxoxxhzrdcckhtinpqtugc64tyze'
   )
-  const authstring = 'bafyreibvk33g3t2jktm3i7q7vwugu3mqoc3oajlymb7u46qn6kqpsexl4u'
+  const authstring =
+    'bafyreibvk33g3t2jktm3i7q7vwugu3mqoc3oajlymb7u46qn6kqpsexl4u'
 
   before(async () => {
     const fixtTestPaths = getTestPaths(fixtPath, testName)

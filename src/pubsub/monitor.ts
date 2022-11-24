@@ -15,10 +15,7 @@ export class Monitor extends EventEmitter {
     return this._isConnected
   }
 
-  constructor (
-    readonly libp2p: Libp2p,
-    readonly topic: string
-  ) {
+  constructor (readonly libp2p: Libp2p, readonly topic: string) {
     super()
 
     this._isConnected = false
@@ -30,15 +27,23 @@ export class Monitor extends EventEmitter {
 
   connect (): void {
     if (!this.isConnected()) {
-      this.libp2p.pubsub.addEventListener('subscription-change', this._refreshPeers)
-      this.peers = new Set(this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString))
+      this.libp2p.pubsub.addEventListener(
+        'subscription-change',
+        this._refreshPeers
+      )
+      this.peers = new Set(
+        this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
+      )
       this._isConnected = true
     }
   }
 
   disconnect (): void {
     if (this.isConnected()) {
-      this.libp2p.pubsub.removeEventListener('subscription-change', this._refreshPeers)
+      this.libp2p.pubsub.removeEventListener(
+        'subscription-change',
+        this._refreshPeers
+      )
       this.peers = new Set()
       this._isConnected = false
     }
@@ -46,7 +51,9 @@ export class Monitor extends EventEmitter {
 
   _refreshPeers (): void {
     const _peers = this.peers
-    this.peers = new Set(this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString))
+    this.peers = new Set(
+      this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
+    )
 
     const join = new Set()
     for (const peer of this.peers) {

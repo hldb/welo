@@ -15,21 +15,23 @@ export class MultiReplicator extends Playable {
 
   constructor (config: Config) {
     const starting = async (): Promise<void> => {
-      await Promise.all(this.modules.map(
-        async (module): Promise<void> => await start(module)
-      ))
+      await Promise.all(
+        this.modules.map(async (module): Promise<void> => await start(module))
+      )
     }
 
     const stopping = async (): Promise<void> => {
-      await Promise.all(this.modules.map(
-        async (module): Promise<void> => await stop(module)
-      ))
+      await Promise.all(
+        this.modules.map(async (module): Promise<void> => await stop(module))
+      )
     }
 
     super({ starting, stopping })
 
     this.config = config
-    this.modules = MultiReplicator.modules.map((Replicator: any): Playable => new Replicator(this.config))
+    this.modules = MultiReplicator.modules.map(
+      (Replicator: any): Playable => new Replicator(this.config)
+    )
 
     this.events = new EventEmitter()
   }

@@ -57,7 +57,8 @@ describe(testName, () => {
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
-    Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(directory, name))
+    Storage = async (name: string): Promise<Datastore> =>
+      await getLevelStorage(path.join(directory, name))
   })
 
   after(async () => {

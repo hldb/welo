@@ -17,7 +17,12 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'opal'
 
 describe(testName, () => {
-  let ipfs: IPFS, libp2p: Libp2p, opal: OpalType, directory: string, identity: Identity, directory1: string
+  let ipfs: IPFS,
+    libp2p: Libp2p,
+    opal: OpalType,
+    directory: string,
+    identity: Identity,
+    directory1: string
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)

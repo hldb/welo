@@ -58,7 +58,9 @@ export class Replica extends Playable {
     Entry: EntryStatic<any>
     Identity: IdentityStatic<any>
   }) {
-    const onUpdate = (): void => { void this.setRoot(this.graph.root) }
+    const onUpdate = (): void => {
+      void this.setRoot(this.graph.root)
+    }
     const starting = async (): Promise<void> => {
       this._storage = await this.Storage('replica')
       await this._storage.open()
@@ -218,7 +220,7 @@ export class Replica extends Playable {
       identity: this.identity,
       tag: this.manifest.getTag,
       payload,
-      next: (await all(this.heads.keys())).map(string => CID.parse(string)),
+      next: (await all(this.heads.keys())).map((string) => CID.parse(string)),
       refs: [] // refs are empty for now
     })
 

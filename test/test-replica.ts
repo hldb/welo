@@ -33,7 +33,8 @@ describe(testName, () => {
     identity: Identity,
     tempIdentity: Identity
 
-  const Storage = async (name: string): Promise<Datastore> => await getLevelStorage(path.join(tempPath, name))
+  const Storage = async (name: string): Promise<Datastore> =>
+    await getLevelStorage(path.join(tempPath, name))
 
   const registry = initRegistry()
 
@@ -66,7 +67,11 @@ describe(testName, () => {
     const tempIpfs = await getTestIpfs(testPaths1, offlineIpfsOptions)
     const tempLibp2p = await getTestLibp2p(tempIpfs)
     const tempIdentities = await getTestIdentities(testPaths1)
-    tempIdentity = await getTestIdentity(tempIdentities, tempLibp2p.keychain, names.name1)
+    tempIdentity = await getTestIdentity(
+      tempIdentities,
+      tempLibp2p.keychain,
+      names.name1
+    )
   })
 
   after(async () => {

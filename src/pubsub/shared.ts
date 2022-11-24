@@ -7,7 +7,8 @@ import { Playable } from '~utils/playable'
 import { Monitor } from './monitor'
 
 const topicPrefix = '/opal/replicator/live/1.0.0/'
-const channelTopic = (address: Address): string => topicPrefix + address.toString(base32)
+const channelTopic = (address: Address): string =>
+  topicPrefix + address.toString(base32)
 
 export class SharedChannel extends Playable {
   readonly ipfs: IPFS

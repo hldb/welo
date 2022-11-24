@@ -441,10 +441,7 @@ describe(testName, () => {
 
         assert.equal(await graph.size(), 1)
         assert.equal(await graph.nodes.size(), 1)
-        assert.deepEqual(
-          await graph.get(cid0),
-          muteNode()
-        )
+        assert.deepEqual(await graph.get(cid0), muteNode())
 
         assert.equal(await graph.heads.size(), 1)
         assert.equal(await graph.heads.has(cid0.toString()), true)
@@ -687,10 +684,7 @@ describe(testName, () => {
 
         assert.equal(await graph.size(), 1)
         assert.equal(await graph.nodes.size(), 1)
-        assert.deepEqual(
-          await graph.get(cid0),
-          muteNode()
-        )
+        assert.deepEqual(await graph.get(cid0), muteNode())
 
         assert.equal(await graph.heads.size(), 1)
         assert.equal(await graph.heads.has(cid0.toString()), true)
