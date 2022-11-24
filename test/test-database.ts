@@ -1,7 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs'
-import { Datastore } from 'interface-datastore'
+import type { IPFS } from 'ipfs-core-types'
+import type { Datastore } from 'interface-datastore'
 
 import { Database } from '~database/index.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'

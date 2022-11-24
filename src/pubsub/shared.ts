@@ -1,7 +1,7 @@
-import { IPFS } from 'ipfs-core-types'
+import type { IPFS } from 'ipfs-core-types'
 import { base32 } from 'multiformats/bases/base32'
 
-import { Address } from '~manifest/address'
+import type { Address } from '~manifest/address'
 import { Playable } from '~utils/playable'
 
 import { Monitor } from './monitor'

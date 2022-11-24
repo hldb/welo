@@ -1,11 +1,11 @@
 import EventEmitter from 'events'
-import { IPFS } from 'ipfs-core-types'
-import { PeerId } from '@libp2p/interface-peer-id'
-import { Message } from '@libp2p/interface-pubsub'
+import type { IPFS } from 'ipfs-core-types'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { Message } from '@libp2p/interface-pubsub'
 import { base32 } from 'multiformats/bases/base32'
-import { CID } from 'multiformats/cid'
+import type { CID } from 'multiformats/cid'
 
-import { Address } from '~manifest/address.js'
+import type { Address } from '~manifest/address.js'
 import * as Advert from '~replicator/live/message.js'
 import { Playable } from '~utils/playable.js'
 

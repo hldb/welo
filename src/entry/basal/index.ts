@@ -1,12 +1,12 @@
-import { Block } from 'multiformats/block'
-import { CID } from 'multiformats/cid'
+import type { Block } from 'multiformats/block'
+import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
 import { Extends } from '~utils/decorators.js'
-import { IdentityInstance } from '~identity/interface.js'
+import type { IdentityInstance } from '~identity/interface.js'
 
 import protocol from './protocol.js'
-import {
+import type {
   EntryData,
   EntryInstance,
   EntryStatic,

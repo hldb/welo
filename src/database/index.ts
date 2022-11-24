@@ -1,19 +1,19 @@
 import EventEmitter from 'events'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { CID } from 'multiformats/cid'
+import type { CID } from 'multiformats/cid'
 
-import { Blocks } from '~blocks/index.js'
-import { EntryStatic } from '~entry/interface.js'
-import { IdentityInstance, IdentityStatic } from '~identity/interface.js'
-import { ManifestInstance } from '~manifest/interface.js'
-import { AccessInstance } from '~access/interface.js'
-import { Creator, Selector, StoreInstance } from '~store/interface.js'
 import { Playable } from '~utils/playable.js'
-import { getStorage } from '~storage/index.js'
-import { MultiReplicator } from '~replicator/multi.js'
+import type { Blocks } from '~blocks/index.js'
+import type { EntryStatic } from '~entry/interface.js'
+import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
+import type { ManifestInstance } from '~manifest/interface.js'
+import type { AccessInstance } from '~access/interface.js'
+import type { Creator, Selector, StoreInstance } from '~store/interface.js'
+import type { getStorage } from '~storage/index.js'
+import type { MultiReplicator } from '~replicator/multi.js'
 
 import { Replica } from './replica.js'
-import { Config, Handlers, Open } from './interface.js'
+import type { Config, Handlers, Open } from './interface.js'
 
 export class Database extends Playable {
   readonly directory: string

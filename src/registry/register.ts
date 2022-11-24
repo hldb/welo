@@ -8,7 +8,7 @@
  *
  */
 
-import { Registrant } from './registrant.js'
+import type { Registrant } from './registrant.js'
 
 const $tar = Symbol.for('*')
 

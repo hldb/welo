@@ -1,16 +1,16 @@
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
-import { Datastore } from 'interface-datastore'
+import type { Datastore } from 'interface-datastore'
 
-import { AccessProtocol } from '~access/static/protocol.js'
-import { EntryProtocol } from '~entry/basal/protocol.js'
-import { IdentityProtocol } from '~identity/basal/protocol.js'
-import { IdentityInstance } from '~identity/interface.js'
-import { Blocks } from '~blocks/index.js'
-import { getStorage } from '~storage/index.js'
-import { StoreProtocol } from '~store/keyvalue/protocol.js'
-import { Replicator } from '~replicator/index.js'
-import { KeyChain } from '~utils/types.js'
+import type { AccessProtocol } from '~access/static/protocol.js'
+import type { EntryProtocol } from '~entry/basal/protocol.js'
+import type { IdentityProtocol } from '~identity/basal/protocol.js'
+import type { IdentityInstance } from '~identity/interface.js'
+import type { Blocks } from '~blocks/index.js'
+import type { getStorage } from '~storage/index.js'
+import type { StoreProtocol } from '~store/keyvalue/protocol.js'
+import type { Replicator } from '~replicator/index.js'
+import type { KeyChain } from '~utils/types.js'
 
 export interface Determine {
   protocol?: string

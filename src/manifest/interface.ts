@@ -1,8 +1,8 @@
-import { Block } from 'multiformats/block'
+import type { Block } from 'multiformats/block'
 
-import { Blocks } from '~blocks/index.js'
+import type { Blocks } from '~blocks/index.js'
 
-import { Address } from './address.js'
+import type { Address } from './address.js'
 
 export interface Protocol {
   readonly protocol: string

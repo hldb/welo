@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import EventEmitter from 'events'
-import { IPFS } from 'ipfs-core-types'
+import type { IPFS } from 'ipfs-core-types'
 import type { PubSub } from '@libp2p/interface-pubsub'
 
 import { Monitor } from '~pubsub/monitor.js'

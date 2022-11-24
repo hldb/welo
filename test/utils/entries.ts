@@ -1,5 +1,5 @@
 import { Entry } from '~entry/basal/index.js'
-import { Identity } from '~identity/basal/index.js'
+import type { Identity } from '~identity/basal/index.js'
 import { sortEntriesRev } from '~database/traversal.js'
 
 export const entryData = {

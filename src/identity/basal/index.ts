@@ -1,14 +1,14 @@
 import { keys } from '@libp2p/crypto'
 import type { PrivateKey, PublicKey } from '@libp2p/interface-keys'
 import { Key } from 'interface-datastore'
-import { Block } from 'multiformats/block'
-import { CID } from 'multiformats/cid'
+import type { Block } from 'multiformats/block'
+import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
 import { Extends } from '~utils/decorators.js'
 
 import protocol from './protocol.js'
-import {
+import type {
   IdentityInstance,
   IdentityStatic,
   AsIdentity,

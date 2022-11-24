@@ -1,10 +1,10 @@
-import { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interfaces/startable'
 
-import { Replica } from '~database/replica.js'
-import { ManifestInstance } from '~manifest/interface.js'
-import { Blocks } from '~blocks/index.js'
-import { getStorage } from '~storage/index.js'
-import { Registrant } from '~registry/registrant.js'
+import type { Replica } from '~database/replica.js'
+import type { ManifestInstance } from '~manifest/interface.js'
+import type { Blocks } from '~blocks/index.js'
+import type { getStorage } from '~storage/index.js'
+import type { Registrant } from '~registry/registrant.js'
 
 export interface Props {
   manifest: ManifestInstance<any>

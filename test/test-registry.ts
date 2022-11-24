@@ -2,7 +2,7 @@ import { strict as assert } from 'assert'
 
 import { initRegistry } from '~registry/index.js'
 import { Register } from '~registry/register.js'
-import { Registrant } from '~registry/registrant.js'
+import type { Registrant } from '~registry/registrant.js'
 
 const testName = 'register'
 

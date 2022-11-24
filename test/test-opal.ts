@@ -1,13 +1,13 @@
 import { strict as assert } from 'assert'
-import type { IPFS } from 'ipfs'
-import { Libp2p } from 'libp2p'
+import type { IPFS } from 'ipfs-core-types'
+import type { Libp2p } from 'libp2p'
 
 import { Opal } from '../src/index.js'
-import { Opal as OpalType } from '../src/opal.js'
+import type { Opal as OpalType } from '../src/opal.js'
 import { OPAL_PREFIX } from '~utils/constants.js'
 import type { Address, Manifest } from '~manifest/index.js'
-import { Database } from '~database/index.js'
-import { Identity } from '~identity/basal/index.js'
+import type { Database } from '~database/index.js'
+import type { Identity } from '~identity/basal/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

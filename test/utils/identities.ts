@@ -1,11 +1,11 @@
-import { Datastore } from 'interface-datastore'
+import type { Datastore } from 'interface-datastore'
 import { base32 } from 'multiformats/bases/base32'
 
 import { Identity } from '~identity/basal/index.js'
 import { getLevelStorage } from '~storage/index.js'
-import { KeyChain } from '~utils/types.js'
+import type { KeyChain } from '~utils/types.js'
 
-import { TestPaths } from './constants.js'
+import type { TestPaths } from './constants.js'
 
 export const getTestIdentities = async (
   testPaths: TestPaths

@@ -1,7 +1,7 @@
 import where from 'wherearewe'
 import makedir from 'make-dir'
 import { LevelDatastore } from 'datastore-level'
-import { Datastore } from 'interface-datastore'
+import type { Datastore } from 'interface-datastore'
 
 export interface StorageOptions {
   db?: any

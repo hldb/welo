@@ -1,13 +1,13 @@
 import { base32 } from 'multiformats/bases/base32'
 
 import { Extends } from '~utils/decorators.js'
-import { EntryInstance } from '~entry/interface.js'
-import { ManifestInstance, ManifestData } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
+import type { EntryInstance } from '~entry/interface.js'
+import type { ManifestInstance, ManifestData } from '~manifest/interface.js'
 
 import protocol, { Config } from './protocol.js'
-import { AccessInstance, AccessStatic } from '../interface.js'
 import { wildcard } from '../util.js'
+import type { AccessInstance, AccessStatic } from '../interface.js'
 
 @Extends<AccessStatic>()
 // the Static in StaticAccess means the ACL is immutable and does not change

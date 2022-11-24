@@ -1,4 +1,4 @@
-import { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interfaces/startable'
 
 export interface Lifecycle {
   starting: () => Promise<void>

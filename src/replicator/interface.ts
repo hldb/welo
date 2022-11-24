@@ -1,9 +1,9 @@
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { IPFS } from 'ipfs'
+import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 
-import { Replica } from '~database/replica.js'
-import { Blocks } from '~blocks/index.js'
+import type { Replica } from '~database/replica.js'
+import type { Blocks } from '~blocks/index.js'
 
 export interface Config {
   peerId?: PeerId

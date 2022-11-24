@@ -1,4 +1,4 @@
-import { Block } from 'multiformats/block'
+import type { Block } from 'multiformats/block'
 
 import { Blocks } from '~blocks/index.js'
 

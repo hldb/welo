@@ -1,5 +1,5 @@
-import { Block } from 'multiformats/block'
-import { CID } from 'multiformats/cid'
+import type { Block } from 'multiformats/block'
+import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
 

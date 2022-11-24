@@ -1,6 +1,6 @@
 import * as IPFS from 'ipfs-core'
-import { IPFS as IPFSType } from 'ipfs-core-types'
-import { TestPaths } from './constants'
+import type { IPFS as IPFSType } from 'ipfs-core-types'
+import type { TestPaths } from './constants'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const offlineIpfsOptions = (repo: string) => ({

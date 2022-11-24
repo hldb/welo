@@ -5,19 +5,19 @@ import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
-import { Datastore } from 'datastore-level'
+import type { Datastore } from 'datastore-level'
 
 // import * as version from './version.js'
-import { Config, Create, Determine, Options } from './interface.js'
+import type { Config, Create, Determine, Options } from './interface.js'
 import { initRegistry, Registry } from './registry/index.js'
 import { Manifest, Address } from '~manifest/index.js'
 import { Database } from '~database/index.js'
 import { Blocks } from '~blocks/index.js'
 import { OPAL_LOWER } from '~utils/constants.js'
-import { getStorage } from '~storage/index.js'
+import type { getStorage } from '~storage/index.js'
 import type { Replicator as ReplicatorClass } from '~replicator/index.js'
-import { IdentityInstance } from '~identity/interface.js'
-import { ManifestData } from '~manifest/interface.js'
+import type { IdentityInstance } from '~identity/interface.js'
+import type { ManifestData } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
 import {
   dirs,
@@ -25,7 +25,7 @@ import {
   defaultManifest,
   getComponents
 } from '~utils/index.js'
-import { KeyChain } from '~utils/types.js'
+import type { KeyChain } from '~utils/types.js'
 
 const registry = initRegistry()
 

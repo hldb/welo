@@ -1,10 +1,10 @@
-import { Block } from 'multiformats/block'
-import { CID } from 'multiformats/cid'
-import { Datastore } from 'interface-datastore'
+import type { Block } from 'multiformats/block'
+import type { CID } from 'multiformats/cid'
+import type { Datastore } from 'interface-datastore'
 
-import { Blocks } from '~blocks/index.js'
-import { Keychain } from '~keychain/index.js'
-import { Registrant } from '~registry/registrant.js'
+import type { Blocks } from '~blocks/index.js'
+import type { Keychain } from '~keychain/index.js'
+import type { Registrant } from '~registry/registrant.js'
 
 export type Gen = string
 

@@ -1,7 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs-core-types'
-import { Datastore } from 'interface-datastore'
+import type { IPFS } from 'ipfs-core-types'
+import type { Datastore } from 'interface-datastore'
 import { start, stop } from '@libp2p/interfaces/startable'
 
 import { Keyvalue } from '~store/keyvalue/index.js'

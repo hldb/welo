@@ -1,19 +1,19 @@
 import EventEmitter from 'events'
-import { HashMap } from 'ipld-hashmap'
+import type { HashMap } from 'ipld-hashmap'
 import { Datastore, Key } from 'interface-datastore'
 
-import { Replica } from '~database/replica.js'
+import type { Replica } from '~database/replica.js'
 import { Extends } from '~utils/decorators.js'
-import { ManifestData, ManifestInstance } from '~manifest/interface.js'
+import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
-import { getStorage } from '~storage/index.js'
+import type { getStorage } from '~storage/index.js'
 import { loadHashMap } from '~database/graph.js'
-import { Blocks } from '~blocks/index.js'
+import type { Blocks } from '~blocks/index.js'
 import { decodedcid, encodedcid } from '~utils/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
-import { StoreStatic, StoreInstance } from '../interface.js'
+import type { StoreStatic, StoreInstance } from '../interface.js'
 
 const indexesKey = new Key('indexes')
 

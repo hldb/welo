@@ -1,10 +1,10 @@
-import { Block } from 'multiformats/block'
+import type { Block } from 'multiformats/block'
 
 import { Blocks } from '~blocks/index.js'
 import { Extends } from '~utils/decorators.js'
 
 import { Address } from './address.js'
-import {
+import type {
   AsManifest,
   Create,
   Fetch,

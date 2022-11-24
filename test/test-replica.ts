@@ -1,7 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs'
-import { CID } from 'multiformats/cid'
+import type { IPFS } from 'ipfs-core-types'
+import type { CID } from 'multiformats/cid'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Datastore, Key } from 'interface-datastore'
 

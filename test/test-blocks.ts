@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs-core-types'
+import type { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
 import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'

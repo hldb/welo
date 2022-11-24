@@ -1,8 +1,8 @@
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs'
-import { CID } from 'multiformats/cid'
+import type { IPFS } from 'ipfs-core-types'
+import type { CID } from 'multiformats/cid'
 import { start } from '@libp2p/interfaces/startable'
-import { HashMap } from 'ipld-hashmap'
+import type { HashMap } from 'ipld-hashmap'
 
 import {
   sortCids,
@@ -14,7 +14,7 @@ import {
   traverser
 } from '~database/traversal.js'
 import { Blocks } from '~blocks/index.js'
-import { EntryInstance } from '~entry/interface.js'
+import type { EntryInstance } from '~entry/interface.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { Keyvalue } from '~store/keyvalue/index.js'

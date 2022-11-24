@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
-import { IPFS } from 'ipfs'
-import { Block } from 'multiformats/block'
+import type { IPFS } from 'ipfs-core-types'
+import type { Block } from 'multiformats/block'
 
 import { Blocks } from '~blocks/index.js'
 import { Manifest, Address } from '~manifest/index.js'

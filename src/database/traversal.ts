@@ -1,17 +1,17 @@
-import { HashMap } from 'ipld-hashmap'
-import { CID } from 'multiformats/cid'
+import type { HashMap } from 'ipld-hashmap'
+import type { CID } from 'multiformats/cid'
 import { compare } from 'uint8arrays/compare'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
 
-import { Blocks } from '~blocks/index.js'
+import type { Blocks } from '~blocks/index.js'
 import { cidstring, parsedcid } from '~utils/index.js'
-import { EntryInstance, EntryStatic } from '~entry/interface.js'
-import { IdentityStatic } from '~identity/interface.js'
-import { AccessInstance } from '~access/interface.js'
+import type { EntryInstance, EntryStatic } from '~entry/interface.js'
+import type { IdentityStatic } from '~identity/interface.js'
+import type { AccessInstance } from '~access/interface.js'
 
-import { Graph } from './graph.js'
-import { Edge } from './graph-node.js'
+import type { Graph } from './graph.js'
+import type { Edge } from './graph-node.js'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order

@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
-import { Block } from 'multiformats/block'
+import type { Block } from 'multiformats/block'
 
 import { initialNode, Node, NodeValue, NodeObj } from '~database/graph-node.js'
 

@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
-import type { IPFS } from 'ipfs'
-import { CID } from 'multiformats/cid.js'
+import type { IPFS } from 'ipfs-core-types'
+import type { CID } from 'multiformats/cid.js'
 import { start } from '@libp2p/interfaces/startable'
 
 import { Graph } from '~database/graph.js'

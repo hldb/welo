@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { Libp2p } from 'libp2p'
+import type { Libp2p } from 'libp2p'
 
 import { peerIdString } from '~utils/index'
 

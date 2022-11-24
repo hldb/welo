@@ -1,8 +1,8 @@
-import { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interfaces/startable'
 
-import { EntryInstance } from '~entry/interface.js'
-import { Registrant } from '~registry/registrant.js'
-import { ManifestInstance } from '~manifest/interface.js'
+import type { EntryInstance } from '~entry/interface.js'
+import type { Registrant } from '~registry/registrant.js'
+import type { ManifestInstance } from '~manifest/interface.js'
 
 export interface AccessInstance extends Startable {
   canAppend: (entry: EntryInstance<any>) => Promise<boolean>
