@@ -1,9 +1,10 @@
 import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
-import * as Block from 'multiformats/block'
+import { encode } from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
+import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
 
@@ -13,7 +14,7 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'blocks'
 
 describe(testName, () => {
-  let block: Block.Block<Uint8Array>
+  let block: BlockView<Uint8Array, 113, 18, 1>
   const value = new Uint8Array()
   const bytes = new Uint8Array([64])
   const cid = CID.parse(
@@ -22,8 +23,7 @@ describe(testName, () => {
   const code = codec.code
 
   before(async () => {
-    block = await Block.encode<
-    Uint8Array,
+    block = await encode<Uint8Array,
       typeof codec.code,
       typeof hasher.code
     >({ value, codec, hasher })
@@ -37,7 +37,7 @@ describe(testName, () => {
 
     describe('encode', () => {
       it('returns a new block instance', async () => {
-        const block = await Blocks.encode({ value })
+        const block = await Blocks.encode<Uint8Array>({ value })
 
         assert.deepEqual(block.value, value)
         assert.deepEqual(block.bytes, bytes)
@@ -48,7 +48,7 @@ describe(testName, () => {
 
     describe('decode', () => {
       it('returns a new block instance', async () => {
-        const block = await Blocks.decode({ bytes })
+        const block = await Blocks.decode<Uint8Array>({ bytes })
 
         assert.deepEqual(block.value, value)
         assert.deepEqual(block.bytes, bytes)

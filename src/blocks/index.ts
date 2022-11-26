@@ -1,16 +1,20 @@
-import * as Block from 'multiformats/block'
+import { encode, decode } from 'multiformats/block'
 import * as cbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import type { IPFS, AbortOptions } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
-import type { MultihashHasher } from 'multiformats/hashes/hasher'
 import type { PreloadOptions } from 'ipfs-core-types/src/utils'
 import type { PutOptions } from 'ipfs-core-types/src/block'
-
-type Codec = typeof cbor
+import type {
+  ByteView,
+  BlockView,
+  MultihashHasher,
+  BlockEncoder,
+  BlockDecoder
+} from 'multiformats/interface'
 
 interface Codecs {
-  [code: number]: Codec
+  [code: number]: typeof cbor
 }
 
 const codecs: Codecs = {
@@ -18,7 +22,7 @@ const codecs: Codecs = {
 }
 
 interface Names {
-  [code: number]: string
+  [code: number]: typeof cbor.name
 }
 
 const names: Names = {
@@ -26,7 +30,7 @@ const names: Names = {
 }
 
 interface Hashers {
-  [code: number]: Block.Hasher<'sha2-256'>
+  [code: number]: typeof sha256
 }
 
 const hashers: Hashers = {
@@ -44,10 +48,10 @@ class IpfsBlocks {
     hasher
   }: {
     value: T
-    codec?: Block.BlockEncoder<number, T>
+    codec?: BlockEncoder<number, T>
     hasher?: MultihashHasher<number>
-  }): Promise<Block.Block<T>> {
-    return await Block.encode<T, number, number>({
+  }): Promise<BlockView<T, number, number, 1>> {
+    return await encode<T, number, number>({
       value,
       codec: codec != null ? codec : cbor,
       hasher: hasher != null ? hasher : sha256
@@ -59,47 +63,76 @@ class IpfsBlocks {
     codec,
     hasher
   }: {
-    bytes: Block.ByteView<T>
-    codec?: Block.BlockDecoder<number, T>
+    bytes: ByteView<T>
+    codec?: BlockDecoder<number, T>
     hasher?: MultihashHasher<number>
-  }): Promise<Block.Block<T>> {
-    return await Block.decode<T, number, number>({
+  }): Promise<BlockView<T, number, number, 1>> {
+    return await decode<T, number, number>({
       bytes,
       codec: codec != null ? codec : cbor,
       hasher: hasher != null ? hasher : sha256
     })
   }
 
-  async get (
-    cid: CID,
+  async get<T>(
+    cid: CID<T>,
     options?: (AbortOptions & PreloadOptions) | undefined
-  ): Promise<Block.Block<any>> {
+  ): Promise<BlockView<T, number, number, 1>> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
+    }
+
+    if (cid.version === 0) {
+      throw new Error('cid.version 0 is not supported')
+    }
+
+    const codec = codecs[cid.code]
+    if (codec == null) {
+      throw new Error('codec not available')
+    }
+
+    const hasher = hashers[cid.multihash.code]
+    if (hasher == null) {
+      throw new Error('hasher not availabe')
     }
 
     const bytes = await this.ipfs.block.get(cid, options)
 
-    return await Block.decode({
+    return await decode<T, number, number>({
       bytes,
-      codec: codecs[cid.code],
-      hasher: hashers[cid.multihash.code]
+      codec,
+      hasher
     })
   }
 
-  async put (
-    block: Block.Block<any>,
-    options?: PutOptions | undefined
-  ): Promise<CID> {
+  async put<T>(
+    block: BlockView<T>,
+    options?: PutOptions
+  ): Promise<CID<T, number, number, 1>> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
     }
 
-    return await this.ipfs.block.put(block.bytes, {
-      version: block.cid.version,
-      format: names[block.cid.code],
-      ...options
-    })
+    // @ts-expect-error
+    if (block.cid.version === 0) {
+      throw new Error('cid.version 0 no supported')
+    }
+
+    const format = names[block.cid.code]
+    if (format == null) {
+      throw new Error('unsupported codec')
+    }
+
+    const cid = await this.ipfs.block.put(
+      block.bytes,
+      {
+        format,
+        ...options,
+        version: block.cid.version
+      }
+    )
+
+    return cid as CID<T, number, number, 1>
   }
 
   get encode (): typeof IpfsBlocks.encode {
