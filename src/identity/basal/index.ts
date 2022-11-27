@@ -1,7 +1,7 @@
 import { keys } from '@libp2p/crypto'
 import type { PrivateKey, PublicKey } from '@libp2p/interface-keys'
 import { Key } from 'interface-datastore'
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
@@ -51,7 +51,7 @@ const privs = new WeakMap()
 @Extends<IdentityStatic<IdentityValue>>()
 class Identity implements IdentityInstance<IdentityValue> {
   name?: string
-  block: Block<IdentityValue>
+  block: BlockView<IdentityValue>
   pubkey: PublicKey
 
   readonly auth: CID
@@ -68,7 +68,7 @@ class Identity implements IdentityInstance<IdentityValue> {
     name?: string
     priv?: PrivateKey
     pubkey: PublicKey
-    block: Block<IdentityValue>
+    block: BlockView<IdentityValue>
   }) {
     this.name = name
     this.block = block
@@ -124,7 +124,7 @@ class Identity implements IdentityInstance<IdentityValue> {
   }
 
   static async fetch ({ blocks, auth: cid }: Fetch): Promise<Identity> {
-    const block = await blocks.get(cid)
+    const block = await blocks.get<IdentityValue>(cid)
 
     const identity = await this.asIdentity({ block })
     if (identity === null) {
@@ -159,7 +159,7 @@ class Identity implements IdentityInstance<IdentityValue> {
   }: Import): Promise<Identity> {
     const persist = identities !== undefined && keychain !== undefined
 
-    const block: Block<KpiValue> = await Blocks.decode({ bytes: kpi })
+    const block: BlockView<KpiValue> = await Blocks.decode({ bytes: kpi })
 
     let pem: string, identity: Uint8Array
     try {
@@ -211,7 +211,7 @@ class Identity implements IdentityInstance<IdentityValue> {
     const bytes = await identities.get(key)
 
     const value = { pem, identity: bytes }
-    const block: Block<KpiValue> = await Blocks.encode({ value })
+    const block: BlockView<KpiValue> = await Blocks.encode({ value })
     return block.bytes
   }
 

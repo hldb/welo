@@ -1,17 +1,17 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
 
 import type { Blocks } from '~blocks/index.js'
-import type { Keychain } from '~keychain/index.js'
 import type { Registrant } from '~registry/registrant.js'
+import type { KeyChain } from '~utils/types.js'
 
 export type Gen = string
 
 export interface Get {
   name: string
   identities: Datastore
-  keychain: Keychain
+  keychain: KeyChain
 }
 
 export interface Fetch {
@@ -21,20 +21,20 @@ export interface Fetch {
 
 export type AsIdentity<Value> =
   | IdentityInstance<Value>
-  | { block: Block<Value> }
+  | { block: BlockView<Value> }
 
 export type Export = Get
 
 export interface Import {
   name: string
   identities?: Datastore
-  keychain?: Keychain
+  keychain?: KeyChain
   kpi: Uint8Array
 }
 
 export interface IdentityInstance<Value> {
   name?: string
-  block: Block<Value>
+  block: BlockView<Value>
   readonly auth: CID
   readonly id: Uint8Array
   sign: (data: Uint8Array) => Promise<Uint8Array>

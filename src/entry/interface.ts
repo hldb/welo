@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '~blocks/index.js'
@@ -13,7 +13,7 @@ export interface EntryData {
 }
 
 export interface EntryInstance<Value> extends EntryData {
-  readonly block: Block<Value>
+  readonly block: BlockView<Value>
   readonly identity: IdentityInstance<any>
   readonly cid: CID
 }
@@ -31,7 +31,7 @@ export interface Fetch {
 
 export type AsEntry<Value> =
   | EntryInstance<Value>
-  | { block: Block<Value>, identity: IdentityInstance<any> }
+  | { block: BlockView<Value>, identity: IdentityInstance<any> }
 
 export interface EntryStatic<Value> extends Registrant {
   new (props: any): EntryInstance<Value>

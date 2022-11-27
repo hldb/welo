@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
 import { Extends } from '~utils/decorators.js'
@@ -33,7 +33,7 @@ export class Manifest implements ManifestInstance<ManifestData> {
     return this._address
   }
 
-  constructor (readonly block: Block<ManifestData>) {
+  constructor (readonly block: BlockView<ManifestData>) {
     const manifest = block.value
     this.name = manifest.name
     this.store = manifest.store
@@ -53,7 +53,9 @@ export class Manifest implements ManifestInstance<ManifestData> {
   }
 
   static async fetch ({ blocks, address }: Fetch): Promise<Manifest> {
-    const block: Block<ManifestData> = await blocks.get(address.cid)
+    const block: BlockView<ManifestData> = await blocks.get<ManifestData>(
+      address.cid
+    )
     const manifest = this.asManifest({ block })
 
     if (manifest === null) {

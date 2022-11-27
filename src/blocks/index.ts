@@ -123,14 +123,11 @@ class IpfsBlocks {
       throw new Error('unsupported codec')
     }
 
-    const cid = await this.ipfs.block.put(
-      block.bytes,
-      {
-        format,
-        ...options,
-        version: block.cid.version
-      }
-    )
+    const cid = await this.ipfs.block.put(block.bytes, {
+      format,
+      ...options,
+      version: block.cid.version
+    })
 
     return cid as CID<T, number, number, 1>
   }

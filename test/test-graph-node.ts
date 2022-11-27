@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import { initialNode, Node, NodeValue, NodeObj } from '~database/graph-node.js'
 
@@ -92,7 +92,7 @@ describe('Graph Node', () => {
     describe('.encode', () => {
       it('returns a Block with a value of NodeValue', async () => {
         const node = Node.init()
-        const block: Block<NodeValue> = await node.encode()
+        const block: BlockView<NodeValue> = await node.encode()
         assert.equal(Array.isArray(block.value.out), true)
         assert.equal(Array.isArray(block.value.in), true)
         assert.equal(block.value.out.length === 0, true)

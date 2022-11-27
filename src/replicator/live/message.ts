@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
@@ -13,7 +13,7 @@ interface BlockData<Protocol> {
 
 type BlockDataP = BlockData<typeof protocol>
 
-type BlockMessage = Block<BlockDataP>
+type BlockMessage = BlockView<BlockDataP>
 
 export async function write (
   database: CID,

@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs-core-types'
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
 import { Manifest, Address } from '~manifest/index.js'
@@ -123,7 +123,7 @@ describe(testName, () => {
 
       it('returns null if unable to coerce', () => {
         const _manifest = Manifest.asManifest({
-          block: false as unknown as Block<any>
+          block: false as unknown as BlockView<any>
         })
         assert.equal(_manifest, null)
       })

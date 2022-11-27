@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
 
@@ -60,7 +60,7 @@ export class Node implements NodeObj {
     return node?.missing === false && node?.denied === false
   }
 
-  async encode (): Promise<Block<NodeValue>> {
+  async encode (): Promise<BlockView<NodeValue>> {
     const simple: NodeValue = {
       in: Array.from(this.in),
       out: Array.from(this.out),

@@ -4,7 +4,7 @@ import { Datastore, Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import { Playable } from '~utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
@@ -137,7 +137,9 @@ export class Replica extends Playable {
   async getRoot (): Promise<Root> {
     try {
       const rootHash = await this.storage.get(rootHashKey)
-      const block: Block<Root> = await this.blocks.get(decodedcid(rootHash))
+      const block: BlockView<Root> = await this.blocks.get<Root>(
+        decodedcid(rootHash)
+      )
       return block.value
     } catch (e) {
       throw new Error('failed to get root')

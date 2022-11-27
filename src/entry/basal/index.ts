@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '~blocks/index.js'
@@ -24,7 +24,7 @@ interface SignedEntry {
 @Extends<EntryStatic<SignedEntry>>()
 export class Entry implements EntryInstance<SignedEntry> {
   readonly identity: IdentityInstance<any>
-  readonly block: Block<SignedEntry>
+  readonly block: BlockView<SignedEntry>
 
   readonly cid: CID
   readonly auth: CID
@@ -40,8 +40,8 @@ export class Entry implements EntryInstance<SignedEntry> {
     data,
     identity
   }: {
-    block: Block<SignedEntry>
-    data: Block<EntryData>
+    block: BlockView<SignedEntry>
+    data: BlockView<EntryData>
     identity: IdentityInstance<any>
   }) {
     this.identity = identity
@@ -68,14 +68,14 @@ export class Entry implements EntryInstance<SignedEntry> {
     next,
     refs
   }: Create): Promise<Entry> {
-    const data: Block<EntryData> = await Blocks.encode({
+    const data: BlockView<EntryData> = await Blocks.encode({
       value: { tag, payload, next, refs }
     })
 
     const auth = identity.auth
     const sig = await identity.sign(data.bytes)
 
-    const block: Block<SignedEntry> = await Blocks.encode({
+    const block: BlockView<SignedEntry> = await Blocks.encode({
       value: { auth, data: data.bytes, sig }
     })
 
@@ -83,7 +83,7 @@ export class Entry implements EntryInstance<SignedEntry> {
   }
 
   static async fetch ({ blocks, Identity, cid }: Fetch): Promise<Entry> {
-    const block: Block<SignedEntry> = await blocks.get(cid)
+    const block: BlockView<SignedEntry> = await blocks.get<SignedEntry>(cid)
     const { auth } = block.value
     const identity = await Identity.fetch({ blocks, auth })
 
@@ -107,7 +107,7 @@ export class Entry implements EntryInstance<SignedEntry> {
     }
 
     const { block, identity } = entry
-    const data: Block<EntryData> = await Blocks.decode({
+    const data: BlockView<EntryData> = await Blocks.decode({
       bytes: block.value.data
     })
 
@@ -118,7 +118,7 @@ export class Entry implements EntryInstance<SignedEntry> {
     block,
     identity
   }: {
-    block: Block<SignedEntry>
+    block: BlockView<SignedEntry>
     identity: IdentityInstance<any>
   }): Promise<boolean> {
     const { auth, data, sig } = block.value

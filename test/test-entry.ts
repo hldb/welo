@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import type { IPFS } from 'ipfs'
+import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'

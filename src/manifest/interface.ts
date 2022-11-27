@@ -1,4 +1,4 @@
-import type { Block } from 'multiformats/block'
+import type { BlockView } from 'multiformats/interface'
 
 import type { Blocks } from '~blocks/index.js'
 
@@ -20,7 +20,7 @@ export interface ManifestData {
 }
 
 export interface ManifestInstance<Value> extends ManifestData {
-  readonly block: Block<Value>
+  readonly block: BlockView<Value>
   get getTag(): Uint8Array
   get address(): Address
 }
@@ -34,7 +34,7 @@ export interface Fetch {
 
 export type AsManifest<Value> =
   | ManifestInstance<Value>
-  | { block: Block<Value> }
+  | { block: BlockView<Value> }
 
 export interface ManifestStatic<Value> {
   new (props: any): ManifestInstance<Value>
