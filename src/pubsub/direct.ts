@@ -96,7 +96,7 @@ export class DirectChannel extends Playable {
     }
 
     void Advert.read(message.data).then((advert) => {
-      if (advert.value.database.equals(this.address.cid) === true) {
+      if (advert.value.database.equals(this.address.cid)) {
         this.events.emit('message', message)
       }
     })

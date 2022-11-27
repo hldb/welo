@@ -124,7 +124,7 @@ export class Entry implements EntryInstance<SignedEntry> {
     const { auth, data, sig } = block.value
 
     return (
-      auth.equals(identity.auth) === true && (await identity.verify(data, sig))
+      auth.equals(identity.auth) && (await identity.verify(data, sig))
     )
   }
 }
