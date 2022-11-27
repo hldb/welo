@@ -1,9 +1,7 @@
 import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
-import { encode } from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
@@ -21,13 +19,6 @@ describe(testName, () => {
     'bafyreigdmqpykrgxyaxtlafqpqhzrb7qy2rh75nldvfd4kok6gl47quzvy'
   )
   const code = codec.code
-
-  before(async () => {
-    block = await encode<Uint8Array,
-      typeof codec.code,
-      typeof hasher.code
-    >({ value, codec, hasher })
-  })
 
   describe('class', () => {
     it('exposes static properties', () => {
@@ -82,11 +73,12 @@ describe(testName, () => {
 
     describe('put', () => {
       it('returns a block from a cid', async () => {
-        const cid = await blocks.put(block)
+        const cid: CID<Uint8Array> = await blocks.put(block)
 
         assert.ok(cid instanceof CID)
         assert.deepEqual(cid, block.cid)
         assert.equal(cid.code, code)
+        assert.equal(cid.version, 1)
       })
 
       it('rejects if not ipfs instance provided', async () => {
