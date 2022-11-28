@@ -1,4 +1,4 @@
-import where from 'wherearewe'
+import * as where from 'wherearewe'
 import makedir from 'make-dir'
 import { LevelDatastore } from 'datastore-level'
 import type { Datastore } from 'interface-datastore'

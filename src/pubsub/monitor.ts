@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 import type { Libp2p } from 'libp2p'
 import type { Startable } from '@libp2p/interfaces/startable'
 
-import { peerIdString } from '~utils/index'
+import { peerIdString } from '~utils/index.js'
 
 const peersJoin = 'peers-join'
 const peersLeave = 'peers-leave'

@@ -1,6 +1,6 @@
 import path from 'path'
 import EventEmitter from 'events'
-import where from 'wherearewe'
+import * as where from 'wherearewe'
 import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
