@@ -1,13 +1,13 @@
 import EventEmitter from 'events'
-import type { IPFS } from 'ipfs-core-types'
-import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message } from '@libp2p/interface-pubsub'
 import { base32 } from 'multiformats/bases/base32'
+import type { Libp2p } from 'libp2p'
+import type { PeerId } from '@libp2p/interface-peer-id'
+import type { Message, PublishResult } from '@libp2p/interface-pubsub'
 import type { CID } from 'multiformats/cid'
 
-import type { Address } from '~manifest/address.js'
 import * as Advert from '~replicator/live/message.js'
 import { Playable } from '~utils/playable.js'
+import type { Address } from '~manifest/address.js'
 
 import { Monitor } from './monitor.js'
 
@@ -46,7 +46,7 @@ const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
 // This implementation makes it easier to handle messages per store while the pubsub channel is still shared
 
 export class DirectChannel extends Playable {
-  readonly ipfs: IPFS
+  readonly libp2p: Libp2p
   readonly address: Address
   readonly localPeerId: PeerId
   readonly remotePeerId: PeerId
@@ -54,27 +54,29 @@ export class DirectChannel extends Playable {
   readonly events: EventEmitter
 
   constructor (
-    ipfs: IPFS,
+    libp2p: Libp2p,
     address: Address,
     localPeerId: PeerId,
     remotePeerId: PeerId
   ) {
     const starting = async (): Promise<void> => {
-      await this.ipfs.pubsub.subscribe(this.topic, this._onMessage)
+      this.libp2p.pubsub.subscribe(this.topic)
+      this.libp2p.pubsub.addEventListener('message', this._onMessage)
       this.monitor.start()
     }
     const stopping = async (): Promise<void> => {
-      await this.ipfs.pubsub.unsubscribe(this.topic, this._onMessage)
+      this.libp2p.pubsub.unsubscribe(this.topic)
+      this.libp2p.pubsub.removeEventListener('message', this._onMessage)
       this.monitor.stop()
     }
     super({ starting, stopping })
 
-    this.ipfs = ipfs
+    this.libp2p = libp2p
     this.address = address
     this.localPeerId = localPeerId
     this.remotePeerId = remotePeerId
 
-    this.monitor = new Monitor(this.ipfs, this.topic)
+    this.monitor = new Monitor(this.libp2p, this.topic)
     this.events = new EventEmitter()
   }
 
@@ -86,7 +88,8 @@ export class DirectChannel extends Playable {
     return this.monitor.peers.has(this.remotePeerId.toString())
   }
 
-  private _onMessage (message: Message): void {
+  private _onMessage (evt: CustomEvent<Message>): void {
+    const message = evt.detail
     if (message.type === 'unsigned') {
       return
     }
@@ -102,13 +105,13 @@ export class DirectChannel extends Playable {
     })
   }
 
-  async publish (heads: CID[]): Promise<void> {
+  async publish (heads: CID[]): Promise<PublishResult> {
     if (!this.isOpen()) {
       throw new Error('direct pubsub not open')
     }
 
     const advert = await Advert.write(this.address.cid, heads)
 
-    return await this.ipfs.pubsub.publish(this.topic, advert.bytes)
+    return await this.libp2p.pubsub.publish(this.topic, advert.bytes)
   }
 }

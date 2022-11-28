@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import type { Libp2p } from 'libp2p'
+import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '~utils/index'
 
@@ -7,26 +8,25 @@ const peersJoin = 'peers-join'
 const peersLeave = 'peers-leave'
 const update = 'update'
 
-export class Monitor extends EventEmitter {
-  private _isConnected: boolean
+export class Monitor extends EventEmitter implements Startable {
+  private _isStarted: boolean
   peers: Set<string>
 
-  isConnected (): boolean {
-    return this._isConnected
+  isStarted (): boolean {
+    return this._isStarted
   }
 
   constructor (readonly libp2p: Libp2p, readonly topic: string) {
     super()
-
-    this._isConnected = false
+    this._isStarted = false
     this.peers = new Set()
 
     this.on(peersJoin, () => this.emit(update))
     this.on(peersLeave, () => this.emit(update))
   }
 
-  connect (): void {
-    if (!this.isConnected()) {
+  start (): void {
+    if (!this.isStarted()) {
       this.libp2p.pubsub.addEventListener(
         'subscription-change',
         this._refreshPeers
@@ -34,18 +34,18 @@ export class Monitor extends EventEmitter {
       this.peers = new Set(
         this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
       )
-      this._isConnected = true
+      this._isStarted = true
     }
   }
 
-  disconnect (): void {
-    if (this.isConnected()) {
+  stop (): void {
+    if (this.isStarted()) {
       this.libp2p.pubsub.removeEventListener(
         'subscription-change',
         this._refreshPeers
       )
       this.peers = new Set()
-      this._isConnected = false
+      this._isStarted = false
     }
   }
 

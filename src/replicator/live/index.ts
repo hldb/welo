@@ -1,23 +1,24 @@
 import EventEmitter from 'events'
 import all from 'it-all'
-import type { IPFS } from 'ipfs-core-types'
 import { start, stop } from '@libp2p/interfaces/dist/src/startable'
+import { base32 } from 'multiformats/bases/base32'
+import type { IPFS } from 'ipfs-core-types'
+import type { Libp2p } from 'libp2p'
 import type { CID } from 'multiformats/cid'
 import type { Message } from '@libp2p/interface-pubsub'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import { base32 } from 'multiformats/bases/base32'
 
 import { dagLinks, loadEntry, traverser } from '~database/traversal.js'
+import { parsedcid } from '~utils/index.js'
+import { Playable } from '~utils/playable.js'
+import { DirectChannel } from '~pubsub/direct.js'
+import { SharedChannel } from '~pubsub/shared.js'
 import type { Manifest } from '~manifest/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { EntryStatic } from '~entry/interface.js'
 import type { IdentityStatic } from '~identity/interface.js'
 import type { Replica } from '~database/replica.js'
 import type { AccessInstance } from '~access/interface.js'
-import { parsedcid } from '~utils/index.js'
-import { Playable } from '~utils/playable.js'
-import { DirectChannel } from '~pubsub/direct.js'
-import { SharedChannel } from '~pubsub/shared.js'
 
 import * as ReplicatorMessage from './message.js'
 
@@ -25,6 +26,7 @@ import * as ReplicatorMessage from './message.js'
 
 export class LiveReplicator extends Playable {
   readonly ipfs: IPFS
+  readonly libp2p: Libp2p
   readonly localPeerId: PeerId
   readonly manifest: Manifest
   readonly blocks: Blocks
@@ -40,6 +42,7 @@ export class LiveReplicator extends Playable {
 
   constructor ({
     ipfs,
+    libp2p,
     peerId,
     manifest,
     blocks,
@@ -49,6 +52,7 @@ export class LiveReplicator extends Playable {
     Identity
   }: {
     ipfs: IPFS
+    libp2p: Libp2p
     peerId: PeerId
     manifest: Manifest
     blocks: Blocks
@@ -80,6 +84,7 @@ export class LiveReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
+    this.libp2p = libp2p
     this.localPeerId = peerId
     this.manifest = manifest
     this.blocks = blocks
@@ -90,12 +95,12 @@ export class LiveReplicator extends Playable {
 
     this.events = new EventEmitter()
 
-    this.shared = new SharedChannel(this.ipfs, this.manifest.address)
+    this.shared = new SharedChannel(this.libp2p, this.manifest.address)
     this.directs = new Map()
   }
 
   async broadcast (heads: CID[]): Promise<void> {
-    const promises: Array<Promise<void>> = []
+    const promises: Array<Promise<unknown>> = []
     for (const direct of this.directs.values()) {
       if (direct.isOpen()) {
         promises.push(direct.publish(heads))
@@ -134,7 +139,7 @@ export class LiveReplicator extends Playable {
 
   _onPeerJoin (remotePeerId: PeerId): void {
     const direct = new DirectChannel(
-      this.ipfs,
+      this.libp2p,
       this.manifest.address,
       this.localPeerId,
       remotePeerId
