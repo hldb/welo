@@ -25,7 +25,9 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'replica'
 
 describe(testName, () => {
-  let ipfs: IPFS,
+  let
+    ipfs: IPFS,
+    tempIpfs: IPFS,
     blocks: Blocks,
     replica: Replica,
     manifest: Manifest,
@@ -64,7 +66,7 @@ describe(testName, () => {
     await start(access)
 
     const testPaths1 = getTestPaths(tempPath, testName + '1')
-    const tempIpfs = await getTestIpfs(testPaths1, offlineIpfsOptions)
+    tempIpfs = await getTestIpfs(testPaths1, offlineIpfsOptions)
     const tempLibp2p = await getTestLibp2p(tempIpfs)
     const tempIdentities = await getTestIdentities(testPaths1)
     tempIdentity = await getTestIdentity(
@@ -76,6 +78,7 @@ describe(testName, () => {
 
   after(async () => {
     await ipfs.stop()
+    await tempIpfs.stop()
   })
 
   describe('class', () => {
