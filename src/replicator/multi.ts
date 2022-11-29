@@ -6,7 +6,7 @@ import { Playable } from '~utils/playable.js'
 import type { Config } from './interface.js'
 
 export class MultiReplicator extends Playable {
-  static readonly modules: Array<typeof Playable>
+  static readonly modules: Array<typeof Playable> = []
 
   readonly config: Config
   readonly modules: Playable[]

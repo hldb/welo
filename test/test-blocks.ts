@@ -1,7 +1,9 @@
 import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
+import { encode } from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
+import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
@@ -12,13 +14,17 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'blocks'
 
 describe(testName, () => {
-  let block: BlockView<Uint8Array, 113, 18, 1>
+  let block: BlockView<Uint8Array, number, number, 1>
   const value = new Uint8Array()
   const bytes = new Uint8Array([64])
   const cid = CID.parse(
     'bafyreigdmqpykrgxyaxtlafqpqhzrb7qy2rh75nldvfd4kok6gl47quzvy'
   )
   const code = codec.code
+
+  before(async () => {
+    block = await encode<Uint8Array, number, number>({ value, codec, hasher })
+  })
 
   describe('class', () => {
     it('exposes static properties', () => {

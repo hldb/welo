@@ -22,7 +22,7 @@ describe(testName, () => {
     keychain: KeyChain,
     identity: Identity
   let tempIpfs: IPFS, tempIdentities: Datastore, tempKeychain: KeyChain
-  const expectedProtocol = '/opal/identity'
+  const expectedProtocol = '/opal/identity/basal'
   const name = names.name0
   const password = ''
 
