@@ -11,15 +11,20 @@ const update = 'update'
 export class Monitor extends EventEmitter implements Startable {
   private _isStarted: boolean
   peers: Set<string>
+  readonly #refreshPeers: typeof refreshPeers
 
   isStarted (): boolean {
     return this._isStarted
   }
 
-  constructor (readonly libp2p: Libp2p, readonly topic: string) {
+  constructor (
+    readonly libp2p: Libp2p,
+    readonly topic: string
+  ) {
     super()
     this._isStarted = false
     this.peers = new Set()
+    this.#refreshPeers = refreshPeers.bind(this)
 
     this.on(peersJoin, () => this.emit(update))
     this.on(peersLeave, () => this.emit(update))
@@ -29,8 +34,9 @@ export class Monitor extends EventEmitter implements Startable {
     if (!this.isStarted()) {
       this.libp2p.pubsub.addEventListener(
         'subscription-change',
-        this._refreshPeers
+        this.#refreshPeers
       )
+      this.libp2p.pubsub.subscribe(this.topic)
       this.peers = new Set(
         this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
       )
@@ -42,35 +48,36 @@ export class Monitor extends EventEmitter implements Startable {
     if (this.isStarted()) {
       this.libp2p.pubsub.removeEventListener(
         'subscription-change',
-        this._refreshPeers
+        this.#refreshPeers
       )
+      this.libp2p.pubsub.unsubscribe(this.topic)
       this.peers = new Set()
       this._isStarted = false
     }
   }
+}
 
-  _refreshPeers (): void {
-    const _peers = this.peers
-    this.peers = new Set(
-      this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
-    )
+function refreshPeers (this: Monitor): void {
+  const _peers = this.peers
+  this.peers = new Set(
+    this.libp2p.pubsub.getSubscribers(this.topic).map(peerIdString)
+  )
 
-    const join = new Set()
-    for (const peer of this.peers) {
-      !_peers.has(peer) && join.add(peer)
-    }
+  const join = new Set()
+  for (const peer of this.peers) {
+    !_peers.has(peer) && join.add(peer)
+  }
 
-    const leave = new Set()
-    for (const peer of _peers) {
-      !this.peers.has(peer) && leave.add(peer)
-    }
+  const leave = new Set()
+  for (const peer of _peers) {
+    !this.peers.has(peer) && leave.add(peer)
+  }
 
-    if (join.size > 0) {
-      this.emit(peersJoin, join)
-    }
+  if (join.size > 0) {
+    this.emit(peersJoin, join)
+  }
 
-    if (leave.size > 0) {
-      this.emit(peersLeave, leave)
-    }
+  if (leave.size > 0) {
+    this.emit(peersLeave, leave)
   }
 }

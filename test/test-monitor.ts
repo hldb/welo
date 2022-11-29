@@ -2,12 +2,13 @@ import { strict as assert } from 'assert'
 import EventEmitter from 'events'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
-import type { PubSub } from '@libp2p/interface-pubsub'
+import type { PeerId } from '@libp2p/interface-peer-id'
 
 import { Monitor } from '~pubsub/monitor.js'
 
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
+import { peerIdString } from '~utils/index.js'
 
 const testName = 'pubsub peer monitor'
 
@@ -17,10 +18,8 @@ describe(testName, () => {
     ipfs2: IPFS,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
-    id1: string,
-    id2: string,
-    pubsub1: PubSub,
-    pubsub2: PubSub
+    id1: PeerId,
+    id2: PeerId
 
   const sharedTopic = 'shared-topic'
 
@@ -35,8 +34,13 @@ describe(testName, () => {
     // @ts-expect-error
     libp2p2 = ipfs2.libp2p as Libp2p
 
-    id1 = (await ipfs1.id()).id.toString()
-    id2 = (await ipfs2.id()).id.toString()
+    id1 = (await ipfs1.id()).id
+    id2 = (await ipfs2.id()).id
+
+    await Promise.all([
+      ipfs1.swarm.connect(id2),
+      ipfs2.swarm.connect(id1)
+    ])
   })
 
   after(async () => {
@@ -45,63 +49,78 @@ describe(testName, () => {
 
   describe('instance', () => {
     it('exposes instance properties', () => {
-      const monitor = new Monitor(libp2p1, 'topic')
-      assert.ok(monitor.libp2p)
-      assert.ok(monitor.topic)
-      assert.ok(monitor.peers)
+      const topic = 'topic'
+      const monitor = new Monitor(libp2p1, topic)
+      assert.equal(monitor.libp2p, libp2p1)
+      assert.equal(monitor.topic, topic)
+      assert.deepEqual(monitor.peers, new Set())
       assert.ok(monitor instanceof Monitor)
       assert.ok(monitor instanceof EventEmitter)
     })
 
-    describe('peers', () => {
-      it('returns a set of peerId strings for current peers', () => {
-        const monitor = new Monitor(libp2p1, 'topic')
-        assert.deepEqual(monitor.peers, new Set())
-      })
-    })
-
-    describe('peers-join', () => {
-      it('emitted when a peer joins', async () => {
+    describe('events', () => {
+      it('emitted when peers join and leave', async () => {
         const peer1 = new Monitor(libp2p1, sharedTopic)
         const peer2 = new Monitor(libp2p2, sharedTopic)
 
         let joins1 = 0
         let joins2 = 0
+        let leaves1 = 0
+        let leaves2 = 0
+        let updates1 = 0
+        let updates2 = 0
 
-        peer1.on('peer-join', () => joins1++)
-        peer2.on('peer-join', () => joins2++)
+        peer1.on('peers-join', () => joins1++)
+        peer2.on('peers-join', () => joins2++)
+        peer1.on('peers-leave', () => leaves1++)
+        peer2.on('peers-leave', () => leaves2++)
+        peer1.on('update', () => updates1++)
+        peer2.on('update', () => updates2++)
 
         peer1.start()
         peer2.start()
 
         const promise = Promise.all([
-          new Promise((resolve) => peer1.once('join', resolve)),
-          new Promise((resolve) => peer2.once('join', resolve))
+          new Promise((resolve) => peer1.once('peers-join', resolve)),
+          new Promise((resolve) => peer2.once('peers-join', resolve))
         ])
-
-        pubsub1.subscribe(sharedTopic)
-        pubsub2.subscribe(sharedTopic)
 
         assert.deepEqual(peer1.peers, new Set())
         assert.deepEqual(peer2.peers, new Set())
 
         const ids = await promise
 
-        assert.equal(ids[0], id2)
-        assert.equal(ids[1], id1)
+        assert.deepEqual(ids[0], new Set([peerIdString(id2)]))
+        assert.deepEqual(ids[1], new Set([peerIdString(id1)]))
         assert.equal(joins1, 1)
         assert.equal(joins2, 1)
+        assert.equal(updates1, 1)
+        assert.equal(updates2, 1)
+
+        peer2.stop()
+        await new Promise((resolve) => peer1.once('peers-leave', resolve))
+        assert.equal(leaves1, 1)
+        assert.equal(leaves2, 0)
+        assert.equal(updates1, 2)
+        assert.equal(updates2, 1)
+
+        peer2.start()
+        assert.deepEqual(peer2.peers, new Set([peerIdString(id1)]))
+        await new Promise((resolve) => peer1.once('peers-join', resolve))
+        assert.equal(joins1, 2)
+        assert.equal(joins2, 1)
+        assert.equal(updates1, 3)
+        assert.equal(updates2, 1)
+
+        peer1.stop()
+        await new Promise((resolve) => peer2.once('peers-leave', resolve))
+        assert.equal(leaves1, 1)
+        assert.equal(leaves2, 1)
+        assert.equal(updates1, 3)
+        assert.equal(updates2, 2)
+
+        peer2.stop()
       })
-    })
-
-    describe('peers-leave', () => {
-      it('emitted when a peer leaves', () => {})
-    })
-
-    describe('update', () => {
-      it('emitted when peers-join is emitted', () => {})
-
-      it('emitted when peers-join is emitted', () => {})
     })
   })
 })
