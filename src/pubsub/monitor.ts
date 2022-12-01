@@ -1,15 +1,14 @@
 import EventEmitter from 'events'
 import type { Libp2p } from 'libp2p'
-import type { PubSub } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '~utils/index.js'
 
+import { getPeers } from './util.js'
+
 const peerJoin = 'peer-join'
 const peerLeave = 'peer-leave'
 const update = 'update'
-
-const getPeers = (pubsub: PubSub, topic: string): string[] => pubsub.getSubscribers(topic).map(peerIdString)
 
 export class Monitor extends EventEmitter implements Startable {
   private _isStarted: boolean
@@ -40,7 +39,7 @@ export class Monitor extends EventEmitter implements Startable {
         this.#refreshPeers
       )
       this.libp2p.pubsub.subscribe(this.topic)
-      this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic))
+      this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
       this._isStarted = true
     }
   }
@@ -60,7 +59,7 @@ export class Monitor extends EventEmitter implements Startable {
 
 function refreshPeers (this: Monitor): void {
   const _peers = this.peers
-  this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic))
+  this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
 
   const joins = new Set()
   for (const peer of this.peers) {
