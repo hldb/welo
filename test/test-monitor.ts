@@ -70,10 +70,10 @@ describe(testName, () => {
         let updates1 = 0
         let updates2 = 0
 
-        peer1.on('peers-join', () => joins1++)
-        peer2.on('peers-join', () => joins2++)
-        peer1.on('peers-leave', () => leaves1++)
-        peer2.on('peers-leave', () => leaves2++)
+        peer1.on('peer-join', () => joins1++)
+        peer2.on('peer-join', () => joins2++)
+        peer1.on('peer-leave', () => leaves1++)
+        peer2.on('peer-leave', () => leaves2++)
         peer1.on('update', () => updates1++)
         peer2.on('update', () => updates2++)
 
@@ -81,8 +81,8 @@ describe(testName, () => {
         peer2.start()
 
         const promise = Promise.all([
-          new Promise((resolve) => peer1.once('peers-join', resolve)),
-          new Promise((resolve) => peer2.once('peers-join', resolve))
+          new Promise((resolve) => peer1.once('peer-join', resolve)),
+          new Promise((resolve) => peer2.once('peer-join', resolve))
         ])
 
         assert.deepEqual(peer1.peers, new Set())
@@ -90,15 +90,15 @@ describe(testName, () => {
 
         const ids = await promise
 
-        assert.deepEqual(ids[0], new Set([peerIdString(id2)]))
-        assert.deepEqual(ids[1], new Set([peerIdString(id1)]))
+        assert.deepEqual(ids[0], peerIdString(id2))
+        assert.deepEqual(ids[1], peerIdString(id1))
         assert.equal(joins1, 1)
         assert.equal(joins2, 1)
         assert.equal(updates1, 1)
         assert.equal(updates2, 1)
 
         peer2.stop()
-        await new Promise((resolve) => peer1.once('peers-leave', resolve))
+        await new Promise((resolve) => peer1.once('peer-leave', resolve))
         assert.equal(leaves1, 1)
         assert.equal(leaves2, 0)
         assert.equal(updates1, 2)
@@ -106,14 +106,14 @@ describe(testName, () => {
 
         peer2.start()
         assert.deepEqual(peer2.peers, new Set([peerIdString(id1)]))
-        await new Promise((resolve) => peer1.once('peers-join', resolve))
+        await new Promise((resolve) => peer1.once('peer-join', resolve))
         assert.equal(joins1, 2)
         assert.equal(joins2, 1)
         assert.equal(updates1, 3)
         assert.equal(updates2, 1)
 
         peer1.stop()
-        await new Promise((resolve) => peer2.once('peers-leave', resolve))
+        await new Promise((resolve) => peer2.once('peer-leave', resolve))
         assert.equal(leaves1, 1)
         assert.equal(leaves2, 1)
         assert.equal(updates1, 3)
