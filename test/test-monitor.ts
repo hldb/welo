@@ -59,16 +59,20 @@ describe(testName, () => {
     })
 
     describe('events', () => {
-      it('emitted when peers join and leave', async () => {
-        const peer1 = new Monitor(libp2p1, sharedTopic)
-        const peer2 = new Monitor(libp2p2, sharedTopic)
+      let
+        peer1: Monitor,
+        peer2: Monitor
 
-        let joins1 = 0
-        let joins2 = 0
-        let leaves1 = 0
-        let leaves2 = 0
-        let updates1 = 0
-        let updates2 = 0
+      let joins1 = 0
+      let joins2 = 0
+      let leaves1 = 0
+      let leaves2 = 0
+      let updates1 = 0
+      let updates2 = 0
+
+      before(() => {
+        peer1 = new Monitor(libp2p1, sharedTopic)
+        peer2 = new Monitor(libp2p2, sharedTopic)
 
         peer1.on('peer-join', () => joins1++)
         peer2.on('peer-join', () => joins2++)
@@ -76,7 +80,9 @@ describe(testName, () => {
         peer2.on('peer-leave', () => leaves2++)
         peer1.on('update', () => updates1++)
         peer2.on('update', () => updates2++)
+      })
 
+      it('emits peer-join when a peer joins', async () => {
         peer1.start()
         peer2.start()
 
@@ -96,7 +102,9 @@ describe(testName, () => {
         assert.equal(joins2, 1)
         assert.equal(updates1, 1)
         assert.equal(updates2, 1)
+      })
 
+      it('emits peer-leave when a peer leaves', async () => {
         peer2.stop()
         await new Promise((resolve) => peer1.once('peer-leave', resolve))
         assert.equal(leaves1, 1)
