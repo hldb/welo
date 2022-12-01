@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import type { Libp2p } from 'libp2p'
+import type { SubscriptionChangeData } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '~utils/index.js'
@@ -57,7 +58,18 @@ export class Monitor extends EventEmitter implements Startable {
   }
 }
 
-function refreshPeers (this: Monitor): void {
+function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>): void {
+  let affected = false
+  for (const { topic } of evt.detail.subscriptions) {
+    if (topic === this.topic) {
+      affected = true
+    }
+  }
+
+  if (!affected) {
+    return
+  }
+
   const _peers = this.peers
   this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
 
