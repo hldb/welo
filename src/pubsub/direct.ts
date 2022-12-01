@@ -1,15 +1,12 @@
 import EventEmitter from 'events'
-import { base32 } from 'multiformats/bases/base32'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message, PublishResult } from '@libp2p/interface-pubsub'
-import type { CID } from 'multiformats/cid'
+import type { Message, PublishResult, SubscriptionChangeData } from '@libp2p/interface-pubsub'
+import type { Startable } from '@libp2p/interfaces/startable'
 
-import * as Advert from '~replicator/live/message.js'
-import { Playable } from '~utils/playable.js'
-import type { Address } from '~manifest/address.js'
+import { peerIdString } from '~utils/index.js'
 
-import { Monitor } from './monitor.js'
+import { getPeers, getTopics } from './util.js'
 
 const prefix = '/dps/1.0.0/'
 
@@ -28,56 +25,80 @@ function sortAlphabetical (a: string, b: string): 1 | 0 | -1 {
   return 0
 }
 
-const b32PeerId = (peerId: PeerId): string => peerId.toCID().toString(base32)
-
 const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
   if (localPeerId === remotePeerId) {
     throw new Error('no direct channel with self')
   }
 
-  const peerids = [b32PeerId(localPeerId), b32PeerId(remotePeerId)].sort(
+  const peerids = [peerIdString(localPeerId), peerIdString(remotePeerId)].sort(
     sortAlphabetical
   )
 
   return prefix + peerids.join('/')
 }
 
+const events = {
+  peered: 'peered',
+  unpeered: 'unpeered'
+}
+
 // The Direct Channel spec for the Live Replicator specifies that the channel is not unique per database
 // This implementation makes it easier to handle messages per store while the pubsub channel is still shared
 
-export class DirectChannel extends Playable {
+export class Direct extends EventEmitter implements Startable {
   readonly libp2p: Libp2p
-  readonly address: Address
   readonly localPeerId: PeerId
   readonly remotePeerId: PeerId
-  readonly monitor: Monitor
-  readonly events: EventEmitter
+
+  readonly #onSubscriptionChange: typeof onSubscriptionChange
+  readonly #onMessage: typeof onMessage
+
+  #isStarted: boolean
+
+  isStarted (): boolean {
+    return this.#isStarted
+  }
+
+  start (): void {
+    if (!this.isStarted()) {
+      this.libp2p.pubsub.addEventListener(
+        'subscription-change',
+        this.#onSubscriptionChange
+      )
+      this.libp2p.pubsub.addEventListener('message', this.#onMessage)
+      this.libp2p.pubsub.subscribe(this.topic)
+
+      this.#isStarted = true
+    }
+  }
+
+  stop (): void {
+    if (this.isStarted()) {
+      this.libp2p.pubsub.unsubscribe(this.topic)
+
+      this.libp2p.pubsub.removeEventListener('message', this.#onMessage)
+      this.libp2p.pubsub.removeEventListener(
+        'subscription-change',
+        this.#onSubscriptionChange
+      )
+
+      this.#isStarted = false
+    }
+  }
 
   constructor (
     libp2p: Libp2p,
-    address: Address,
-    localPeerId: PeerId,
     remotePeerId: PeerId
   ) {
-    const starting = async (): Promise<void> => {
-      this.libp2p.pubsub.subscribe(this.topic)
-      this.libp2p.pubsub.addEventListener('message', this._onMessage)
-      this.monitor.start()
-    }
-    const stopping = async (): Promise<void> => {
-      this.libp2p.pubsub.unsubscribe(this.topic)
-      this.libp2p.pubsub.removeEventListener('message', this._onMessage)
-      this.monitor.stop()
-    }
-    super({ starting, stopping })
-
+    super()
     this.libp2p = libp2p
-    this.address = address
-    this.localPeerId = localPeerId
+    this.localPeerId = libp2p.peerId
     this.remotePeerId = remotePeerId
 
-    this.monitor = new Monitor(this.libp2p, this.topic)
-    this.events = new EventEmitter()
+    this.#onSubscriptionChange = onSubscriptionChange.bind(this)
+    this.#onMessage = onMessage.bind(this)
+
+    this.#isStarted = false
   }
 
   get topic (): string {
@@ -85,33 +106,48 @@ export class DirectChannel extends Playable {
   }
 
   isOpen (): boolean {
-    return this.monitor.peers.has(this.remotePeerId.toString())
+    return getPeers(this.libp2p.pubsub, this.topic)
+      .filter(this.remotePeerId.equals.bind(this.remotePeerId))
+      .length !== 0 &&
+      getTopics(this.libp2p.pubsub).includes(this.topic)
   }
 
-  private _onMessage (evt: CustomEvent<Message>): void {
-    const message = evt.detail
-    if (message.type === 'unsigned') {
-      return
-    }
-
-    if (b32PeerId(message.from) !== b32PeerId(this.remotePeerId)) {
-      return
-    }
-
-    void Advert.read(message.data).then((advert) => {
-      if (advert.value.database.equals(this.address.cid)) {
-        this.events.emit('message', message)
-      }
-    })
-  }
-
-  async publish (heads: CID[]): Promise<PublishResult> {
+  async publish (bytes: Uint8Array): Promise<PublishResult> {
     if (!this.isOpen()) {
       throw new Error('direct pubsub not open')
     }
 
-    const advert = await Advert.write(this.address.cid, heads)
+    return await this.libp2p.pubsub.publish(this.topic, bytes)
+  }
+}
 
-    return await this.libp2p.pubsub.publish(this.topic, advert.bytes)
+function onMessage (this: Direct, evt: CustomEvent<Message>): void {
+  const message = evt.detail
+  if (message.type === 'unsigned') {
+    return
+  }
+
+  if (message.from.equals(this.remotePeerId)) {
+    return
+  }
+
+  this.emit('message', evt)
+}
+
+function onSubscriptionChange (this: Direct, evt: CustomEvent<SubscriptionChangeData>): void {
+  const { peerId, subscriptions } = evt.detail
+
+  if (!peerId.equals(this.remotePeerId)) {
+    return
+  }
+
+  for (const { topic, subscribe } of subscriptions) {
+    if (topic === this.topic) {
+      if (subscribe) {
+        this.emit(events.peered)
+      } else {
+        this.emit(events.unpeered)
+      }
+    }
   }
 }
