@@ -10,7 +10,7 @@ import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { peerIdString } from '~utils/index.js'
 
-const testName = 'pubsub peer monitor'
+const testName = 'pubsub/monitor'
 
 describe(testName, () => {
   let

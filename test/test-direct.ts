@@ -11,7 +11,7 @@ import { Direct } from '~pubsub/direct.js'
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 
-const testName = 'pubsub peer monitor'
+const testName = 'pubsub/direct'
 
 describe(testName, () => {
   let
