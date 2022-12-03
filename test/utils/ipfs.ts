@@ -9,7 +9,7 @@ export const offlineIpfsOptions = (repo: string) => ({
   config: {
     profile: 'test',
     Addresses: {
-      Swarm: ['/ip4/127.0.0.1/tcp/0'],
+      Swarm: [],
       Announce: [],
       NoAnnounce: [],
       Delegates: []
