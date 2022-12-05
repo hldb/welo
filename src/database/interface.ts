@@ -1,4 +1,3 @@
-import type { PeerId } from '@libp2p/interface-peer-id'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 
@@ -19,7 +18,6 @@ export interface Open {
   start?: boolean
   blocks: Blocks
   Replicator: typeof MultiReplicator
-  peerId?: PeerId
   ipfs?: IPFS
   libp2p?: Libp2p
   identity: IdentityInstance<any>
