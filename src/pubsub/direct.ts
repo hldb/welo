@@ -127,7 +127,7 @@ function onMessage (this: Direct, evt: CustomEvent<Message>): void {
     return
   }
 
-  if (message.from.equals(this.remotePeerId)) {
+  if (!message.from.equals(this.remotePeerId)) {
     return
   }
 
