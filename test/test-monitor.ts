@@ -94,10 +94,10 @@ describe(testName, () => {
         assert.deepEqual(peer1.peers, new Set())
         assert.deepEqual(peer2.peers, new Set())
 
-        const ids = await promise
+        const ids = await promise as PeerId[]
 
-        assert.deepEqual(ids[0], peerIdString(id2))
-        assert.deepEqual(ids[1], peerIdString(id1))
+        assert.equal(peerIdString(ids[0]), peerIdString(id2))
+        assert.equal(peerIdString(ids[1]), peerIdString(id1))
         assert.equal(joins1, 1)
         assert.equal(joins2, 1)
         assert.equal(updates1, 1)

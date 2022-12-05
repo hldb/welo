@@ -3,7 +3,7 @@ import type { Libp2p } from 'libp2p'
 import type { SubscriptionChangeData } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
-import { peerIdString } from '~utils/index.js'
+import { parsedPeerId, peerIdString } from '~utils/index.js'
 
 import { getPeers } from './util.js'
 
@@ -73,21 +73,21 @@ function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>):
   const _peers = this.peers
   this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
 
-  const joins = new Set()
+  const joins: Set<string> = new Set()
   for (const peer of this.peers) {
     !_peers.has(peer) && joins.add(peer)
   }
 
-  const leaves = new Set()
+  const leaves: Set<string> = new Set()
   for (const peer of _peers) {
     !this.peers.has(peer) && leaves.add(peer)
   }
 
   for (const join of joins) {
-    this.emit(peerJoin, join)
+    this.emit(peerJoin, parsedPeerId(join))
   }
 
   for (const leave of leaves) {
-    this.emit(peerLeave, leave)
+    this.emit(peerLeave, parsedPeerId(leave))
   }
 }
