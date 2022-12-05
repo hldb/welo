@@ -3,6 +3,9 @@ export const fixtPath = './test/fixtures'
 export const identitiesPath = '/identities'
 export const keychainPath = '/keychain'
 export const ipfsPath = '/ipfs'
+export const databasePath = '/database'
+export const replicaPath = databasePath + '/replica'
+export const storePath = databasePath + '/store'
 
 export type TestRoot = typeof tempPath | typeof fixtPath
 
@@ -11,6 +14,9 @@ export interface TestPaths {
   identities: string
   keychain: string
   ipfs: string
+  database: string
+  replica: string
+  store: string
 }
 
 export const getTestPaths = (
@@ -20,7 +26,10 @@ export const getTestPaths = (
   test: testRoot + '/' + testName,
   identities: testRoot + '/' + testName + identitiesPath,
   keychain: testRoot + '/' + testName + keychainPath,
-  ipfs: testRoot + '/' + testName + ipfsPath
+  ipfs: testRoot + '/' + testName + ipfsPath,
+  database: testRoot + '/' + testName + databasePath,
+  replica: testRoot + '/' + testName + replicaPath,
+  store: testRoot + '/' + testName + storePath
 })
 
 export const names = {

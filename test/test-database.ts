@@ -1,7 +1,7 @@
 import path from 'path'
 import { strict as assert } from 'assert'
+import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
-import type { Datastore } from 'interface-datastore'
 
 import { Database } from '~database/index.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
@@ -13,7 +13,7 @@ import { initRegistry } from '~registry/index.js'
 import { Blocks } from '~blocks/index.js'
 import { defaultManifest } from '~utils/index.js'
 import { MultiReplicator } from '~replicator/multi.js'
-import { getLevelStorage, getStorage } from '~storage/index.js'
+import type { DatastoreClass } from '~utils/datastore.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -29,7 +29,7 @@ describe(testName, () => {
     manifest: Manifest,
     identity: Identity,
     directory: string,
-    Storage: getStorage
+    Datastore: DatastoreClass
 
   const registry = initRegistry()
 
@@ -57,8 +57,7 @@ describe(testName, () => {
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
-    Storage = async (name: string): Promise<Datastore> =>
-      await getLevelStorage(path.join(directory, name))
+    Datastore = LevelDatastore
   })
 
   after(async () => {
@@ -74,7 +73,7 @@ describe(testName, () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
           directory,
-          Storage,
+          Datastore,
           manifest,
           identity,
           blocks,

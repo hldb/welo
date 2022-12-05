@@ -7,14 +7,14 @@ import type { IdentityInstance, IdentityStatic } from '~identity/interface'
 import type { ManifestInstance } from '~manifest/interface'
 import type { Blocks } from '~blocks/index.js'
 import type { MultiReplicator } from '~replicator/multi.js'
-import type { getStorage } from '~storage/index.js'
+import type { DatastoreClass } from '~utils/datastore.js'
 import type { StoreInstance, StoreStatic } from '~store/interface'
 
 import type { Replica } from './replica'
 
 export interface Open {
   directory: string
-  Storage: getStorage
+  Datastore: DatastoreClass
   start?: boolean
   blocks: Blocks
   Replicator: typeof MultiReplicator

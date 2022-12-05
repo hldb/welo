@@ -13,7 +13,7 @@ import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import type { EntryInstance, EntryStatic } from '~entry/interface.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 import type { AccessInstance } from '~access/interface.js'
-import type { getStorage } from '~storage/index.js'
+import { DatastoreClass, getDatastore } from '~utils/datastore.js'
 
 import { Graph, Root } from './graph.js'
 import {
@@ -29,6 +29,7 @@ const rootHashKey = new Key('rootHash')
 
 export class Replica extends Playable {
   readonly manifest: ManifestInstance<any>
+  readonly directory: string
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
@@ -36,14 +37,15 @@ export class Replica extends Playable {
   readonly Identity: IdentityStatic<any>
   readonly events: EventEmitter
 
-  Storage: getStorage
+  Datastore: DatastoreClass
 
   _storage: Datastore | null
   _graph: Graph | null
 
   constructor ({
     manifest,
-    Storage,
+    directory,
+    Datastore,
     blocks,
     access,
     identity,
@@ -51,7 +53,8 @@ export class Replica extends Playable {
     Identity
   }: {
     manifest: ManifestInstance<any>
-    Storage: getStorage
+    directory: string
+    Datastore: DatastoreClass
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
@@ -62,7 +65,7 @@ export class Replica extends Playable {
       void this.setRoot(this.graph.root)
     }
     const starting = async (): Promise<void> => {
-      this._storage = await this.Storage('replica')
+      this._storage = await getDatastore(this.Datastore, directory)
       await this._storage.open()
 
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
@@ -84,13 +87,14 @@ export class Replica extends Playable {
     super({ starting, stopping })
 
     this.manifest = manifest
+    this.directory = directory
     this.blocks = blocks
     this.access = access
     this.identity = identity
     this.Entry = Entry
     this.Identity = Identity
 
-    this.Storage = Storage
+    this.Datastore = Datastore
 
     this._storage = null
     this._graph = null

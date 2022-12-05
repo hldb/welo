@@ -1,18 +1,17 @@
 import { strict as assert } from 'assert'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Datastore } from 'interface-datastore'
 
 import { LiveReplicator as Replicator } from '~replicator/live/index.js'
 import { Blocks } from '~blocks/index.js'
 import { Replica } from '~database/replica.js'
 import { StaticAccess as Access } from '~access/static/index.js'
-import { getLevelStorage } from '~storage/index.js'
 
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
+import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestRegistry } from './utils/registry.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -33,11 +32,13 @@ describe(testName, () => {
     replica2: Replica,
     replicator1: Replicator,
     replicator2: Replicator,
+    testPaths1: TestPaths,
+    testPaths2: TestPaths,
     access: Access
 
   before(async () => {
-    const testPaths1 = getTestPaths(tempPath, testName + '/1')
-    const testPaths2 = getTestPaths(tempPath, testName + '/2')
+    testPaths1 = getTestPaths(tempPath, testName + '/1')
+    testPaths2 = getTestPaths(tempPath, testName + '/2')
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
@@ -49,10 +50,7 @@ describe(testName, () => {
     id1 = (await ipfs1.id()).id
     id2 = (await ipfs2.id()).id
 
-    const Storage1 = async (name: string): Promise<Datastore> =>
-      await getLevelStorage(`${testPaths1.test}/database/${name}`)
-    const Storage2 = async (name: string): Promise<Datastore> =>
-      await getLevelStorage(`${testPaths2.test}/database/${name}`)
+    const Datastore = LevelDatastore
 
     const blocks1 = new Blocks(ipfs1)
     const blocks2 = new Blocks(ipfs2)
@@ -73,7 +71,8 @@ describe(testName, () => {
 
     replica1 = new Replica({
       manifest,
-      Storage: Storage1,
+      directory: testPaths1.replica,
+      Datastore,
       blocks: blocks1,
       access,
       identity: identity1,
@@ -82,7 +81,8 @@ describe(testName, () => {
     })
     replica2 = new Replica({
       manifest,
-      Storage: Storage2,
+      directory: testPaths2.replica,
+      Datastore,
       blocks: blocks2,
       access,
       identity: identity2,

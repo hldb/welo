@@ -1,8 +1,7 @@
-import path from 'path'
 import { strict as assert } from 'assert'
-import type { IPFS } from 'ipfs-core-types'
-import type { Datastore } from 'interface-datastore'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { LevelDatastore } from 'datastore-level'
+import type { IPFS } from 'ipfs-core-types'
 
 import { Keyvalue } from '~store/keyvalue/index.js'
 import { Replica } from '~database/replica.js'
@@ -13,9 +12,8 @@ import { Identity } from '~identity/basal/index.js'
 import { initRegistry } from '~registry/index.js'
 import { Manifest } from '~manifest/index.js'
 import { defaultManifest } from '~utils/index.js'
-import { getLevelStorage } from '~storage/index.js'
 
-import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
@@ -23,10 +21,9 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: IPFS, blocks: Blocks, identity: Identity
+  let ipfs: IPFS, blocks: Blocks, identity: Identity, testPaths: TestPaths
   const expectedProtocol = '/opal/store/keyvalue'
-  const Storage = async (name: string): Promise<Datastore> =>
-    await getLevelStorage(path.join(tempPath, 'test-keyvalue', name))
+  const Datastore = LevelDatastore
 
   const registry = initRegistry()
 
@@ -36,7 +33,7 @@ describe(testName, () => {
   registry.identity.add(Identity)
 
   before(async () => {
-    const testPaths = getTestPaths(tempPath, testName)
+    testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -79,8 +76,9 @@ describe(testName, () => {
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Storage,
+        Datastore,
         manifest,
+        directory: testPaths.replica,
         blocks,
         access,
         identity,
@@ -88,7 +86,7 @@ describe(testName, () => {
         Identity
       })
       await start(replica)
-      keyvalue = new Keyvalue({ manifest, blocks, replica, Storage })
+      keyvalue = new Keyvalue({ manifest, directory: testPaths.store, blocks, replica, Datastore })
       await start(keyvalue)
     })
 

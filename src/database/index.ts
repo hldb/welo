@@ -9,7 +9,7 @@ import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 import type { AccessInstance } from '~access/interface.js'
 import type { Creator, Selector, StoreInstance } from '~store/interface.js'
-import type { getStorage } from '~storage/index.js'
+import type { DatastoreClass } from '~utils/datastore.js'
 import type { MultiReplicator } from '~replicator/multi.js'
 
 import { Replica } from './replica.js'
@@ -17,7 +17,7 @@ import type { Config, Handlers, Open } from './interface.js'
 
 export class Database extends Playable {
   readonly directory: string
-  readonly Storage: getStorage
+  readonly Datastore: DatastoreClass
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>
@@ -55,7 +55,7 @@ export class Database extends Playable {
     }
     super({ starting, stopping })
 
-    this.Storage = config.Storage
+    this.Datastore = config.Datastore
     this.directory = config.directory
     this.manifest = config.manifest
     this.blocks = config.blocks
@@ -123,7 +123,7 @@ export class Database extends Playable {
   static async open (options: Open): Promise<Database> {
     const {
       directory,
-      Storage,
+      Datastore,
       manifest,
       Replicator,
       ipfs,
@@ -140,17 +140,22 @@ export class Database extends Playable {
       throw new Error('identity instance type does not match Identity class')
     }
 
-    const common = { manifest, blocks, Storage } // createStorage }
+    const common = { manifest, blocks, Datastore }
 
     const access = new Access(common)
     const replica = new Replica({
       ...common,
+      directory: directory + '/replica',
       identity,
       Entry,
       Identity,
       access
     })
-    const store = new Store({ ...common, replica })
+    const store = new Store({
+      ...common,
+      directory: directory + '/store',
+      replica
+    })
     const replicator = new Replicator({
       ...common,
       ipfs,
@@ -160,7 +165,7 @@ export class Database extends Playable {
 
     const config: Config = {
       directory,
-      Storage,
+      Datastore,
       blocks,
       replicator,
       identity,

@@ -3,14 +3,15 @@ import type { Startable } from '@libp2p/interfaces/startable'
 import type { Replica } from '~database/replica.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 import type { Blocks } from '~blocks/index.js'
-import type { getStorage } from '~storage/index.js'
+import type { DatastoreClass } from '~utils/datastore.js'
 import type { Registrant } from '~registry/registrant.js'
 
 export interface Props {
   manifest: ManifestInstance<any>
+  directory: string
   blocks: Blocks
   replica: Replica
-  Storage: getStorage
+  Datastore: DatastoreClass
 }
 
 export type Creator = (...args: any[]) => any

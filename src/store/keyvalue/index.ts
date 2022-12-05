@@ -1,15 +1,15 @@
 import EventEmitter from 'events'
-import type { HashMap } from 'ipld-hashmap'
 import { Datastore, Key } from 'interface-datastore'
+import type { HashMap } from 'ipld-hashmap'
 
-import type { Replica } from '~database/replica.js'
 import { Extends } from '~utils/decorators.js'
-import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
-import type { getStorage } from '~storage/index.js'
 import { loadHashMap } from '~database/graph.js'
-import type { Blocks } from '~blocks/index.js'
 import { decodedcid, encodedcid } from '~utils/index.js'
+import { DatastoreClass, getDatastore } from '~utils/datastore.js'
+import type { Replica } from '~database/replica.js'
+import type { Blocks } from '~blocks/index.js'
+import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
@@ -32,10 +32,11 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   readonly manifest: ManifestInstance<ManifestData>
+  readonly directory: string
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
-  readonly Storage: getStorage
+  readonly Datastore: DatastoreClass
   private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
@@ -43,17 +44,19 @@ export class Keyvalue extends Playable implements StoreInstance {
 
   constructor ({
     manifest,
+    directory,
     blocks,
     replica,
-    Storage
+    Datastore
   }: {
     manifest: ManifestInstance<ManifestData>
+    directory: string
     blocks: Blocks
     replica: Replica
-    Storage: getStorage
+    Datastore: DatastoreClass
   }) {
     const starting = async (): Promise<void> => {
-      this._storage = await Storage('store')
+      this._storage = await getDatastore(Datastore, directory)
       await this._storage.open()
 
       const indexesCID = await this.storage
@@ -82,11 +85,12 @@ export class Keyvalue extends Playable implements StoreInstance {
     super({ starting, stopping })
 
     this.manifest = manifest
+    this.directory = directory
     this.blocks = blocks
     this.config = manifest.store.config
     this.replica = replica
 
-    this.Storage = Storage
+    this.Datastore = Datastore
     this._storage = null
     this._indexes = null
     this._index = null

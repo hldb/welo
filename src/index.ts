@@ -1,6 +1,6 @@
 import { Opal as _Opal } from './opal.js'
 
-import { getLevelStorage } from '~storage/index.js'
+import { LevelDatastore } from 'datastore-level'
 import { Replicator } from '~replicator/index.js'
 
 import { StaticAccess } from '~access/static/index.js'
@@ -13,7 +13,7 @@ _Opal.registry.entry.add(Entry)
 _Opal.registry.identity.add(Identity)
 _Opal.registry.store.add(Keyvalue)
 
-_Opal.Storage = getLevelStorage
+_Opal.Datastore = LevelDatastore
 _Opal.Replicator = Replicator
 
 export const Opal = _Opal

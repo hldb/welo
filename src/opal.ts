@@ -7,25 +7,26 @@ import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { Datastore } from 'datastore-level'
 
-// import * as version from './version.js'
-import type { Config, Create, Determine, Options } from './interface.js'
-import { initRegistry, Registry } from './registry/index.js'
 import { Manifest, Address } from '~manifest/index.js'
 import { Database } from '~database/index.js'
 import { Blocks } from '~blocks/index.js'
 import { OPAL_LOWER } from '~utils/constants.js'
-import type { getStorage } from '~storage/index.js'
-import type { Replicator as ReplicatorClass } from '~replicator/index.js'
-import type { IdentityInstance } from '~identity/interface.js'
-import type { ManifestData } from '~manifest/interface.js'
 import { Playable } from '~utils/playable.js'
+import { initRegistry, Registry } from '~registry/index.js'
+import { getDatastore, DatastoreClass } from '~utils/datastore.js'
 import {
   dirs,
   DirsReturn,
   defaultManifest,
   getComponents
 } from '~utils/index.js'
+import type { Replicator as ReplicatorClass } from '~replicator/index.js'
+import type { IdentityInstance } from '~identity/interface.js'
+import type { ManifestData } from '~manifest/interface.js'
 import type { KeyChain } from '~utils/types.js'
+
+// import * as version from './version.js'
+import type { Config, Create, Determine, Options } from './interface.js'
 
 const registry = initRegistry()
 
@@ -38,7 +39,7 @@ export class Opal extends Playable {
     return Opal.registry
   }
 
-  static Storage?: getStorage
+  static Datastore?: DatastoreClass
   static Replicator?: typeof ReplicatorClass
 
   private readonly dirs: DirsReturn
@@ -120,11 +121,11 @@ export class Opal extends Playable {
     if (options.identity != null) {
       identity = options.identity
     } else {
-      if (this.Storage == null) {
-        throw new Error('Opal.create: missing Storage')
+      if (this.Datastore == null) {
+        throw new Error('Opal.create: missing Datastore')
       }
 
-      identities = await this.Storage(dirs(directory).identities)
+      identities = await getDatastore(this.Datastore, dirs(directory).identities)
 
       await identities.open()
       const Identity = this.registry.identity.star
@@ -204,13 +205,13 @@ export class Opal extends Playable {
       throw new Error('no identity available')
     }
 
-    let Storage: getStorage
-    if (options.Storage != null) {
-      Storage = options.Storage
-    } else if (Opal.Storage != null) {
-      Storage = Opal.Storage
+    let Datastore: DatastoreClass
+    if (options.Datastore != null) {
+      Datastore = options.Datastore
+    } else if (Opal.Datastore != null) {
+      Datastore = Opal.Datastore
     } else {
-      throw new Error('no Storage available')
+      throw new Error('no Datastore available')
     }
 
     let Replicator: typeof ReplicatorClass
@@ -226,12 +227,10 @@ export class Opal extends Playable {
       this.dirs.databases,
       manifest.address.cid.toString(base32)
     )
-    const dbStorage = async (_path: string): Promise<Datastore> =>
-      await Storage(path.join(dbPath, _path))
 
     const promise = Database.open({
       directory: dbPath,
-      Storage: dbStorage,
+      Datastore,
       Replicator,
       manifest,
       blocks: this.blocks,

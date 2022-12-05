@@ -1,15 +1,16 @@
-import type { Datastore } from 'interface-datastore'
 import { base32 } from 'multiformats/bases/base32'
+import { LevelDatastore } from 'datastore-level'
+import type { Datastore } from 'interface-datastore'
 
 import { Identity } from '~identity/basal/index.js'
-import { getLevelStorage } from '~storage/index.js'
+import { getDatastore } from '~utils/datastore.js'
 import type { KeyChain } from '~utils/types.js'
 
 import type { TestPaths } from './constants.js'
 
 export const getTestIdentities = async (
   testPaths: TestPaths
-): Promise<Datastore> => await getLevelStorage(testPaths.identities)
+): Promise<Datastore> => await getDatastore(LevelDatastore, testPaths.identities)
 
 export const getTestIdentity = async (
   testIdentities: Datastore,

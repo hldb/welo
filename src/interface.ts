@@ -7,10 +7,10 @@ import type { EntryProtocol } from '~entry/basal/protocol.js'
 import type { IdentityProtocol } from '~identity/basal/protocol.js'
 import type { IdentityInstance } from '~identity/interface.js'
 import type { Blocks } from '~blocks/index.js'
-import type { getStorage } from '~storage/index.js'
 import type { StoreProtocol } from '~store/keyvalue/protocol.js'
 import type { Replicator } from '~replicator/index.js'
 import type { KeyChain } from '~utils/types.js'
+import type { DatastoreClass } from '~utils/datastore'
 
 export interface Determine {
   protocol?: string
@@ -25,7 +25,7 @@ export interface Determine {
 
 export interface Options {
   identity?: IdentityInstance<any>
-  Storage?: getStorage
+  Datastore?: DatastoreClass
   Replicator?: typeof Replicator
 }
 

@@ -1,9 +1,9 @@
-import path from 'path'
 import { strict as assert } from 'assert'
+import { start, stop } from '@libp2p/interfaces/startable'
+import { Key } from 'interface-datastore'
+import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
-import { start, stop } from '@libp2p/interfaces/startable'
-import { Datastore, Key } from 'interface-datastore'
 
 import { Replica } from '~database/replica.js'
 import { Blocks } from '~blocks/index.js'
@@ -14,13 +14,13 @@ import { Identity } from '~identity/basal/index.js'
 import { cidstring, decodedcid, defaultManifest } from '~utils/index.js'
 import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '~registry/index.js'
-import { getLevelStorage } from '~storage/index.js'
 
-import { getTestPaths, names, tempPath } from './utils/constants.js'
+import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import { getDatastore } from '~utils/datastore.js'
 
 const testName = 'replica'
 
@@ -33,10 +33,10 @@ describe(testName, () => {
     manifest: Manifest,
     access: StaticAccess,
     identity: Identity,
-    tempIdentity: Identity
+    tempIdentity: Identity,
+    testPaths: TestPaths
 
-  const Storage = async (name: string): Promise<Datastore> =>
-    await getLevelStorage(path.join(tempPath, name))
+  const Datastore = LevelDatastore
 
   const registry = initRegistry()
 
@@ -46,7 +46,7 @@ describe(testName, () => {
   registry.identity.add(Identity)
 
   before(async () => {
-    const testPaths = getTestPaths(tempPath, testName)
+    testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -84,8 +84,9 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
-          Storage,
+          Datastore,
           manifest,
+          directory: testPaths.replica,
           blocks,
           access,
           identity,
@@ -152,8 +153,9 @@ describe(testName, () => {
         })
         const cid = entry.cid
         const replica = new Replica({
-          Storage,
+          Datastore,
           manifest,
+          directory: testPaths.replica,
           blocks,
           access,
           identity,
@@ -181,8 +183,9 @@ describe(testName, () => {
         const entry = await singleEntry(tempIdentity)()
         const cid = entry.cid
         const replica = new Replica({
-          Storage,
+          Datastore,
           manifest,
+          directory: testPaths.replica,
           blocks,
           access,
           identity,
@@ -261,7 +264,7 @@ describe(testName, () => {
 
         await stop(replica)
 
-        const storage = await Storage('replica')
+        const storage = await getDatastore(Datastore, testPaths.replica)
         await storage.open()
 
         assert.equal(await storage.has(rootHashKey), true)
@@ -274,8 +277,9 @@ describe(testName, () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
         const replica = new Replica({
-          Storage,
+          Datastore,
           manifest,
+          directory: testPaths.replica,
           blocks,
           access,
           identity,

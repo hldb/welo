@@ -49,7 +49,7 @@ describe(testName, () => {
       assert.ok(Opal.registry.entry)
       assert.ok(Opal.registry.identity)
       assert.ok(Opal.registry.store)
-      assert.ok(Opal.Storage)
+      assert.ok(Opal.Datastore)
       // assert.ok(Opal.Replicator)
       assert.ok(Opal.create)
       assert.ok(Opal.Manifest)
@@ -66,14 +66,14 @@ describe(testName, () => {
         await opal.stop()
       })
 
-      it('rejects if no identity option or Opal.Storage', async () => {
-        const Storage = Opal.Storage
-        Opal.Storage = undefined
+      it('rejects if no identity option or Opal.Datastore', async () => {
+        const Datastore = Opal.Datastore
+        Opal.Datastore = undefined
 
         const promise = Opal.create({ ipfs, libp2p, directory })
         await assert.rejects(promise)
 
-        Opal.Storage = Storage
+        Opal.Datastore = Datastore
       })
     })
   })
