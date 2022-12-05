@@ -199,6 +199,7 @@ export class Replica extends Playable {
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
+    const size = await this.graph.size()
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag)) {
         console.warn('replica received entry with mismatched tag')
@@ -206,6 +207,7 @@ export class Replica extends Playable {
       }
 
       await this.blocks.put(entry.block)
+      await this.blocks.put(entry.identity.block)
 
       if (await this.access.canAppend(entry)) {
         await this.graph.add(entry.cid, entry.next)
@@ -214,7 +216,9 @@ export class Replica extends Playable {
       }
     }
 
-    this.events.emit('update')
+    if ((await this.graph.size() - size) > 0) {
+      this.events.emit('update')
+    }
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
