@@ -123,8 +123,6 @@ export class Entry implements EntryInstance<SignedEntry> {
   }): Promise<boolean> {
     const { auth, data, sig } = block.value
 
-    return (
-      auth.equals(identity.auth) && (await identity.verify(data, sig))
-    )
+    return auth.equals(identity.auth) && (await identity.verify(data, sig))
   }
 }

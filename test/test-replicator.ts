@@ -21,8 +21,7 @@ import { Identity } from '~identity/basal/index.js'
 const testName = 'live-replicator'
 
 describe(testName, () => {
-  let
-    ipfs1: IPFS,
+  let ipfs1: IPFS,
     ipfs2: IPFS,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
@@ -58,12 +57,22 @@ describe(testName, () => {
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
 
-    const identity1 = await getTestIdentity(identities1, libp2p1.keychain, testName)
-    const identity2 = await getTestIdentity(identities2, libp2p2.keychain, testName)
+    const identity1 = await getTestIdentity(
+      identities1,
+      libp2p1.keychain,
+      testName
+    )
+    const identity2 = await getTestIdentity(
+      identities2,
+      libp2p2.keychain,
+      testName
+    )
 
     const registry = getTestRegistry()
     const write = [identity1.id, identity2.id]
-    const accessConfig = { access: { protocol: Access.protocol, config: { write } } }
+    const accessConfig = {
+      access: { protocol: Access.protocol, config: { write } }
+    }
     const manifest = await getTestManifest(testName, registry, accessConfig)
 
     access = new Access({ manifest })
@@ -128,17 +137,16 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
-      await Promise.all([
-        ipfs1.swarm.connect(id2),
-        ipfs2.swarm.connect(id1)
-      ])
+      await Promise.all([ipfs1.swarm.connect(id2), ipfs2.swarm.connect(id1)])
     })
 
     it('replicates replica entries and identities', async () => {
       const promise = replica1.write(new Uint8Array())
 
       await Promise.all([
-        new Promise((resolve) => replica2.events.addEventListener('update', resolve, { once: true })),
+        new Promise((resolve) =>
+          replica2.events.addEventListener('update', resolve, { once: true })
+        ),
         promise
       ])
     })

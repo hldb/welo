@@ -12,7 +12,10 @@ type DatastorePath = LevelDatastorePath
 
 type DatastoreOptions = Options & LevelDatastoreOptions
 
-export type DatastoreClass = new (path: DatastorePath, options: DatastoreOptions) => Datastore
+export type DatastoreClass = new (
+  path: DatastorePath,
+  options: DatastoreOptions
+) => Datastore
 
 export type GetDatastore = (
   Datastore: DatastoreClass,

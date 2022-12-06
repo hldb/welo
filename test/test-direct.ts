@@ -14,8 +14,7 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'pubsub/direct'
 
 describe(testName, () => {
-  let
-    ipfs1: IPFS,
+  let ipfs1: IPFS,
     ipfs2: IPFS,
     ipfs3: IPFS,
     libp2p1: Libp2p,
@@ -57,11 +56,7 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await stop(
-      ipfs1,
-      ipfs2,
-      ipfs3
-    )
+    await stop(ipfs1, ipfs2, ipfs3)
   })
 
   describe('instance', () => {
@@ -74,10 +69,7 @@ describe(testName, () => {
     })
 
     describe('events', () => {
-      let
-        peer1: Direct,
-        peer2: Direct,
-        topic: string
+      let peer1: Direct, peer2: Direct, topic: string
 
       const messages1: Array<CustomEvent<Message>> = []
       const messages2: Array<CustomEvent<Message>> = []
@@ -103,8 +95,12 @@ describe(testName, () => {
         libp2p3.pubsub.subscribe(topic)
 
         const promise = Promise.all([
-          new Promise((resolve) => peer1.addEventListener('peered', resolve, { once: true })),
-          new Promise((resolve) => peer2.addEventListener('peered', resolve, { once: true }))
+          new Promise((resolve) =>
+            peer1.addEventListener('peered', resolve, { once: true })
+          ),
+          new Promise((resolve) =>
+            peer2.addEventListener('peered', resolve, { once: true })
+          )
         ])
 
         assert.equal(peer1.isOpen(), false)
@@ -120,11 +116,20 @@ describe(testName, () => {
         void peer1.publish(new Uint8Array([1]))
         void peer2.publish(new Uint8Array([2]))
         void libp2p3.pubsub.publish(topic, new Uint8Array([3]))
-        void await Promise.all([
-          new Promise((resolve) => peer1.addEventListener('message', resolve, { once: true })),
-          new Promise((resolve) => peer2.addEventListener('message', resolve, { once: true })),
-          new Promise((resolve) => libp2p3.pubsub.addEventListener('message', () => messages3.length === 2 && resolve(true)))
-        ])
+        void (await Promise.all([
+          new Promise((resolve) =>
+            peer1.addEventListener('message', resolve, { once: true })
+          ),
+          new Promise((resolve) =>
+            peer2.addEventListener('message', resolve, { once: true })
+          ),
+          new Promise((resolve) =>
+            libp2p3.pubsub.addEventListener(
+              'message',
+              () => messages3.length === 2 && resolve(true)
+            )
+          )
+        ]))
 
         assert.equal(messages1.length, 1)
         assert.equal(messages2.length, 1)
@@ -140,7 +145,9 @@ describe(testName, () => {
         assert.equal(peer2.isOpen(), true)
 
         await Promise.all([
-          new Promise((resolve) => peer2.addEventListener('unpeered', resolve, { once: true })),
+          new Promise((resolve) =>
+            peer2.addEventListener('unpeered', resolve, { once: true })
+          ),
           peer1.stop()
         ])
 
@@ -148,7 +155,9 @@ describe(testName, () => {
         assert.equal(peer2.isOpen(), false)
 
         await Promise.all([
-          new Promise((resolve) => peer2.addEventListener('peered', resolve, { once: true })),
+          new Promise((resolve) =>
+            peer2.addEventListener('peered', resolve, { once: true })
+          ),
           peer1.start()
         ])
 

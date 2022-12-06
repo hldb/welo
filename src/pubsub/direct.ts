@@ -1,7 +1,12 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message, PublishResult, SubscriptionChangeData, SignedMessage } from '@libp2p/interface-pubsub'
+import type {
+  Message,
+  PublishResult,
+  SubscriptionChangeData,
+  SignedMessage
+} from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '~utils/index.js'
@@ -38,9 +43,9 @@ const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
 }
 
 export interface DirectEvents {
-  'peered': CustomEvent<undefined>
-  'unpeered': CustomEvent<undefined>
-  'message': CustomEvent<SignedMessage>
+  peered: CustomEvent<undefined>
+  unpeered: CustomEvent<undefined>
+  message: CustomEvent<SignedMessage>
 }
 
 // The Direct Channel spec for the Live Replicator specifies that the channel is not unique per database
@@ -87,10 +92,7 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
     }
   }
 
-  constructor (
-    libp2p: Libp2p,
-    remotePeerId: PeerId
-  ) {
+  constructor (libp2p: Libp2p, remotePeerId: PeerId) {
     super()
     this.libp2p = libp2p
     this.localPeerId = libp2p.peerId
@@ -107,10 +109,11 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
   }
 
   isOpen (): boolean {
-    return getPeers(this.libp2p.pubsub, this.topic)
-      .filter(this.remotePeerId.equals.bind(this.remotePeerId))
-      .length !== 0 &&
-      getTopics(this.libp2p.pubsub).includes(this.topic)
+    return (
+      getPeers(this.libp2p.pubsub, this.topic).filter(
+        this.remotePeerId.equals.bind(this.remotePeerId)
+      ).length !== 0 && getTopics(this.libp2p.pubsub).includes(this.topic)
+    )
   }
 
   async publish (bytes: Uint8Array): Promise<PublishResult> {
@@ -132,10 +135,15 @@ function onMessage (this: Direct, evt: CustomEvent<Message>): void {
     return
   }
 
-  this.dispatchEvent(new CustomEvent<SignedMessage>('message', { detail: message }))
+  this.dispatchEvent(
+    new CustomEvent<SignedMessage>('message', { detail: message })
+  )
 }
 
-function onSubscriptionChange (this: Direct, evt: CustomEvent<SubscriptionChangeData>): void {
+function onSubscriptionChange (
+  this: Direct,
+  evt: CustomEvent<SubscriptionChangeData>
+): void {
   const { peerId, subscriptions } = evt.detail
 
   if (!peerId.equals(this.remotePeerId)) {

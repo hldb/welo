@@ -25,8 +25,7 @@ import { getDatastore } from '~utils/datastore.js'
 const testName = 'replica'
 
 describe(testName, () => {
-  let
-    ipfs: IPFS,
+  let ipfs: IPFS,
     tempIpfs: IPFS,
     blocks: Blocks,
     replica: Replica,

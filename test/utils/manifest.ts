@@ -2,7 +2,10 @@ import { Manifest } from '~manifest/index.js'
 import type { ManifestData } from '~manifest/interface.js'
 import type { Registry } from '~registry/index.js'
 
-export const getTestManifestConfig = (name: string, registry: Registry): ManifestData => ({
+export const getTestManifestConfig = (
+  name: string,
+  registry: Registry
+): ManifestData => ({
   name,
   store: {
     protocol: registry.store.star.protocol
@@ -19,5 +22,12 @@ export const getTestManifestConfig = (name: string, registry: Registry): Manifes
   }
 })
 
-export const getTestManifest = async (name: string, registry: Registry, overrides: object = {}): Promise<Manifest> =>
-  await Manifest.create({ ...getTestManifestConfig(name, registry), ...overrides })
+export const getTestManifest = async (
+  name: string,
+  registry: Registry,
+  overrides: object = {}
+): Promise<Manifest> =>
+  await Manifest.create({
+    ...getTestManifestConfig(name, registry),
+    ...overrides
+  })

@@ -23,7 +23,8 @@ import type { Registrant } from '~registry/registrant.js'
 import * as Advert from './message.js'
 import { protocol } from './protocol.js'
 
-const getSharedChannelTopic = (manifest: Manifest): string => '/opal/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
+const getSharedChannelTopic = (manifest: Manifest): string =>
+  '/opal/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
 
 export class LiveReplicator extends Playable implements Registrant {
   readonly ipfs: IPFS
@@ -77,8 +78,14 @@ export class LiveReplicator extends Playable implements Registrant {
       await start(this.shared)
     }
     const stopping = async (): Promise<void> => {
-      this.replica.events.removeEventListener('update', this.#onReplicaHeadsUpdate)
-      this.replica.events.removeEventListener('write', this.#onReplicaHeadsUpdate)
+      this.replica.events.removeEventListener(
+        'update',
+        this.#onReplicaHeadsUpdate
+      )
+      this.replica.events.removeEventListener(
+        'write',
+        this.#onReplicaHeadsUpdate
+      )
 
       this.shared.removeEventListener('peer-join', this.#onPeerJoin)
       this.shared.removeEventListener('peer-leave', this.#onPeersLeave)
@@ -112,7 +119,9 @@ export class LiveReplicator extends Playable implements Registrant {
     if (Array.from(await all(this.replica.heads.values())).length < 1) {
       return
     }
-    const heads: CID[] = Array.from(await all(this.replica.heads.keys())).map(parsedcid)
+    const heads: CID[] = Array.from(await all(this.replica.heads.keys())).map(
+      parsedcid
+    )
 
     const promises: Array<Promise<PublishResult>> = []
     const advert = await Advert.write(this.manifest.address.cid, heads)
@@ -130,7 +139,10 @@ function onReplicaHeadsUpdate (this: LiveReplicator): void {
   void this.broadcast()
 }
 
-function onHeadsMessage (this: LiveReplicator, evt: CustomEvent<SignedMessage>): void {
+function onHeadsMessage (
+  this: LiveReplicator,
+  evt: CustomEvent<SignedMessage>
+): void {
   void (async () => {
     const msg = evt.detail
     const message = await Advert.read(msg.data)
@@ -151,19 +163,28 @@ function onHeadsMessage (this: LiveReplicator, evt: CustomEvent<SignedMessage>):
   })()
 }
 
-function onPeerJoin (this: LiveReplicator, evt: CustomEvent<PeerStatusChangeData>): void {
+function onPeerJoin (
+  this: LiveReplicator,
+  evt: CustomEvent<PeerStatusChangeData>
+): void {
   const { peerId: remotePeerId } = evt.detail
-  const direct = new Direct(
-    this.libp2p,
-    remotePeerId
+  const direct = new Direct(this.libp2p, remotePeerId)
+  direct.addEventListener(
+    'peered',
+    () => {
+      void this.broadcast()
+    },
+    { once: true }
   )
-  direct.addEventListener('peered', () => { void this.broadcast() }, { once: true })
   direct.addEventListener('message', this._onHeadsMessage)
   this.directs.set(remotePeerId.toCID().toString(base32), direct)
   void start(direct)
 }
 
-function onPeersLeave (this: LiveReplicator, evt: CustomEvent<PeerStatusChangeData>): void {
+function onPeersLeave (
+  this: LiveReplicator,
+  evt: CustomEvent<PeerStatusChangeData>
+): void {
   const { peerId: remotePeerId } = evt.detail
   // if direct exists in this.directs Map then .delete returns true
   const key = remotePeerId.toCID().toString(base32)

@@ -15,7 +15,7 @@ export interface PeerStatusChangeData {
 export interface MonitorEvents {
   'peer-join': CustomEvent<PeerStatusChangeData>
   'peer-leave': CustomEvent<PeerStatusChangeData>
-  'update': CustomEvent<undefined>
+  update: CustomEvent<undefined>
 }
 
 export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
@@ -27,17 +27,18 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
     return this._isStarted
   }
 
-  constructor (
-    readonly libp2p: Libp2p,
-    readonly topic: string
-  ) {
+  constructor (readonly libp2p: Libp2p, readonly topic: string) {
     super()
     this._isStarted = false
     this.peers = new Set()
     this.#refreshPeers = refreshPeers.bind(this)
 
-    this.addEventListener('peer-join', () => this.dispatchEvent(new CustomEvent<undefined>('update')))
-    this.addEventListener('peer-leave', () => this.dispatchEvent(new CustomEvent<undefined>('update')))
+    this.addEventListener('peer-join', () =>
+      this.dispatchEvent(new CustomEvent<undefined>('update'))
+    )
+    this.addEventListener('peer-leave', () =>
+      this.dispatchEvent(new CustomEvent<undefined>('update'))
+    )
   }
 
   start (): void {
@@ -47,7 +48,9 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
         this.#refreshPeers
       )
       this.libp2p.pubsub.subscribe(this.topic)
-      this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
+      this.peers = new Set(
+        getPeers(this.libp2p.pubsub, this.topic).map(peerIdString)
+      )
       this._isStarted = true
     }
   }
@@ -65,7 +68,10 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
   }
 }
 
-function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>): void {
+function refreshPeers (
+  this: Monitor,
+  evt: CustomEvent<SubscriptionChangeData>
+): void {
   let affected = false
   for (const { topic } of evt.detail.subscriptions) {
     if (topic === this.topic) {
@@ -78,7 +84,9 @@ function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>):
   }
 
   const _peers = this.peers
-  this.peers = new Set(getPeers(this.libp2p.pubsub, this.topic).map(peerIdString))
+  this.peers = new Set(
+    getPeers(this.libp2p.pubsub, this.topic).map(peerIdString)
+  )
 
   const joins: Set<string> = new Set()
   for (const peer of this.peers) {
@@ -91,10 +99,18 @@ function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>):
   }
 
   for (const join of joins) {
-    this.dispatchEvent(new CustomEvent<PeerStatusChangeData>('peer-join', { detail: { peerId: parsedPeerId(join) } }))
+    this.dispatchEvent(
+      new CustomEvent<PeerStatusChangeData>('peer-join', {
+        detail: { peerId: parsedPeerId(join) }
+      })
+    )
   }
 
   for (const leave of leaves) {
-    this.dispatchEvent(new CustomEvent<PeerStatusChangeData>('peer-leave', { detail: { peerId: parsedPeerId(leave) } }))
+    this.dispatchEvent(
+      new CustomEvent<PeerStatusChangeData>('peer-leave', {
+        detail: { peerId: parsedPeerId(leave) }
+      })
+    )
   }
 }

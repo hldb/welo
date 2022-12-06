@@ -33,9 +33,9 @@ interface DatabaseStatusChangeData {
 }
 
 interface OpalEvents {
-  'opened': CustomEvent<DatabaseStatusChangeData>
-  'closed': CustomEvent<DatabaseStatusChangeData>
-  'stop': CustomEvent<undefined>
+  opened: CustomEvent<DatabaseStatusChangeData>
+  closed: CustomEvent<DatabaseStatusChangeData>
+  stop: CustomEvent<undefined>
 }
 
 const registry = initRegistry()
@@ -134,7 +134,10 @@ export class Opal extends Playable {
         throw new Error('Opal.create: missing Datastore')
       }
 
-      identities = await getDatastore(this.Datastore, dirs(directory).identities)
+      identities = await getDatastore(
+        this.Datastore,
+        dirs(directory).identities
+      )
 
       await identities.open()
       const Identity = this.registry.identity.star
@@ -248,13 +251,25 @@ export class Opal extends Playable {
       identity,
       ...getComponents(this.registry, manifest)
     })
-      .then(database => {
+      .then((database) => {
         this.opened.set(addr, database)
-        this.events.dispatchEvent(new CustomEvent<DatabaseStatusChangeData>('opened', { detail: { database } }))
-        database.events.addEventListener('closed', () => {
-          this.opened.delete(addr)
-          this.events.dispatchEvent(new CustomEvent<DatabaseStatusChangeData>('closed', { detail: { database } }))
-        }, { once: true })
+        this.events.dispatchEvent(
+          new CustomEvent<DatabaseStatusChangeData>('opened', {
+            detail: { database }
+          })
+        )
+        database.events.addEventListener(
+          'closed',
+          () => {
+            this.opened.delete(addr)
+            this.events.dispatchEvent(
+              new CustomEvent<DatabaseStatusChangeData>('closed', {
+                detail: { database }
+              })
+            )
+          },
+          { once: true }
+        )
         return database
       })
       .catch((e) => {

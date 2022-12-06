@@ -10,7 +10,8 @@ import type { TestPaths } from './constants.js'
 
 export const getTestIdentities = async (
   testPaths: TestPaths
-): Promise<Datastore> => await getDatastore(LevelDatastore, testPaths.identities)
+): Promise<Datastore> =>
+  await getDatastore(LevelDatastore, testPaths.identities)
 
 export const getTestIdentity = async (
   testIdentities: Datastore,

@@ -13,8 +13,7 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'pubsub/monitor'
 
 describe(testName, () => {
-  let
-    ipfs1: IPFS,
+  let ipfs1: IPFS,
     ipfs2: IPFS,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
@@ -37,10 +36,7 @@ describe(testName, () => {
     id1 = (await ipfs1.id()).id
     id2 = (await ipfs2.id()).id
 
-    await Promise.all([
-      ipfs1.swarm.connect(id2),
-      ipfs2.swarm.connect(id1)
-    ])
+    await Promise.all([ipfs1.swarm.connect(id2), ipfs2.swarm.connect(id1)])
   })
 
   after(async () => {
@@ -59,9 +55,7 @@ describe(testName, () => {
     })
 
     describe('events', () => {
-      let
-        peer1: Monitor,
-        peer2: Monitor
+      let peer1: Monitor, peer2: Monitor
 
       let joins1 = 0
       let joins2 = 0
@@ -87,8 +81,12 @@ describe(testName, () => {
         peer2.start()
 
         const promise = Promise.all([
-          new Promise((resolve) => peer1.addEventListener('peer-join', resolve, { once: true })),
-          new Promise((resolve) => peer2.addEventListener('peer-join', resolve, { once: true }))
+          new Promise((resolve) =>
+            peer1.addEventListener('peer-join', resolve, { once: true })
+          ),
+          new Promise((resolve) =>
+            peer2.addEventListener('peer-join', resolve, { once: true })
+          )
         ])
 
         assert.deepEqual(peer1.peers, new Set())
@@ -106,7 +104,9 @@ describe(testName, () => {
 
       it('emits peer-leave when a peer leaves', async () => {
         peer2.stop()
-        await new Promise((resolve) => peer1.addEventListener('peer-leave', resolve, { once: true }))
+        await new Promise((resolve) =>
+          peer1.addEventListener('peer-leave', resolve, { once: true })
+        )
         assert.equal(leaves1, 1)
         assert.equal(leaves2, 0)
         assert.equal(updates1, 2)
@@ -114,14 +114,18 @@ describe(testName, () => {
 
         peer2.start()
         assert.deepEqual(peer2.peers, new Set([peerIdString(id1)]))
-        await new Promise((resolve) => peer1.addEventListener('peer-join', resolve, { once: true }))
+        await new Promise((resolve) =>
+          peer1.addEventListener('peer-join', resolve, { once: true })
+        )
         assert.equal(joins1, 2)
         assert.equal(joins2, 1)
         assert.equal(updates1, 3)
         assert.equal(updates2, 1)
 
         peer1.stop()
-        await new Promise((resolve) => peer2.addEventListener('peer-leave', resolve, { once: true }))
+        await new Promise((resolve) =>
+          peer2.addEventListener('peer-leave', resolve, { once: true })
+        )
         assert.equal(leaves1, 1)
         assert.equal(leaves2, 1)
         assert.equal(updates1, 3)

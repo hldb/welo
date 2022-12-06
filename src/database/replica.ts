@@ -28,8 +28,8 @@ import type { Edge } from './graph-node.js'
 const rootHashKey = new Key('rootHash')
 
 interface ReplicaEvents {
-  'write': CustomEvent<undefined>
-  'update': CustomEvent<undefined>
+  write: CustomEvent<undefined>
+  update: CustomEvent<undefined>
 }
 
 export class Replica extends Playable {
@@ -225,7 +225,7 @@ export class Replica extends Playable {
       }
     }
 
-    if ((await this.graph.size() - size) > 0) {
+    if ((await this.graph.size()) - size > 0) {
       this.events.dispatchEvent(new CustomEvent<undefined>('update'))
     }
   }

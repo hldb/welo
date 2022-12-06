@@ -88,9 +88,9 @@ interface GraphChangeData {
 }
 
 interface GraphEvents {
-  'add': CustomEvent<GraphChangeData>
-  'miss': CustomEvent<GraphChangeData>
-  'deny': CustomEvent<GraphChangeData>
+  add: CustomEvent<GraphChangeData>
+  miss: CustomEvent<GraphChangeData>
+  deny: CustomEvent<GraphChangeData>
 }
 
 export class Graph extends Playable {
@@ -184,7 +184,9 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('add', { detail: { cid } }))
+    this.events.dispatchEvent(
+      new CustomEvent<GraphChangeData>('add', { detail: { cid } })
+    )
   }
 
   async miss (cid: CID): Promise<void> {
@@ -197,7 +199,9 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('miss', { detail: { cid } }))
+    this.events.dispatchEvent(
+      new CustomEvent<GraphChangeData>('miss', { detail: { cid } })
+    )
   }
 
   async deny (cid: CID): Promise<void> {
@@ -210,7 +214,9 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('deny', { detail: { cid } }))
+    this.events.dispatchEvent(
+      new CustomEvent<GraphChangeData>('deny', { detail: { cid } })
+    )
   }
 }
 

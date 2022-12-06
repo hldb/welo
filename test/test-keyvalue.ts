@@ -86,7 +86,13 @@ describe(testName, () => {
         Identity
       })
       await start(replica)
-      keyvalue = new Keyvalue({ manifest, directory: testPaths.store, blocks, replica, Datastore })
+      keyvalue = new Keyvalue({
+        manifest,
+        directory: testPaths.store,
+        blocks,
+        replica,
+        Datastore
+      })
       await start(keyvalue)
     })
 

@@ -16,10 +16,10 @@ import { Replica } from './replica.js'
 import type { Config, Handlers, Open } from './interface.js'
 
 interface DatabaseEvents {
-  'opened': CustomEvent<undefined>
-  'closed': CustomEvent<undefined>
-  'update': CustomEvent<undefined>
-  'write': CustomEvent<undefined>
+  opened: CustomEvent<undefined>
+  closed: CustomEvent<undefined>
+  update: CustomEvent<undefined>
+  write: CustomEvent<undefined>
 }
 
 export class Database extends Playable {
@@ -80,9 +80,11 @@ export class Database extends Playable {
 
     this.events = new EventEmitter()
     this._handlers = {
-      storeUpdate: () => this.events.dispatchEvent(new CustomEvent<undefined>('update')),
+      storeUpdate: () =>
+        this.events.dispatchEvent(new CustomEvent<undefined>('update')),
       // replicatorReplicate: () => database.events.emit('replicate'),
-      replicaWrite: () => this.events.dispatchEvent(new CustomEvent<undefined>('write'))
+      replicaWrite: () =>
+        this.events.dispatchEvent(new CustomEvent<undefined>('write'))
     }
 
     // expose actions as database write methods (e.g. database.put)
