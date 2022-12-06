@@ -21,7 +21,7 @@ import { Keyvalue } from '~store/keyvalue/index.js'
 import { StaticAccess } from '~access/static/index.js'
 import { Graph, loadHashMap } from '~database/graph.js'
 import { cidstring, defaultManifest } from '~utils/index.js'
-import { initRegistry } from '~registry/index.js'
+import { initRegistry } from '../src/registry.js'
 import { Manifest } from '~manifest/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

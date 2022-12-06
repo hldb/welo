@@ -13,7 +13,7 @@ import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { cidstring, decodedcid, defaultManifest } from '~utils/index.js'
 import { Manifest } from '~manifest/index.js'
-import { initRegistry } from '~registry/index.js'
+import { initRegistry } from '../src/registry.js'
 
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

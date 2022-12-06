@@ -18,7 +18,7 @@ import type { EntryStatic } from '~entry/interface.js'
 import type { IdentityStatic } from '~identity/interface.js'
 import type { Replica } from '~database/replica.js'
 import type { AccessInstance } from '~access/interface.js'
-import type { Registrant } from '~registry/registrant.js'
+import type { Registrant } from '~utils/register.js'
 
 import * as Advert from './message.js'
 import { protocol } from './protocol.js'

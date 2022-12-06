@@ -8,7 +8,9 @@
  *
  */
 
-import type { Registrant } from './registrant.js'
+export interface Registrant {
+  protocol: string
+}
 
 const $tar = Symbol.for('*')
 

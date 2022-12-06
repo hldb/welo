@@ -7,7 +7,7 @@ import entryPrefix from '~entry/prefix.js'
 import identityPrefix from '~identity/prefix.js'
 import storePrefix from '~store/prefix.js'
 
-import { Register } from './register.js'
+import { Register } from './utils/register.js'
 
 export interface Registry {
   access: Register<AccessStatic>

@@ -9,7 +9,7 @@ import { Blocks } from '~blocks/index.js'
 import { StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
-import { initRegistry } from '~registry/index.js'
+import { initRegistry } from '../src/registry.js'
 import { Manifest } from '~manifest/index.js'
 import { defaultManifest } from '~utils/index.js'
 

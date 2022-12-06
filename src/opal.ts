@@ -12,7 +12,6 @@ import { Database } from '~database/index.js'
 import { Blocks } from '~blocks/index.js'
 import { OPAL_LOWER } from '~utils/constants.js'
 import { Playable } from '~utils/playable.js'
-import { initRegistry, Registry } from '~registry/index.js'
 import { getDatastore, DatastoreClass } from '~utils/datastore.js'
 import {
   dirs,
@@ -26,15 +25,16 @@ import type { ManifestData } from '~manifest/interface.js'
 import type { KeyChain } from '~utils/types.js'
 
 // import * as version from './version.js'
+import { initRegistry, Registry } from './registry.js'
 import type { Config, Create, Determine, Options } from './interface.js'
 
-interface DatabaseStatusChangeData {
+interface DatabaseStatusEmit {
   database: Database
 }
 
 interface OpalEvents {
-  opened: CustomEvent<DatabaseStatusChangeData>
-  closed: CustomEvent<DatabaseStatusChangeData>
+  opened: CustomEvent<DatabaseStatusEmit>
+  closed: CustomEvent<DatabaseStatusEmit>
   stop: CustomEvent<undefined>
 }
 
@@ -254,7 +254,7 @@ export class Opal extends Playable {
       .then((database) => {
         this.opened.set(addr, database)
         this.events.dispatchEvent(
-          new CustomEvent<DatabaseStatusChangeData>('opened', {
+          new CustomEvent<DatabaseStatusEmit>('opened', {
             detail: { database }
           })
         )
@@ -263,7 +263,7 @@ export class Opal extends Playable {
           () => {
             this.opened.delete(addr)
             this.events.dispatchEvent(
-              new CustomEvent<DatabaseStatusChangeData>('closed', {
+              new CustomEvent<DatabaseStatusEmit>('closed', {
                 detail: { database }
               })
             )

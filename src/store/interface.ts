@@ -4,7 +4,7 @@ import type { Replica } from '~database/replica.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 import type { Blocks } from '~blocks/index.js'
 import type { DatastoreClass } from '~utils/datastore.js'
-import type { Registrant } from '~registry/registrant.js'
+import type { Registrant } from '~utils/register.js'
 
 export interface Props {
   manifest: ManifestInstance<any>

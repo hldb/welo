@@ -8,7 +8,7 @@ import { StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { Keyvalue } from '~store/keyvalue/index.js'
-import { initRegistry } from '~registry/index.js'
+import { initRegistry } from '../src/registry.js'
 import { getComponents } from '~utils/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

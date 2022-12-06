@@ -4,7 +4,7 @@ import { base32 } from 'multiformats/bases/base32'
 import { peerIdFromString } from '@libp2p/peer-id'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-import type { Registry } from '~registry/index.js'
+import type { Registry } from '../registry.js'
 import type { ManifestData } from '~manifest/interface.js'
 import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import type { AccessStatic } from '~access/interface.js'

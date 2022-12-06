@@ -1,7 +1,7 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import type { EntryInstance } from '~entry/interface.js'
-import type { Registrant } from '~registry/registrant.js'
+import type { Registrant } from '~utils/register.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 
 export interface AccessInstance extends Startable {
