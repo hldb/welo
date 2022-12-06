@@ -38,7 +38,6 @@
       "~keychain/*": ["src/keychain/*"],
       "~manifest/*": ["src/manifest/*"],
       "~pubsub/*": ["src/pubsub/*"],
-      "~registry/*": ["src/registry/*"],
       "~replicator/*": ["src/replicator/*"],
       "~storage/*": ["src/storage/*"],
       "~store/*": ["src/store/*"],
