@@ -1,7 +1,7 @@
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message, PublishResult, SubscriptionChangeData } from '@libp2p/interface-pubsub'
+import type { Message, PublishResult, SubscriptionChangeData, SignedMessage } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '~utils/index.js'
@@ -37,15 +37,16 @@ const channelTopic = (localPeerId: PeerId, remotePeerId: PeerId): string => {
   return prefix + peerids.join('/')
 }
 
-const events = {
-  peered: 'peered',
-  unpeered: 'unpeered'
+export interface DirectEvents {
+  'peered': CustomEvent<undefined>
+  'unpeered': CustomEvent<undefined>
+  'message': CustomEvent<SignedMessage>
 }
 
 // The Direct Channel spec for the Live Replicator specifies that the channel is not unique per database
 // This implementation makes it easier to handle messages per store while the pubsub channel is still shared
 
-export class Direct extends EventEmitter implements Startable {
+export class Direct extends EventEmitter<DirectEvents> implements Startable {
   readonly libp2p: Libp2p
   readonly localPeerId: PeerId
   readonly remotePeerId: PeerId
@@ -131,7 +132,7 @@ function onMessage (this: Direct, evt: CustomEvent<Message>): void {
     return
   }
 
-  this.emit('message', evt)
+  this.dispatchEvent(new CustomEvent<SignedMessage>('message', { detail: message }))
 }
 
 function onSubscriptionChange (this: Direct, evt: CustomEvent<SubscriptionChangeData>): void {
@@ -144,9 +145,9 @@ function onSubscriptionChange (this: Direct, evt: CustomEvent<SubscriptionChange
   for (const { topic, subscribe } of subscriptions) {
     if (topic === this.topic) {
       if (subscribe) {
-        this.emit(events.peered)
+        this.dispatchEvent(new CustomEvent<undefined>('peered'))
       } else {
-        this.emit(events.unpeered)
+        this.dispatchEvent(new CustomEvent<undefined>('unpeered'))
       }
     }
   }

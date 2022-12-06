@@ -1,5 +1,5 @@
 import path from 'path'
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
@@ -28,6 +28,16 @@ import type { KeyChain } from '~utils/types.js'
 // import * as version from './version.js'
 import type { Config, Create, Determine, Options } from './interface.js'
 
+interface DatabaseStatusChangeData {
+  database: Database
+}
+
+interface OpalEvents {
+  'opened': CustomEvent<DatabaseStatusChangeData>
+  'closed': CustomEvent<DatabaseStatusChangeData>
+  'stop': CustomEvent<undefined>
+}
+
 const registry = initRegistry()
 
 export class Opal extends Playable {
@@ -54,7 +64,7 @@ export class Opal extends Playable {
 
   readonly identity: IdentityInstance<any>
 
-  readonly events: EventEmitter
+  readonly events: EventEmitter<OpalEvents>
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
@@ -70,14 +80,13 @@ export class Opal extends Playable {
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
+      this.events.dispatchEvent(new CustomEvent<undefined>('started'))
     }
     const stopping = async (): Promise<void> => {
       await Promise.all(Object.values(this._opening))
       await Promise.all(Object.values(this.opened).map(stop))
 
-      this.events.emit('stop')
-      this.events.removeAllListeners('opened')
-      this.events.removeAllListeners('closed')
+      this.events.dispatchEvent(new CustomEvent<undefined>('stopped'))
     }
     super({ starting, stopping })
 
@@ -239,14 +248,14 @@ export class Opal extends Playable {
       identity,
       ...getComponents(this.registry, manifest)
     })
-      .then((db) => {
-        this.opened.set(addr, db)
-        this.events.emit('opened', db)
-        db.events.once('closed', () => {
+      .then(database => {
+        this.opened.set(addr, database)
+        this.events.dispatchEvent(new CustomEvent<DatabaseStatusChangeData>('opened', { detail: { database } }))
+        database.events.addEventListener('closed', () => {
           this.opened.delete(addr)
-          this.events.emit('closed', db)
-        })
-        return db
+          this.events.dispatchEvent(new CustomEvent<DatabaseStatusChangeData>('closed', { detail: { database } }))
+        }, { once: true })
+        return database
       })
       .catch((e) => {
         console.error(e)

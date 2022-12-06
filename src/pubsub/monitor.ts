@@ -1,17 +1,24 @@
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import type { Libp2p } from 'libp2p'
 import type { SubscriptionChangeData } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
+import type { PeerId } from '@libp2p/interface-peer-id'
 
 import { parsedPeerId, peerIdString } from '~utils/index.js'
 
 import { getPeers } from './util.js'
 
-const peerJoin = 'peer-join'
-const peerLeave = 'peer-leave'
-const update = 'update'
+export interface PeerStatusChangeData {
+  peerId: PeerId
+}
 
-export class Monitor extends EventEmitter implements Startable {
+export interface MonitorEvents {
+  'peer-join': CustomEvent<PeerStatusChangeData>
+  'peer-leave': CustomEvent<PeerStatusChangeData>
+  'update': CustomEvent<undefined>
+}
+
+export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
   private _isStarted: boolean
   peers: Set<string>
   readonly #refreshPeers: typeof refreshPeers
@@ -29,8 +36,8 @@ export class Monitor extends EventEmitter implements Startable {
     this.peers = new Set()
     this.#refreshPeers = refreshPeers.bind(this)
 
-    this.on(peerJoin, () => this.emit(update))
-    this.on(peerLeave, () => this.emit(update))
+    this.addEventListener('peer-join', () => this.dispatchEvent(new CustomEvent<undefined>('update')))
+    this.addEventListener('peer-leave', () => this.dispatchEvent(new CustomEvent<undefined>('update')))
   }
 
   start (): void {
@@ -84,10 +91,10 @@ function refreshPeers (this: Monitor, evt: CustomEvent<SubscriptionChangeData>):
   }
 
   for (const join of joins) {
-    this.emit(peerJoin, parsedPeerId(join))
+    this.dispatchEvent(new CustomEvent<PeerStatusChangeData>('peer-join', { detail: { peerId: parsedPeerId(join) } }))
   }
 
   for (const leave of leaves) {
-    this.emit(peerLeave, parsedPeerId(leave))
+    this.dispatchEvent(new CustomEvent<PeerStatusChangeData>('peer-leave', { detail: { peerId: parsedPeerId(leave) } }))
   }
 }

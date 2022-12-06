@@ -138,7 +138,7 @@ describe(testName, () => {
       const promise = replica1.write(new Uint8Array())
 
       await Promise.all([
-        new Promise((resolve) => replica2.events.once('update', resolve)),
+        new Promise((resolve) => replica2.events.addEventListener('update', resolve, { once: true })),
         promise
       ])
     })

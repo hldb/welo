@@ -1,5 +1,5 @@
 import { start, stop } from '@libp2p/interfaces/startable'
-import EventEmitter from 'events'
+// import { EventEmitter } from '@libp2p/interfaces/events'
 
 import type { Database } from '~database/index.js'
 import { Playable } from '~utils/playable.js'
@@ -10,7 +10,7 @@ export class MultiReplicator extends Playable {
 
   readonly config: Config
   readonly modules: Playable[]
-  readonly events: EventEmitter
+  // readonly events: EventEmitter
   database?: Database
 
   constructor (config: Config) {
@@ -33,6 +33,6 @@ export class MultiReplicator extends Playable {
       (Replicator: any): Playable => new Replicator(this.config)
     )
 
-    this.events = new EventEmitter()
+    // this.events = new EventEmitter()
   }
 }

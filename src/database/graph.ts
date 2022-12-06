@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import PQueue from 'p-queue'
 import { HashMap, create, load, Loader, CreateOptions } from 'ipld-hashmap'
 import * as blockCodec from '@ipld/dag-cbor'
@@ -83,11 +83,21 @@ const getSize = async (blocks: Blocks, state: State): Promise<number> => {
   return nodes - missing - denied
 }
 
+interface GraphChangeData {
+  cid: CID
+}
+
+interface GraphEvents {
+  'add': CustomEvent<GraphChangeData>
+  'miss': CustomEvent<GraphChangeData>
+  'deny': CustomEvent<GraphChangeData>
+}
+
 export class Graph extends Playable {
   blocks: Blocks
   _root: Root | null
   _state: State | null
-  readonly events: EventEmitter
+  readonly events: EventEmitter<GraphEvents>
   readonly queue: PQueue
 
   constructor ({ blocks, root }: { blocks: Blocks, root?: Root }) {
@@ -174,7 +184,7 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.emit('add', cid)
+    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('add', { detail: { cid } }))
   }
 
   async miss (cid: CID): Promise<void> {
@@ -187,7 +197,7 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.emit('miss', cid)
+    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('miss', { detail: { cid } }))
   }
 
   async deny (cid: CID): Promise<void> {
@@ -200,7 +210,7 @@ export class Graph extends Playable {
     }
 
     await this.queue.add(func)
-    this.events.emit('deny', cid)
+    this.events.dispatchEvent(new CustomEvent<GraphChangeData>('deny', { detail: { cid } }))
   }
 }
 

@@ -1,12 +1,12 @@
 import { strict as assert } from 'assert'
-import EventEmitter from 'events'
+import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
 
-import { Direct } from '~pubsub/direct.js'
+import { Direct, DirectEvents } from '~pubsub/direct.js'
 
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -70,7 +70,7 @@ describe(testName, () => {
       assert.equal(direct.libp2p, libp2p1)
       assert.ok(direct.topic.startsWith(prefix))
       assert.ok(direct.isOpen)
-      assert.ok(direct instanceof EventEmitter)
+      assert.ok(direct instanceof EventEmitter<DirectEvents>)
     })
 
     describe('events', () => {
@@ -92,8 +92,8 @@ describe(testName, () => {
         peer2 = new Direct(libp2p2, id1)
         topic = peer1.topic
 
-        peer1.on('message', onMessage1)
-        peer2.on('message', onMessage2)
+        peer1.addEventListener('message', onMessage1)
+        peer2.addEventListener('message', onMessage2)
         libp2p3.pubsub.addEventListener('message', onMessage3)
       })
 
@@ -103,8 +103,8 @@ describe(testName, () => {
         libp2p3.pubsub.subscribe(topic)
 
         const promise = Promise.all([
-          new Promise((resolve) => peer1.once('peered', resolve)),
-          new Promise((resolve) => peer2.once('peered', resolve))
+          new Promise((resolve) => peer1.addEventListener('peered', resolve, { once: true })),
+          new Promise((resolve) => peer2.addEventListener('peered', resolve, { once: true }))
         ])
 
         assert.equal(peer1.isOpen(), false)
@@ -121,8 +121,8 @@ describe(testName, () => {
         void peer2.publish(new Uint8Array([2]))
         void libp2p3.pubsub.publish(topic, new Uint8Array([3]))
         void await Promise.all([
-          new Promise((resolve) => peer1.once('message', resolve)),
-          new Promise((resolve) => peer2.once('message', resolve)),
+          new Promise((resolve) => peer1.addEventListener('message', resolve, { once: true })),
+          new Promise((resolve) => peer2.addEventListener('message', resolve, { once: true })),
           new Promise((resolve) => libp2p3.pubsub.addEventListener('message', () => messages3.length === 2 && resolve(true)))
         ])
 
@@ -130,8 +130,8 @@ describe(testName, () => {
         assert.equal(messages2.length, 1)
         assert.equal(messages3.length, 2)
 
-        peer1.removeListener('message', onMessage1)
-        peer2.removeListener('message', onMessage2)
+        peer1.removeEventListener('message', onMessage1)
+        peer2.removeEventListener('message', onMessage2)
         libp2p3.pubsub.removeEventListener('message', onMessage3)
       })
 
@@ -140,7 +140,7 @@ describe(testName, () => {
         assert.equal(peer2.isOpen(), true)
 
         await Promise.all([
-          new Promise((resolve) => peer2.once('unpeered', resolve)),
+          new Promise((resolve) => peer2.addEventListener('unpeered', resolve, { once: true })),
           peer1.stop()
         ])
 
@@ -148,7 +148,7 @@ describe(testName, () => {
         assert.equal(peer2.isOpen(), false)
 
         await Promise.all([
-          new Promise((resolve) => peer2.once('peered', resolve)),
+          new Promise((resolve) => peer2.addEventListener('peered', resolve, { once: true })),
           peer1.start()
         ])
 

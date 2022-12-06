@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+// import { EventEmitter } from '@libp2p/interfaces/events'
 import { Datastore, Key } from 'interface-datastore'
 import type { HashMap } from 'ipld-hashmap'
 
@@ -40,7 +40,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
-  events: EventEmitter
+  // events: EventEmitter
 
   constructor ({
     manifest,
@@ -95,7 +95,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this._indexes = null
     this._index = null
 
-    this.events = new EventEmitter()
+    // this.events = new EventEmitter()
   }
 
   get storage (): Datastore {

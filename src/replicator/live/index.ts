@@ -1,17 +1,16 @@
-import EventEmitter from 'events'
 import all from 'it-all'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { CID } from 'multiformats/cid'
-import type { Message, PublishResult } from '@libp2p/interface-pubsub'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
+import type { CustomEvent } from '@libp2p/interfaces/events'
 
 import { dagLinks, loadEntry, traverser } from '~database/traversal.js'
 import { cidstring, parsedcid } from '~utils/index.js'
 import { Playable } from '~utils/playable.js'
-import { Monitor } from '~pubsub/monitor.js'
+import { Monitor, PeerStatusChangeData } from '~pubsub/monitor.js'
 import { Direct } from '~pubsub/direct.js'
 import type { Manifest } from '~manifest/index.js'
 import type { Blocks } from '~blocks/index.js'
@@ -39,7 +38,7 @@ export class LiveReplicator extends Playable implements Registrant {
   readonly shared: Monitor
   readonly directs: Map<string, Direct>
 
-  readonly events: EventEmitter
+  // readonly events: EventEmitter
   readonly #onPeerJoin: typeof onPeerJoin
   readonly #onPeersLeave: typeof onPeersLeave
   readonly #onReplicaHeadsUpdate: typeof onReplicaHeadsUpdate
@@ -69,20 +68,20 @@ export class LiveReplicator extends Playable implements Registrant {
     Identity: IdentityStatic<any>
   }) {
     const starting = async (): Promise<void> => {
-      this.shared.on('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
-      this.shared.on('peer-leave', this.#onPeersLeave) // if a peer leaves and the direct connection is closed then delete the direct
+      this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
+      this.shared.addEventListener('peer-leave', this.#onPeersLeave) // if a peer leaves and the direct connection is closed then delete the direct
 
-      this.replica.events.on('update', this.#onReplicaHeadsUpdate)
-      this.replica.events.on('write', this.#onReplicaHeadsUpdate)
+      this.replica.events.addEventListener('update', this.#onReplicaHeadsUpdate)
+      this.replica.events.addEventListener('write', this.#onReplicaHeadsUpdate)
 
       await start(this.shared)
     }
     const stopping = async (): Promise<void> => {
-      this.replica.events.removeListener('update', this.#onReplicaHeadsUpdate)
-      this.replica.events.removeListener('write', this.#onReplicaHeadsUpdate)
+      this.replica.events.removeEventListener('update', this.#onReplicaHeadsUpdate)
+      this.replica.events.removeEventListener('write', this.#onReplicaHeadsUpdate)
 
-      this.shared.removeListener('peer-join', this.#onPeerJoin)
-      this.shared.removeListener('peer-leave', this.#onPeersLeave)
+      this.shared.removeEventListener('peer-join', this.#onPeerJoin)
+      this.shared.removeEventListener('peer-leave', this.#onPeersLeave)
 
       await stop(...this.directs.values())
 
@@ -99,7 +98,7 @@ export class LiveReplicator extends Playable implements Registrant {
     this.Entry = Entry
     this.Identity = Identity
 
-    this.events = new EventEmitter()
+    // this.events = new EventEmitter()
     this.#onPeerJoin = onPeerJoin.bind(this)
     this.#onPeersLeave = onPeersLeave.bind(this)
     this.#onReplicaHeadsUpdate = onReplicaHeadsUpdate.bind(this)
@@ -131,7 +130,7 @@ function onReplicaHeadsUpdate (this: LiveReplicator): void {
   void this.broadcast()
 }
 
-function onHeadsMessage (this: LiveReplicator, evt: CustomEvent<Message>): void {
+function onHeadsMessage (this: LiveReplicator, evt: CustomEvent<SignedMessage>): void {
   void (async () => {
     const msg = evt.detail
     const message = await Advert.read(msg.data)
@@ -152,23 +151,25 @@ function onHeadsMessage (this: LiveReplicator, evt: CustomEvent<Message>): void 
   })()
 }
 
-function onPeerJoin (this: LiveReplicator, remotePeerId: PeerId): void {
+function onPeerJoin (this: LiveReplicator, evt: CustomEvent<PeerStatusChangeData>): void {
+  const { peerId: remotePeerId } = evt.detail
   const direct = new Direct(
     this.libp2p,
     remotePeerId
   )
-  direct.once('peered', () => { void this.broadcast() })
-  direct.on('message', this._onHeadsMessage)
+  direct.addEventListener('peered', () => { void this.broadcast() }, { once: true })
+  direct.addEventListener('message', this._onHeadsMessage)
   this.directs.set(remotePeerId.toCID().toString(base32), direct)
   void start(direct)
 }
 
-function onPeersLeave (this: LiveReplicator, remotePeerId: PeerId): void {
+function onPeersLeave (this: LiveReplicator, evt: CustomEvent<PeerStatusChangeData>): void {
+  const { peerId: remotePeerId } = evt.detail
   // if direct exists in this.directs Map then .delete returns true
   const key = remotePeerId.toCID().toString(base32)
   const direct = this.directs.get(key)
   if (direct != null) {
-    direct.removeListener('message', this._onHeadsMessage)
+    direct.removeEventListener('message', this._onHeadsMessage)
     void stop(direct)
     this.directs.delete(key)
   }

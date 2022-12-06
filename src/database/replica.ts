@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { CID } from 'multiformats/cid'
 import { Datastore, Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
@@ -27,6 +27,11 @@ import type { Edge } from './graph-node.js'
 
 const rootHashKey = new Key('rootHash')
 
+interface ReplicaEvents {
+  'write': CustomEvent<undefined>
+  'update': CustomEvent<undefined>
+}
+
 export class Replica extends Playable {
   readonly manifest: ManifestInstance<any>
   readonly directory: string
@@ -35,7 +40,7 @@ export class Replica extends Playable {
   readonly access: AccessInstance
   readonly Entry: EntryStatic<any>
   readonly Identity: IdentityStatic<any>
-  readonly events: EventEmitter
+  readonly events: EventEmitter<ReplicaEvents>
 
   Datastore: DatastoreClass
 
@@ -72,12 +77,12 @@ export class Replica extends Playable {
 
       this._graph = new Graph({ blocks, root })
 
-      this.events.on('update', onUpdate)
+      this.events.addEventListener('update', onUpdate)
       await start(this._graph)
     }
     const stopping = async (): Promise<void> => {
       await stop(this._graph)
-      this.events.removeListener('update', onUpdate)
+      this.events.removeEventListener('update', onUpdate)
       await this.storage.close()
 
       this._storage = null
@@ -221,7 +226,7 @@ export class Replica extends Playable {
     }
 
     if ((await this.graph.size() - size) > 0) {
-      this.events.emit('update')
+      this.events.dispatchEvent(new CustomEvent<undefined>('update'))
     }
   }
 
@@ -238,7 +243,7 @@ export class Replica extends Playable {
 
     // do not await
     const add = await this.add([entry]).then(() => {
-      this.events.emit('write')
+      this.events.dispatchEvent(new CustomEvent<undefined>('write'))
       return entry
     })
 

@@ -98,7 +98,7 @@ describe(testName, () => {
     it('exposes instance properties', () => {
       assert.ok(keyvalue.start)
       assert.ok(keyvalue.stop)
-      assert.ok(keyvalue.events)
+      // assert.ok(keyvalue.events)
       assert.ok(keyvalue.index)
       assert.ok(keyvalue.creators)
       assert.ok(keyvalue.selectors)

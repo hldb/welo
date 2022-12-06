@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { CID } from 'multiformats/cid'
 
@@ -15,6 +15,13 @@ import type { MultiReplicator } from '~replicator/multi.js'
 import { Replica } from './replica.js'
 import type { Config, Handlers, Open } from './interface.js'
 
+interface DatabaseEvents {
+  'opened': CustomEvent<undefined>
+  'closed': CustomEvent<undefined>
+  'update': CustomEvent<undefined>
+  'write': CustomEvent<undefined>
+}
+
 export class Database extends Playable {
   readonly directory: string
   readonly Datastore: DatastoreClass
@@ -30,7 +37,7 @@ export class Database extends Playable {
   readonly Entry: EntryStatic<any>
   readonly Identity: IdentityStatic<any>
 
-  readonly events: EventEmitter
+  readonly events: EventEmitter<DatabaseEvents>
 
   private readonly _handlers: Handlers
 
@@ -73,9 +80,9 @@ export class Database extends Playable {
 
     this.events = new EventEmitter()
     this._handlers = {
-      storeUpdate: () => this.events.emit('update'),
+      storeUpdate: () => this.events.dispatchEvent(new CustomEvent<undefined>('update')),
       // replicatorReplicate: () => database.events.emit('replicate'),
-      replicaWrite: () => this.events.emit('write')
+      replicaWrite: () => this.events.dispatchEvent(new CustomEvent<undefined>('write'))
     }
 
     // expose actions as database write methods (e.g. database.put)
@@ -195,6 +202,6 @@ export class Database extends Playable {
 
   async close (): Promise<void> {
     await stop(this)
-    this.events.emit('closed')
+    this.events.dispatchEvent(new CustomEvent<undefined>('closed'))
   }
 }
