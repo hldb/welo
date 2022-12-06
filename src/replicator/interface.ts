@@ -3,6 +3,7 @@ import type { Libp2p } from 'libp2p'
 
 import type { Replica } from '~database/replica.js'
 import type { Blocks } from '~blocks/index.js'
+import type { Playable } from '~utils/playable.js'
 
 export interface Config {
   ipfs?: IPFS
@@ -11,3 +12,7 @@ export interface Config {
   replica: Replica
   blocks: Blocks
 }
+
+export interface Replicator extends Playable {}
+
+export type ReplicatorClass = new (props: any) => Replicator
