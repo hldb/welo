@@ -8,7 +8,7 @@ import type { Datastore } from 'datastore-level'
 
 import { Manifest, Address } from '~manifest/index.js'
 import { Blocks } from '~blocks/index.js'
-import { OPAL_LOWER } from '~utils/constants.js'
+import { OPAL_PATH } from '~utils/constants.js'
 import { Playable } from '~utils/playable.js'
 import { getDatastore, DatastoreClass } from '~utils/datastore.js'
 import {
@@ -104,7 +104,7 @@ export class Opal extends Playable {
   }
 
   static async create (options: Create): Promise<Opal> {
-    let directory: string = OPAL_LOWER
+    let directory: string = OPAL_PATH
     if (where.isNode && typeof options.directory === 'string') {
       directory = options.directory
     }
