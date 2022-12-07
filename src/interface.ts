@@ -11,6 +11,7 @@ import type { StoreProtocol } from '~store/keyvalue/protocol.js'
 import type { Replicator } from '~replicator/index.js'
 import type { KeyChain } from '~utils/types.js'
 import type { DatastoreClass } from '~utils/datastore'
+import type { Address } from './manifest'
 
 export interface Determine {
   protocol?: string
@@ -45,4 +46,18 @@ export interface Create {
   ipfs: IPFS
   libp2p: Libp2p
   start?: boolean
+}
+
+interface AddressEmit {
+  address: Address
+}
+
+export interface OpenedEmit extends AddressEmit {}
+export interface ClosedEmit extends AddressEmit {}
+
+export interface Events {
+  opened: CustomEvent<OpenedEmit>
+  closed: CustomEvent<ClosedEmit>
+  started: CustomEvent<undefined>
+  stopped: CustomEvent<undefined>
 }

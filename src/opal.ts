@@ -26,18 +26,7 @@ import type { KeyChain } from '~utils/types.js'
 
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry.js'
-import type { Config, Create, Determine, Options } from './interface.js'
-
-interface DatabaseStatusEmit {
-  database: Database
-}
-
-interface OpalEvents {
-  opened: CustomEvent<DatabaseStatusEmit>
-  closed: CustomEvent<DatabaseStatusEmit>
-  started: CustomEvent<undefined>
-  stopped: CustomEvent<undefined>
-}
+import type { ClosedEmit, Config, Create, Determine, Events, OpenedEmit, Options } from './interface.js'
 
 const registry = initRegistry()
 
@@ -65,7 +54,7 @@ export class Opal extends Playable {
 
   readonly identity: IdentityInstance<any>
 
-  readonly events: EventEmitter<OpalEvents>
+  readonly events: EventEmitter<Events>
 
   readonly opened: Map<string, Database>
   private readonly _opening: Map<string, Promise<Database>>
@@ -255,8 +244,8 @@ export class Opal extends Playable {
       .then((database) => {
         this.opened.set(addr, database)
         this.events.dispatchEvent(
-          new CustomEvent<DatabaseStatusEmit>('opened', {
-            detail: { database }
+          new CustomEvent<OpenedEmit>('opened', {
+            detail: { address }
           })
         )
         database.events.addEventListener(
@@ -264,8 +253,8 @@ export class Opal extends Playable {
           () => {
             this.opened.delete(addr)
             this.events.dispatchEvent(
-              new CustomEvent<DatabaseStatusEmit>('closed', {
-                detail: { database }
+              new CustomEvent<ClosedEmit>('closed', {
+                detail: { address }
               })
             )
           },
