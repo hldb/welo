@@ -19,12 +19,6 @@ export interface ManifestData {
   readonly tag?: Uint8Array
 }
 
-export interface ManifestInstance<Value> extends ManifestData {
-  readonly block: BlockView<Value>
-  get getTag(): Uint8Array
-  get address(): Address
-}
-
 export type Create = ManifestData
 
 export interface Fetch {
@@ -32,13 +26,6 @@ export interface Fetch {
   address: Address
 }
 
-export type AsManifest<Value> =
-  | ManifestInstance<Value>
-  | { block: BlockView<Value> }
-
-export interface ManifestStatic<Value> {
-  new (props: any): ManifestInstance<Value>
-  create: (create: Create) => Promise<ManifestInstance<Value>>
-  fetch: (fetch: Fetch) => Promise<ManifestInstance<Value>>
-  asManifest: (asManifest: AsManifest<Value>) => ManifestInstance<Value> | null
+export interface AsManifest {
+  block: BlockView<ManifestData>
 }
