@@ -4,7 +4,7 @@ import type { Libp2p } from 'libp2p'
 
 import { Opal } from '../src/index.js'
 import type { Opal as OpalType } from '../src/opal.js'
-import { OPAL_PREFIX } from '~utils/constants.js'
+import { OPAL_PATH } from '~utils/constants.js'
 import type { Address, Manifest } from '~manifest/index.js'
 import type { Database } from '../src/database.js'
 import type { Identity } from '~identity/basal/index.js'
@@ -34,7 +34,7 @@ describe(testName, () => {
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 
-    directory = testPaths.test + OPAL_PREFIX
+    directory = testPaths.test + OPAL_PATH
     directory1 = directory + '1'
   })
 

@@ -8,6 +8,6 @@ describe('Constants', () => {
   })
 
   it('exports OPAL_PREFIX', () => {
-    assert.equal(constants.OPAL_PREFIX, '/opal')
+    assert.equal(constants.OPAL_PATH, '/opal')
   })
 })
