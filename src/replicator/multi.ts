@@ -11,7 +11,9 @@ const register = new Register<ReplicatorClass>(replicatorPrefix)
 
 @Extends<ReplicatorClass>()
 export class MultiReplicator extends Playable implements Replicator {
-  static get register (): Register<ReplicatorClass> { return register }
+  static get register (): Register<ReplicatorClass> {
+    return register
+  }
 
   readonly config: Config
   readonly replicators: Replicator[]
@@ -27,7 +29,8 @@ export class MultiReplicator extends Playable implements Replicator {
     super({ starting, stopping })
 
     this.config = config
-    this.replicators = Array.from(register.registered.values())
-      .map((Replicator): Replicator => new Replicator(this.config))
+    this.replicators = Array.from(register.registered.values()).map(
+      (Replicator): Replicator => new Replicator(this.config)
+    )
   }
 }

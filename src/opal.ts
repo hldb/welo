@@ -18,7 +18,7 @@ import {
   getComponents,
   cidstring
 } from '~utils/index.js'
-import type { Replicator as ReplicatorClass } from '~replicator/index.js'
+import type { ReplicatorClass } from '~replicator/interface.js'
 import type { IdentityInstance } from '~identity/interface.js'
 import type { ManifestData } from '~manifest/interface.js'
 import type { KeyChain } from '~utils/types.js'
@@ -26,7 +26,15 @@ import type { KeyChain } from '~utils/types.js'
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry.js'
 import { Database } from './database.js'
-import type { ClosedEmit, Config, Create, Determine, Events, OpenedEmit, Options } from './interface.js'
+import type {
+  ClosedEmit,
+  Config,
+  Create,
+  Determine,
+  Events,
+  OpenedEmit,
+  Options
+} from './interface.js'
 
 const registry = initRegistry()
 
@@ -40,7 +48,7 @@ export class Opal extends Playable {
   }
 
   static Datastore?: DatastoreClass
-  static Replicator?: typeof ReplicatorClass
+  static Replicator?: ReplicatorClass
 
   private readonly dirs: DirsReturn
   readonly directory: string
@@ -213,7 +221,7 @@ export class Opal extends Playable {
       throw new Error('no Datastore attached to Opal class')
     }
 
-    let Replicator: typeof ReplicatorClass
+    let Replicator: ReplicatorClass
     if (options.Replicator != null) {
       Replicator = options.Replicator
     } else if (Opal.Replicator != null) {

@@ -11,7 +11,7 @@ import type { ManifestInstance } from '~manifest/interface.js'
 import type { AccessInstance } from '~access/interface.js'
 import type { Creator, Selector, StoreInstance } from '~store/interface.js'
 import type { DatastoreClass } from '~utils/datastore.js'
-import type { MultiReplicator } from '~replicator/multi.js'
+import type { Replicator } from '~replicator/interface.js'
 
 import { Replica } from './replica/index.js'
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
@@ -21,7 +21,7 @@ export class Database extends Playable {
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>
-  readonly replicator: MultiReplicator
+  readonly replicator: Replicator
 
   readonly replica: Replica
   readonly access: AccessInstance
@@ -187,7 +187,11 @@ export class Database extends Playable {
 
   async close (): Promise<void> {
     await stop(this)
-    this.events.dispatchEvent(new CustomEvent<ClosedEmit>('closed', { detail: { address: this.address } }))
+    this.events.dispatchEvent(
+      new CustomEvent<ClosedEmit>('closed', {
+        detail: { address: this.address }
+      })
+    )
   }
 }
 
