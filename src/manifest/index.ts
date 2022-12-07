@@ -1,7 +1,6 @@
 import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
-import { Extends } from '~utils/decorators.js'
 
 import { Address } from './address.js'
 import type {
@@ -9,15 +8,12 @@ import type {
   Create,
   Fetch,
   ManifestData,
-  ManifestInstance,
-  ManifestStatic,
   Protocol
 } from './interface.js'
 
 export { Address }
 
-@Extends<ManifestStatic<ManifestData>>()
-export class Manifest implements ManifestInstance<ManifestData> {
+export class Manifest {
   readonly name: string
   readonly store: Protocol
   readonly access: Protocol
@@ -25,12 +21,13 @@ export class Manifest implements ManifestInstance<ManifestData> {
   readonly identity: Protocol
   readonly meta?: any
   readonly tag?: Uint8Array
-  readonly getTag: Uint8Array
-
-  private readonly _address: Address
 
   get address (): Address {
-    return this._address
+    return new Address(this.block.cid)
+  }
+
+  getTag (): Uint8Array {
+    return this.tag != null ? this.tag : this.block.cid.bytes
   }
 
   constructor (readonly block: BlockView<ManifestData>) {
@@ -42,9 +39,6 @@ export class Manifest implements ManifestInstance<ManifestData> {
     this.identity = manifest.identity
     if (manifest.meta != null) this.meta = manifest.meta
     if (manifest.tag != null) this.tag = manifest.tag
-
-    this.getTag = manifest.tag != null ? manifest.tag : block.cid.bytes
-    this._address = new Address(block.cid)
   }
 
   static async create (manifest: Create): Promise<Manifest> {
@@ -65,7 +59,7 @@ export class Manifest implements ManifestInstance<ManifestData> {
     return manifest
   }
 
-  static asManifest (manifest: AsManifest<ManifestData>): Manifest | null {
+  static asManifest (manifest: AsManifest): Manifest | null {
     if (manifest instanceof Manifest) {
       return manifest
     }

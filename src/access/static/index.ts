@@ -3,7 +3,7 @@ import { base32 } from 'multiformats/bases/base32'
 import { Extends } from '~utils/decorators.js'
 import { Playable } from '~utils/playable.js'
 import type { EntryInstance } from '~entry/interface.js'
-import type { ManifestInstance, ManifestData } from '~manifest/interface.js'
+import type { Manifest } from '~manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { wildcard } from '../util.js'
@@ -12,11 +12,11 @@ import type { AccessInstance, AccessStatic } from '../interface.js'
 @Extends<AccessStatic>()
 // the Static in StaticAccess means the ACL is immutable and does not change
 export class StaticAccess extends Playable implements AccessInstance {
-  readonly manifest: ManifestInstance<ManifestData>
+  readonly manifest: Manifest
   readonly config: Config
   readonly write: Set<string>
 
-  constructor ({ manifest }: { manifest: ManifestInstance<ManifestData> }) {
+  constructor ({ manifest }: { manifest: Manifest }) {
     const starting = async (): Promise<void> => {
       if (!Array.isArray(this.config.write) || this.config.write.length === 0) {
         throw new Error(

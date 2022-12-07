@@ -61,7 +61,7 @@ describe(testName, () => {
         //   'bafyreidaqbln54tc6zg2n2oylgx7l5nqnbua7lelsvg3zuoxadr4rqvfiq'
         // )
         assert.equal(manifest.meta, undefined)
-        assert.deepEqual(manifest.getTag, manifest.block.cid.bytes)
+        assert.deepEqual(manifest.getTag(), manifest.block.cid.bytes)
       })
 
       it('returns a manifest with a meta field', async () => {
@@ -72,7 +72,7 @@ describe(testName, () => {
         //   'bafyreigyn3jgyyzntuaefrurwqksnbjfzuocgayfnryttnx2hemr2vkrty'
         // )
         assert.equal(_manifest.meta, meta)
-        assert.deepEqual(_manifest.getTag, _manifest.block.cid.bytes)
+        assert.deepEqual(_manifest.getTag(), _manifest.block.cid.bytes)
       })
 
       it('returns a manifest with a tag field', async () => {
@@ -84,7 +84,7 @@ describe(testName, () => {
         // )
         assert.equal(_manifest.meta, undefined)
         assert.deepEqual(_manifest.tag, tag)
-        assert.deepEqual(_manifest.getTag, tag)
+        assert.deepEqual(_manifest.getTag(), tag)
       })
     })
 

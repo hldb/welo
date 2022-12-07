@@ -11,7 +11,7 @@ import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import type { EntryInstance, EntryStatic } from '~entry/interface.js'
-import type { ManifestInstance } from '~manifest/interface.js'
+import type { Manifest } from '~manifest/index.js'
 import type { AccessInstance } from '~access/interface.js'
 import { DatastoreClass, getDatastore } from '~utils/datastore.js'
 
@@ -33,7 +33,7 @@ interface ReplicaEvents {
 }
 
 export class Replica extends Playable {
-  readonly manifest: ManifestInstance<any>
+  readonly manifest: Manifest
   readonly directory: string
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
@@ -57,7 +57,7 @@ export class Replica extends Playable {
     Entry,
     Identity
   }: {
-    manifest: ManifestInstance<any>
+    manifest: Manifest
     directory: string
     Datastore: DatastoreClass
     blocks: Blocks
@@ -210,7 +210,7 @@ export class Replica extends Playable {
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
     const size = await this.graph.size()
     for await (const entry of entries) {
-      if (!equals(entry.tag, this.manifest.getTag)) {
+      if (!equals(entry.tag, this.manifest.getTag())) {
         console.warn('replica received entry with mismatched tag')
         continue
       }
@@ -233,7 +233,7 @@ export class Replica extends Playable {
   async write (payload: any): Promise<EntryInstance<any>> {
     const entry = await this.Entry.create({
       identity: this.identity,
-      tag: this.manifest.getTag,
+      tag: this.manifest.getTag(),
       payload,
       next: (await all(this.heads.keys())).map((string) => CID.parse(string)),
       refs: [] // refs are empty for now

@@ -9,7 +9,7 @@ import { decodedcid, encodedcid } from '~utils/index.js'
 import { DatastoreClass, getDatastore } from '~utils/datastore.js'
 import type { Replica } from '~replica/index.js'
 import type { Blocks } from '~blocks/index.js'
-import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
+import type { Manifest } from '~manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
@@ -31,7 +31,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     return creators
   }
 
-  readonly manifest: ManifestInstance<ManifestData>
+  readonly manifest: Manifest
   readonly directory: string
   readonly blocks: Blocks
   readonly config?: Config
@@ -49,7 +49,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     replica,
     Datastore
   }: {
-    manifest: ManifestInstance<ManifestData>
+    manifest: Manifest
     directory: string
     blocks: Blocks
     replica: Replica
