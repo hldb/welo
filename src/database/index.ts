@@ -13,14 +13,7 @@ import type { DatastoreClass } from '~utils/datastore.js'
 import type { MultiReplicator } from '~replicator/multi.js'
 
 import { Replica } from './replica.js'
-import type { Config, Handlers, Open } from './interface.js'
-
-interface DatabaseEvents {
-  opened: CustomEvent<undefined>
-  closed: CustomEvent<undefined>
-  update: CustomEvent<undefined>
-  write: CustomEvent<undefined>
-}
+import type { Config, Open, Events } from './interface.js'
 
 export class Database extends Playable {
   readonly directory: string
@@ -37,28 +30,17 @@ export class Database extends Playable {
   readonly Entry: EntryStatic<any>
   readonly Identity: IdentityStatic<any>
 
-  readonly events: EventEmitter<DatabaseEvents>
-
-  private readonly _handlers: Handlers
+  readonly events: EventEmitter<Events>
+  readonly #onStoreUpdate: typeof onStoreUpdate
 
   constructor (config: Config) {
     const starting = async (): Promise<void> => {
+      this.store.events.addEventListener('update', this.#onStoreUpdate)
       await start(this.access, this.replica, this.store, this.replicator)
     }
     const stopping = async (): Promise<void> => {
+      this.replica.events.removeEventListener('update', this.#onStoreUpdate)
       await stop(this.store, this.replica, this.access, this.replicator)
-      // await this.replicator.stop()
-
-      // this.store.events.removeListener('update', this._handlers.storeUpdate)
-      // this.replicator.events.removeListener('replicate', this._handlers.replicatorReplicate)
-      // this.replica.events.removeListener('write', this._handlers.replicaWrite)
-
-      // await Promise.all([
-      //   this.replicator.close(),
-      //   this.store.close(),
-      //   this.replica.close(),
-      //   this.access.close()
-      // ])
     }
     super({ starting, stopping })
 
@@ -70,8 +52,7 @@ export class Database extends Playable {
     this.replicator = config.replicator
     this.replica = config.replica
 
-    // this.storage = config.storage
-    // this.replicator = config.replicator
+    this.replicator = config.replicator
 
     this.store = config.store
     this.access = config.access
@@ -79,13 +60,7 @@ export class Database extends Playable {
     this.Identity = config.Identity
 
     this.events = new EventEmitter()
-    this._handlers = {
-      storeUpdate: () =>
-        this.events.dispatchEvent(new CustomEvent<undefined>('update')),
-      // replicatorReplicate: () => database.events.emit('replicate'),
-      replicaWrite: () =>
-        this.events.dispatchEvent(new CustomEvent<undefined>('write'))
-    }
+    this.#onStoreUpdate = onStoreUpdate.bind(this)
 
     // expose actions as database write methods (e.g. database.put)
     // todo: handle async action creators
@@ -151,10 +126,17 @@ export class Database extends Playable {
 
     const common = { manifest, blocks, Datastore }
 
+    const directories = {
+      // access: directory + '/access',
+      replica: directory + '/replica',
+      store: directory + '/store'
+      // replicator: directory + '/replicator'
+    }
+
     const access = new Access(common)
     const replica = new Replica({
       ...common,
-      directory: directory + '/replica',
+      directory: directories.replica,
       identity,
       Entry,
       Identity,
@@ -162,7 +144,7 @@ export class Database extends Playable {
     })
     const store = new Store({
       ...common,
-      directory: directory + '/store',
+      directory: directories.store,
       replica
     })
     const replicator = new Replicator({
@@ -191,10 +173,6 @@ export class Database extends Playable {
 
     const database = new Database(config)
 
-    // database.store.events.on('update', database._handlers.storeUpdate)
-    // database.replicator.events.on('replicate', database._handlers.replicatorReplicate)
-    // database.replica.events.on('write', database._handlers.replicaWrite)
-
     if (options.start !== false) {
       await start(database)
     }
@@ -206,4 +184,8 @@ export class Database extends Playable {
     await stop(this)
     this.events.dispatchEvent(new CustomEvent<undefined>('closed'))
   }
+}
+
+function onStoreUpdate (this: Database): void {
+  this.events.dispatchEvent(new CustomEvent<undefined>('update'))
 }

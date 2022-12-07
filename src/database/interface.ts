@@ -35,7 +35,7 @@ export interface Config extends Omit<Open, 'start'> {
   access: AccessInstance
 }
 
-export interface Handlers {
-  storeUpdate: () => boolean
-  replicaWrite: () => boolean
+export interface Events {
+  closed: CustomEvent<undefined>
+  update: CustomEvent<undefined>
 }

@@ -1,4 +1,4 @@
-// import { EventEmitter } from '@libp2p/interfaces/events'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Datastore, Key } from 'interface-datastore'
 import type { HashMap } from 'ipld-hashmap'
 
@@ -13,7 +13,7 @@ import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
-import type { StoreStatic, StoreInstance } from '../interface.js'
+import type { StoreStatic, StoreInstance, Events } from '../interface.js'
 
 const indexesKey = new Key('indexes')
 
@@ -40,7 +40,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
-  // events: EventEmitter
+  events: EventEmitter<Events>
 
   constructor ({
     manifest,
@@ -95,7 +95,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this._indexes = null
     this._index = null
 
-    // this.events = new EventEmitter()
+    this.events = new EventEmitter()
   }
 
   get storage (): Datastore {
@@ -131,6 +131,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     await this.indexes.set('latest', encodedcid(index.cid))
     await this.storage.put(indexesKey, encodedcid(this.indexes.cid))
     this._index = index
+    this.events.dispatchEvent(new CustomEvent<undefined>('update'))
     return index
   }
 }
