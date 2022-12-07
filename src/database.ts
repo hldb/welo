@@ -3,6 +3,7 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import type { CID } from 'multiformats/cid'
 
 import { Playable } from '~utils/playable.js'
+import { Replica } from '~replica/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { EntryStatic } from '~entry/interface.js'
 import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
@@ -13,7 +14,6 @@ import type { Creator, Selector, StoreInstance } from '~store/interface.js'
 import type { DatastoreClass } from '~utils/datastore.js'
 import type { Replicator } from '~replicator/interface.js'
 
-import { Replica } from './replica/index.js'
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
 
 export class Database extends Playable {
