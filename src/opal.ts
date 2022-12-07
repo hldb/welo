@@ -1,7 +1,6 @@
 import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
-import { base32 } from 'multiformats/bases/base32'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
@@ -17,7 +16,8 @@ import {
   dirs,
   DirsReturn,
   defaultManifest,
-  getComponents
+  getComponents,
+  cidstring
 } from '~utils/index.js'
 import type { Replicator as ReplicatorClass } from '~replicator/index.js'
 import type { IdentityInstance } from '~identity/interface.js'
@@ -35,7 +35,8 @@ interface DatabaseStatusEmit {
 interface OpalEvents {
   opened: CustomEvent<DatabaseStatusEmit>
   closed: CustomEvent<DatabaseStatusEmit>
-  stop: CustomEvent<undefined>
+  started: CustomEvent<undefined>
+  stopped: CustomEvent<undefined>
 }
 
 const registry = initRegistry()
@@ -223,7 +224,7 @@ export class Opal extends Playable {
     } else if (Opal.Datastore != null) {
       Datastore = Opal.Datastore
     } else {
-      throw new Error('no Datastore available')
+      throw new Error('no Datastore attached to Opal class')
     }
 
     let Replicator: typeof ReplicatorClass
@@ -232,23 +233,23 @@ export class Opal extends Playable {
     } else if (Opal.Replicator != null) {
       Replicator = Opal.Replicator
     } else {
-      throw new Error('no Replicator supplied')
+      throw new Error('no Replicator attached to Opal class')
     }
 
-    const dbPath = path.join(
+    const directory = path.join(
       this.dirs.databases,
-      manifest.address.cid.toString(base32)
+      cidstring(manifest.address.cid)
     )
 
     const promise = Database.open({
-      directory: dbPath,
-      Datastore,
-      Replicator,
+      directory,
       manifest,
-      blocks: this.blocks,
+      identity,
       ipfs: this.ipfs,
       libp2p: this.libp2p,
-      identity,
+      blocks: this.blocks,
+      Datastore,
+      Replicator,
       ...getComponents(this.registry, manifest)
     })
       .then((database) => {
