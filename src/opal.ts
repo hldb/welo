@@ -7,7 +7,6 @@ import type { Libp2p } from 'libp2p'
 import type { Datastore } from 'datastore-level'
 
 import { Manifest, Address } from '~manifest/index.js'
-import { Database } from '~database/index.js'
 import { Blocks } from '~blocks/index.js'
 import { OPAL_LOWER } from '~utils/constants.js'
 import { Playable } from '~utils/playable.js'
@@ -26,6 +25,7 @@ import type { KeyChain } from '~utils/types.js'
 
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry.js'
+import { Database } from './database.js'
 import type { ClosedEmit, Config, Create, Determine, Events, OpenedEmit, Options } from './interface.js'
 
 const registry = initRegistry()
@@ -70,13 +70,10 @@ export class Opal extends Playable {
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
-      this.events.dispatchEvent(new CustomEvent<undefined>('started'))
     }
     const stopping = async (): Promise<void> => {
       await Promise.all(Object.values(this._opening))
       await Promise.all(Object.values(this.opened).map(stop))
-
-      this.events.dispatchEvent(new CustomEvent<undefined>('stopped'))
     }
     super({ starting, stopping })
 

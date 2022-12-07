@@ -6,7 +6,7 @@ import { Opal } from '../src/index.js'
 import type { Opal as OpalType } from '../src/opal.js'
 import { OPAL_PREFIX } from '~utils/constants.js'
 import type { Address, Manifest } from '~manifest/index.js'
-import type { Database } from '~database/index.js'
+import type { Database } from '../src/database.js'
 import type { Identity } from '~identity/basal/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'

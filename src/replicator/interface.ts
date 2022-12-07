@@ -1,7 +1,7 @@
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 
-import type { Replica } from '~database/replica.js'
+import type { Replica } from '~replica/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { Playable } from '~utils/playable.js'
 

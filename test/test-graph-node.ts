@@ -2,7 +2,7 @@ import { strict as assert } from 'assert'
 import { base32 } from 'multiformats/bases/base32'
 import type { BlockView } from 'multiformats/interface'
 
-import { initialNode, Node, NodeValue, NodeObj } from '~database/graph-node.js'
+import { initialNode, Node, NodeValue, NodeObj } from '~replica/graph-node.js'
 
 describe('Graph Node', () => {
   const initNode: NodeObj = {

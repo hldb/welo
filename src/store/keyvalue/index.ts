@@ -4,10 +4,10 @@ import type { HashMap } from 'ipld-hashmap'
 
 import { Extends } from '~utils/decorators.js'
 import { Playable } from '~utils/playable.js'
-import { loadHashMap } from '~database/graph.js'
+import { loadHashMap } from '~replica/graph.js'
 import { decodedcid, encodedcid } from '~utils/index.js'
 import { DatastoreClass, getDatastore } from '~utils/datastore.js'
-import type { Replica } from '~database/replica.js'
+import type { Replica } from '~replica/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { ManifestData, ManifestInstance } from '~manifest/interface.js'
 

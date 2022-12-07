@@ -3,8 +3,8 @@ import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid.js'
 import { start } from '@libp2p/interfaces/startable'
 
-import { Graph } from '~database/graph.js'
-import { Node } from '~database/graph-node.js'
+import { Graph } from '~replica/graph.js'
+import { Node } from '~replica/graph-node.js'
 import { Blocks } from '~blocks/index.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'

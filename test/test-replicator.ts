@@ -7,7 +7,7 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 
 import { LiveReplicator as Replicator } from '~replicator/live/index.js'
 import { Blocks } from '~blocks/index.js'
-import { Replica } from '~database/replica.js'
+import { Replica } from '~replica/index.js'
 import { StaticAccess as Access } from '~access/static/index.js'
 
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'

@@ -6,18 +6,18 @@ import { Playable } from '~utils/playable.js'
 import type { Blocks } from '~blocks/index.js'
 import type { EntryStatic } from '~entry/interface.js'
 import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
+import type { Address } from '~manifest/address.js'
 import type { ManifestInstance } from '~manifest/interface.js'
 import type { AccessInstance } from '~access/interface.js'
 import type { Creator, Selector, StoreInstance } from '~store/interface.js'
 import type { DatastoreClass } from '~utils/datastore.js'
 import type { MultiReplicator } from '~replicator/multi.js'
 
-import { Replica } from './replica.js'
-import type { Config, Open, Events } from './interface.js'
+import { Replica } from './replica/index.js'
+import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
 
 export class Database extends Playable {
   readonly directory: string
-  readonly Datastore: DatastoreClass
   readonly blocks: Blocks
   readonly manifest: ManifestInstance<any>
   readonly identity: IdentityInstance<any>
@@ -27,13 +27,18 @@ export class Database extends Playable {
   readonly access: AccessInstance
   readonly store: StoreInstance
 
+  readonly Datastore: DatastoreClass
   readonly Entry: EntryStatic<any>
   readonly Identity: IdentityStatic<any>
 
-  readonly events: EventEmitter<Events>
+  readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate
 
-  constructor (config: Config) {
+  get address (): Address {
+    return this.manifest.address
+  }
+
+  constructor (config: DbConfig) {
     const starting = async (): Promise<void> => {
       this.store.events.addEventListener('update', this.#onStoreUpdate)
       await start(this.access, this.replica, this.store, this.replicator)
@@ -104,7 +109,7 @@ export class Database extends Playable {
     )
   }
 
-  static async open (options: Open): Promise<Database> {
+  static async open (options: DbOpen): Promise<Database> {
     const {
       directory,
       Datastore,
@@ -154,7 +159,7 @@ export class Database extends Playable {
       replica
     })
 
-    const config: Config = {
+    const config: DbConfig = {
       directory,
       Datastore,
       blocks,
@@ -182,7 +187,7 @@ export class Database extends Playable {
 
   async close (): Promise<void> {
     await stop(this)
-    this.events.dispatchEvent(new CustomEvent<undefined>('closed'))
+    this.events.dispatchEvent(new CustomEvent<ClosedEmit>('closed', { detail: { address: this.address } }))
   }
 }
 

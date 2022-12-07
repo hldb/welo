@@ -5,7 +5,7 @@ import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
 
-import { Replica } from '~database/replica.js'
+import { Replica } from '~replica/index.js'
 import { Blocks } from '~blocks/index.js'
 import { Keyvalue } from '~store/keyvalue/index.js'
 import { StaticAccess } from '~access/static/index.js'

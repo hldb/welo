@@ -3,7 +3,7 @@ import { strict as assert } from 'assert'
 import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 
-import { Database } from '~database/index.js'
+import { Database } from '../src/database.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
 import { StaticAccess as Access, StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
