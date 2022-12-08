@@ -5,15 +5,16 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import type { BlockView } from 'multiformats/interface'
+import type { HashMap } from 'ipld-hashmap/interface'
 
 import { Playable } from '~utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
+import { DatastoreClass, getDatastore } from '~utils/datastore.js'
 import type { Blocks } from '~blocks/index.js'
 import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
 import type { EntryInstance, EntryStatic } from '~entry/interface.js'
 import type { Manifest } from '~manifest/index.js'
 import type { AccessInstance } from '~access/interface.js'
-import { DatastoreClass, getDatastore } from '~utils/datastore.js'
 
 import { Graph, Root } from './graph.js'
 import {
@@ -123,23 +124,23 @@ export class Replica extends Playable {
     return this._graph
   }
 
-  get heads (): typeof this.graph.heads {
+  get heads (): HashMap<null> {
     return this.graph.heads
   }
 
-  get tails (): typeof this.graph.tails {
+  get tails (): HashMap<null> {
     return this.graph.tails
   }
 
-  get missing (): typeof this.graph.missing {
+  get missing (): HashMap<null> {
     return this.graph.missing
   }
 
-  get denied (): typeof this.graph.denied {
+  get denied (): HashMap<null> {
     return this.graph.denied
   }
 
-  get size (): typeof this.graph.size {
+  get size (): () => Promise<number> {
     return this.graph.size.bind(this.graph)
   }
 
