@@ -1,10 +1,5 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 
-export interface Lifecycle {
-  starting: () => Promise<void>
-  stopping: () => Promise<void>
-}
-
 export class Playable implements Startable {
   private _isStarted: boolean
 
@@ -15,7 +10,7 @@ export class Playable implements Startable {
   private _starting: Promise<void> | null
   private _stopping: Promise<void> | null
 
-  constructor (private readonly _lifecycle: Lifecycle) {
+  constructor (private readonly lifecycle: { starting: () => Promise<void>, stopping: () => Promise<void> }) {
     this._isStarted = false
     this._starting = null
     this._stopping = null
@@ -34,7 +29,7 @@ export class Playable implements Startable {
       await this._stopping
     }
 
-    this._starting = this._lifecycle.starting()
+    this._starting = this.lifecycle.starting()
 
     return await this._starting
       .then(() => {
@@ -58,7 +53,7 @@ export class Playable implements Startable {
       await this._starting
     }
 
-    this._stopping = this._lifecycle.stopping()
+    this._stopping = this.lifecycle.stopping()
 
     return await this._stopping
       .then(() => {
