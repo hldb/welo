@@ -43,10 +43,6 @@ export class Opal extends Playable {
     return registry
   }
 
-  get registry (): typeof Opal.registry {
-    return Opal.registry
-  }
-
   static Datastore?: DatastoreClass
   static Replicator?: ReplicatorClass
 
@@ -167,7 +163,7 @@ export class Opal extends Playable {
 
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
-      ...defaultManifest(options.name, this.identity, this.registry),
+      ...defaultManifest(options.name, this.identity, registry),
       ...options
     }
 
@@ -175,7 +171,7 @@ export class Opal extends Playable {
     await this.blocks.put(manifest.block)
 
     try {
-      getComponents(this.registry, manifest)
+      getComponents(registry, manifest)
     } catch (e) {
       console.warn('manifest configuration contains unregistered components')
     }
@@ -240,7 +236,7 @@ export class Opal extends Playable {
       blocks: this.blocks,
       Datastore,
       Replicator,
-      ...getComponents(this.registry, manifest)
+      ...getComponents(registry, manifest)
     })
       .then((database) => {
         this.opened.set(addr, database)
