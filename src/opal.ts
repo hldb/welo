@@ -165,10 +165,6 @@ export class Opal extends Playable {
 
   // static get version () { return version }
 
-  static get Manifest (): typeof Manifest {
-    return Manifest
-  }
-
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
       ...defaultManifest(options.name, this.identity, this.registry),

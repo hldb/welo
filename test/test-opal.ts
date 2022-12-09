@@ -52,7 +52,6 @@ describe(testName, () => {
       assert.ok(Opal.Datastore)
       // assert.ok(Opal.Replicator)
       assert.ok(Opal.create)
-      assert.ok(Opal.Manifest)
     })
 
     describe('create', () => {
