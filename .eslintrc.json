@@ -11,6 +11,9 @@
         "project": "./tsconfig.json",
         "tsconfigRootDir": "./"
     },
-    "plugins": ["import"],
+    "plugins": [
+        "import",
+        "eslint-plugin-tsdoc"
+    ],
     "ignorePatterns": ["dist"]
 }
