@@ -2,8 +2,8 @@ import { encode, decode } from 'multiformats/block'
 import * as cbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import type { IPFS, AbortOptions } from 'ipfs-core-types'
-import type { CID } from 'multiformats/cid'
 import type { PreloadOptions } from 'ipfs-core-types/src/utils'
+import type { CID } from 'multiformats/cid'
 import type { PutOptions } from 'ipfs-core-types/src/block'
 import type {
   ByteView,
