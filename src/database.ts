@@ -16,6 +16,11 @@ import type { Replicator } from '~replicator/interface.js'
 
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
 
+/**
+ * The Merkle-CRDT Database
+ *
+ * @public
+ */
 export class Database extends Playable {
   readonly directory: string
   readonly blocks: Blocks
@@ -109,6 +114,16 @@ export class Database extends Playable {
     )
   }
 
+  /**
+   * Open a Database
+   *
+   * @remarks
+   * Opal database factory uses this method, and provides the modules needed,
+   * to return databases from its `open` instance method.
+   *
+   * @param options - Contains properties and modules for the database to use
+   * @returns
+   */
   static async open (options: DbOpen): Promise<Database> {
     const {
       directory,
@@ -185,6 +200,13 @@ export class Database extends Playable {
     return database
   }
 
+  /**
+   * Close the Database
+   *
+   * @remarks
+   * Opal database factory listens for the closed method to be called
+   * to manage lifecycles of databases it's managing.
+   */
   async close (): Promise<void> {
     await stop(this)
     this.events.dispatchEvent(

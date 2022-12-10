@@ -1,5 +1,11 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 
+/**
+ * Implements {@link https://github.com/libp2p/js-libp2p-interfaces/tree/master/packages/interfaces#startable
+ * | Libp2p's Startable interface} for easy reuse with async code.
+ *
+ * @public
+ */
 export class Playable implements Startable {
   private _isStarted: boolean
 

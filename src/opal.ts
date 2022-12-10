@@ -32,13 +32,32 @@ import type {
   Create,
   Determine,
   Events,
+  FetchOptions,
   OpenedEmit,
-  Options
+  OpenOptions
 } from './interface.js'
 
 const registry = initRegistry()
 
+export { Manifest, Address }
+export type {
+  Playable,
+  Database,
+  Create,
+  Determine,
+  FetchOptions,
+  OpenOptions as Options
+}
+
+/**
+ * Database Factory
+ *
+ * @public
+ */
 export class Opal extends Playable {
+  /**
+   *
+   */
   static get registry (): Registry {
     return registry
   }
@@ -99,6 +118,12 @@ export class Opal extends Playable {
     this._opening = new Map()
   }
 
+  /**
+   * Create an Opal instance
+   *
+   * @param options - options
+   * @returns a promise which resolves to an Opal instance
+   */
   static async create (options: Create): Promise<Opal> {
     let directory: string = OPAL_PATH
     if (where.isNode && typeof options.directory === 'string') {
@@ -161,6 +186,15 @@ export class Opal extends Playable {
 
   // static get version () { return version }
 
+  /**
+   * Deterministically create a database manifest
+   *
+   * @remarks
+   * Options are shallow merged with {@link defaultManifest}.
+   *
+   * @param options - Override defaults used to create the manifest.
+   * @returns
+   */
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
       ...defaultManifest(options.name, this.identity, registry),
@@ -179,11 +213,31 @@ export class Opal extends Playable {
     return manifest
   }
 
-  async fetch (address: Address): Promise<Manifest> {
-    return await Manifest.fetch({ blocks: this.blocks, address })
+  /**
+   * Fetch a Database Manifest
+   *
+   * @remarks
+   * Convenience method for using `Manifest.fetch`.
+   *
+   * @param address - the Address of the Manifest to fetch
+   * @returns
+   */
+  async fetch (address: Address, options: FetchOptions = {}): Promise<Manifest> {
+    return await Manifest.fetch({ blocks: this.blocks, address }, options)
   }
 
-  async open (manifest: Manifest, options: Options = {}): Promise<Database> {
+  /**
+   * Opens a database for a manifest.
+   *
+   * @remarks
+   * This method will throw an error if the database is already opened or being opened.
+   * Use {@link Opal.opened} to get opened databases.
+   *
+   * @param manifest - the manifest of the database to open
+   * @param options - optional configuration for how to run the database
+   * @returns the database instance for the given manifest
+   */
+  async open (manifest: Manifest, options: OpenOptions = {}): Promise<Database> {
     const address = manifest.address
     const addr: string = address.toString()
 

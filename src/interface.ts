@@ -17,6 +17,7 @@ import type { StoreInstance, StoreStatic } from '~store/interface'
 import type { Replica } from '~replica/index.js'
 import type { Replicator, ReplicatorClass } from '~replicator/interface'
 
+/** @public */
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
@@ -35,6 +36,7 @@ export interface Config {
   libp2p: Libp2p
 }
 
+/** @public */
 export interface Determine {
   protocol?: string
   name: string
@@ -46,7 +48,11 @@ export interface Determine {
   tag?: Uint8Array
 }
 
-export interface Options {
+/** @public */
+export { FetchOptions } from '~utils/types'
+
+/** @public */
+export interface OpenOptions {
   identity?: IdentityInstance<any>
   Datastore?: DatastoreClass
   Replicator?: ReplicatorClass

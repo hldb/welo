@@ -1,3 +1,9 @@
+/**
+ * peer-to-peer, collaborative states using merkle-crdts
+ *
+ * @packageDocumentation
+ */
+
 import { Opal as _Opal } from './opal.js'
 
 import { LevelDatastore } from 'datastore-level'
@@ -16,4 +22,14 @@ _Opal.registry.store.add(Keyvalue)
 _Opal.Datastore = LevelDatastore
 _Opal.Replicator = Replicator
 
-export const Opal = _Opal
+export { _Opal as Opal }
+
+export type { Manifest, Address } from '~manifest/index.js'
+export type { Playable } from '~utils/playable.js'
+export type { Database } from './database.js'
+export type {
+  Create,
+  Determine,
+  FetchOptions,
+  OpenOptions
+} from './interface.js'
