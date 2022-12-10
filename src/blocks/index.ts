@@ -76,7 +76,7 @@ class IpfsBlocks {
 
   async get<T>(
     cid: CID<T>,
-    options?: (AbortOptions & PreloadOptions) | undefined
+    options?: (AbortOptions & PreloadOptions)
   ): Promise<BlockView<T, number, number, 1>> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
