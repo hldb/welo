@@ -17,7 +17,7 @@ import type { Replicator } from '~replicator/interface.js'
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
 
 /**
- * The Merkle-CRDT Database
+ * Database Class
  *
  * @public
  */
