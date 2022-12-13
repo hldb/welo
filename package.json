@@ -10,6 +10,9 @@
     "lint": "eslint src test",
     "style": "prettier -w src test && eslint --fix src test",
     "build": "tsc",
+    "extract-api": "api-extractor run -c ./config/api-extractor.json -l -v",
+    "document-api": "api-documenter markdown -i ./API -o ./API",
+    "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json ; npm run clean",
     "clean": "git add test/fixtures && git stash -- test/fixtures && git stash drop ; rm -rf test/temp"
   },
