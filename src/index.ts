@@ -28,6 +28,7 @@ export type { Manifest, Address } from '~manifest/index.js'
 export type { Playable } from '~utils/playable.js'
 export type { Database } from './database.js'
 export type {
+  Config,
   Create,
   Determine,
   FetchOptions,

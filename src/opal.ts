@@ -43,6 +43,7 @@ export { Manifest, Address }
 export type {
   Playable,
   Database,
+  Config,
   Create,
   Determine,
   FetchOptions,
