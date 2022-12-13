@@ -4,4 +4,4 @@ import type { PreloadOptions } from 'ipfs-core-types/src/utils'
 
 export type KeyChain = Libp2p['keychain']
 
-export type FetchOptions = AbortOptions & PreloadOptions
+export interface FetchOptions extends AbortOptions, PreloadOptions {}
