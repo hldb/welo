@@ -1,6 +1,6 @@
 {
-  "name": "opal",
-  "version": "0.0.1",
+  "name": "@cypsela/opal",
+  "version": "0.0.0",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "src/index.js",
   "type": "module",
