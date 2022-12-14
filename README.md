@@ -33,6 +33,10 @@ const manifest = await opal.determine({ name: 'this is the databases name', type
 const keyvalue = await opal.open(manifest)
 
 /** The keyvalue API docs are not uploaded yet */
+
+const entryCID = await keyvalue.put('key', 'value')
+const value = await keyvalue.get('key')
+const entryCID = await keyvalue.del('key')
 ```
 
 Check out the [tests](./test) for more usage examples for now.
