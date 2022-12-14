@@ -24,7 +24,7 @@ import { Opal } from '@cypsela/opal'
 const ipfs = await IPFS.create() // 
 
 /** see more config options in the API docs */
-const opal = await Opal.create({ ipfs })
+const opal = await Opal.create({ ipfs, libp2p: ipfs.libp2p }) // ipfs.libp2p will throw a typescript error; it's a hack for now
 
 /** create a manifest for a keyvalue database */
 const manifest = await opal.determine({ name: 'this is the databases name', type: 'keyvalue' })
