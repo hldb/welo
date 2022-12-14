@@ -128,7 +128,7 @@ export class Opal extends Playable {
   static async create (options: Create): Promise<Opal> {
     let directory: string = OPAL_PATH
     if (where.isNode && typeof options.directory === 'string') {
-      directory = options.directory
+      directory = options.directory ?? '.' + directory
     }
 
     const ipfs = options.ipfs
