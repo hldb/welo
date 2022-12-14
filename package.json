@@ -1,11 +1,13 @@
 {
   "name": "@cypsela/opal",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "prettier": "prettier-config-standard",
   "scripts": {
     "prepare": "ts-patch install -s",
