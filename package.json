@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cypsela/odb.git"
+    "url": "git+https://github.com/cypsela/opal.git"
   },
   "keywords": [
     "peer-to-peer",
@@ -29,9 +29,9 @@
   ],
   "author": "tabcat <tabcat00@proton.me>",
   "bugs": {
-    "url": "https://github.com/cypsela/odb/issues"
+    "url": "https://github.com/cypsela/opal/issues"
   },
-  "homepage": "https://github.com/cypsela/odb#readme",
+  "homepage": "https://github.com/cypsela/opal#readme",
   "devDependencies": {
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",
