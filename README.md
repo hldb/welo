@@ -23,10 +23,16 @@ import { Welo } from 'welo'
 const ipfs = await IPFS.create() // 
 
 /** see more config options in the API docs */
-const welo = await Welo.create({ ipfs, libp2p: ipfs.libp2p }) // ipfs.libp2p will throw a typescript error; it's a hack for now
+const welo = await Welo.create({
+  ipfs,
+  libp2p: ipfs.libp2p // ipfs.libp2p will throw a typescript error; it's a hack for now
+})
 
 /** create a manifest for a keyvalue database */
-const manifest = await welo.determine({ name: 'this is the databases name', type: 'keyvalue' })
+const manifest = await welo.determine({
+  name: 'this is the databases name',
+  type: 'keyvalue'
+})
 
 /** open the keyvalue database */
 const keyvalue = await welo.open(manifest)
