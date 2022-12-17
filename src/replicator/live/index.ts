@@ -24,7 +24,7 @@ import * as Advert from './message.js'
 import { protocol } from './protocol.js'
 
 const getSharedChannelTopic = (manifest: Manifest): string =>
-  '/opal/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
+  '/opalsnt/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
 
 export class LiveReplicator extends Playable implements Registrant {
   readonly ipfs: IPFS

@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 
-import { OPAL_PREFIX as prefix } from '~utils/constants.js'
+import { OPALSNT_PREFIX as prefix } from '~utils/constants.js'
 
 const parse = function (address: Address | string): CID {
   address = address.toString()
@@ -22,7 +22,7 @@ const parse = function (address: Address | string): CID {
  *
  * @remarks
  * May also be referred to as the database address.
- * It is a CID with a prefix that says it's an opal manifest.
+ * It is a CID with a prefix that says it's an opalsnt manifest.
  *
  * @public
  */

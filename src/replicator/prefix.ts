@@ -1,4 +1,4 @@
-import { OPAL_PREFIX as prefix } from '~utils/constants.js'
+import { OPALSNT_PREFIX as prefix } from '~utils/constants.js'
 
 const type = 'replicator'
-export const replicatorPrefix: '/opal/replicator' = `${prefix}${type}`
+export const replicatorPrefix: '/opalsnt/replicator' = `${prefix}${type}`

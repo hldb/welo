@@ -118,7 +118,7 @@ export class Database extends Playable {
    * Open a Database
    *
    * @remarks
-   * Opal database factory uses this method, and provides the modules needed,
+   * Welo Database factory uses this method, and provides the modules needed,
    * to return databases from its `open` instance method.
    *
    * @param options - Contains properties and modules for the database to use
@@ -204,7 +204,7 @@ export class Database extends Playable {
    * Close the Database
    *
    * @remarks
-   * Opal database factory listens for the closed method to be called
+   * Welo database factory listens for the closed method to be called
    * to manage lifecycles of databases it's managing.
    */
   async close (): Promise<void> {

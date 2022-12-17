@@ -45,7 +45,7 @@
    *
    * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
    */
-  "mainEntryPointFilePath": "<projectFolder>/dist/src/opal.d.ts",
+  "mainEntryPointFilePath": "<projectFolder>/dist/src/welo.d.ts",
 
   /**
    * A list of NPM package names whose exports should be treated as part of this package.
@@ -234,7 +234,7 @@
      * SUPPORTED TOKENS: none
      * DEFAULT VALUE: ""
      */
-    "projectFolderUrl": "http://github.com/cypsela/opal"
+    "projectFolderUrl": "http://github.com/opalsnt/welo"
   },
 
   /**

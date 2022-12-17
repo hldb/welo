@@ -1,6 +1,6 @@
-import { OPAL_PREFIX as prefix } from '~utils/constants.js'
+import { OPALSNT_PREFIX as prefix } from '~utils/constants.js'
 
 const type = 'entry'
-const protocolPrefix: '/opal/entry/' = `${prefix}${type}/`
+const protocolPrefix: '/opalsnt/entry/' = `${prefix}${type}/`
 
 export default protocolPrefix

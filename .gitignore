@@ -3,4 +3,4 @@ test/temp/
 dist
 .vscode
 coverage
-API/opal.api.json
+API/welo.api.json

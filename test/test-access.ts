@@ -59,7 +59,7 @@ describe(testName, () => {
   describe('Class', () => {
     it('exposes static properties', () => {
       assert.equal(Access.protocol, protocol)
-      assert.equal(Access.protocol, '/opal/access/static')
+      assert.equal(Access.protocol, '/opalsnt/access/static')
     })
 
     describe('.open', () => {

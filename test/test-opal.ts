@@ -2,9 +2,9 @@ import { strict as assert } from 'assert'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 
-import { Opal } from '../src/index.js'
-import type { Opal as OpalType } from '../src/opal.js'
-import { OPAL_PATH } from '~utils/constants.js'
+import { Welo } from '../src/index.js'
+import type { Welo as WeloType } from '../src/welo.js'
+import { WELO_PATH } from '~utils/constants.js'
 import type { Address, Manifest } from '~manifest/index.js'
 import type { Database } from '../src/database.js'
 import type { Identity } from '~identity/basal/index.js'
@@ -14,12 +14,12 @@ import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
 
-const testName = 'opal'
+const testName = 'welo'
 
 describe(testName, () => {
   let ipfs: IPFS,
     libp2p: Libp2p,
-    opal: OpalType,
+    welo: WeloType,
     directory: string,
     identity: Identity,
     directory1: string
@@ -34,45 +34,45 @@ describe(testName, () => {
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 
-    directory = testPaths.test + OPAL_PATH
+    directory = testPaths.test + WELO_PATH
     directory1 = directory + '1'
   })
 
   after(async () => {
-    await opal.stop()
+    await welo.stop()
     await ipfs.stop()
   })
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Opal.registry.access)
-      assert.ok(Opal.registry.entry)
-      assert.ok(Opal.registry.identity)
-      assert.ok(Opal.registry.store)
-      assert.ok(Opal.Datastore)
-      // assert.ok(Opal.Replicator)
-      assert.ok(Opal.create)
+      assert.ok(Welo.registry.access)
+      assert.ok(Welo.registry.entry)
+      assert.ok(Welo.registry.identity)
+      assert.ok(Welo.registry.store)
+      assert.ok(Welo.Datastore)
+      // assert.ok(Welo.Replicator)
+      assert.ok(Welo.create)
     })
 
     describe('create', () => {
-      it('returns an instance of Opal', async () => {
-        opal = await Opal.create({ ipfs, libp2p, directory })
+      it('returns an instance of Welo', async () => {
+        welo = await Welo.create({ ipfs, libp2p, directory })
       })
 
-      it('returns an instance of Opal with an identity option', async () => {
+      it('returns an instance of Welo with an identity option', async () => {
         const directory = directory1
-        const opal = await Opal.create({ ipfs, libp2p, directory, identity })
-        await opal.stop()
+        const welo = await Welo.create({ ipfs, libp2p, directory, identity })
+        await welo.stop()
       })
 
-      it('rejects if no identity option or Opal.Datastore', async () => {
-        const Datastore = Opal.Datastore
-        Opal.Datastore = undefined
+      it('rejects if no identity option or Welo.Datastore', async () => {
+        const Datastore = Welo.Datastore
+        Welo.Datastore = undefined
 
-        const promise = Opal.create({ ipfs, libp2p, directory })
+        const promise = Welo.create({ ipfs, libp2p, directory })
         await assert.rejects(promise)
 
-        Opal.Datastore = Datastore
+        Welo.Datastore = Datastore
       })
     })
   })
@@ -81,22 +81,22 @@ describe(testName, () => {
     let manifest: Manifest, address: Address
 
     it('exposes instance properties', () => {
-      assert.ok(opal.stop)
-      assert.ok(opal.determine)
-      assert.ok(opal.fetch)
-      assert.ok(opal.open)
+      assert.ok(welo.stop)
+      assert.ok(welo.determine)
+      assert.ok(welo.fetch)
+      assert.ok(welo.open)
     })
 
     describe('determineManifest', () => {
       it('returns an instance of Manifest based on some options', async () => {
-        manifest = await opal.determine({ name: 'test' })
+        manifest = await welo.determine({ name: 'test' })
         address = manifest.address
       })
     })
 
     describe('fetchManifest', () => {
       it('returns an instance of Manifest from a manifest address', async () => {
-        const _manifest = await opal.fetch(address)
+        const _manifest = await welo.fetch(address)
         assert.deepEqual(_manifest.block.cid, manifest.block.cid)
       })
     })
@@ -105,21 +105,21 @@ describe(testName, () => {
       let database: Database
 
       it('returns an instance of Database for a manifest', async () => {
-        const promise = opal.open(manifest)
-        assert.equal(opal.opened.size, 0)
+        const promise = welo.open(manifest)
+        assert.equal(welo.opened.size, 0)
         database = await promise
-        assert.equal(opal.opened.size, 1)
+        assert.equal(welo.opened.size, 1)
       })
 
       it('rejects when opening a database already open', async () => {
-        const promise = opal.open(manifest)
+        const promise = welo.open(manifest)
         await assert.rejects(promise)
       })
 
       it('handles database.close events', async () => {
-        assert.equal(opal.opened.size, 1)
+        assert.equal(welo.opened.size, 1)
         await database.close()
-        assert.equal(opal.opened.size, 0)
+        assert.equal(welo.opened.size, 0)
       })
     })
   })

@@ -1,2 +1,2 @@
-export const protocol: '/opal/replicator/live/1.0.0/' =
-  '/opal/replicator/live/1.0.0/'
+export const protocol: '/opalsnt/replicator/live/1.0.0/' =
+  '/opalsnt/replicator/live/1.0.0/'

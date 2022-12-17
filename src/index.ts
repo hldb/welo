@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { Opal as _Opal } from './opal.js'
+import { Welo as _Welo } from './welo.js'
 
 import { LevelDatastore } from 'datastore-level'
 import { Replicator } from '~replicator/index.js'
@@ -14,15 +14,15 @@ import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
 import { Keyvalue } from '~store/keyvalue/index.js'
 
-_Opal.registry.access.add(StaticAccess)
-_Opal.registry.entry.add(Entry)
-_Opal.registry.identity.add(Identity)
-_Opal.registry.store.add(Keyvalue)
+_Welo.registry.access.add(StaticAccess)
+_Welo.registry.entry.add(Entry)
+_Welo.registry.identity.add(Identity)
+_Welo.registry.store.add(Keyvalue)
 
-_Opal.Datastore = LevelDatastore
-_Opal.Replicator = Replicator
+_Welo.Datastore = LevelDatastore
+_Welo.Replicator = Replicator
 
-export { _Opal as Opal }
+export { _Welo as Welo }
 
 export type { Manifest, Address } from '~manifest/index.js'
 export type { Playable } from '~utils/playable.js'

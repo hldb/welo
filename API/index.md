@@ -8,5 +8,5 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [opal](./opal.md) |  |
+|  [welo](./welo.md) |  |
 

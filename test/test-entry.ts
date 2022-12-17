@@ -26,7 +26,7 @@ describe(testName, () => {
     identities: Datastore,
     keychain: KeyChain
 
-  const expectedProtocol = '/opal/entry/basal'
+  const expectedProtocol = '/opalsnt/entry/basal'
   const name = names.name0
 
   const tag = new Uint8Array()

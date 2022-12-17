@@ -1,5 +1,5 @@
 {
-  "name": "@cypsela/opal",
+  "name": "welo",
   "version": "0.0.1",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "dist/src/index.js",
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cypsela/opal.git"
+    "url": "git+https://github.com/opalsnt/welo.git"
   },
   "keywords": [
     "peer-to-peer",
@@ -32,9 +32,9 @@
   ],
   "author": "tabcat <tabcat00@proton.me>",
   "bugs": {
-    "url": "https://github.com/cypsela/opal/issues"
+    "url": "https://github.com/opalsnt/welo/issues"
   },
-  "homepage": "https://github.com/cypsela/opal#readme",
+  "homepage": "https://github.com/opalsnt/welo#readme",
   "devDependencies": {
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",
