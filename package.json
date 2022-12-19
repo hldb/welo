@@ -12,7 +12,7 @@
   "scripts": {
     "prepare": "ts-patch install -s",
     "lint": "eslint src test",
-    "style": "prettier -w src test && eslint --fix src test",
+    "format": "prettier -w src test && eslint --fix src test",
     "build": "tsc",
     "extract-api": "api-extractor run -c ./config/api-extractor.json -l -v",
     "document-api": "api-documenter markdown -i ./API -o ./API",
