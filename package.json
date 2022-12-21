@@ -1,6 +1,6 @@
 {
   "name": "welo",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -18,11 +18,12 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json ; npm run clean",
-    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp && git checkout -- test/fixtures"
+    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp && git checkout -- test/fixtures",
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/opalsnt/welo.git"
+    "url": "https://github.com/opalsnt/welo.git"
   },
   "keywords": [
     "peer-to-peer",
@@ -52,7 +53,8 @@
     "ts-node": "^10.9.1",
     "ts-patch": "^2.0.2",
     "typescript": "^4.8.4",
-    "typescript-transform-paths": "^3.4.4"
+    "typescript-transform-paths": "^3.4.4",
+    "semantic-release": "^19.0.5"
   },
   "dependencies": {
     "ipfs-core": "^0.17.0",
