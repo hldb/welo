@@ -11,7 +11,7 @@
   "types": "dist/src/index.d.ts",
   "type": "module",
   "files": [
-    "dist"
+    "dist/src"
   ],
   "prettier": "prettier-config-standard",
   "scripts": {
