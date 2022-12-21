@@ -2,6 +2,11 @@
   "name": "welo",
   "version": "0.0.0-development",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
+  "license": "Apache-2.0 OR MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "type": "module",
