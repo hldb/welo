@@ -24,7 +24,6 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
-    "report": "c8 report --reporter=text-lcov > coverage/report.lcov",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp && git checkout -- test/fixtures",
     "semantic-release": "semantic-release"
   },
