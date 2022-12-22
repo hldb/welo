@@ -1,3 +1,7 @@
+[![npm](https://img.shields.io/npm/v/welo?style=flat-square)](https://www.npmjs.com/package/welo)
+[![Codecov](https://img.shields.io/codecov/c/github/opalsnt/welo?style=flat-square)](https://app.codecov.io/gh/opalsnt/welo)
+![node-current](https://img.shields.io/node/v/welo?style=flat-square)
+[![NPM](https://img.shields.io/npm/l/welo?style=flat-square)](./LICENSE)
 
 # welo
 
