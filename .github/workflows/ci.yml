@@ -57,11 +57,10 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
+      - run: npm ci
       # The logic below handles the npm publication:
       # these if statements ensure that a publication only occurs when
       # a new release is created:
-      - run: npm ci
-        if: ${{ steps.release.outputs.release_created }}
       - run: npm publish
         if: ${{ steps.release.outputs.release_created }}
         env:
@@ -69,5 +68,7 @@ jobs:
       - run: |
           npm version `node -p -e "require('./package.json').version"`-`git rev-parse --short HEAD` --no-git-tag-version
           npm publish --tag next
-        if: ${{ !steps.release.outputs.release_created }} # publish rc
+        if: ${{ !steps.release.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         name: release rc
