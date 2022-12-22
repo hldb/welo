@@ -56,7 +56,7 @@ Check out the [API Docs](./API/index.md)
 
 ## License
 
-This project is [dual licensed](./LICENSE) under [MIT](./LICENSE-MIT) and [APACHE 2.0](./LICENSE-APACHE).
+This project is [dual licensed](./LICENSE) under [APACHE-2.0](./LICENSE-APACHE) and [MIT](./LICENSE-MIT).
 
 ## Funding
 
