@@ -57,6 +57,7 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       # The logic below handles the npm publication:
       # these if statements ensure that a publication only occurs when
