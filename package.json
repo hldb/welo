@@ -18,6 +18,7 @@
     "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
     "lint": "eslint src test",
+    "dep-check": "npx depcheck --ignores=~*",
     "format": "prettier -w src test && eslint --fix src test",
     "build": "tsc",
     "extract-api": "api-extractor run -c ./config/api-extractor.json -l -v",
