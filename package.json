@@ -18,6 +18,8 @@
     "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
     "lint": "eslint src test",
+    "dep-check": "npx depcheck --ignores=~*,polendina,ts-node,typescript-transform-paths",
+    "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "build": "tsc",
     "extract-api": "api-extractor run -c ./config/api-extractor.json -l -v",
@@ -45,12 +47,16 @@
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",
     "@types/mocha": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
     "c8": "^7.12.0",
+    "copy-deps": "^1.1.2",
+    "depcheck": "^1.4.3",
     "eslint": "^8.23.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
-    "eslint-import-resolver-typescript": "^3.5.2",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.6.0",
+    "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-tsdoc": "^0.2.17",
-    "json": "^11.0.0",
     "mocha": "^10.1.0",
     "polendina": "^3.1.0",
     "prettier": "^2.7.1",
@@ -61,8 +67,54 @@
     "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
+    "@ipld/dag-cbor": "^8.0.0",
+    "@libp2p/crypto": "^1.0.10",
+    "@libp2p/interface-keys": "^1.0.6",
+    "@libp2p/interface-peer-id": "^1.1.2",
+    "@libp2p/interface-pubsub": "^3.0.4",
+    "@libp2p/interfaces": "^3.1.0",
+    "@libp2p/peer-id": "^1.1.18",
+    "abstract-level": "^1.0.3",
+    "datastore-level": "^9.0.4",
+    "interface-datastore": "^7.0.2",
     "ipfs-core": "^0.17.0",
+    "ipfs-core-types": "^0.13.0",
     "ipld-hashmap": "^2.1.13",
-    "make-dir": "^3.1.0"
+    "it-all": "^2.0.0",
+    "level": "^8.0.0",
+    "libp2p": "^0.40.0",
+    "make-dir": "^3.1.0",
+    "multiformats": "^10.0.3",
+    "p-queue": "^7.3.0",
+    "uint8arrays": "^4.0.2",
+    "wherearewe": "^2.0.1"
+  },
+  "copyDependencies": {
+    "ipfs-core": [
+      "multiformats",
+      "@libp2p/interfaces",
+      "ipfs-core-types",
+      "@ipld/dag-cbor",
+      "interface-datastore",
+      "@libp2p/interface-keys",
+      "libp2p",
+      "@libp2p/interface-peer-id",
+      "@libp2p/peer-id",
+      "uint8arrays",
+      "@libp2p/crypto"
+    ],
+    "datastore-level": [
+      "level",
+      "abstract-level"
+    ],
+    "libp2p": [
+      "@libp2p/interface-pubsub"
+    ],
+    "eslint-config-standard-with-typescript": [
+      "eslint-plugin-import",
+      "@typescript-eslint/eslint-plugin",
+      "eslint-plugin-n",
+      "eslint-plugin-promise"
+    ]
   }
 }
