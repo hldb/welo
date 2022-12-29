@@ -94,46 +94,78 @@ describe(testName, () => {
         peer2.start()
         libp2p3.pubsub.subscribe(topic)
 
+        let listener1, listener2, listener3
         const promise = Promise.all([
           new Promise((resolve) =>
             peer1.addEventListener('peered', resolve, { once: true })
           ),
           new Promise((resolve) =>
             peer2.addEventListener('peered', resolve, { once: true })
-          )
+          ),
+          new Promise<void>((resolve) => {
+            let i: number = 0
+            listener1 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            libp2p1.pubsub.addEventListener(
+              'subscription-change',
+              listener1
+            )
+          }),
+          new Promise<void>((resolve) => {
+            let i: number = 0
+            listener2 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            libp2p2.pubsub.addEventListener(
+              'subscription-change',
+              listener2
+            )
+          }),
+          new Promise<void>((resolve) => {
+            let i: number = 0
+            listener3 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            libp2p3.pubsub.addEventListener(
+              'subscription-change',
+              listener3
+            )
+          })
         ])
 
         assert.equal(peer1.isOpen(), false)
         assert.equal(peer2.isOpen(), false)
 
         await promise
+        libp2p1.pubsub.removeEventListener('subscription-change', listener1)
+        libp2p2.pubsub.removeEventListener('subscription-change', listener2)
+        libp2p3.pubsub.removeEventListener('subscription-change', listener3)
 
         assert.equal(peer1.isOpen(), true)
         assert.equal(peer2.isOpen(), true)
       })
 
       it('emits message when receiving messages from remote peer', async () => {
-        void peer1.publish(new Uint8Array([1]))
-        void peer2.publish(new Uint8Array([2]))
-        void libp2p3.pubsub.publish(topic, new Uint8Array([3]))
-        void (await Promise.all([
+        let listener
+        const promise = Promise.all([
           new Promise((resolve) =>
             peer1.addEventListener('message', resolve, { once: true })
           ),
           new Promise((resolve) =>
             peer2.addEventListener('message', resolve, { once: true })
           ),
-          new Promise((resolve) =>
-            libp2p3.pubsub.addEventListener(
-              'message',
-              () => messages3.length === 2 && resolve(true)
-            )
-          )
-        ]))
+          new Promise((resolve) => {
+            listener = (): void => { messages3.length === 3 && resolve(true) }
+            libp2p3.pubsub.addEventListener('message', listener)
+          })
+        ])
+        void await Promise.all([
+          peer1.publish(new Uint8Array([1])),
+          peer2.publish(new Uint8Array([2])),
+          libp2p3.pubsub.publish(topic, new Uint8Array([3]))
+        ])
+
+        await promise
+        libp2p1.pubsub.removeEventListener('message', listener)
 
         assert.equal(messages1.length, 1)
         assert.equal(messages2.length, 1)
-        assert.equal(messages3.length, 2)
+        assert.equal(messages3.length, 3)
 
         peer1.removeEventListener('message', onMessage1)
         peer2.removeEventListener('message', onMessage2)
