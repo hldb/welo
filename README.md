@@ -5,7 +5,7 @@
 
 # welo
 
-peer-to-peer, collaborative states using [merkle-crdts](https://research.protocol.ai/publications/merkle-crdts-merkle-dags-meet-crdts/).
+[opalescent database](https://github.com/opalsnt) implemented in typescript
 
 Beta Release Tacker: https://github.com/opalsnt/welo/issues/8
 
