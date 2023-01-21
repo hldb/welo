@@ -250,6 +250,7 @@ describe(testName, () => {
 
       it('rejects when invalid direction is given', async () => {
         const direction = 'not a real direction'
+        // @ts-expect-error
         const promise = replica.traverse({ direction })
 
         await assert.rejects(promise)
