@@ -121,7 +121,8 @@
   },
   "include": [
     "src",
-    "test"
+    "test",
+    "benchmark"
   ],
   "exclude": [
     "node_modules",
