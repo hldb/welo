@@ -8,7 +8,6 @@ import type { Blocks } from '~blocks/index.js'
 import { cidstring, parsedcid } from '~utils/index.js'
 import type { EntryInstance, EntryStatic } from '~entry/interface.js'
 import type { IdentityStatic } from '~identity/interface.js'
-import type { AccessInstance } from '~access/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
@@ -50,8 +49,8 @@ export function dagLinks ({
   graph,
   access
 }: {
-  graph: Graph
-  access: AccessInstance
+  graph: { has: (str: string) => boolean | Promise<boolean> }
+  access: { canAppend: (entry: EntryInstance<any>) => boolean | Promise<boolean> }
 }): LinksFunc {
   const seen: Set<string> = new Set()
 
