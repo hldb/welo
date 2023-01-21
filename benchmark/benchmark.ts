@@ -17,14 +17,15 @@ const libp2p = ipfs.libp2p
 const welo = await Welo.create({ ipfs, libp2p, directory: paths.database })
 const db = await welo.open(await welo.determine({ name: '1000' }))
 
+const num = 1000
 /**
  * write 1000 entries
  */
-console.log('writing 1000 entries')
-console.time('wrote 1000 entries')
+console.log(`writing ${num} entries`)
+console.time(`wrote ${num} entries`)
 let timeNew = Date.now()
 let timeOld: number
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < num; i++) {
   if (i % 100 === 0) {
     console.log(`wrote ${i} entries`)
     timeOld = timeNew
@@ -33,7 +34,7 @@ for (let i = 0; i < 1000; i++) {
   }
   await db.replica.write({})
 }
-console.timeEnd('wrote 1000 entries')
+console.timeEnd(`wrote ${num} entries`)
 
 /**
  * descending ordered traversal of entries
