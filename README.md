@@ -8,7 +8,7 @@
 # welo
 
 
-[HLDB](https://github.com/hldb) implemented in typescript
+[HLDB](https://github.com/hldb) implementation in Typescript
 
 Beta Release Tacker: https://github.com/hldb/welo/issues/8
 
