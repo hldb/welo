@@ -3,13 +3,14 @@
 ![node-current](https://img.shields.io/node/v/welo?style=flat-square)
 [![NPM](https://img.shields.io/npm/l/welo?style=flat-square)](./LICENSE)
 
+<img src="https://user-images.githubusercontent.com/36933094/215352217-b9c5aca3-bfdc-46e4-9b42-504e7992fef8.png" alt="welo opal painting" width="400"/>
+
 # welo
+
 
 [HLDB](https://github.com/hldb) implemented in typescript
 
 Beta Release Tacker: https://github.com/hldb/welo/issues/8
-
-![DALL·E 2022-09-27 21 45 51 - cabochon gemstone opal  translucent vibrant multi-color  AAA+ grade  100 carats  macro photography  kaleidoscope inside the opal  ](https://user-images.githubusercontent.com/36933094/203710996-860c60cf-bddf-4c5b-b5c9-5b46d32f076f.png)
 
 ## Install
 
