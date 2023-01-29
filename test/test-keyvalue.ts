@@ -22,7 +22,7 @@ const testName = 'keyvalue'
 
 describe(testName, () => {
   let ipfs: IPFS, blocks: Blocks, identity: Identity, testPaths: TestPaths
-  const expectedProtocol = '/opalsnt/store/keyvalue'
+  const expectedProtocol = '/hldb/store/keyvalue'
   const Datastore = LevelDatastore
 
   const registry = initRegistry()

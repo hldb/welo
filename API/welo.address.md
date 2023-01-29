@@ -14,7 +14,7 @@ export declare class Address
 
 ## Remarks
 
-May also be referred to as the database address. It is a CID with a prefix that says it's an opalsnt manifest.
+May also be referred to as the database address. It is a CID with a prefix that says it's an hldb manifest.
 
 ## Constructors
 

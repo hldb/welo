@@ -5,7 +5,7 @@ import { Address } from '~manifest/address.js'
 
 describe('Address', () => {
   let address: Address
-  const prefix = '/opalsnt/'
+  const prefix = '/hldb/'
   const hash = 'bafyreiewienqflf5skie6c5xlmasqj7ndj24qwt6fxkwqdwzggfmpdmqai'
   const string = prefix + hash
 

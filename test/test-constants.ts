@@ -8,6 +8,6 @@ describe('Constants', () => {
   })
 
   it('exports OPALSNT_PREFIX', () => {
-    assert.equal(constants.OPALSNT_PREFIX, '/opalsnt/')
+    assert.equal(constants.OPALSNT_PREFIX, '/hldb/')
   })
 })

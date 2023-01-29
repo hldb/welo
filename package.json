@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/opalsnt/welo.git"
+    "url": "https://github.com/hldb/welo.git"
   },
   "keywords": [
     "peer-to-peer",
@@ -41,9 +41,9 @@
   ],
   "author": "tabcat <tabcat00@proton.me>",
   "bugs": {
-    "url": "https://github.com/opalsnt/welo/issues"
+    "url": "https://github.com/hldb/welo/issues"
   },
-  "homepage": "https://github.com/opalsnt/welo#readme",
+  "homepage": "https://github.com/hldb/welo#readme",
   "devDependencies": {
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",

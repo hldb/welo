@@ -22,7 +22,7 @@ const parse = function (address: Address | string): CID {
  *
  * @remarks
  * May also be referred to as the database address.
- * It is a CID with a prefix that says it's an opalsnt manifest.
+ * It is a CID with a prefix that says it's an hldb manifest.
  *
  * @public
  */
