@@ -59,4 +59,4 @@ This project is [dual licensed](./LICENSE) under [APACHE-2.0](./LICENSE-APACHE) 
 
 ## Funding
 
-Thanks to [Protocol Labs](https://protocol.io) for Funding this project through a [grant](https://github.com/tabcat/rough-opal).
+Thanks to [Protocol Labs](https://protocol.io) for funding this project through this [grant](https://github.com/tabcat/rough-opal).
