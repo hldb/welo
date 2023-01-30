@@ -10,8 +10,6 @@
 
 [HLDB](https://github.com/hldb) implementation in Typescript
 
-Beta Release Tacker: https://github.com/hldb/welo/issues/8
-
 ## Install
 
 ```bash
