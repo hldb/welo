@@ -1,7 +1,7 @@
 [![npm](https://img.shields.io/npm/v/welo?style=flat-square)](https://www.npmjs.com/package/welo)
 [![Codecov](https://img.shields.io/codecov/c/github/hldb/welo?style=flat-square)](https://app.codecov.io/gh/hldb/welo)
 ![node-current](https://img.shields.io/node/v/welo?style=flat-square)
-[![NPM](https://img.shields.io/npm/l/welo?style=flat-square)](./LICENSE)
+[![NPM](https://img.shields.io/npm/l/welo?color=green&style=flat-square)](./LICENSE)
 [![Matrix](https://img.shields.io/badge/chat-%23hldb%3Amatrix.org-blue?style=flat-square)](https://matrix.to/#/#hldb:matrix.org)
 
 <img src="https://user-images.githubusercontent.com/36933094/215352217-b9c5aca3-bfdc-46e4-9b42-504e7992fef8.png" alt="welo opal painting" width="400"/>
