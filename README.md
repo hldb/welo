@@ -8,6 +8,7 @@
 
 # welo
 
+peer-to-peer collaboration using Merkle-CRDTs
 
 [HLDB](https://github.com/hldb) implementation in Typescript
 
