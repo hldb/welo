@@ -17,6 +17,7 @@
   "scripts": {
     "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
+    "reset": "rm -rf node_modules package-lock.json && npm install",
     "lint": "eslint src test",
     "dep-check": "npx depcheck --ignores=~*,polendina,ts-node,typescript-transform-paths",
     "copy-deps": "npx copy-deps",
