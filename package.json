@@ -27,8 +27,11 @@
     "extract-api": "api-extractor run -c ./api-extractor.json -l -v",
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
-    "test": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
-    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp && git checkout -- test/fixtures"
+    "test:node": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
+    "polendina:page": "polendina dist/test/**/test-*.js --output-dir=./.polendina --page --timeout=5",
+    "test:browser": "npm run build && npm run polendina:page && npm run clean",
+    "test": "npm run test:node && npm run test:browser",
+    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },
   "repository": {
     "type": "git",
