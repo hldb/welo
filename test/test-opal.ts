@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 
@@ -45,13 +45,13 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Welo.registry.access)
-      assert.ok(Welo.registry.entry)
-      assert.ok(Welo.registry.identity)
-      assert.ok(Welo.registry.store)
-      assert.ok(Welo.Datastore)
-      // assert.ok(Welo.Replicator)
-      assert.ok(Welo.create)
+      assert.isOk(Welo.registry.access)
+      assert.isOk(Welo.registry.entry)
+      assert.isOk(Welo.registry.identity)
+      assert.isOk(Welo.registry.store)
+      assert.isOk(Welo.Datastore)
+      // assert.isOk(Welo.Replicator)
+      assert.isOk(Welo.create)
     })
 
     describe('create', () => {
@@ -70,7 +70,7 @@ describe(testName, () => {
         Welo.Datastore = undefined
 
         const promise = Welo.create({ ipfs, libp2p, directory })
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
 
         Welo.Datastore = Datastore
       })
@@ -81,10 +81,10 @@ describe(testName, () => {
     let manifest: Manifest, address: Address
 
     it('exposes instance properties', () => {
-      assert.ok(welo.stop)
-      assert.ok(welo.determine)
-      assert.ok(welo.fetch)
-      assert.ok(welo.open)
+      assert.isOk(welo.stop)
+      assert.isOk(welo.determine)
+      assert.isOk(welo.fetch)
+      assert.isOk(welo.open)
     })
 
     describe('determineManifest', () => {
@@ -106,20 +106,20 @@ describe(testName, () => {
 
       it('returns an instance of Database for a manifest', async () => {
         const promise = welo.open(manifest)
-        assert.equal(welo.opened.size, 0)
+        assert.strictEqual(welo.opened.size, 0)
         database = await promise
-        assert.equal(welo.opened.size, 1)
+        assert.strictEqual(welo.opened.size, 1)
       })
 
       it('rejects when opening a database already open', async () => {
         const promise = welo.open(manifest)
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
       })
 
       it('handles database.close events', async () => {
-        assert.equal(welo.opened.size, 1)
+        assert.strictEqual(welo.opened.size, 1)
         await database.close()
-        assert.equal(welo.opened.size, 0)
+        assert.strictEqual(welo.opened.size, 0)
       })
     })
   })

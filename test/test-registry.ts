@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 
 import { initRegistry } from '../src/registry.js'
 import { Register } from '~utils/register.js'
@@ -25,27 +25,27 @@ describe(testName, () => {
 
   describe('Instance', () => {
     it('exposes instance properties', () => {
-      assert.ok(register.registered)
-      assert.equal(register.starKey, Symbol.for('*'))
+      assert.isOk(register.registered)
+      assert.strictEqual(register.starKey, Symbol.for('*'))
     })
 
     describe('.add', () => {
       it('registers an initial component', () => {
         register.add(components.one)
-        assert.equal(
+        assert.strictEqual(
           register.registered.get(components.one.protocol),
           components.one
         )
-        assert.equal(register.star, components.one)
+        assert.strictEqual(register.star, components.one)
       })
 
       it('registers a second component as star', () => {
         register.add(components.two, true)
-        assert.equal(
+        assert.strictEqual(
           register.registered.get(components.two.protocol),
           components.two
         )
-        assert.equal(register.star, components.two)
+        assert.strictEqual(register.star, components.two)
       })
 
       it('fails to re-register a component', () => {
@@ -59,7 +59,7 @@ describe(testName, () => {
 
     describe('.get', () => {
       it('grabs an existing component', () => {
-        assert.equal(register.get(components.one.protocol), components.one)
+        assert.strictEqual(register.get(components.one.protocol), components.one)
       })
 
       it('fails to grab a non-existent component', () => {
@@ -72,12 +72,12 @@ describe(testName, () => {
 
       it('sets an alias for an existing component', () => {
         register.alias(components.one.protocol, alias)
-        assert.equal(register.get(alias), components.one)
+        assert.strictEqual(register.get(alias), components.one)
       })
 
       it('sets a component to star', () => {
         register.alias(components.one.protocol, register.starKey)
-        assert.equal(register.star, components.one)
+        assert.strictEqual(register.star, components.one)
       })
 
       it('fails to set an alias for a non-existent component', () => {
@@ -87,7 +87,7 @@ describe(testName, () => {
 
     describe('.star', () => {
       it('grabs the star component', () => {
-        assert.equal(register.star, components.one)
+        assert.strictEqual(register.star, components.one)
       })
 
       it('fails to grab non-existent star component', () => {
@@ -101,9 +101,9 @@ describe(testName, () => {
 describe('initRegistry', () => {
   it('returns an empty registry', () => {
     const registry = initRegistry()
-    assert.equal(registry.store.constructor, Register)
-    assert.equal(registry.access.constructor, Register)
-    assert.equal(registry.entry.constructor, Register)
-    assert.equal(registry.identity.constructor, Register)
+    assert.strictEqual(registry.store.constructor, Register)
+    assert.strictEqual(registry.access.constructor, Register)
+    assert.strictEqual(registry.entry.constructor, Register)
+    assert.strictEqual(registry.identity.constructor, Register)
   })
 })

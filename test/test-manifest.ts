@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import type { BlockView } from 'multiformats/interface'
 
@@ -56,33 +56,33 @@ describe(testName, () => {
     describe('.create', () => {
       it('returns a manifest', async () => {
         manifest = await Manifest.create(config)
-        // assert.equal(
+        // assert.strictEqual(
         //   manifest.block.cid.toString(),
         //   'bafyreidaqbln54tc6zg2n2oylgx7l5nqnbua7lelsvg3zuoxadr4rqvfiq'
         // )
-        assert.equal(manifest.meta, undefined)
+        assert.strictEqual(manifest.meta, undefined)
         assert.deepEqual(manifest.getTag(), manifest.block.cid.bytes)
       })
 
       it('returns a manifest with a meta field', async () => {
         const meta = 'meta'
         const _manifest = await Manifest.create({ ...config, meta })
-        // assert.equal(
+        // assert.strictEqual(
         //   _manifest.block.cid.toString(),
         //   'bafyreigyn3jgyyzntuaefrurwqksnbjfzuocgayfnryttnx2hemr2vkrty'
         // )
-        assert.equal(_manifest.meta, meta)
+        assert.strictEqual(_manifest.meta, meta)
         assert.deepEqual(_manifest.getTag(), _manifest.block.cid.bytes)
       })
 
       it('returns a manifest with a tag field', async () => {
         const tag = new Uint8Array()
         const _manifest = await Manifest.create({ ...config, tag })
-        // assert.equal(
+        // assert.strictEqual(
         //   _manifest.block.cid.toString(),
         //   'bafyreiajfis5gnuv5eep36ybb4u6u3pophafqcddx3hqgzg2hvpd2er6om'
         // )
-        assert.equal(_manifest.meta, undefined)
+        assert.strictEqual(_manifest.meta, undefined)
         assert.deepEqual(_manifest.tag, tag)
         assert.deepEqual(_manifest.getTag(), tag)
       })
@@ -106,14 +106,14 @@ describe(testName, () => {
       //   await blocks.put(block)
       //   const address = new Address(block.cid)
       //   const promise = Manifest.fetch({ blocks, address })
-      //   await assert.rejects(promise)
+      //   await assert.isRejected(promise)
       // })
     })
 
     describe('.asManifest', () => {
       it('returns the same instance if possible', () => {
         const _manifest = Manifest.asManifest(manifest)
-        assert.equal(_manifest, manifest)
+        assert.strictEqual(_manifest, manifest)
       })
 
       it('returns a new instance if necessary', () => {
@@ -125,33 +125,33 @@ describe(testName, () => {
         const _manifest = Manifest.asManifest({
           block: false as unknown as BlockView<any>
         })
-        assert.equal(_manifest, null)
+        assert.strictEqual(_manifest, null)
       })
     })
 
     describe('.getComponents', () => {
       it('returns the components for the manifest', () => {
         const components = getComponents(registry, manifest)
-        assert.equal(components.Store, Keyvalue)
-        assert.equal(components.Access, StaticAccess)
-        assert.equal(components.Entry, Entry)
-        assert.equal(components.Identity, Identity)
+        assert.strictEqual(components.Store, Keyvalue)
+        assert.strictEqual(components.Access, StaticAccess)
+        assert.strictEqual(components.Entry, Entry)
+        assert.strictEqual(components.Identity, Identity)
       })
     })
   })
 
   describe('Instance', () => {
     it('exposes instance properties', () => {
-      assert.ok(manifest.block)
-      // assert.ok(manifest.version)
-      assert.ok(manifest.name)
-      assert.ok(manifest.store)
-      assert.ok(manifest.access)
-      assert.ok(manifest.entry)
-      assert.ok(manifest.identity)
-      assert.ok(manifest.tag === undefined)
-      assert.ok(manifest.getTag)
-      assert.ok(manifest.address)
+      assert.isOk(manifest.block)
+      // assert.isOk(manifest.version)
+      assert.isOk(manifest.name)
+      assert.isOk(manifest.store)
+      assert.isOk(manifest.access)
+      assert.isOk(manifest.entry)
+      assert.isOk(manifest.identity)
+      assert.isOk(manifest.tag === undefined)
+      assert.isOk(manifest.getTag)
+      assert.isOk(manifest.address)
       // have to make some properties not enumberable again
       // assert.deepEqual({ ...manifest }, config);
       assert.deepEqual(manifest.address, new Address(manifest.block.cid))

@@ -1,5 +1,5 @@
 import path from 'path'
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 
@@ -66,7 +66,7 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Database.open)
+      assert.isOk(Database.open)
     })
 
     describe('open', () => {
@@ -89,27 +89,27 @@ describe(testName, () => {
 
   describe('instance', () => {
     it('exposes instance properties', () => {
-      assert.ok(database.blocks)
-      assert.ok(database.identity)
-      assert.ok(database.replica)
-      assert.ok(database.manifest)
-      assert.ok(database.store)
-      assert.ok(database.access)
-      assert.ok(database.Entry)
-      assert.ok(database.Identity)
+      assert.isOk(database.blocks)
+      assert.isOk(database.identity)
+      assert.isOk(database.replica)
+      assert.isOk(database.manifest)
+      assert.isOk(database.store)
+      assert.isOk(database.access)
+      assert.isOk(database.Entry)
+      assert.isOk(database.Identity)
       // see about doing this with generics
-      // assert.ok(database.put);
-      // assert.ok(database.del);
-      // assert.ok(database.get);
-      assert.ok(database.events)
-      assert.ok(database.close)
+      // assert.isOk(database.put);
+      // assert.isOk(database.del);
+      // assert.isOk(database.get);
+      assert.isOk(database.events)
+      assert.isOk(database.close)
     })
 
     describe('close', () => {
       it('resets the database state', async () => {
-        assert.equal(database.isStarted(), true)
+        assert.strictEqual(database.isStarted(), true)
         await database.close()
-        assert.equal(database.isStarted(), false)
+        assert.strictEqual(database.isStarted(), false)
       })
     })
   })

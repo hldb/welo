@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import { LevelDatastore } from 'datastore-level'
@@ -102,23 +102,23 @@ describe(testName, () => {
     const payload = {}
 
     it('exposes instance properties', () => {
-      assert.ok(replica.manifest)
-      assert.ok(replica.blocks)
-      assert.ok(replica.access)
-      assert.ok(replica.identity)
-      assert.ok(replica.Entry)
-      assert.ok(replica.Identity)
-      assert.ok(replica.events)
-      assert.ok(replica.heads)
-      assert.ok(replica.tails)
-      assert.ok(replica.missing)
-      assert.ok(replica.denied)
-      assert.ok(replica.size)
-      assert.ok(replica.traverse)
-      assert.ok(replica.has)
-      assert.ok(replica.known)
-      assert.ok(replica.add)
-      assert.ok(replica.write)
+      assert.isOk(replica.manifest)
+      assert.isOk(replica.blocks)
+      assert.isOk(replica.access)
+      assert.isOk(replica.identity)
+      assert.isOk(replica.Entry)
+      assert.isOk(replica.Identity)
+      assert.isOk(replica.events)
+      assert.isOk(replica.heads)
+      assert.isOk(replica.tails)
+      assert.isOk(replica.missing)
+      assert.isOk(replica.denied)
+      assert.isOk(replica.size)
+      assert.isOk(replica.traverse)
+      assert.isOk(replica.has)
+      assert.isOk(replica.known)
+      assert.isOk(replica.add)
+      assert.isOk(replica.write)
     })
 
     describe('add', () => {
@@ -128,15 +128,15 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.equal(await replica.size(), 1)
-        assert.equal(await replica.has(cid), true)
-        assert.equal(await replica.known(cid), true)
-        assert.equal(await replica.heads.has(cidstring(cid)), true)
-        assert.equal(await replica.heads.size(), 1)
-        assert.equal(await replica.tails.has(cidstring(cid)), true)
-        assert.equal(await replica.tails.size(), 1)
-        assert.equal(await replica.missing.size(), 0)
-        assert.equal(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.size(), 1)
+        assert.strictEqual(await replica.has(cid), true)
+        assert.strictEqual(await replica.known(cid), true)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.tails.size(), 1)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
 
         await stop(replica)
       })
@@ -165,15 +165,15 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.equal(await replica.size(), 0)
-        assert.equal(await replica.has(cid), false)
-        assert.equal(await replica.known(cid), false)
-        assert.equal(await replica.heads.has(cidstring(cid)), false)
-        assert.equal(await replica.heads.size(), 0)
-        assert.equal(await replica.tails.has(cidstring(cid)), false)
-        assert.equal(await replica.tails.size(), 0)
-        assert.equal(await replica.missing.size(), 0)
-        assert.equal(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.size(), 0)
+        assert.strictEqual(await replica.has(cid), false)
+        assert.strictEqual(await replica.known(cid), false)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.tails.size(), 0)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
 
         await stop(replica)
       })
@@ -195,15 +195,15 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.equal(await replica.size(), 0)
-        assert.equal(await replica.has(cid), false)
-        assert.equal(await replica.known(cid), false)
-        assert.equal(await replica.heads.has(cidstring(cid)), false)
-        assert.equal(await replica.heads.size(), 0)
-        assert.equal(await replica.tails.has(cidstring(cid)), false)
-        assert.equal(await replica.tails.size(), 0)
-        assert.equal(await replica.missing.size(), 0)
-        assert.equal(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.size(), 0)
+        assert.strictEqual(await replica.has(cid), false)
+        assert.strictEqual(await replica.known(cid), false)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.tails.size(), 0)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
 
         await stop(replica)
       })
@@ -216,15 +216,15 @@ describe(testName, () => {
         const cid = entry.cid
         cids.push(cid)
 
-        assert.equal(await replica.size(), 1)
-        assert.equal(await replica.has(cid), true)
-        assert.equal(await replica.known(cid), true)
-        assert.equal(await replica.heads.has(cidstring(cid)), true)
-        assert.equal(await replica.heads.size(), 1)
-        assert.equal(await replica.tails.has(cidstring(cid)), true)
-        assert.equal(await replica.tails.size(), 1)
-        assert.equal(await replica.missing.size(), 0)
-        assert.equal(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.size(), 1)
+        assert.strictEqual(await replica.has(cid), true)
+        assert.strictEqual(await replica.known(cid), true)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.tails.size(), 1)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
       })
     })
 
@@ -253,7 +253,7 @@ describe(testName, () => {
         // @ts-expect-error
         const promise = replica.traverse({ direction })
 
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
       })
     })
 
@@ -267,7 +267,7 @@ describe(testName, () => {
         const storage = await getDatastore(Datastore, testPaths.replica)
         await storage.open()
 
-        assert.equal(await storage.has(rootHashKey), true)
+        assert.strictEqual(await storage.has(rootHashKey), true)
 
         assert.deepEqual(decodedcid(await storage.get(rootHashKey)), block.cid)
         await storage.close()
@@ -288,15 +288,15 @@ describe(testName, () => {
         })
         await start(replica)
 
-        assert.equal(await replica.size(), 1)
-        assert.equal(await replica.has(cid), true)
-        assert.equal(await replica.known(cid), true)
-        assert.equal(await replica.heads.has(cidstring(cid)), true)
-        assert.equal(await replica.heads.size(), 1)
-        assert.equal(await replica.tails.has(cidstring(cid)), true)
-        assert.equal(await replica.tails.size(), 1)
-        assert.equal(await replica.missing.size(), 0)
-        assert.equal(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.size(), 1)
+        assert.strictEqual(await replica.has(cid), true)
+        assert.strictEqual(await replica.known(cid), true)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
+        assert.strictEqual(await replica.tails.size(), 1)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
 
         await stop(replica)
       })

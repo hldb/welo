@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
@@ -47,11 +47,11 @@ describe(testName, () => {
     it('exposes instance properties', () => {
       const topic = 'topic'
       const monitor = new Monitor(libp2p1, topic)
-      assert.equal(monitor.libp2p, libp2p1)
-      assert.equal(monitor.topic, topic)
+      assert.strictEqual(monitor.libp2p, libp2p1)
+      assert.strictEqual(monitor.topic, topic)
       assert.deepEqual(monitor.peers, new Set())
-      assert.ok(monitor instanceof Monitor)
-      assert.ok(monitor instanceof EventEmitter<MonitorEvents>)
+      assert.isOk(monitor instanceof Monitor)
+      assert.isOk(monitor instanceof EventEmitter<MonitorEvents>)
     })
 
     describe('events', () => {
@@ -94,12 +94,12 @@ describe(testName, () => {
 
         await promise
 
-        assert.equal(peer1.peers.has(peerIdString(id2)), true)
-        assert.equal(peer2.peers.has(peerIdString(id1)), true)
-        assert.equal(joins1, 1)
-        assert.equal(joins2, 1)
-        assert.equal(updates1, 1)
-        assert.equal(updates2, 1)
+        assert.strictEqual(peer1.peers.has(peerIdString(id2)), true)
+        assert.strictEqual(peer2.peers.has(peerIdString(id1)), true)
+        assert.strictEqual(joins1, 1)
+        assert.strictEqual(joins2, 1)
+        assert.strictEqual(updates1, 1)
+        assert.strictEqual(updates2, 1)
       })
 
       it('emits peer-leave when a peer leaves', async () => {
@@ -107,29 +107,29 @@ describe(testName, () => {
         await new Promise((resolve) =>
           peer1.addEventListener('peer-leave', resolve, { once: true })
         )
-        assert.equal(leaves1, 1)
-        assert.equal(leaves2, 0)
-        assert.equal(updates1, 2)
-        assert.equal(updates2, 1)
+        assert.strictEqual(leaves1, 1)
+        assert.strictEqual(leaves2, 0)
+        assert.strictEqual(updates1, 2)
+        assert.strictEqual(updates2, 1)
 
         peer2.start()
         assert.deepEqual(peer2.peers, new Set([peerIdString(id1)]))
         await new Promise((resolve) =>
           peer1.addEventListener('peer-join', resolve, { once: true })
         )
-        assert.equal(joins1, 2)
-        assert.equal(joins2, 1)
-        assert.equal(updates1, 3)
-        assert.equal(updates2, 1)
+        assert.strictEqual(joins1, 2)
+        assert.strictEqual(joins2, 1)
+        assert.strictEqual(updates1, 3)
+        assert.strictEqual(updates2, 1)
 
         peer1.stop()
         await new Promise((resolve) =>
           peer2.addEventListener('peer-leave', resolve, { once: true })
         )
-        assert.equal(leaves1, 1)
-        assert.equal(leaves2, 1)
-        assert.equal(updates1, 3)
-        assert.equal(updates2, 2)
+        assert.strictEqual(leaves1, 1)
+        assert.strictEqual(leaves2, 1)
+        assert.strictEqual(updates1, 3)
+        assert.strictEqual(updates2, 2)
 
         peer2.stop()
       })

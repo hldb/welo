@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
@@ -132,7 +132,7 @@ describe(testName, () => {
   describe('instance', () => {
     it('exposes instance properties', () => {
       const replicator = replicator1
-      assert.ok(replicator.broadcast)
+      assert.isOk(replicator.broadcast)
     })
 
     before(async () => {

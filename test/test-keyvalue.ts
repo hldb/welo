@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
@@ -52,8 +52,8 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Keyvalue)
-      assert.equal(Keyvalue.protocol, expectedProtocol)
+      assert.isOk(Keyvalue)
+      assert.strictEqual(Keyvalue.protocol, expectedProtocol)
     })
   })
 
@@ -102,13 +102,13 @@ describe(testName, () => {
     })
 
     it('exposes instance properties', () => {
-      assert.ok(keyvalue.start)
-      assert.ok(keyvalue.stop)
-      // assert.ok(keyvalue.events)
-      assert.ok(keyvalue.index)
-      assert.ok(keyvalue.creators)
-      assert.ok(keyvalue.selectors)
-      assert.ok(keyvalue.latest)
+      assert.isOk(keyvalue.start)
+      assert.isOk(keyvalue.stop)
+      // assert.isOk(keyvalue.events)
+      assert.isOk(keyvalue.index)
+      assert.isOk(keyvalue.creators)
+      assert.isOk(keyvalue.selectors)
+      assert.isOk(keyvalue.latest)
     })
 
     describe('update', () => {
@@ -119,7 +119,7 @@ describe(testName, () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(await keyvalue.selectors.get(index)(key), value)
+        assert.strictEqual(await keyvalue.selectors.get(index)(key), value)
       })
 
       it('deletes a key value pair', async () => {
@@ -129,7 +129,7 @@ describe(testName, () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(await keyvalue.selectors.get(index)(key), undefined)
+        assert.strictEqual(await keyvalue.selectors.get(index)(key), undefined)
       })
 
       it('updates a key value pair to new value', async () => {
@@ -139,7 +139,7 @@ describe(testName, () => {
         const index = await keyvalue.latest()
 
         assert.deepEqual(entry.payload, payload)
-        assert.equal(await keyvalue.selectors.get(index)(key), value + 1)
+        assert.strictEqual(await keyvalue.selectors.get(index)(key), value + 1)
       })
     })
 
@@ -150,7 +150,7 @@ describe(testName, () => {
 
         const index = keyvalue.index
 
-        assert.equal(await keyvalue.selectors.get(index)(key), value + 1)
+        assert.strictEqual(await keyvalue.selectors.get(index)(key), value + 1)
       })
     })
   })

@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
@@ -58,25 +58,25 @@ describe(testName, () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.ok(Entry.protocol)
-      assert.ok(Entry.create)
-      assert.ok(Entry.fetch)
-      assert.ok(Entry.asEntry)
-      assert.ok(Entry.verify)
+      assert.isOk(Entry.protocol)
+      assert.isOk(Entry.create)
+      assert.isOk(Entry.fetch)
+      assert.isOk(Entry.asEntry)
+      assert.isOk(Entry.verify)
     })
 
     it(`.type is equal to '${expectedProtocol}'`, () => {
-      assert.equal(Entry.protocol, expectedProtocol)
+      assert.strictEqual(Entry.protocol, expectedProtocol)
     })
 
     it('.create returns a new entry', async () => {
       entry = await Entry.create({ identity, tag, payload, next, refs })
-      assert.equal(entry.identity, identity)
+      assert.strictEqual(entry.identity, identity)
       assert.deepEqual(entry.tag, tag)
       assert.deepEqual(entry.payload, payload)
       assert.deepEqual(entry.next, next)
       assert.deepEqual(entry.refs, refs)
-      assert.equal(
+      assert.strictEqual(
         entry.cid.toString(base32),
         'bafyreifmxzc4qcntuwdc4lw3rukieuzb5n4rbrkirfcwsesmsgbdc6al5i'
       )
@@ -86,7 +86,7 @@ describe(testName, () => {
       await blocks.put(entry.block)
       await blocks.put(identity.block)
       const _entry = await Entry.fetch({ blocks, Identity, cid: entry.cid })
-      assert.notEqual(_entry, entry)
+      assert.notStrictEqual(_entry, entry)
       assert.deepEqual(_entry.block, entry.block)
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
     })
@@ -98,13 +98,13 @@ describe(testName, () => {
       invalidEntry = (await Entry.asEntry({ block, identity })) as Entry
 
       const promise = Entry.fetch({ blocks, Identity, cid: invalidEntry.cid })
-      await assert.rejects(promise)
+      await assert.isRejected(promise)
     })
 
     describe('.asEntry', () => {
       it('returns the same instance if possible', async () => {
         const _entry = await Entry.asEntry(entry)
-        assert.equal(_entry, entry)
+        assert.strictEqual(_entry, entry)
       })
 
       it('returns a new instance if necessary', async () => {
@@ -112,7 +112,7 @@ describe(testName, () => {
           block: entry.block,
           identity: entry.identity
         })
-        assert.notEqual(_entry, entry)
+        assert.notStrictEqual(_entry, entry)
         assert.deepEqual(_entry, entry)
       })
     })
@@ -120,13 +120,13 @@ describe(testName, () => {
     describe('.verify', () => {
       it('verifies entry with valid signature', async () => {
         const verified = await Entry.verify(entry)
-        assert.equal(verified, true)
+        assert.strictEqual(verified, true)
       })
 
       it('unverifies entry with invalid signature', async () => {
         const _entry = invalidEntry
         const verified = await Entry.verify(_entry)
-        assert.equal(verified, false)
+        assert.strictEqual(verified, false)
       })
 
       it('unverifies entry with mismatched identity', async () => {
@@ -141,25 +141,25 @@ describe(testName, () => {
           identity
         })) as Entry
         const verified = await Entry.verify(_entry)
-        assert.equal(verified, false)
+        assert.strictEqual(verified, false)
       })
     })
   })
 
   describe('Instance', () => {
     it('exposes instance properties', async () => {
-      assert.ok(entry.block)
-      assert.ok(entry.cid)
-      assert.ok(entry.identity)
-      assert.ok(entry.auth)
-      assert.ok(entry.sig)
-      assert.ok(entry.tag)
-      assert.ok(entry.payload)
-      assert.ok(entry.next)
-      assert.ok(entry.refs)
-      assert.equal(entry.cid, entry.block.cid)
-      assert.equal(entry.auth, entry.block.value.auth)
-      assert.equal(entry.sig, entry.block.value.sig)
+      assert.isOk(entry.block)
+      assert.isOk(entry.cid)
+      assert.isOk(entry.identity)
+      assert.isOk(entry.auth)
+      assert.isOk(entry.sig)
+      assert.isOk(entry.tag)
+      assert.isOk(entry.payload)
+      assert.isOk(entry.next)
+      assert.isOk(entry.refs)
+      assert.strictEqual(entry.cid, entry.block.cid)
+      assert.strictEqual(entry.auth, entry.block.value.auth)
+      assert.strictEqual(entry.sig, entry.block.value.sig)
       const data = await Blocks.decode<EntryData>({
         bytes: entry.block.value.data
       })

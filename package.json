@@ -51,9 +51,13 @@
   "devDependencies": {
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",
+    "@types/chai": "^4.3.4",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "c8": "^7.12.0",
+    "chai": "^4.3.7",
+    "chai-as-promised": "^7.1.1",
     "copy-deps": "^1.1.2",
     "depcheck": "^1.4.3",
     "eslint": "^8.23.0",

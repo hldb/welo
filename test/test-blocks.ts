@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import { CID } from 'multiformats/cid'
 import { encode } from 'multiformats/block'
@@ -28,8 +28,8 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.ok(Blocks.encode)
-      assert.ok(Blocks.decode)
+      assert.isOk(Blocks.encode)
+      assert.isOk(Blocks.decode)
     })
 
     describe('encode', () => {
@@ -39,7 +39,7 @@ describe(testName, () => {
         assert.deepEqual(block.value, value)
         assert.deepEqual(block.bytes, bytes)
         assert.deepEqual(block.cid, cid)
-        assert.equal(block.cid.code, code)
+        assert.strictEqual(block.cid.code, code)
       })
     })
 
@@ -50,7 +50,7 @@ describe(testName, () => {
         assert.deepEqual(block.value, value)
         assert.deepEqual(block.bytes, bytes)
         assert.deepEqual(block.cid, cid)
-        assert.equal(block.cid.code, code)
+        assert.strictEqual(block.cid.code, code)
       })
     })
   })
@@ -69,28 +69,28 @@ describe(testName, () => {
     })
 
     it('exposes instance properties', () => {
-      assert.ok(blocks.get)
-      assert.ok(blocks.put)
-      assert.ok(blocks.encode)
-      assert.ok(blocks.decode)
-      assert.equal(blocks.encode, Blocks.encode)
-      assert.equal(blocks.decode, Blocks.decode)
+      assert.isOk(blocks.get)
+      assert.isOk(blocks.put)
+      assert.isOk(blocks.encode)
+      assert.isOk(blocks.decode)
+      assert.strictEqual(blocks.encode, Blocks.encode)
+      assert.strictEqual(blocks.decode, Blocks.decode)
     })
 
     describe('put', () => {
       it('returns a block from a cid', async () => {
         const cid: CID<Uint8Array> = await blocks.put(block)
 
-        assert.ok(cid instanceof CID)
+        assert.isOk(cid instanceof CID)
         assert.deepEqual(cid, block.cid)
-        assert.equal(cid.code, code)
-        assert.equal(cid.version, 1)
+        assert.strictEqual(cid.code, code)
+        assert.strictEqual(cid.version, 1)
       })
 
       it('rejects if not ipfs instance provided', async () => {
         const _blocks = new Blocks(undefined as unknown as IPFS)
         const promise = _blocks.put(block)
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
       })
     })
 
@@ -101,13 +101,13 @@ describe(testName, () => {
         assert.deepEqual(block.value, value)
         assert.deepEqual(new Uint8Array(block.bytes), bytes)
         assert.deepEqual(block.cid, cid)
-        assert.equal(block.cid.code, code)
+        assert.strictEqual(block.cid.code, code)
       })
 
       it('rejects if not ipfs instance provided', async () => {
         const _blocks = new Blocks(undefined as unknown as IPFS)
         const promise = _blocks.get(cid)
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
       })
     })
   })

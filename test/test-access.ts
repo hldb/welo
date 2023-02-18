@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { base32 } from 'multiformats/bases/base32'
 import { start } from '@libp2p/interfaces/startable'
 
@@ -58,8 +58,8 @@ describe(testName, () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.equal(Access.protocol, protocol)
-      assert.equal(Access.protocol, '/hldb/access/static')
+      assert.strictEqual(Access.protocol, protocol)
+      assert.strictEqual(Access.protocol, '/hldb/access/static')
     })
 
     describe('.open', () => {
@@ -70,7 +70,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         await start(access)
-        assert.equal(access.manifest, manifest)
+        assert.strictEqual(access.manifest, manifest)
         assert.deepEqual(access.write, new Set([base32.encode(identity.id)]))
       })
 
@@ -81,7 +81,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         await start(access)
-        assert.equal(access.manifest, manifest)
+        assert.strictEqual(access.manifest, manifest)
         assert.deepEqual(access.write, new Set(anyaccess.config.write))
       })
 
@@ -92,7 +92,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         const promise = access.start()
-        await assert.rejects(promise)
+        await assert.isRejected(promise)
       })
     })
   })
@@ -105,7 +105,7 @@ describe(testName, () => {
       })
       const access = new Access({ manifest })
       await start(access)
-      assert.equal(access.manifest, manifest)
+      assert.strictEqual(access.manifest, manifest)
       assert.deepEqual(access.write, new Set([base32.encode(identity.id)]))
     })
 
@@ -117,7 +117,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         await start(access)
-        assert.equal(await access.canAppend(entry), true)
+        assert.strictEqual(await access.canAppend(entry), true)
       })
 
       it('returns true if wildcard has write access', async () => {
@@ -127,7 +127,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         await start(access)
-        assert.equal(await access.canAppend(entry), true)
+        assert.strictEqual(await access.canAppend(entry), true)
       })
 
       it('returns false if identity has no write access', async () => {
@@ -137,7 +137,7 @@ describe(testName, () => {
         })
         const access = new Access({ manifest })
         await start(access)
-        assert.equal(await access.canAppend(entry), false)
+        assert.strictEqual(await access.canAppend(entry), false)
       })
     })
   })

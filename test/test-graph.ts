@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid.js'
 import { start } from '@libp2p/interfaces/startable'
@@ -58,15 +58,15 @@ describe(testName, () => {
     describe('constructor', () => {
       it('returns instance', () => {
         const graph = new Graph({ blocks })
-        assert.equal(graph.blocks, blocks)
-        assert.equal(graph._root, null)
+        assert.strictEqual(graph.blocks, blocks)
+        assert.strictEqual(graph._root, null)
       })
 
       it('returns instance using provided root', () => {
         // const root = {}
         // const graph = new Graph({ blocks, root })
-        // assert.equal(graph.blocks, blocks)
-        // assert.equal(graph._root, root)
+        // assert.strictEqual(graph.blocks, blocks)
+        // assert.strictEqual(graph._root, root)
       })
     })
   })
@@ -75,25 +75,25 @@ describe(testName, () => {
     it('exposes instance properties', async () => {
       const graph = new Graph({ blocks })
 
-      assert.equal(graph._root, null)
-      assert.equal(graph._state, null)
-      assert.ok(graph.known)
-      assert.ok(graph.get)
-      assert.ok(graph.has)
-      assert.ok(graph.size)
-      assert.ok(graph.add)
-      assert.ok(graph.miss)
-      assert.ok(graph.deny)
+      assert.strictEqual(graph._root, null)
+      assert.strictEqual(graph._state, null)
+      assert.isOk(graph.known)
+      assert.isOk(graph.get)
+      assert.isOk(graph.has)
+      assert.isOk(graph.size)
+      assert.isOk(graph.add)
+      assert.isOk(graph.miss)
+      assert.isOk(graph.deny)
 
       await start(graph)
 
-      assert.ok(graph.state)
-      assert.ok(graph.root)
-      assert.ok(graph.nodes)
-      assert.ok(graph.heads)
-      assert.ok(graph.tails)
-      assert.ok(graph.missing)
-      assert.ok(graph.denied)
+      assert.isOk(graph.state)
+      assert.isOk(graph.root)
+      assert.isOk(graph.nodes)
+      assert.isOk(graph.heads)
+      assert.isOk(graph.tails)
+      assert.isOk(graph.missing)
+      assert.isOk(graph.denied)
     })
 
     describe('add', () => {
@@ -106,18 +106,18 @@ describe(testName, () => {
 
         await graph.add(cid, out)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 1)
         assert.deepEqual(await graph.get(cid), muteNode())
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('adds a cid to a graph and references an unknown node', async () => {
@@ -129,8 +129,8 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           muteNode({ out: new Set([missing[0].toString()]) })
@@ -140,16 +140,16 @@ describe(testName, () => {
           missingNode({ in: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(missing[0].toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(missing[0].toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('adds a cid to a graph and references an existing node', async () => {
@@ -166,8 +166,8 @@ describe(testName, () => {
 
         await graph.add(cid1, out1)
 
-        assert.equal(await graph.size(), 2)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 2)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           muteNode({ in: new Set([cid1.toString()]) })
@@ -177,14 +177,14 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('adds a cid to a graph and references a missing node', async () => {
@@ -200,8 +200,8 @@ describe(testName, () => {
 
         await graph.add(cid1, out0)
 
-        assert.equal(await graph.size(), 2)
-        assert.equal(await graph.nodes.size(), 3)
+        assert.strictEqual(await graph.size(), 2)
+        assert.strictEqual(await graph.nodes.size(), 3)
         assert.deepEqual(
           await graph.get(cid0),
           muteNode({ out: new Set([missing[0].toString()]) })
@@ -215,16 +215,16 @@ describe(testName, () => {
           missingNode({ in: new Set([cid0.toString(), cid1.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 2)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 2)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 2)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 2)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(missing[0].toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(missing[0].toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('adds a cid to a graph and references a denied node', async () => {
@@ -247,8 +247,8 @@ describe(testName, () => {
 
         await graph.add(cid2, out2)
 
-        assert.equal(await graph.size(), 2)
-        assert.equal(await graph.nodes.size(), 3)
+        assert.strictEqual(await graph.size(), 2)
+        assert.strictEqual(await graph.nodes.size(), 3)
         assert.deepEqual(
           await graph.get(cid0),
           deniedNode({ in: new Set([cid1.toString(), cid2.toString()]) })
@@ -262,18 +262,18 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 2)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
-        assert.equal(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 2)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
 
-        assert.equal(await graph.tails.size(), 2)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 2)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 1)
-        assert.equal(await graph.denied.has(cid0.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid0.toString()), true)
       })
 
       it('does not overwrite an added node for an existing cid in a graph', async () => {
@@ -292,22 +292,22 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         const node1 = await graph.get(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 1)
         assert.deepEqual(await graph.get(cid0), node1)
         assert.deepEqual(await graph.get(cid1), node0)
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid0.toString()), true)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a node for a missing cid in a graph', async () => {
@@ -323,8 +323,8 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.size(), 2)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 2)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           muteNode({ in: new Set([cid1.toString()]) })
@@ -334,15 +334,15 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a node for a denied cid in a graph', async () => {
@@ -360,8 +360,8 @@ describe(testName, () => {
         await graph.deny(cid0)
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.size(), 2)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 2)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           muteNode({ in: new Set([cid1.toString()]) })
@@ -371,15 +371,15 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('handles self-reference cids in out', async () => {
@@ -391,19 +391,19 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 1)
         assert.deepEqual(await graph.get(cid0), muteNode())
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
     })
 
@@ -418,11 +418,11 @@ describe(testName, () => {
 
         await graph.miss(cid0)
 
-        assert.equal(await graph.size(), 0)
-        assert.equal(await graph.heads.size(), 0)
-        assert.equal(await graph.tails.size(), 0)
-        assert.equal(await graph.missing.size(), 0)
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.size(), 0)
+        assert.strictEqual(await graph.heads.size(), 0)
+        assert.strictEqual(await graph.tails.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a head node for an existing cid in a graph', async () => {
@@ -439,19 +439,19 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.miss(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 1)
         assert.deepEqual(await graph.get(cid0), muteNode())
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a tail node for an existing cid in a graph', async () => {
@@ -468,8 +468,8 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.miss(cid0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           missingNode({ in: new Set([cid1.toString()]) })
@@ -479,16 +479,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(cid0.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid0.toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('does not overwrite a node for a missing cid in a graph', async () => {
@@ -509,24 +509,24 @@ describe(testName, () => {
 
         await graph.miss(cid0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(await graph.get(cid0), node0)
         assert.deepEqual(
           await graph.get(cid1),
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(cid0.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid0.toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a node for a denied cid in a graph', async () => {
@@ -544,8 +544,8 @@ describe(testName, () => {
         await graph.deny(cid0)
         await graph.miss(cid0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           missingNode({ in: new Set([cid1.toString()]) })
@@ -555,16 +555,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(cid0.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid0.toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('prunes an orphaned missing node from the graph', async () => {
@@ -586,8 +586,8 @@ describe(testName, () => {
         await graph.miss(cid0)
         await graph.miss(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid1),
           missingNode({ in: new Set([cid2.toString()]) })
@@ -597,16 +597,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid1.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(cid1.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid1.toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('prunes an orphaned denied node from the graph', async () => {
@@ -628,8 +628,8 @@ describe(testName, () => {
         await graph.deny(cid0)
         await graph.miss(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid1),
           missingNode({ in: new Set([cid2.toString()]) })
@@ -639,16 +639,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid1.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
-        assert.equal(await graph.missing.size(), 1)
-        assert.equal(await graph.missing.has(cid1.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid1.toString()), true)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
     })
 
@@ -661,11 +661,11 @@ describe(testName, () => {
 
         await graph.deny(cid0)
 
-        assert.equal(await graph.size(), 0)
-        assert.equal(await graph.heads.size(), 0)
-        assert.equal(await graph.tails.size(), 0)
-        assert.equal(await graph.missing.size(), 0)
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.size(), 0)
+        assert.strictEqual(await graph.heads.size(), 0)
+        assert.strictEqual(await graph.tails.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a head node for an existing cid in a graph', async () => {
@@ -682,19 +682,19 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.deny(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 1)
         assert.deepEqual(await graph.get(cid0), muteNode())
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 0)
+        assert.strictEqual(await graph.denied.size(), 0)
       })
 
       it('overwrites a tail node for an existing cid in a graph', async () => {
@@ -711,8 +711,8 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.deny(cid0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           deniedNode({ in: new Set([cid1.toString()]) })
@@ -722,16 +722,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 1)
-        assert.equal(await graph.denied.has(cid0.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid0.toString()), true)
       })
 
       it('overwrites a node for a missing cid in a graph', async () => {
@@ -749,8 +749,8 @@ describe(testName, () => {
         await graph.miss(cid0)
         await graph.deny(cid0)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid0),
           deniedNode({ in: new Set([cid1.toString()]) })
@@ -760,16 +760,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid0.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 1)
-        assert.equal(await graph.denied.has(cid0.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid0.toString()), true)
       })
 
       it('prunes an orphaned missing node from the graph', async () => {
@@ -791,8 +791,8 @@ describe(testName, () => {
         await graph.miss(cid0)
         await graph.deny(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid1),
           deniedNode({ in: new Set([cid2.toString()]) })
@@ -802,16 +802,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid1.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 1)
-        assert.equal(await graph.denied.has(cid1.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid1.toString()), true)
       })
 
       it('prunes an orphaned denied node from the graph', async () => {
@@ -833,8 +833,8 @@ describe(testName, () => {
         await graph.deny(cid0)
         await graph.deny(cid1)
 
-        assert.equal(await graph.size(), 1)
-        assert.equal(await graph.nodes.size(), 2)
+        assert.strictEqual(await graph.size(), 1)
+        assert.strictEqual(await graph.nodes.size(), 2)
         assert.deepEqual(
           await graph.get(cid1),
           deniedNode({ in: new Set([cid2.toString()]) })
@@ -844,16 +844,16 @@ describe(testName, () => {
           muteNode({ out: new Set([cid1.toString()]) })
         )
 
-        assert.equal(await graph.heads.size(), 1)
-        assert.equal(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
-        assert.equal(await graph.missing.size(), 0)
+        assert.strictEqual(await graph.missing.size(), 0)
 
-        assert.equal(await graph.denied.size(), 1)
-        assert.equal(await graph.denied.has(cid1.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid1.toString()), true)
       })
     })
 
@@ -867,39 +867,39 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.heads.has(cid0.toString()), true)
-        assert.equal(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
 
         const cid1 = nodes[1]
         const out1: CID[] = []
 
         await graph.add(cid1, out1)
 
-        assert.equal(await graph.heads.has(cid0.toString()), true)
-        assert.equal(await graph.heads.has(cid1.toString()), true)
-        assert.equal(await graph.heads.size(), 2)
+        assert.strictEqual(await graph.heads.has(cid0.toString()), true)
+        assert.strictEqual(await graph.heads.has(cid1.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 2)
 
         const cid2 = nodes[2]
         const out2 = [cid0, cid1]
 
         await graph.add(cid2, out2)
 
-        assert.equal(await graph.heads.has(cid2.toString()), true)
-        assert.equal(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.has(cid2.toString()), true)
+        assert.strictEqual(await graph.heads.size(), 1)
 
         await graph.miss(cid0)
 
         assert.deepEqual(await graph.heads.has(cid2.toString()), true)
-        assert.equal(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.size(), 1)
 
         await graph.miss(cid1)
 
         assert.deepEqual(await graph.heads.has(cid2.toString()), true)
-        assert.equal(await graph.heads.size(), 1)
+        assert.strictEqual(await graph.heads.size(), 1)
 
         await graph.miss(cid2)
 
-        assert.equal(await graph.heads.size(), 0)
+        assert.strictEqual(await graph.heads.size(), 0)
       })
     })
 
@@ -913,40 +913,40 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
 
         const cid1 = nodes[1]
         const out1: CID[] = []
 
         await graph.add(cid1, out1)
 
-        assert.equal(await graph.tails.size(), 2)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 2)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
         const cid2 = nodes[2]
         const out2 = [cid0, cid1]
 
         await graph.add(cid2, out2)
 
-        assert.equal(await graph.tails.size(), 2)
-        assert.equal(await graph.tails.has(cid0.toString()), true)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 2)
+        assert.strictEqual(await graph.tails.has(cid0.toString()), true)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
         await graph.miss(cid0)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid1.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid1.toString()), true)
 
         await graph.miss(cid1)
 
-        assert.equal(await graph.tails.size(), 1)
-        assert.equal(await graph.tails.has(cid2.toString()), true)
+        assert.strictEqual(await graph.tails.size(), 1)
+        assert.strictEqual(await graph.tails.has(cid2.toString()), true)
 
         await graph.miss(cid2)
 
-        assert.equal(await graph.tails.size(), 0)
+        assert.strictEqual(await graph.tails.size(), 0)
       })
     })
 
@@ -961,8 +961,8 @@ describe(testName, () => {
 
         await graph.add(cid1, out1)
 
-        assert.equal(await graph.missing.has(cid0.toString()), true)
-        assert.equal(await graph.missing.size(), 1)
+        assert.strictEqual(await graph.missing.has(cid0.toString()), true)
+        assert.strictEqual(await graph.missing.size(), 1)
       })
     })
 
@@ -980,8 +980,8 @@ describe(testName, () => {
         await graph.add(cid1, out1)
         await graph.deny(cid0)
 
-        assert.equal(await graph.denied.has(cid0.toString()), true)
-        assert.equal(await graph.denied.size(), 1)
+        assert.strictEqual(await graph.denied.has(cid0.toString()), true)
+        assert.strictEqual(await graph.denied.size(), 1)
       })
     })
 
@@ -996,8 +996,8 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.known(cid0), true)
-        assert.equal(await graph.known(cid1), true)
+        assert.strictEqual(await graph.known(cid0), true)
+        assert.strictEqual(await graph.known(cid1), true)
       })
 
       it('returns false if cid is unknown to graph', async () => {
@@ -1011,7 +1011,7 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.known(cid3), false)
+        assert.strictEqual(await graph.known(cid3), false)
       })
     })
 
@@ -1026,7 +1026,7 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.has(cid0), true)
+        assert.strictEqual(await graph.has(cid0), true)
       })
 
       it('returns false if cid is not a vertex in the graph', async () => {
@@ -1039,7 +1039,7 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.has(cid1), false)
+        assert.strictEqual(await graph.has(cid1), false)
       })
     })
 
@@ -1075,7 +1075,7 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.get(cid2), undefined)
+        assert.strictEqual(await graph.get(cid2), undefined)
       })
     })
 
@@ -1089,7 +1089,7 @@ describe(testName, () => {
 
         await graph.add(cid0, out0)
 
-        assert.equal(await graph.size(), 1)
+        assert.strictEqual(await graph.size(), 1)
       })
     })
   })

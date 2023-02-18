@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
@@ -62,10 +62,10 @@ describe(testName, () => {
   describe('instance', () => {
     it('exposes instance properties', () => {
       const direct = new Direct(libp2p1, id2)
-      assert.equal(direct.libp2p, libp2p1)
-      assert.ok(direct.topic.startsWith(prefix))
-      assert.ok(direct.isOpen)
-      assert.ok(direct instanceof EventEmitter<DirectEvents>)
+      assert.strictEqual(direct.libp2p, libp2p1)
+      assert.isOk(direct.topic.startsWith(prefix))
+      assert.isOk(direct.isOpen)
+      assert.isOk(direct instanceof EventEmitter<DirectEvents>)
     })
 
     describe('events', () => {
@@ -128,16 +128,16 @@ describe(testName, () => {
           })
         ])
 
-        assert.equal(peer1.isOpen(), false)
-        assert.equal(peer2.isOpen(), false)
+        assert.strictEqual(peer1.isOpen(), false)
+        assert.strictEqual(peer2.isOpen(), false)
 
         await promise
         libp2p1.pubsub.removeEventListener('subscription-change', listener1)
         libp2p2.pubsub.removeEventListener('subscription-change', listener2)
         libp2p3.pubsub.removeEventListener('subscription-change', listener3)
 
-        assert.equal(peer1.isOpen(), true)
-        assert.equal(peer2.isOpen(), true)
+        assert.strictEqual(peer1.isOpen(), true)
+        assert.strictEqual(peer2.isOpen(), true)
       })
 
       it('emits message when receiving messages from remote peer', async () => {
@@ -163,9 +163,9 @@ describe(testName, () => {
         await promise
         libp2p1.pubsub.removeEventListener('message', listener)
 
-        assert.equal(messages1.length, 1)
-        assert.equal(messages2.length, 1)
-        assert.equal(messages3.length, 3)
+        assert.strictEqual(messages1.length, 1)
+        assert.strictEqual(messages2.length, 1)
+        assert.strictEqual(messages3.length, 3)
 
         peer1.removeEventListener('message', onMessage1)
         peer2.removeEventListener('message', onMessage2)
@@ -173,8 +173,8 @@ describe(testName, () => {
       })
 
       it('emits unpeered when remote peer is no longer pubsub peered', async () => {
-        assert.equal(peer1.isOpen(), true)
-        assert.equal(peer2.isOpen(), true)
+        assert.strictEqual(peer1.isOpen(), true)
+        assert.strictEqual(peer2.isOpen(), true)
 
         await Promise.all([
           new Promise((resolve) =>
@@ -183,8 +183,8 @@ describe(testName, () => {
           peer1.stop()
         ])
 
-        assert.equal(peer1.isOpen(), false)
-        assert.equal(peer2.isOpen(), false)
+        assert.strictEqual(peer1.isOpen(), false)
+        assert.strictEqual(peer2.isOpen(), false)
 
         await Promise.all([
           new Promise((resolve) =>
@@ -193,8 +193,8 @@ describe(testName, () => {
           peer1.start()
         ])
 
-        assert.equal(peer1.isOpen(), true)
-        assert.equal(peer2.isOpen(), true)
+        assert.strictEqual(peer1.isOpen(), true)
+        assert.strictEqual(peer2.isOpen(), true)
 
         peer2.stop()
         peer2.stop()

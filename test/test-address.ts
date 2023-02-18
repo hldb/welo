@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import { CID } from 'multiformats/cid'
 
 import { Address } from '~manifest/address.js'
@@ -11,31 +11,31 @@ describe('Address', () => {
 
   describe('Class', () => {
     it('exposes class properties', () => {
-      assert.ok(Address.asAddress)
+      assert.isOk(Address.asAddress)
     })
 
     describe('.asAddress', () => {
       it('returns an address from a cid', () => {
         address = Address.asAddress({ cid: CID.parse(hash) }) as Address
-        assert.equal(address.toString(), string)
+        assert.strictEqual(address.toString(), string)
       })
 
       it('returns the same instance if possible', () => {
         const _address = Address.asAddress(address)
-        assert.equal(_address, address)
+        assert.strictEqual(_address, address)
       })
 
       it('returns null if unable to coerce', () => {
-        assert.equal(Address.asAddress(), null)
-        assert.equal(Address.asAddress(''), null)
-        assert.equal(Address.asAddress({ cid: hash }), null)
+        assert.strictEqual(Address.asAddress(), null)
+        assert.strictEqual(Address.asAddress(''), null)
+        assert.strictEqual(Address.asAddress({ cid: hash }), null)
       })
     })
 
     describe('.fromString', () => {
       it('returns address from string', () => {
         address = Address.fromString(string)
-        assert.equal(address.cid.toString(), hash)
+        assert.strictEqual(address.cid.toString(), hash)
       })
 
       it('throws given invalid string', () => {
@@ -48,25 +48,25 @@ describe('Address', () => {
 
   describe('Instance', () => {
     it('exposes instance properties', () => {
-      assert.equal(address.toString(), string)
+      assert.strictEqual(address.toString(), string)
     })
 
     it('.toString', () => {
-      assert.equal(address.toString(), string)
+      assert.strictEqual(address.toString(), string)
     })
 
     describe('.equals', () => {
       it('returns true if the addresses are the same', () => {
         const _address = Address.fromString(string)
-        assert.ok(address.equals(address))
-        assert.ok(address.equals(_address))
+        assert.isOk(address.equals(address))
+        assert.isOk(address.equals(_address))
       })
 
       it('returns false if the addresses are different', () => {
         const _hash =
           'bafyreib2caa6txg46uhpt43bgfnfk3wzfdbz4n2frn2brbrjtjuambgd6i'
         const _address = Address.fromString(prefix + _hash)
-        assert.equal(address.equals(_address), false)
+        assert.strictEqual(address.equals(_address), false)
       })
     })
   })

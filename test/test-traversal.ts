@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import { assert } from './utils/chai.js'
 import type { IPFS } from 'ipfs-core-types'
 import type { CID } from 'multiformats/cid'
 import { start } from '@libp2p/interfaces/startable'
@@ -145,7 +145,7 @@ describe('traversal', () => {
       const cid = entry.cid
 
       const loaded = (await load(cid)) as EntryInstance<any>
-      assert.equal(cidstring(loaded.cid), cidstring(entry.cid)) // one is a buffer and one is a uint8array if not stringified
+      assert.strictEqual(cidstring(loaded.cid), cidstring(entry.cid)) // one is a buffer and one is a uint8array if not stringified
     })
 
     it('returns null if cid resolves to malformed entry', () => {})
@@ -283,7 +283,7 @@ describe('traversal', () => {
 
       const links = graphLinks({ graph, tails, edge })
 
-      await assert.rejects(async () => await links(entry))
+      await assert.isRejected(links(entry))
     })
   })
 
