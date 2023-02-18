@@ -1,5 +1,6 @@
 import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
+import { stop } from '@libp2p/interfaces/startable'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
@@ -40,7 +41,7 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await Promise.all([ipfs1.stop(), ipfs2.stop()])
+    await stop(ipfs1, ipfs2)
   })
 
   describe('instance', () => {
