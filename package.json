@@ -13,6 +13,10 @@
   "files": [
     "dist/src"
   ],
+  "browser": {
+    "path": "path-browserify",
+    "make-dir": false
+  },
   "prettier": "prettier-config-standard",
   "scripts": {
     "prepare": "ts-patch install -s",
@@ -28,8 +32,8 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test:node": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
-    "polendina:page": "polendina dist/test/**/test-*.js --output-dir=./.polendina --page --timeout=5",
-    "test:browser": "npm run build && npm run polendina:page && npm run clean",
+    "polendina": "polendina dist/test/**/test-*.js --output-dir=./.polendina --page",
+    "test:browser": "npm run build && npm run polendina && npm run clean",
     "test": "npm run test:node && npm run test:browser",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },
@@ -67,6 +71,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-tsdoc": "^0.2.17",
     "mocha": "^10.1.0",
+    "path-browserify": "^1.0.1",
     "polendina": "^3.1.0",
     "prettier": "^2.7.1",
     "prettier-config-standard": "^5.0.0",
