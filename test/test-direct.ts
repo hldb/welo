@@ -5,10 +5,11 @@ import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
+import type { Multiaddr } from '@multiformats/multiaddr'
 
 import { Direct, DirectEvents } from '~pubsub/direct.js'
 
-import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 
 const testName = 'pubsub/direct'
@@ -22,7 +23,10 @@ describe(testName, () => {
     libp2p3: Libp2p,
     id1: PeerId,
     id2: PeerId,
-    id3: PeerId
+    // id3: PeerId,
+    addr1: Multiaddr,
+    addr2: Multiaddr,
+    addr3: Multiaddr
 
   const prefix = '/dps/1.0.0/'
 
@@ -43,15 +47,19 @@ describe(testName, () => {
 
     id1 = (await ipfs1.id()).id
     id2 = (await ipfs2.id()).id
-    id3 = (await ipfs3.id()).id
+    // id3 = (await ipfs3.id()).id
+
+    addr1 = await getMultiaddr(ipfs1)
+    addr2 = await getMultiaddr(ipfs2)
+    addr3 = await getMultiaddr(ipfs3)
 
     await Promise.all([
-      ipfs1.swarm.connect(id2),
-      ipfs1.swarm.connect(id3),
-      ipfs2.swarm.connect(id1),
-      ipfs2.swarm.connect(id3),
-      ipfs3.swarm.connect(id1),
-      ipfs3.swarm.connect(id2)
+      ipfs1.swarm.connect(addr2),
+      ipfs1.swarm.connect(addr3),
+      ipfs2.swarm.connect(addr1),
+      ipfs2.swarm.connect(addr3),
+      ipfs3.swarm.connect(addr1),
+      ipfs3.swarm.connect(addr2)
     ])
   })
 

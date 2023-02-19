@@ -3,20 +3,20 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
-import type { PeerId } from '@libp2p/interface-peer-id'
 
 import { LiveReplicator as Replicator } from '~replicator/live/index.js'
 import { Blocks } from '~blocks/index.js'
 import { Replica } from '~replica/index.js'
 import { StaticAccess as Access } from '~access/static/index.js'
 
-import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestRegistry } from './utils/registry.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { Entry } from '~entry/basal/index.js'
 import { Identity } from '~identity/basal/index.js'
+import type { Multiaddr } from '@multiformats/multiaddr'
 
 const testName = 'live-replicator'
 
@@ -25,8 +25,8 @@ describe(testName, () => {
     ipfs2: IPFS,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
-    id1: PeerId,
-    id2: PeerId,
+    addr1: Multiaddr,
+    addr2: Multiaddr,
     replica1: Replica,
     replica2: Replica,
     replicator1: Replicator,
@@ -46,8 +46,8 @@ describe(testName, () => {
     // @ts-expect-error
     libp2p2 = ipfs2.libp2p as Libp2p
 
-    id1 = (await ipfs1.id()).id
-    id2 = (await ipfs2.id()).id
+    addr1 = await getMultiaddr(ipfs1)
+    addr2 = await getMultiaddr(ipfs2)
 
     const Datastore = LevelDatastore
 
@@ -137,7 +137,7 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
-      await Promise.all([ipfs1.swarm.connect(id2), ipfs2.swarm.connect(id1)])
+      await Promise.all([ipfs1.swarm.connect(addr2), ipfs2.swarm.connect(addr1)])
     })
 
     it('replicates replica entries and identities', async () => {

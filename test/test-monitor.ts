@@ -8,8 +8,9 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 import { Monitor, MonitorEvents } from '~pubsub/monitor.js'
 import { peerIdString } from '~utils/index.js'
 
-import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
+import type { Multiaddr } from '@multiformats/multiaddr'
 
 const testName = 'pubsub/monitor'
 
@@ -19,7 +20,9 @@ describe(testName, () => {
     libp2p1: Libp2p,
     libp2p2: Libp2p,
     id1: PeerId,
-    id2: PeerId
+    id2: PeerId,
+    addr1: Multiaddr,
+    addr2: Multiaddr
 
   const sharedTopic = 'shared-topic'
 
@@ -37,7 +40,10 @@ describe(testName, () => {
     id1 = (await ipfs1.id()).id
     id2 = (await ipfs2.id()).id
 
-    await Promise.all([ipfs1.swarm.connect(id2), ipfs2.swarm.connect(id1)])
+    addr1 = await getMultiaddr(ipfs1)
+    addr2 = await getMultiaddr(ipfs2)
+
+    await Promise.all([ipfs1.swarm.connect(addr2), ipfs2.swarm.connect(addr1)])
   })
 
   after(async () => {
