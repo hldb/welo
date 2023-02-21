@@ -76,8 +76,8 @@ export interface DbOpen {
   start?: boolean
   blocks: Blocks
   Replicator: ReplicatorClass
-  ipfs?: IPFS
-  libp2p?: Libp2p
+  ipfs: IPFS
+  libp2p: Libp2p
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessStatic
@@ -86,7 +86,7 @@ export interface DbOpen {
   Store: StoreStatic
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start'> {
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p'> {
   replicator: Replicator
   replica: Replica
   store: StoreInstance
