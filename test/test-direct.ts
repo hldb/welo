@@ -113,26 +113,17 @@ describe(testName, () => {
           new Promise<void>((resolve) => {
             let i: number = 0
             listener1 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p1.pubsub.addEventListener(
-              'subscription-change',
-              listener1
-            )
+            libp2p1.pubsub.addEventListener('subscription-change', listener1)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener2 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p2.pubsub.addEventListener(
-              'subscription-change',
-              listener2
-            )
+            libp2p2.pubsub.addEventListener('subscription-change', listener2)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener3 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p3.pubsub.addEventListener(
-              'subscription-change',
-              listener3
-            )
+            libp2p3.pubsub.addEventListener('subscription-change', listener3)
           })
         ])
 
@@ -158,15 +149,17 @@ describe(testName, () => {
             peer2.addEventListener('message', resolve, { once: true })
           ),
           new Promise((resolve) => {
-            listener = (): void => { messages3.length === 3 && resolve(true) }
+            listener = (): void => {
+              messages3.length === 3 && resolve(true)
+            }
             libp2p3.pubsub.addEventListener('message', listener)
           })
         ])
-        void await Promise.all([
+        void (await Promise.all([
           peer1.publish(new Uint8Array([1])),
           peer2.publish(new Uint8Array([2])),
           libp2p3.pubsub.publish(topic, new Uint8Array([3]))
-        ])
+        ]))
 
         await promise
         libp2p1.pubsub.removeEventListener('message', listener)

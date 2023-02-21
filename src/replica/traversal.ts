@@ -50,7 +50,9 @@ export function dagLinks ({
   access
 }: {
   graph: { has: (str: string) => boolean | Promise<boolean> }
-  access: { canAppend: (entry: EntryInstance<any>) => boolean | Promise<boolean> }
+  access: {
+    canAppend: (entry: EntryInstance<any>) => boolean | Promise<boolean>
+  }
 }): LinksFunc {
   const seen: Set<string> = new Set()
 

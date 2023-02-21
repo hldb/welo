@@ -167,7 +167,9 @@ export class Replica extends Playable {
   }
 
   async traverse (
-    { direction }: { direction: 'descend' | 'ascend' } = { direction: 'descend' }
+    { direction }: { direction: 'descend' | 'ascend' } = {
+      direction: 'descend'
+    }
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
     const Entry = this.Entry

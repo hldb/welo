@@ -5,7 +5,4 @@ chai.use(chaiAsPromised)
 
 export const assert = chai.assert
 
-export {
-  chai,
-  chaiAsPromised
-}
+export { chai, chaiAsPromised }

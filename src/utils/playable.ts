@@ -16,7 +16,12 @@ export class Playable implements Startable {
   private _starting: Promise<void> | null
   private _stopping: Promise<void> | null
 
-  constructor (private readonly lifecycle: { starting: () => Promise<void>, stopping: () => Promise<void> }) {
+  constructor (
+    private readonly lifecycle: {
+      starting: () => Promise<void>
+      stopping: () => Promise<void>
+    }
+  ) {
     this._isStarted = false
     this._starting = null
     this._stopping = null

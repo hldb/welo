@@ -59,7 +59,10 @@ describe(testName, () => {
 
     describe('.get', () => {
       it('grabs an existing component', () => {
-        assert.strictEqual(register.get(components.one.protocol), components.one)
+        assert.strictEqual(
+          register.get(components.one.protocol),
+          components.one
+        )
       })
 
       it('fails to grab a non-existent component', () => {

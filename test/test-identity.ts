@@ -117,7 +117,7 @@ describe(testName, () => {
 
     describe('.asIdentity', () => {
       it('returns the same instance if possible', async () => {
-        const _identity = await Identity.asIdentity(identity) as Identity
+        const _identity = (await Identity.asIdentity(identity)) as Identity
         assert.strictEqual(_identity, identity)
         assert.strictEqual(
           _identity.block.cid.toString(base32),

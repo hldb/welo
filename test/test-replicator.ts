@@ -137,7 +137,10 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
-      await Promise.all([ipfs1.swarm.connect(addr2), ipfs2.swarm.connect(addr1)])
+      await Promise.all([
+        ipfs1.swarm.connect(addr2),
+        ipfs2.swarm.connect(addr1)
+      ])
     })
 
     it('replicates replica entries and identities', async () => {

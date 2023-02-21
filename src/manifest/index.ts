@@ -82,7 +82,10 @@ export class Manifest {
    *
    * @returns
    */
-  static async fetch ({ blocks, address }: Fetch, options?: FetchOptions): Promise<Manifest> {
+  static async fetch (
+    { blocks, address }: Fetch,
+    options?: FetchOptions
+  ): Promise<Manifest> {
     const block: BlockView<ManifestData> = await blocks.get<ManifestData>(
       address.cid,
       options
