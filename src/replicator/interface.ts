@@ -15,4 +15,4 @@ export interface Config {
 
 export interface Replicator extends Playable {}
 
-export type ReplicatorClass = new (props: any) => Replicator
+export type ReplicatorClass = new (config: Config) => Replicator
