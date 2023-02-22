@@ -8,7 +8,6 @@ import type { Playable } from '~utils/playable.js'
 export interface Config {
   ipfs: IPFS
   libp2p: Libp2p
-  web3storage?: any
   replica: Replica
   blocks: Blocks
 }
