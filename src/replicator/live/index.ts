@@ -54,21 +54,13 @@ export class LiveReplicator extends Playable {
   constructor ({
     ipfs,
     libp2p,
-    manifest,
-    blocks,
     replica,
-    access,
-    Entry,
-    Identity
+    blocks
   }: {
     ipfs: IPFS
     libp2p: Libp2p
-    manifest: Manifest
-    blocks: Blocks
     replica: Replica
-    access: AccessInstance
-    Entry: EntryStatic<any>
-    Identity: IdentityStatic<any>
+    blocks: Blocks
   }) {
     const starting = async (): Promise<void> => {
       this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
@@ -100,12 +92,12 @@ export class LiveReplicator extends Playable {
 
     this.ipfs = ipfs
     this.libp2p = libp2p
-    this.manifest = manifest
     this.blocks = blocks
     this.replica = replica
-    this.access = access
-    this.Entry = Entry
-    this.Identity = Identity
+    this.manifest = replica.manifest
+    this.access = replica.access
+    this.Entry = replica.Entry
+    this.Identity = replica.Identity
 
     // this.events = new EventEmitter()
     this.#onPeerJoin = onPeerJoin.bind(this)

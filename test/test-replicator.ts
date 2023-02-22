@@ -103,22 +103,14 @@ describe(testName, () => {
     replicator1 = new Replicator({
       ipfs: ipfs1,
       libp2p: libp2p1,
-      manifest,
       blocks: blocks1,
-      replica: replica1,
-      access,
-      Entry,
-      Identity
+      replica: replica1
     })
     replicator2 = new Replicator({
       ipfs: ipfs2,
       libp2p: libp2p2,
-      manifest,
       blocks: blocks2,
-      replica: replica2,
-      access,
-      Entry,
-      Identity
+      replica: replica2
     })
   })
 
