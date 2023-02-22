@@ -1,6 +1,7 @@
 import type { IPFS } from 'ipfs-core-types'
 import type { Libp2p } from 'libp2p'
 import type { Datastore } from 'interface-datastore'
+import type { Service } from 'web3.storage'
 
 import type { AccessProtocol } from '~access/static/protocol.js'
 import type { EntryProtocol } from '~entry/basal/protocol.js'
@@ -23,6 +24,7 @@ export interface Create {
   identity?: IdentityInstance<any>
   ipfs: IPFS
   libp2p: Libp2p
+  w3?: Service
   start?: boolean
 }
 
@@ -34,6 +36,7 @@ export interface Config {
   keychain: KeyChain
   ipfs: IPFS
   libp2p: Libp2p
+  w3: Service
 }
 
 /** @public */
@@ -78,6 +81,7 @@ export interface DbOpen {
   Replicator: ReplicatorClass
   ipfs: IPFS
   libp2p: Libp2p
+  w3?: Service
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessStatic
@@ -86,7 +90,7 @@ export interface DbOpen {
   Store: StoreStatic
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p'> {
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p' | 'w3'> {
   replicator: Replicator
   replica: Replica
   store: StoreInstance

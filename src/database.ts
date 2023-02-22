@@ -132,6 +132,7 @@ export class Database extends Playable {
       Replicator,
       ipfs,
       libp2p,
+      w3,
       identity,
       blocks,
       Store,
@@ -171,6 +172,7 @@ export class Database extends Playable {
       ...common,
       ipfs,
       libp2p,
+      w3,
       replica
     })
 
