@@ -30,7 +30,7 @@ const rootHashKey = new Key('rootHash')
 
 interface ReplicaEvents {
   write: CustomEvent<undefined>
-  update: CustomEvent<undefined>
+  update: CustomEvent<Array<EntryInstance<any>>>
 }
 
 export class Replica extends Playable {
@@ -229,7 +229,7 @@ export class Replica extends Playable {
     }
 
     if ((await this.graph.size()) - size > 0) {
-      this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+      this.events.dispatchEvent(new CustomEvent('update', { detail: entries }))
     }
   }
 
