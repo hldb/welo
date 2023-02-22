@@ -12,18 +12,20 @@ import { Manifest } from '~manifest/index.js'
 import { initRegistry } from '../src/registry.js'
 import { Blocks } from '~blocks/index.js'
 import { defaultManifest } from '~utils/index.js'
-import { MultiReplicator } from '~replicator/multi.js'
+import { MultiReplicator } from '~replicator/multi/index.js'
 import type { DatastoreClass } from '~utils/datastore.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Libp2p } from 'libp2p'
 
 const testName = 'database'
 
 describe(testName, () => {
   let ipfs: IPFS,
+    libp2p: Libp2p,
     blocks: Blocks,
     database: Database,
     manifest: Manifest,
@@ -44,7 +46,7 @@ describe(testName, () => {
     blocks = new Blocks(ipfs)
 
     const identities = await getTestIdentities(testPaths)
-    const libp2p = await getTestLibp2p(ipfs)
+    libp2p = await getTestLibp2p(ipfs)
 
     identity = await getTestIdentity(identities, libp2p.keychain, testName)
 
@@ -76,6 +78,8 @@ describe(testName, () => {
           Datastore,
           manifest,
           identity,
+          ipfs,
+          libp2p,
           blocks,
           Store,
           Access,

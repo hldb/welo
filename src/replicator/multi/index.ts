@@ -4,8 +4,8 @@ import { Register } from '~utils/register.js'
 import { Playable } from '~utils/playable.js'
 import { Extends } from '~utils/decorators.js'
 
-import { replicatorPrefix } from './prefix.js'
-import type { Replicator, ReplicatorClass, Config } from './interface.js'
+import { replicatorPrefix } from '../prefix.js'
+import type { Replicator, ReplicatorClass, Config } from '../interface.js'
 
 const register = new Register<ReplicatorClass>(replicatorPrefix)
 

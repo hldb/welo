@@ -1,6 +1,6 @@
 // import { Zzzync } from 'zzzync'
 
-import { MultiReplicator } from './multi.js'
+import { MultiReplicator } from './multi/index.js'
 
 // MultiReplicator.modules.push(Zzzync)
 
