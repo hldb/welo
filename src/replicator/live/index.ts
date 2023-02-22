@@ -12,6 +12,7 @@ import { cidstring, parsedcid } from '~utils/index.js'
 import { Playable } from '~utils/playable.js'
 import { Monitor, PeerStatusChangeData } from '~pubsub/monitor.js'
 import { Direct } from '~pubsub/direct.js'
+import { Extends } from '~utils/decorators.js'
 import type { Manifest } from '~manifest/index.js'
 import type { Blocks } from '~blocks/index.js'
 import type { EntryStatic } from '~entry/interface.js'
@@ -26,7 +27,8 @@ import { protocol } from './protocol.js'
 const getSharedChannelTopic = (manifest: Manifest): string =>
   '/hldb/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
 
-export class LiveReplicator extends Playable implements Registrant {
+@Extends<Registrant>()
+export class LiveReplicator extends Playable {
   readonly ipfs: IPFS
   readonly libp2p: Libp2p
   readonly manifest: Manifest
@@ -45,7 +47,7 @@ export class LiveReplicator extends Playable implements Registrant {
   readonly #onReplicaHeadsUpdate: typeof onReplicaHeadsUpdate
   readonly _onHeadsMessage: typeof onHeadsMessage
 
-  get protocol (): typeof protocol {
+  static get protocol (): typeof protocol {
     return protocol
   }
 
