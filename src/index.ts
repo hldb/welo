@@ -7,7 +7,8 @@
 import { Welo as _Welo } from './welo.js'
 
 import { LevelDatastore } from 'datastore-level'
-import { Replicator } from '~replicator/index.js'
+import { MultiReplicator } from '~replicator/multi/index.js'
+import { LiveReplicator } from '~replicator/live/index.js'
 
 import { StaticAccess } from '~access/static/index.js'
 import { Entry } from '~entry/basal/index.js'
@@ -19,8 +20,10 @@ _Welo.registry.entry.add(Entry)
 _Welo.registry.identity.add(Identity)
 _Welo.registry.store.add(Keyvalue)
 
+MultiReplicator.register.add(LiveReplicator)
+
 _Welo.Datastore = LevelDatastore
-_Welo.Replicator = Replicator
+_Welo.Replicator = MultiReplicator
 
 export { _Welo as Welo }
 
