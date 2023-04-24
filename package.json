@@ -90,6 +90,7 @@
     "@libp2p/peer-id": "^2.0.1",
     "abstract-level": "^1.0.3",
     "datastore-level": "^9.0.4",
+    "helia": "^1.0.3",
     "interface-datastore": "^7.0.4",
     "ipfs-core": "^0.18.0",
     "ipfs-core-types": "^0.14.0",
