@@ -81,6 +81,7 @@
     "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
+    "@helia/interface": "^1.0.0",
     "@ipld/dag-cbor": "^9.0.0",
     "@libp2p/crypto": "^1.0.12",
     "@libp2p/interface-keys": "^1.0.7",
