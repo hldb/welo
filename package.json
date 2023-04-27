@@ -92,8 +92,6 @@
     "datastore-level": "^9.0.4",
     "helia": "^1.0.3",
     "interface-datastore": "^7.0.4",
-    "ipfs-core": "^0.18.0",
-    "ipfs-core-types": "^0.14.0",
     "ipld-hashmap": "^2.1.13",
     "it-all": "^2.0.0",
     "level": "^8.0.0",
