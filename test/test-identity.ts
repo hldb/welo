@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
@@ -16,12 +16,12 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'basal identity'
 
 describe(testName, () => {
-  let ipfs: IPFS,
+  let ipfs: Helia,
     blocks: Blocks,
     identities: Datastore,
     keychain: KeyChain,
     identity: Identity
-  let tempIpfs: IPFS, tempIdentities: Datastore, tempKeychain: KeyChain
+  let tempIpfs: Helia, tempIdentities: Datastore, tempKeychain: KeyChain
   const expectedProtocol = '/hldb/identity/basal'
   const name = names.name0
   const password = ''

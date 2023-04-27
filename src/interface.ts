@@ -1,4 +1,4 @@
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { Datastore } from 'interface-datastore'
 
@@ -21,7 +21,7 @@ import type { Replicator, ReplicatorClass } from '~replicator/interface'
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
   start?: boolean
 }
@@ -32,7 +32,7 @@ export interface Config {
   blocks: Blocks
   identities: Datastore | null
   keychain: KeyChain
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
 }
 
@@ -76,7 +76,7 @@ export interface DbOpen {
   start?: boolean
   blocks: Blocks
   Replicator: ReplicatorClass
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
   identity: IdentityInstance<any>
   manifest: Manifest

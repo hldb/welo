@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid.js'
 import { start } from '@libp2p/interfaces/startable'
 
@@ -13,7 +13,7 @@ import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 const testName = 'graph'
 
 describe(testName, () => {
-  let ipfs: IPFS, blocks: Blocks
+  let ipfs: Helia, blocks: Blocks
 
   let nodes: CID[], missing: CID[], denied: CID[]
   const initNode = Node.init()

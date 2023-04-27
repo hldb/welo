@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import { CID } from 'multiformats/cid'
 import { encode } from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
@@ -56,7 +56,7 @@ describe(testName, () => {
   })
 
   describe('instance', () => {
-    let ipfs: IPFS, blocks: Blocks
+    let ipfs: Helia, blocks: Blocks
 
     before(async () => {
       const testPaths = getTestPaths(tempPath, testName)
@@ -88,7 +88,7 @@ describe(testName, () => {
       })
 
       it('rejects if not ipfs instance provided', async () => {
-        const _blocks = new Blocks(undefined as unknown as IPFS)
+        const _blocks = new Blocks(undefined as unknown as Helia)
         const promise = _blocks.put(block)
         await assert.isRejected(promise)
       })
@@ -105,7 +105,7 @@ describe(testName, () => {
       })
 
       it('rejects if not ipfs instance provided', async () => {
-        const _blocks = new Blocks(undefined as unknown as IPFS)
+        const _blocks = new Blocks(undefined as unknown as Helia)
         const promise = _blocks.get(cid)
         await assert.isRejected(promise)
       })

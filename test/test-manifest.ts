@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
@@ -17,7 +17,7 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'manifest'
 
 describe(testName, () => {
-  let ipfs: IPFS, blocks: Blocks, manifest: Manifest
+  let ipfs: Helia, blocks: Blocks, manifest: Manifest
 
   const registry = initRegistry()
   registry.store.add(Keyvalue)

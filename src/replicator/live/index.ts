@@ -1,7 +1,7 @@
 import all from 'it-all'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { CID } from 'multiformats/cid'
 import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
@@ -29,7 +29,7 @@ const getSharedChannelTopic = (manifest: Manifest): string =>
 
 @Extends<Registrant>()
 export class LiveReplicator extends Playable {
-  readonly ipfs: IPFS
+  readonly ipfs: Helia
   readonly libp2p: Libp2p
   readonly manifest: Manifest
   readonly blocks: Blocks
@@ -57,7 +57,7 @@ export class LiveReplicator extends Playable {
     replica,
     blocks
   }: {
-    ipfs: IPFS
+    ipfs: Helia
     libp2p: Libp2p
     replica: Replica
     blocks: Blocks

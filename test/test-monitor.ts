@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
@@ -15,8 +15,8 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 const testName = 'pubsub/monitor'
 
 describe(testName, () => {
-  let ipfs1: IPFS,
-    ipfs2: IPFS,
+  let ipfs1: Helia,
+    ipfs2: Helia,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
     id1: PeerId,
@@ -33,9 +33,9 @@ describe(testName, () => {
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
     // @ts-expect-error
-    libp2p1 = ipfs1.libp2p as Libp2p
+    libp2p1 = ipfs1.libp2p
     // @ts-expect-error
-    libp2p2 = ipfs2.libp2p as Libp2p
+    libp2p2 = ipfs2.libp2p
 
     id1 = (await ipfs1.id()).id
     id2 = (await ipfs2.id()).id

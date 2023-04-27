@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 
 import { Keyvalue } from '~store/keyvalue/index.js'
 import { Replica } from '~replica/index.js'
@@ -21,7 +21,7 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: IPFS, blocks: Blocks, identity: Identity, testPaths: TestPaths
+  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths
   const expectedProtocol = '/hldb/store/keyvalue'
   const Datastore = LevelDatastore
 

@@ -2,7 +2,7 @@ import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import { LevelDatastore } from 'datastore-level'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Replica } from '~replica/index.js'
@@ -25,8 +25,8 @@ import { getDatastore } from '~utils/datastore.js'
 const testName = 'replica'
 
 describe(testName, () => {
-  let ipfs: IPFS,
-    tempIpfs: IPFS,
+  let ipfs: Helia,
+    tempIpfs: Helia,
     blocks: Blocks,
     replica: Replica,
     manifest: Manifest,

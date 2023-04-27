@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { start } from '@libp2p/interfaces/startable'
 import type { HashMap } from 'ipld-hashmap'
@@ -33,7 +33,7 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'traversal'
 
 describe('traversal', () => {
-  let ipfs: IPFS,
+  let ipfs: Helia,
     blocks: Blocks,
     identity: Identity,
     identity1: Identity,

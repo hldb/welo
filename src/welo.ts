@@ -2,7 +2,7 @@ import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { Datastore } from 'datastore-level'
 
@@ -69,7 +69,7 @@ export class Welo extends Playable {
   private readonly dirs: DirsReturn
   readonly directory: string
 
-  readonly ipfs: IPFS
+  readonly ipfs: Helia
   readonly libp2p: Libp2p
   readonly blocks: Blocks
 
