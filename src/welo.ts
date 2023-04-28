@@ -2,9 +2,8 @@ import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
-import type { Datastore } from 'datastore-level'
 
 import { Manifest, Address } from '~manifest/index.js'
 import { Blocks } from '~blocks/index.js'
@@ -32,10 +31,11 @@ import type {
   Create,
   Determine,
   Events,
-  FetchOptions,
+  // FetchOptions,
   OpenedEmit,
   OpenOptions
 } from './interface.js'
+import type { LevelDatastore } from 'datastore-level'
 
 const registry = initRegistry()
 
@@ -46,7 +46,7 @@ export type {
   Config,
   Create,
   Determine,
-  FetchOptions,
+  // FetchOptions,
   OpenOptions as Options
 }
 
@@ -69,11 +69,11 @@ export class Welo extends Playable {
   private readonly dirs: DirsReturn
   readonly directory: string
 
-  readonly ipfs: IPFS
+  readonly ipfs: Helia
   readonly libp2p: Libp2p
   readonly blocks: Blocks
 
-  readonly identities: Datastore | null
+  readonly identities: LevelDatastore | null
   readonly keychain: KeyChain
 
   readonly identity: IdentityInstance<any>
@@ -142,7 +142,7 @@ export class Welo extends Playable {
     }
 
     let identity: IdentityInstance<any>
-    let identities: Datastore | null = null
+    let identities: LevelDatastore | null = null
 
     if (options.identity != null) {
       identity = options.identity
@@ -223,8 +223,8 @@ export class Welo extends Playable {
    * @param address - the Address of the Manifest to fetch
    * @returns
    */
-  async fetch (address: Address, options: FetchOptions = {}): Promise<Manifest> {
-    return await Manifest.fetch({ blocks: this.blocks, address }, options)
+  async fetch (address: Address): Promise<Manifest> {
+    return await Manifest.fetch({ blocks: this.blocks, address })
   }
 
   /**

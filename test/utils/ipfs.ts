@@ -1,52 +1,23 @@
 import type { Multiaddr } from '@multiformats/multiaddr'
-import * as IPFS from 'ipfs-core'
-import type { IPFS as IPFSType } from 'ipfs-core-types'
-import { isBrowser, isNode } from 'wherearewe'
+import { createHelia } from 'helia'
+import type { Helia } from '@helia/interface'
 import type { TestPaths } from './constants'
+import { createLibp2p } from 'libp2p'
+import { LevelDatastore } from 'datastore-level'
+import { LevelBlockstore } from 'blockstore-level'
 
-let swarmAddrs: string[]
-if (isNode) {
-  swarmAddrs = ['/ip4/127.0.0.1/tcp/0']
-} else if (isBrowser) {
-  swarmAddrs = ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/']
+import { createLibp2pOptions } from './libp2p-options.js'
+
+interface IpfsOptions {
+  repo: string
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const offlineIpfsOptions = (repo: string) => ({
-  repo,
-  offline: true,
-  config: {
-    profile: 'test',
-    Addresses: {
-      Swarm: [],
-      Announce: [],
-      NoAnnounce: [],
-      Delegates: []
-    },
-    Bootstrap: [],
-    Pubsub: {
-      Router: 'gossipsub',
-      Enabled: true
-    }
-  }
+export const offlineIpfsOptions = (repo: string): IpfsOptions => ({
+  repo
 })
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const localIpfsOptions = (repo: string) => ({
-  repo,
-  config: {
-    Addresses: {
-      Swarm: swarmAddrs,
-      Announce: [],
-      NoAnnounce: [],
-      Delegates: []
-    },
-    Bootstrap: [],
-    Pubsub: {
-      Router: 'gossipsub',
-      Enabled: true
-    }
-  }
+export const localIpfsOptions = (repo: string): IpfsOptions => ({
+  repo
 })
 
 type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
@@ -54,12 +25,25 @@ type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 export const getTestIpfs = async (
   testPaths: TestPaths,
   opts: Opts
-): Promise<IPFSType> => {
-  return (await IPFS.create(opts(testPaths.ipfs))) as unknown as IPFSType
+): Promise<Helia> => {
+  const options = opts(testPaths.ipfs)
+
+  const datastore = new LevelDatastore(options.repo + '/data')
+  const blockstore = new LevelBlockstore(options.repo + '/blocks')
+
+  const libp2pOptions = createLibp2pOptions({ datastore })
+
+  const libp2p = await createLibp2p(libp2pOptions)
+
+  return await createHelia({
+    datastore,
+    blockstore,
+    libp2p
+  })
 }
 
-export const getMultiaddr = async (ipfs: IPFSType): Promise<Multiaddr> => {
-  const { addresses } = await ipfs.id()
+export const getMultiaddr = async (ipfs: Helia): Promise<Multiaddr> => {
+  const addresses = ipfs.libp2p.getMultiaddrs()
   if (addresses.length === 0) {
     throw new Error('no addresses available')
   }

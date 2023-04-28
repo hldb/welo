@@ -1,6 +1,4 @@
-import type { IPFS } from 'ipfs-core-types'
 import all from 'it-all'
-import type { Libp2p } from 'libp2p'
 import { dagLinks, loadEntry, traverser } from '~replica/traversal.js'
 import { parsedcid } from '~utils/index.js'
 import { Welo } from '../src/index.js'
@@ -8,7 +6,7 @@ import { getTestPaths, tempPath } from '../test/utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from '../test/utils/ipfs.js'
 
 const paths = getTestPaths(tempPath, 'benchmark')
-const ipfs = await getTestIpfs(paths, offlineIpfsOptions) as (IPFS & { libp2p: Libp2p })
+const ipfs = await getTestIpfs(paths, offlineIpfsOptions)
 if (ipfs.libp2p == null) {
   throw new Error('ipfs.libp2p is not defined')
 }

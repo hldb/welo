@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 
 import { LiveReplicator as Replicator } from '~replicator/live/index.js'
@@ -21,8 +21,8 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 const testName = 'live-replicator'
 
 describe(testName, () => {
-  let ipfs1: IPFS,
-    ipfs2: IPFS,
+  let ipfs1: Helia,
+    ipfs2: Helia,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
     addr1: Multiaddr,
@@ -41,10 +41,8 @@ describe(testName, () => {
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
-    // @ts-expect-error
-    libp2p1 = ipfs1.libp2p as Libp2p
-    // @ts-expect-error
-    libp2p2 = ipfs2.libp2p as Libp2p
+    libp2p1 = ipfs1.libp2p
+    libp2p2 = ipfs2.libp2p
 
     addr1 = await getMultiaddr(ipfs1)
     addr2 = await getMultiaddr(ipfs2)
@@ -116,9 +114,10 @@ describe(testName, () => {
 
   after(async () => {
     await stop(access)
-    await stop(replica1, replica2)
     await stop(replicator1, replicator2)
-    await stop(ipfs1, ipfs2)
+    await stop(replica1, replica2)
+    await stop(ipfs1)
+    await stop(ipfs2)
   })
 
   describe('instance', () => {
@@ -130,8 +129,8 @@ describe(testName, () => {
     before(async () => {
       await start(replicator1, replicator2)
       await Promise.all([
-        ipfs1.swarm.connect(addr2),
-        ipfs2.swarm.connect(addr1)
+        libp2p1.dial(addr2),
+        libp2p2.dial(addr1)
       ])
     })
 

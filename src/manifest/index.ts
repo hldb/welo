@@ -1,7 +1,7 @@
 import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '~blocks/index.js'
-import type { FetchOptions } from '~utils/types.js'
+// import type { FetchOptions } from '~utils/types.js'
 
 import { Address } from './address.js'
 import type {
@@ -83,12 +83,10 @@ export class Manifest {
    * @returns
    */
   static async fetch (
-    { blocks, address }: Fetch,
-    options?: FetchOptions
+    { blocks, address }: Fetch
   ): Promise<Manifest> {
     const block: BlockView<ManifestData> = await blocks.get<ManifestData>(
-      address.cid,
-      options
+      address.cid
     )
     const manifest = this.asManifest({ block })
 

@@ -1,7 +1,7 @@
 import path from 'path'
 import { assert } from './utils/chai.js'
 import { LevelDatastore } from 'datastore-level'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 
 import { Database } from '../src/database.js'
 import { Keyvalue, Keyvalue as Store } from '~store/keyvalue/index.js'
@@ -24,7 +24,7 @@ import type { Libp2p } from 'libp2p'
 const testName = 'database'
 
 describe(testName, () => {
-  let ipfs: IPFS,
+  let ipfs: Helia,
     libp2p: Libp2p,
     blocks: Blocks,
     database: Database,

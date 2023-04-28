@@ -1,5 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 
 import { Welo } from '../src/index.js'
@@ -17,7 +17,7 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'welo'
 
 describe(testName, () => {
-  let ipfs: IPFS,
+  let ipfs: Helia,
     libp2p: Libp2p,
     welo: WeloType,
     directory: string,

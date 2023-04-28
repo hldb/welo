@@ -1,11 +1,13 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { CID } from 'multiformats/cid'
-import { Datastore, Key } from 'interface-datastore'
+import { Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
+import PQueue from 'p-queue'
 import type { BlockView } from 'multiformats/interface'
 import type { HashMap } from 'ipld-hashmap/interface'
+import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '~utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
@@ -45,8 +47,9 @@ export class Replica extends Playable {
 
   Datastore: DatastoreClass
 
-  _storage: Datastore | null
+  _storage: LevelDatastore | null
   _graph: Graph | null
+  _queue: PQueue
 
   constructor ({
     manifest,
@@ -68,7 +71,7 @@ export class Replica extends Playable {
     Identity: IdentityStatic<any>
   }) {
     const onUpdate = (): void => {
-      void this.setRoot(this.graph.root)
+      void this._queue.add(async () => await this.setRoot(this.graph.root))
     }
     const starting = async (): Promise<void> => {
       this._storage = await getDatastore(this.Datastore, directory)
@@ -82,9 +85,10 @@ export class Replica extends Playable {
       await start(this._graph)
     }
     const stopping = async (): Promise<void> => {
-      await stop(this._graph)
       this.events.removeEventListener('update', onUpdate)
+      await this._queue.onIdle()
       await this.storage.close()
+      await stop(this._graph)
 
       this._storage = null
       this._graph = null
@@ -104,11 +108,12 @@ export class Replica extends Playable {
 
     this._storage = null
     this._graph = null
+    this._queue = new PQueue({})
 
     this.events = new EventEmitter()
   }
 
-  get storage (): Datastore {
+  get storage (): LevelDatastore {
     if (this._storage === null) {
       throw new Error()
     }
@@ -118,7 +123,7 @@ export class Replica extends Playable {
 
   get graph (): Graph {
     if (this._graph === null) {
-      throw new Error()
+      throw new Error('graph has not been set yet')
     }
 
     return this._graph
@@ -244,13 +249,10 @@ export class Replica extends Playable {
 
     await this.blocks.put(entry.block)
 
-    // do not await
-    const add = await this.add([entry]).then(() => {
+    return await this.add([entry]).then(() => {
       this.events.dispatchEvent(new CustomEvent<undefined>('write'))
       return entry
     })
-
-    return add
   }
 
   // useful when the access list is updated

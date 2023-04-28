@@ -1,10 +1,8 @@
 import { encode, decode } from 'multiformats/block'
 import * as cbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
-import type { IPFS, AbortOptions } from 'ipfs-core-types'
-import type { PreloadOptions } from 'ipfs-core-types/src/utils'
+import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
-import type { PutOptions } from 'ipfs-core-types/src/block'
 import type {
   ByteView,
   BlockView,
@@ -12,6 +10,9 @@ import type {
   BlockEncoder,
   BlockDecoder
 } from 'multiformats/interface'
+// import type { IPFS as Helia, AbortOptions } from 'ipfs-core-types'
+// import type { PreloadOptions } from 'ipfs-core-types/src/utils'
+// import type { PutOptions } from 'ipfs-core-types/src/block'
 
 interface Codecs {
   [code: number]: typeof cbor
@@ -40,7 +41,7 @@ const hashers: Hashers = {
 const noIpfsError = (): Error => new Error('this.ipfs is undefined')
 
 class IpfsBlocks {
-  constructor (private readonly ipfs: IPFS) {}
+  constructor (private readonly ipfs: Helia) {}
 
   static async encode<T>({
     value,
@@ -75,8 +76,7 @@ class IpfsBlocks {
   }
 
   async get<T>(
-    cid: CID<T>,
-    options?: AbortOptions & PreloadOptions
+    cid: CID<T>
   ): Promise<BlockView<T, number, number, 1>> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
@@ -96,7 +96,7 @@ class IpfsBlocks {
       throw new Error('hasher not availabe')
     }
 
-    const bytes = await this.ipfs.block.get(cid, options)
+    const bytes = await this.ipfs.blockstore.get(cid)
 
     return await decode<T, number, number>({
       bytes,
@@ -106,8 +106,7 @@ class IpfsBlocks {
   }
 
   async put<T>(
-    block: BlockView<T>,
-    options?: PutOptions
+    block: BlockView<T>
   ): Promise<CID<T, number, number, 1>> {
     if (this.ipfs === undefined) {
       throw noIpfsError()
@@ -123,11 +122,7 @@ class IpfsBlocks {
       throw new Error('unsupported codec')
     }
 
-    const cid = await this.ipfs.block.put(block.bytes, {
-      format,
-      ...options,
-      version: block.cid.version
-    })
+    const cid = await this.ipfs.blockstore.put(block.cid, block.bytes)
 
     return cid as CID<T, number, number, 1>
   }

@@ -1,6 +1,6 @@
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
-import type { Datastore } from 'interface-datastore'
+import type { LevelDatastore } from 'datastore-level'
 
 import type { AccessProtocol } from '~access/static/protocol.js'
 import type { EntryProtocol } from '~entry/basal/protocol.js'
@@ -21,7 +21,7 @@ import type { Replicator, ReplicatorClass } from '~replicator/interface'
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
   start?: boolean
 }
@@ -30,9 +30,9 @@ export interface Config {
   directory: string
   identity: IdentityInstance<any>
   blocks: Blocks
-  identities: Datastore | null
+  identities: LevelDatastore | null
   keychain: KeyChain
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
 }
 
@@ -48,8 +48,8 @@ export interface Determine {
   tag?: Uint8Array
 }
 
-/** @public */
-export { FetchOptions } from '~utils/types'
+// /** @public */ commented out a comment lol
+// export { FetchOptions } from '~utils/types'
 
 /** @public */
 export interface OpenOptions {
@@ -76,7 +76,7 @@ export interface DbOpen {
   start?: boolean
   blocks: Blocks
   Replicator: ReplicatorClass
-  ipfs: IPFS
+  ipfs: Helia
   libp2p: Libp2p
   identity: IdentityInstance<any>
   manifest: Manifest

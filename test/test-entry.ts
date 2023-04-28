@@ -1,8 +1,8 @@
 import { assert } from './utils/chai.js'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import type { Datastore } from 'interface-datastore'
+import type { LevelDatastore } from 'datastore-level'
 
 import { Blocks } from '~blocks/index.js'
 import { Entry } from '~entry/basal/index.js'
@@ -18,12 +18,12 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'basal entry'
 
 describe(testName, () => {
-  let ipfs: IPFS,
+  let ipfs: Helia,
     blocks: Blocks,
     identity: Identity,
     entry: Entry,
     invalidEntry: Entry,
-    identities: Datastore,
+    identities: LevelDatastore,
     keychain: KeyChain
 
   const expectedProtocol = '/hldb/entry/basal'

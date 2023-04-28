@@ -1,6 +1,5 @@
 import { base32 } from 'multiformats/bases/base32'
 import { LevelDatastore } from 'datastore-level'
-import type { Datastore } from 'interface-datastore'
 
 import { Identity } from '~identity/basal/index.js'
 import { getDatastore } from '~utils/datastore.js'
@@ -10,11 +9,11 @@ import type { TestPaths } from './constants.js'
 
 export const getTestIdentities = async (
   testPaths: TestPaths
-): Promise<Datastore> =>
+): Promise<LevelDatastore> =>
   await getDatastore(LevelDatastore, testPaths.identities)
 
 export const getTestIdentity = async (
-  testIdentities: Datastore,
+  testIdentities: LevelDatastore,
   testKeychain: KeyChain,
   name: string
 ): Promise<Identity> => {
@@ -25,8 +24,6 @@ export const getTestIdentity = async (
     identities: testIdentities,
     keychain: testKeychain
   })
-
-  await testIdentities.close()
 
   return identity
 }

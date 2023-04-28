@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { IPFS } from 'ipfs-core-types'
+import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
@@ -15,9 +15,9 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'pubsub/direct'
 
 describe(testName, () => {
-  let ipfs1: IPFS,
-    ipfs2: IPFS,
-    ipfs3: IPFS,
+  let ipfs1: Helia,
+    ipfs2: Helia,
+    ipfs3: Helia,
     libp2p1: Libp2p,
     libp2p2: Libp2p,
     libp2p3: Libp2p,
@@ -38,33 +38,31 @@ describe(testName, () => {
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
     ipfs3 = await getTestIpfs(testPaths3, localIpfsOptions)
-    // @ts-expect-error
-    libp2p1 = ipfs1.libp2p as Libp2p
-    // @ts-expect-error
-    libp2p2 = ipfs2.libp2p as Libp2p
-    // @ts-expect-error
-    libp2p3 = ipfs3.libp2p as Libp2p
+    libp2p1 = ipfs1.libp2p
+    libp2p2 = ipfs2.libp2p
+    libp2p3 = ipfs3.libp2p
 
-    id1 = (await ipfs1.id()).id
-    id2 = (await ipfs2.id()).id
-    // id3 = (await ipfs3.id()).id
+    id1 = libp2p1.peerId
+    id2 = libp2p2.peerId
 
     addr1 = await getMultiaddr(ipfs1)
     addr2 = await getMultiaddr(ipfs2)
     addr3 = await getMultiaddr(ipfs3)
 
     await Promise.all([
-      ipfs1.swarm.connect(addr2),
-      ipfs1.swarm.connect(addr3),
-      ipfs2.swarm.connect(addr1),
-      ipfs2.swarm.connect(addr3),
-      ipfs3.swarm.connect(addr1),
-      ipfs3.swarm.connect(addr2)
+      libp2p1.dial(addr2),
+      libp2p1.dial(addr3),
+      libp2p2.dial(addr1),
+      libp2p2.dial(addr3),
+      libp2p3.dial(addr1),
+      libp2p3.dial(addr2)
     ])
   })
 
   after(async () => {
-    await stop(ipfs1, ipfs2, ipfs3)
+    await stop(ipfs1)
+    await stop(ipfs2)
+    await stop(ipfs3)
   })
 
   describe('instance', () => {
@@ -197,7 +195,7 @@ describe(testName, () => {
         assert.strictEqual(peer1.isOpen(), true)
         assert.strictEqual(peer2.isOpen(), true)
 
-        peer2.stop()
+        peer1.stop()
         peer2.stop()
         libp2p3.pubsub.unsubscribe(topic)
       })
