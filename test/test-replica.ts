@@ -76,7 +76,8 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await stop(ipfs, tempIpfs)
+    await stop(ipfs)
+    await stop(tempIpfs)
   })
 
   describe('class', () => {

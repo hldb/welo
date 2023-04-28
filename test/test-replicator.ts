@@ -116,7 +116,8 @@ describe(testName, () => {
     await stop(access)
     await stop(replica1, replica2)
     await stop(replicator1, replicator2)
-    await stop(ipfs1, ipfs2)
+    await stop(ipfs1)
+    await stop(ipfs2)
   })
 
   describe('instance', () => {
