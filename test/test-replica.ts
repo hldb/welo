@@ -270,7 +270,6 @@ describe(testName, () => {
         assert.strictEqual(await storage.has(rootHashKey), true)
 
         assert.deepEqual(decodedcid(await storage.get(rootHashKey)), block.cid)
-        await storage.close()
       })
 
       it('loads the graph root from disk on start', async () => {

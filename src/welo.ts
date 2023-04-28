@@ -4,7 +4,6 @@ import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
-import type { Datastore } from 'datastore-level'
 
 import { Manifest, Address } from '~manifest/index.js'
 import { Blocks } from '~blocks/index.js'
@@ -36,6 +35,7 @@ import type {
   OpenedEmit,
   OpenOptions
 } from './interface.js'
+import type { LevelDatastore } from 'datastore-level'
 
 const registry = initRegistry()
 
@@ -73,7 +73,7 @@ export class Welo extends Playable {
   readonly libp2p: Libp2p
   readonly blocks: Blocks
 
-  readonly identities: Datastore | null
+  readonly identities: LevelDatastore | null
   readonly keychain: KeyChain
 
   readonly identity: IdentityInstance<any>
@@ -142,7 +142,7 @@ export class Welo extends Playable {
     }
 
     let identity: IdentityInstance<any>
-    let identities: Datastore | null = null
+    let identities: LevelDatastore | null = null
 
     if (options.identity != null) {
       identity = options.identity

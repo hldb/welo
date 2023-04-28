@@ -1,34 +1,33 @@
 import * as where from 'wherearewe'
 import makedir from 'make-dir'
-import type { Datastore, Options } from 'interface-datastore'
-import type { DatabaseOptions, OpenOptions } from 'level'
-import type { AbstractLevel } from 'abstract-level'
+import type { LevelDatastore } from 'datastore-level'
+import type { DatabaseOptions, Level, OpenOptions } from 'level'
 
-type LevelDatastorePath = string | AbstractLevel<any, string, Uint8Array>
+type LevelDatastorePath = string | Level<string, Uint8Array>
 
 type LevelDatastoreOptions = DatabaseOptions<string, Uint8Array> & OpenOptions
 
 type DatastorePath = LevelDatastorePath
 
-type DatastoreOptions = Options & LevelDatastoreOptions
+type DatastoreOptions = LevelDatastoreOptions
 
 export type DatastoreClass = new (
   path: DatastorePath,
   options: DatastoreOptions
-) => Datastore
+) => LevelDatastore
 
 export type GetDatastore = (
   Datastore: DatastoreClass,
   path: DatastorePath,
   options?: DatastoreOptions
-) => Promise<Datastore>
+) => Promise<LevelDatastore>
 
 // makes easier to handle nodejs and browser environment differences
 export const getDatastore: GetDatastore = async (
   Datastore: DatastoreClass,
   path: DatastorePath,
   options: DatastoreOptions = {}
-): Promise<Datastore> => {
+): Promise<LevelDatastore> => {
   // todo: handle less common environments like electron
   if (where.isBrowser) {
     options.prefix = '' // removes the 'level' prefix from the path in indexeddb

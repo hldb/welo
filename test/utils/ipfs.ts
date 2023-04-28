@@ -7,6 +7,10 @@ import { createLibp2p } from 'libp2p'
 import { tcp } from '@libp2p/tcp'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
+import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import { MemoryDatastore } from 'datastore-core'
+import { LevelDatastore } from 'datastore-level'
+import { LevelBlockstore } from 'blockstore-level'
 
 let swarmAddrs: string[]
 if (isNode) {
@@ -51,11 +55,18 @@ export const getTestIpfs = async (
     streamMuxers: [
       yamux()
     ],
+    pubsub: gossipsub(),
     nat: {
       enabled: false
-    }
+    },
+    datastore: new MemoryDatastore()
   })
-  return await createHelia({ libp2p })
+
+  return await createHelia({
+    datastore: new LevelDatastore(options.repo + '/data'),
+    blockstore: new LevelBlockstore(options.repo + '/blocks'),
+    libp2p
+  })
 }
 
 export const getMultiaddr = async (ipfs: Helia): Promise<Multiaddr> => {

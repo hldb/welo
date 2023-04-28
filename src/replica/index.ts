@@ -1,11 +1,12 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { CID } from 'multiformats/cid'
-import { Datastore, Key } from 'interface-datastore'
+import { Key } from 'interface-datastore'
 import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import type { BlockView } from 'multiformats/interface'
 import type { HashMap } from 'ipld-hashmap/interface'
+import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '~utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '~utils/index.js'
@@ -45,7 +46,7 @@ export class Replica extends Playable {
 
   Datastore: DatastoreClass
 
-  _storage: Datastore | null
+  _storage: LevelDatastore | null
   _graph: Graph | null
 
   constructor ({
@@ -108,7 +109,7 @@ export class Replica extends Playable {
     this.events = new EventEmitter()
   }
 
-  get storage (): Datastore {
+  get storage (): LevelDatastore {
     if (this._storage === null) {
       throw new Error()
     }

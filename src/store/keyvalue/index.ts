@@ -1,6 +1,7 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import { Datastore, Key } from 'interface-datastore'
+import { Key } from 'interface-datastore'
 import type { HashMap } from 'ipld-hashmap'
+import type { LevelDatastore } from 'datastore-level'
 
 import { Extends } from '~utils/decorators.js'
 import { Playable } from '~utils/playable.js'
@@ -37,7 +38,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly config?: Config
   readonly replica: Replica
   readonly Datastore: DatastoreClass
-  private _storage: Datastore | null
+  private _storage: LevelDatastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter<Events>
@@ -57,10 +58,8 @@ export class Keyvalue extends Playable implements StoreInstance {
   }) {
     const starting = async (): Promise<void> => {
       this._storage = await getDatastore(Datastore, directory)
-      await this._storage.open()
 
-      const indexesCID = await this.storage
-        .get(indexesKey)
+      const indexesCID = await this.storage.get(indexesKey)
         .catch(() => undefined)
       this._indexes = await loadHashMap(
         blocks,
@@ -76,8 +75,6 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
-      await this.storage.close()
-
       this._storage = null
       this._indexes = null
       this._index = null
@@ -98,7 +95,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.events = new EventEmitter()
   }
 
-  get storage (): Datastore {
+  get storage (): LevelDatastore {
     if (this._storage === null) {
       throw new Error()
     }

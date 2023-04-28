@@ -1,6 +1,6 @@
 import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
-import type { Datastore } from 'interface-datastore'
+import type { LevelDatastore } from 'datastore-level'
 
 import type { AccessProtocol } from '~access/static/protocol.js'
 import type { EntryProtocol } from '~entry/basal/protocol.js'
@@ -30,7 +30,7 @@ export interface Config {
   directory: string
   identity: IdentityInstance<any>
   blocks: Blocks
-  identities: Datastore | null
+  identities: LevelDatastore | null
   keychain: KeyChain
   ipfs: Helia
   libp2p: Libp2p
