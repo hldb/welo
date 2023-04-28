@@ -129,7 +129,7 @@ describe(testName, () => {
       await start(replicator1, replicator2)
       await Promise.all([
         libp2p1.dial(addr2),
-        libp2p1.dial(addr1)
+        libp2p2.dial(addr1)
       ])
     })
 

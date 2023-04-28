@@ -58,6 +58,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   }) {
     const starting = async (): Promise<void> => {
       this._storage = await getDatastore(Datastore, directory)
+      await this._storage.open()
 
       const indexesCID = await this.storage.get(indexesKey)
         .catch(() => undefined)
@@ -75,6 +76,8 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
+      await this.storage.close()
+
       this._storage = null
       this._indexes = null
       this._index = null

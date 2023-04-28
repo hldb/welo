@@ -55,7 +55,7 @@ export const getTestIpfs = async (
     streamMuxers: [
       yamux()
     ],
-    pubsub: gossipsub(),
+    pubsub: gossipsub({ emitSelf: true }),
     nat: {
       enabled: false
     },
