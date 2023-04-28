@@ -60,7 +60,9 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await stop(ipfs1, ipfs2, ipfs3)
+    await stop(ipfs1)
+    await stop(ipfs2)
+    await stop(ipfs3)
   })
 
   describe('instance', () => {
@@ -193,7 +195,7 @@ describe(testName, () => {
         assert.strictEqual(peer1.isOpen(), true)
         assert.strictEqual(peer2.isOpen(), true)
 
-        peer2.stop()
+        peer1.stop()
         peer2.stop()
         libp2p3.pubsub.unsubscribe(topic)
       })

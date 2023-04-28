@@ -45,7 +45,8 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await stop(ipfs1, ipfs2)
+    await stop(ipfs1)
+    await stop(ipfs2)
   })
 
   describe('instance', () => {

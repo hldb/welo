@@ -15,7 +15,8 @@
   ],
   "browser": {
     "path": "path-browserify",
-    "make-dir": false
+    "make-dir": false,
+    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js"
   },
   "prettier": "prettier-config-standard",
   "scripts": {
@@ -31,7 +32,7 @@
     "extract-api": "api-extractor run -c ./api-extractor.json -l -v",
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
-    "test:chrome": "aegir test -t browser -f \"./dist/test/**/test-*.js\"",
+    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
     "test:node": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
@@ -95,14 +96,14 @@
     "@libp2p/interface-pubsub": "^3.0.6",
     "@libp2p/interfaces": "^3.3.1",
     "@libp2p/peer-id": "^2.0.1",
-    "abstract-level": "^1.0.3",
+    "@libp2p/webrtc-star": "^7.0.0",
     "datastore-level": "^10.1.1",
     "helia": "^1.0.3",
     "interface-datastore": "^8.2.0",
     "ipld-hashmap": "^2.1.13",
     "it-all": "^2.0.0",
     "level": "^8.0.0",
-    "libp2p": "^0.42.2",
+    "libp2p": "^0.44.0",
     "make-dir": "^3.1.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.0",

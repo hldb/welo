@@ -1,37 +1,23 @@
 import type { Multiaddr } from '@multiformats/multiaddr'
 import { createHelia } from 'helia'
 import type { Helia } from '@helia/interface'
-import { isBrowser, isNode } from 'wherearewe'
 import type { TestPaths } from './constants'
 import { createLibp2p } from 'libp2p'
-import { tcp } from '@libp2p/tcp'
-import { noise } from '@chainsafe/libp2p-noise'
-import { yamux } from '@chainsafe/libp2p-yamux'
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import { MemoryDatastore } from 'datastore-core'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
 
-let swarmAddrs: string[]
-if (isNode) {
-  swarmAddrs = ['/ip4/127.0.0.1/tcp/0']
-} else if (isBrowser) {
-  swarmAddrs = ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/']
-}
+import { createLibp2pOptions } from './libp2p-options.js'
 
 interface IpfsOptions {
   repo: string
-  offline: boolean
 }
 
 export const offlineIpfsOptions = (repo: string): IpfsOptions => ({
-  repo,
-  offline: true
+  repo
 })
 
 export const localIpfsOptions = (repo: string): IpfsOptions => ({
-  repo,
-  offline: false
+  repo
 })
 
 type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
@@ -41,30 +27,17 @@ export const getTestIpfs = async (
   opts: Opts
 ): Promise<Helia> => {
   const options = opts(testPaths.ipfs)
-  const listen = options.offline ? [] : swarmAddrs
-  const libp2p = await createLibp2p({
-    addresses: {
-      listen
-    },
-    transports: [
-      tcp()
-    ],
-    connectionEncryption: [
-      noise()
-    ],
-    streamMuxers: [
-      yamux()
-    ],
-    pubsub: gossipsub({ emitSelf: true }),
-    nat: {
-      enabled: false
-    },
-    datastore: new MemoryDatastore()
-  })
+
+  const datastore = new LevelDatastore(options.repo + '/data')
+  const blockstore = new LevelBlockstore(options.repo + '/blocks')
+
+  const libp2pOptions = createLibp2pOptions({ datastore })
+
+  const libp2p = await createLibp2p(libp2pOptions)
 
   return await createHelia({
-    datastore: new LevelDatastore(options.repo + '/data'),
-    blockstore: new LevelBlockstore(options.repo + '/blocks'),
+    datastore,
+    blockstore,
     libp2p
   })
 }
