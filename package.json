@@ -52,6 +52,9 @@
   },
   "homepage": "https://github.com/hldb/welo#readme",
   "devDependencies": {
+    "@chainsafe/libp2p-noise": "^11.0.4",
+    "@chainsafe/libp2p-yamux": "^4.0.0",
+    "@libp2p/tcp": "^7.0.1",
     "@microsoft/api-documenter": "^7.19.25",
     "@microsoft/api-extractor": "^7.33.6",
     "@types/chai": "^4.3.4",

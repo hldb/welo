@@ -32,18 +32,16 @@ describe(testName, () => {
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
-    // @ts-expect-error
     libp2p1 = ipfs1.libp2p
-    // @ts-expect-error
     libp2p2 = ipfs2.libp2p
 
-    id1 = (await ipfs1.id()).id
-    id2 = (await ipfs2.id()).id
+    id1 = libp2p1.peerId
+    id2 = libp2p2.peerId
 
     addr1 = await getMultiaddr(ipfs1)
     addr2 = await getMultiaddr(ipfs2)
 
-    await Promise.all([ipfs1.swarm.connect(addr2), ipfs2.swarm.connect(addr1)])
+    await Promise.all([libp2p1.dial(addr2), libp2p2.dial(addr1)])
   })
 
   after(async () => {

@@ -32,7 +32,7 @@ import type {
   Create,
   Determine,
   Events,
-  FetchOptions,
+  // FetchOptions,
   OpenedEmit,
   OpenOptions
 } from './interface.js'
@@ -46,7 +46,7 @@ export type {
   Config,
   Create,
   Determine,
-  FetchOptions,
+  // FetchOptions,
   OpenOptions as Options
 }
 
@@ -223,8 +223,8 @@ export class Welo extends Playable {
    * @param address - the Address of the Manifest to fetch
    * @returns
    */
-  async fetch (address: Address, options: FetchOptions = {}): Promise<Manifest> {
-    return await Manifest.fetch({ blocks: this.blocks, address }, options)
+  async fetch (address: Address): Promise<Manifest> {
+    return await Manifest.fetch({ blocks: this.blocks, address })
   }
 
   /**

@@ -34,6 +34,6 @@ export type {
   Config,
   Create,
   Determine,
-  FetchOptions,
+  // FetchOptions,
   OpenOptions
 } from './interface.js'

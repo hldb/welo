@@ -1,8 +1,12 @@
 import type { Multiaddr } from '@multiformats/multiaddr'
-import * as IPFS from 'ipfs-core'
-import type { IPFS as IPFSType } from 'ipfs-core-types'
+import { createHelia } from 'helia'
+import type { Helia } from '@helia/interface'
 import { isBrowser, isNode } from 'wherearewe'
 import type { TestPaths } from './constants'
+import { createLibp2p } from 'libp2p'
+import { tcp } from '@libp2p/tcp'
+import { noise } from '@chainsafe/libp2p-noise'
+import { yamux } from '@chainsafe/libp2p-yamux'
 
 let swarmAddrs: string[]
 if (isNode) {
@@ -11,42 +15,19 @@ if (isNode) {
   swarmAddrs = ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/']
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const offlineIpfsOptions = (repo: string) => ({
+interface IpfsOptions {
+  repo: string
+  offline: boolean
+}
+
+export const offlineIpfsOptions = (repo: string): IpfsOptions => ({
   repo,
-  offline: true,
-  config: {
-    profile: 'test',
-    Addresses: {
-      Swarm: [],
-      Announce: [],
-      NoAnnounce: [],
-      Delegates: []
-    },
-    Bootstrap: [],
-    Pubsub: {
-      Router: 'gossipsub',
-      Enabled: true
-    }
-  }
+  offline: true
 })
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const localIpfsOptions = (repo: string) => ({
+export const localIpfsOptions = (repo: string): IpfsOptions => ({
   repo,
-  config: {
-    Addresses: {
-      Swarm: swarmAddrs,
-      Announce: [],
-      NoAnnounce: [],
-      Delegates: []
-    },
-    Bootstrap: [],
-    Pubsub: {
-      Router: 'gossipsub',
-      Enabled: true
-    }
-  }
+  offline: false
 })
 
 type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
@@ -54,12 +35,31 @@ type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 export const getTestIpfs = async (
   testPaths: TestPaths,
   opts: Opts
-): Promise<IPFSType> => {
-  return (await IPFS.create(opts(testPaths.ipfs))) as unknown as IPFSType
+): Promise<Helia> => {
+  const options = opts(testPaths.ipfs)
+  const listen = options.offline ? [] : swarmAddrs
+  const libp2p = await createLibp2p({
+    addresses: {
+      listen
+    },
+    transports: [
+      tcp()
+    ],
+    connectionEncryption: [
+      noise()
+    ],
+    streamMuxers: [
+      yamux()
+    ],
+    nat: {
+      enabled: false
+    }
+  })
+  return await createHelia({ libp2p })
 }
 
-export const getMultiaddr = async (ipfs: IPFSType): Promise<Multiaddr> => {
-  const { addresses } = await ipfs.id()
+export const getMultiaddr = async (ipfs: Helia): Promise<Multiaddr> => {
+  const addresses = ipfs.libp2p.getMultiaddrs()
   if (addresses.length === 0) {
     throw new Error('no addresses available')
   }

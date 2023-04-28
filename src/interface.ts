@@ -48,8 +48,8 @@ export interface Determine {
   tag?: Uint8Array
 }
 
-/** @public */
-export { FetchOptions } from '~utils/types'
+// /** @public */ commented out a comment lol
+// export { FetchOptions } from '~utils/types'
 
 /** @public */
 export interface OpenOptions {
