@@ -86,7 +86,7 @@ describe(testName, () => {
         replica = new Replica({
           Datastore,
           manifest,
-          directory: testPaths.replica,
+          directory: testPaths.replica + '/temp',
           blocks,
           access,
           identity,
@@ -123,6 +123,54 @@ describe(testName, () => {
     })
 
     describe('add', () => {
+      beforeEach(async () => {
+        await start(replica)
+      })
+      afterEach(async () => {
+        await stop(replica)
+      })
+
+      it('does not add entry with mismatched tag', async () => {
+        const tag = new Uint8Array([7])
+        const entry = await Entry.create({
+          identity,
+          tag,
+          payload,
+          next: [],
+          refs: []
+        })
+        const cid = entry.cid
+
+        await replica.add([entry])
+
+        assert.strictEqual(await replica.size(), 0)
+        assert.strictEqual(await replica.has(cid), false)
+        assert.strictEqual(await replica.known(cid), false)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.tails.size(), 0)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
+      })
+
+      it('does not add entry without access', async () => {
+        const entry = await singleEntry(tempIdentity)()
+        const cid = entry.cid
+
+        await replica.add([entry])
+
+        assert.strictEqual(await replica.size(), 0)
+        assert.strictEqual(await replica.has(cid), false)
+        assert.strictEqual(await replica.known(cid), false)
+        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
+        assert.strictEqual(await replica.tails.size(), 0)
+        assert.strictEqual(await replica.missing.size(), 0)
+        assert.strictEqual(await replica.denied.size(), 0)
+      })
+
       it('adds an entry to the replica', async () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
@@ -138,81 +186,25 @@ describe(testName, () => {
         assert.strictEqual(await replica.tails.size(), 1)
         assert.strictEqual(await replica.missing.size(), 0)
         assert.strictEqual(await replica.denied.size(), 0)
-
-        await stop(replica)
-      })
-
-      it('does not add entry with mismatched tag', async () => {
-        const tag = new Uint8Array([7])
-        const entry = await Entry.create({
-          identity,
-          tag,
-          payload,
-          next: [],
-          refs: []
-        })
-        const cid = entry.cid
-        const replica = new Replica({
-          Datastore,
-          manifest,
-          directory: testPaths.replica,
-          blocks,
-          access,
-          identity,
-          Entry,
-          Identity
-        })
-        await start(replica)
-
-        await replica.add([entry])
-
-        assert.strictEqual(await replica.size(), 0)
-        assert.strictEqual(await replica.has(cid), false)
-        assert.strictEqual(await replica.known(cid), false)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.heads.size(), 0)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.tails.size(), 0)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
-
-        await stop(replica)
-      })
-
-      it('does not add entry without access', async () => {
-        const entry = await singleEntry(tempIdentity)()
-        const cid = entry.cid
-        const replica = new Replica({
-          Datastore,
-          manifest,
-          directory: testPaths.replica,
-          blocks,
-          access,
-          identity,
-          Entry,
-          Identity
-        })
-        await start(replica)
-
-        await replica.add([entry])
-
-        assert.strictEqual(await replica.size(), 0)
-        assert.strictEqual(await replica.has(cid), false)
-        assert.strictEqual(await replica.known(cid), false)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.heads.size(), 0)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.tails.size(), 0)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
-
-        await stop(replica)
       })
     })
 
     describe('write', () => {
-      it('writes an entry to the replica', async () => {
+      before(async () => {
+        replica = new Replica({
+          Datastore,
+          manifest,
+          directory: testPaths.replica,
+          blocks,
+          access,
+          identity,
+          Entry,
+          Identity
+        })
         await start(replica)
+      })
+
+      it('writes an entry to the replica', async () => {
         const entry = await replica.write(payload)
         const cid = entry.cid
         cids.push(cid)
