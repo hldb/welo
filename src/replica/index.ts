@@ -85,10 +85,10 @@ export class Replica extends Playable {
       await start(this._graph)
     }
     const stopping = async (): Promise<void> => {
-      await stop(this._graph)
       this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
       await this.storage.close()
+      await stop(this._graph)
 
       this._storage = null
       this._graph = null
@@ -123,7 +123,7 @@ export class Replica extends Playable {
 
   get graph (): Graph {
     if (this._graph === null) {
-      throw new Error()
+      throw new Error('graph has not been set yet')
     }
 
     return this._graph
