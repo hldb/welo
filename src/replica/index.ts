@@ -78,7 +78,6 @@ export class Replica extends Playable {
       await this._storage.open()
 
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
-      console.log(root?.toString())
 
       this._graph = new Graph({ blocks, root })
 
