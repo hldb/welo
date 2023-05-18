@@ -21,11 +21,11 @@ npm install welo
 ## Usage
 
 ```typescript
-import IPFS from 'ipfs'
+import { createHelia } from 'helia'
 import { Welo } from 'welo'
 
-/** look at js-ipfs for configurations */
-const ipfs = await IPFS.create() // 
+/** look at Helia for configurations */
+const ipfs = await createHelia()
 
 /** see more config options in the API docs */
 const welo = await Welo.create({
