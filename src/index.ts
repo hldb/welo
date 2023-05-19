@@ -27,6 +27,7 @@ _Welo.Replicator = MultiReplicator
 
 export { _Welo as Welo }
 
+export { StaticAccess, Entry, Identity, Keyvalue }
 export type { Manifest, Address } from '~manifest/index.js'
 export type { Playable } from '~utils/playable.js'
 export type { Database } from './database.js'
