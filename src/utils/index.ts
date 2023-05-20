@@ -5,12 +5,12 @@ import { peerIdFromString } from '@libp2p/peer-id'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
 import type { Registry } from '../registry.js'
-import type { ManifestData } from '~manifest/interface.js'
-import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
-import type { AccessStatic } from '~access/interface.js'
-import type { StoreStatic } from '~store/interface.js'
-import type { EntryStatic } from '~entry/interface.js'
-import type { Manifest } from '~manifest/index.js'
+import type { ManifestData } from '~/manifest/interface.js'
+import type { IdentityInstance, IdentityStatic } from '~/identity/interface.js'
+import type { AccessStatic } from '~/access/interface.js'
+import type { StoreStatic } from '~/store/interface.js'
+import type { EntryStatic } from '~/entry/interface.js'
+import type { Manifest } from '~/manifest/index.js'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)

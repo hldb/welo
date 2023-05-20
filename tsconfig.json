@@ -16,18 +16,7 @@
     "baseUrl": ".",
 
     "paths": {
-      "~access/*": ["src/access/*"],
-      "~blocks/*": ["src/blocks/*"],
-      "~entry/*": ["src/entry/*"],
-      "~identity/*": ["src/identity/*"],
-      "~keychain/*": ["src/keychain/*"],
-      "~manifest/*": ["src/manifest/*"],
-      "~pubsub/*": ["src/pubsub/*"],
-      "~replica/*": ["src/replica/*"],
-      "~replicator/*": ["src/replicator/*"],
-      "~storage/*": ["src/storage/*"],
-      "~store/*": ["src/store/*"],
-      "~utils/*": ["src/utils/*"]
+      "~/*": ["src/*"]
     },
 
     "plugins": [

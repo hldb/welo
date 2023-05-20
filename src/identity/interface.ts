@@ -2,9 +2,9 @@ import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
 
-import type { Blocks } from '~blocks/index.js'
-import type { Registrant } from '~utils/register.js'
-import type { KeyChain } from '~utils/types.js'
+import type { Blocks } from '~/blocks/index.js'
+import type { Registrant } from '~/utils/register.js'
+import type { KeyChain } from '~/utils/types.js'
 
 export type Gen = string
 

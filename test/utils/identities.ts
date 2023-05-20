@@ -1,9 +1,9 @@
 import { base32 } from 'multiformats/bases/base32'
 import { LevelDatastore } from 'datastore-level'
 
-import { Identity } from '~identity/basal/index.js'
-import { getDatastore } from '~utils/datastore.js'
-import type { KeyChain } from '~utils/types.js'
+import { Identity } from '~/identity/basal/index.js'
+import { getDatastore } from '~/utils/datastore.js'
+import type { KeyChain } from '~/utils/types.js'
 
 import type { TestPaths } from './constants.js'
 

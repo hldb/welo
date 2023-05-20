@@ -6,7 +6,7 @@ import * as codec from '@ipld/dag-cbor'
 import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '~blocks/index.js'
+import { Blocks } from '~/blocks/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'

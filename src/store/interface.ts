@@ -1,11 +1,11 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 import type { EventEmitter } from '@libp2p/interfaces/events'
 
-import type { Replica } from '~replica/index.js'
-import type { Manifest } from '~manifest/index.js'
-import type { Blocks } from '~blocks/index.js'
-import type { DatastoreClass } from '~utils/datastore.js'
-import type { Registrant } from '~utils/register.js'
+import type { Replica } from '~/replica/index.js'
+import type { Manifest } from '~/manifest/index.js'
+import type { Blocks } from '~/blocks/index.js'
+import type { DatastoreClass } from '~/utils/datastore.js'
+import type { Registrant } from '~/utils/register.js'
 
 export interface Props {
   manifest: Manifest

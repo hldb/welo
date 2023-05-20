@@ -1,7 +1,7 @@
-import { StaticAccess } from '~access/static/index.js'
-import { Entry } from '~entry/basal/index.js'
-import { Identity } from '~identity/basal/index.js'
-import { Keyvalue } from '~store/keyvalue/index.js'
+import { StaticAccess } from '~/access/static/index.js'
+import { Entry } from '~/entry/basal/index.js'
+import { Identity } from '~/identity/basal/index.js'
+import { Keyvalue } from '~/store/keyvalue/index.js'
 
 import { initRegistry, Registry } from '../../src/registry.js'
 

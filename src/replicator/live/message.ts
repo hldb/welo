@@ -1,7 +1,7 @@
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
-import { Blocks } from '~blocks/index.js'
+import { Blocks } from '~/blocks/index.js'
 
 import { protocol } from './protocol.js'
 

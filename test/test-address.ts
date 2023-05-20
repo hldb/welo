@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import { CID } from 'multiformats/cid'
 
-import { Address } from '~manifest/address.js'
+import { Address } from '~/manifest/address.js'
 
 describe('Address', () => {
   let address: Address

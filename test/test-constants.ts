@@ -1,6 +1,6 @@
 import { assert } from './utils/chai.js'
 
-import * as constants from '~utils/constants.js'
+import * as constants from '~/utils/constants.js'
 
 describe('Constants', () => {
   it('exports WELO_PATH', () => {
