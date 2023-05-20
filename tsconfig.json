@@ -50,6 +50,7 @@
 
   "ts-node": {
     "transpileOnly": true,
+    "esm": true,
     "require": [ "typescript-transform-paths/register" ]
   }
 }
