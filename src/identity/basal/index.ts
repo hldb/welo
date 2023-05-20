@@ -4,8 +4,8 @@ import { Key } from 'interface-datastore'
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
-import { Blocks } from '~/blocks/index.js'
-import { Extends } from '~/utils/decorators.js'
+import { Blocks } from '@/blocks/index.js'
+import { Extends } from '@/utils/decorators.js'
 
 import protocol from './protocol.js'
 import type {

@@ -1,6 +1,6 @@
 import all from 'it-all'
-import { dagLinks, loadEntry, traverser } from '~/replica/traversal.js'
-import { parsedcid } from '~/utils/index.js'
+import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
+import { parsedcid } from '@/utils/index.js'
 import { Welo } from '../src/index.js'
 import { getTestPaths, tempPath } from '../test/utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from '../test/utils/ipfs.js'

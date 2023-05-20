@@ -4,7 +4,7 @@ import type { SubscriptionChangeData } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-import { parsedPeerId, peerIdString } from '~/utils/index.js'
+import { parsedPeerId, peerIdString } from '@/utils/index.js'
 
 import { getPeers } from './util.js'
 

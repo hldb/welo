@@ -1,5 +1,5 @@
-import { Manifest } from '~/manifest/index.js'
-import type { ManifestData } from '~/manifest/interface.js'
+import { Manifest } from '@/manifest/index.js'
+import type { ManifestData } from '@/manifest/interface.js'
 
 import type { Registry } from '../../src/registry.js'
 

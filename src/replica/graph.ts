@@ -5,9 +5,9 @@ import * as blockCodec from '@ipld/dag-cbor'
 import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
 import type { CID } from 'multiformats/cid'
 
-import { Playable } from '~/utils/playable.js'
-import { cidstring } from '~/utils/index.js'
-import type { Blocks } from '~/blocks/index.js'
+import { Playable } from '@/utils/playable.js'
+import { cidstring } from '@/utils/index.js'
+import type { Blocks } from '@/blocks/index.js'
 
 import { Node } from './graph-node.js'
 

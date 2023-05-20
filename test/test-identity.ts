@@ -4,9 +4,9 @@ import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
 
-import { Identity } from '~/identity/basal/index.js'
-import { Blocks } from '~/blocks/index.js'
-import type { KeyChain } from '~/utils/types.js'
+import { Identity } from '@/identity/basal/index.js'
+import { Blocks } from '@/blocks/index.js'
+import type { KeyChain } from '@/utils/types.js'
 
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

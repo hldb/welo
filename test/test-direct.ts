@@ -7,7 +7,7 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
-import { Direct, DirectEvents } from '~/pubsub/direct.js'
+import { Direct, DirectEvents } from '@/pubsub/direct.js'
 
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'

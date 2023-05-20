@@ -1,8 +1,8 @@
 import { assert } from './utils/chai.js'
 
 import { initRegistry } from '../src/registry.js'
-import { Register } from '~/utils/register.js'
-import type { Registrant } from '~/utils/register.js'
+import { Register } from '@/utils/register.js'
+import type { Registrant } from '@/utils/register.js'
 
 const testName = 'register'
 

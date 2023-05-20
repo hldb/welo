@@ -3,9 +3,9 @@ import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid.js'
 import { start } from '@libp2p/interfaces/startable'
 
-import { Graph } from '~/replica/graph.js'
-import { Node } from '~/replica/graph-node.js'
-import { Blocks } from '~/blocks/index.js'
+import { Graph } from '@/replica/graph.js'
+import { Node } from '@/replica/graph-node.js'
+import { Blocks } from '@/blocks/index.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

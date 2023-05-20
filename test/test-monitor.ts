@@ -5,8 +5,8 @@ import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-import { Monitor, MonitorEvents } from '~/pubsub/monitor.js'
-import { peerIdString } from '~/utils/index.js'
+import { Monitor, MonitorEvents } from '@/pubsub/monitor.js'
+import { peerIdString } from '@/utils/index.js'
 
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'

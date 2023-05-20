@@ -1,9 +1,9 @@
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
-import type { Blocks } from '~/blocks/index.js'
-import type { Registrant } from '~/utils/register.js'
-import type { IdentityInstance, IdentityStatic } from '~/identity/interface.js'
+import type { Blocks } from '@/blocks/index.js'
+import type { Registrant } from '@/utils/register.js'
+import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
 
 export interface EntryData {
   tag: Uint8Array
