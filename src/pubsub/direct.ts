@@ -9,7 +9,7 @@ import type {
 } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
-import { peerIdString } from '~utils/index.js'
+import { peerIdString } from '@/utils/index.js'
 
 import { getPeers, getTopics } from './util.js'
 

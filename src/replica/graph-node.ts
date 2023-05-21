@@ -1,6 +1,6 @@
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '~blocks/index.js'
+import { Blocks } from '@/blocks/index.js'
 
 export type Edge = 'out' | 'in'
 

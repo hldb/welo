@@ -4,10 +4,10 @@ import type { Libp2p } from 'libp2p'
 
 import { Welo } from '../src/index.js'
 import type { Welo as WeloType } from '../src/welo.js'
-import { WELO_PATH } from '~utils/constants.js'
-import type { Address, Manifest } from '~manifest/index.js'
+import { WELO_PATH } from '@/utils/constants.js'
+import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
-import type { Identity } from '~identity/basal/index.js'
+import type { Identity } from '@/identity/basal/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

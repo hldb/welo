@@ -1,6 +1,6 @@
 import type { BlockView } from 'multiformats/interface'
 
-import type { Blocks } from '~blocks/index.js'
+import type { Blocks } from '@/blocks/index.js'
 
 import type { Address } from './address.js'
 

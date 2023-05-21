@@ -1,7 +1,7 @@
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '~blocks/index.js'
-// import type { FetchOptions } from '~utils/types.js'
+import { Blocks } from '@/blocks/index.js'
+// import type { FetchOptions } from '@/utils/types.js'
 
 import { Address } from './address.js'
 import type {

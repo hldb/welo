@@ -1,9 +1,9 @@
 import { base32 } from 'multiformats/bases/base32'
 
-import { Extends } from '~utils/decorators.js'
-import { Playable } from '~utils/playable.js'
-import type { EntryInstance } from '~entry/interface.js'
-import type { Manifest } from '~manifest/index.js'
+import { Extends } from '@/utils/decorators.js'
+import { Playable } from '@/utils/playable.js'
+import type { EntryInstance } from '@/entry/interface.js'
+import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { wildcard } from '../util.js'

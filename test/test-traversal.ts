@@ -12,17 +12,17 @@ import {
   dagLinks,
   graphLinks,
   traverser
-} from '~replica/traversal.js'
-import { Blocks } from '~blocks/index.js'
-import type { EntryInstance } from '~entry/interface.js'
-import { Entry } from '~entry/basal/index.js'
-import { Identity } from '~identity/basal/index.js'
-import { Keyvalue } from '~store/keyvalue/index.js'
-import { StaticAccess } from '~access/static/index.js'
-import { Graph, loadHashMap } from '~replica/graph.js'
-import { cidstring, defaultManifest } from '~utils/index.js'
+} from '@/replica/traversal.js'
+import { Blocks } from '@/blocks/index.js'
+import type { EntryInstance } from '@/entry/interface.js'
+import { Entry } from '@/entry/basal/index.js'
+import { Identity } from '@/identity/basal/index.js'
+import { Keyvalue } from '@/store/keyvalue/index.js'
+import { StaticAccess } from '@/access/static/index.js'
+import { Graph, loadHashMap } from '@/replica/graph.js'
+import { cidstring, defaultManifest } from '@/utils/index.js'
 import { initRegistry } from '../src/registry.js'
-import { Manifest } from '~manifest/index.js'
+import { Manifest } from '@/manifest/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, names, tempPath } from './utils/constants.js'

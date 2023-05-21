@@ -2,20 +2,20 @@ import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 import type { LevelDatastore } from 'datastore-level'
 
-import type { AccessProtocol } from '~access/static/protocol.js'
-import type { EntryProtocol } from '~entry/basal/protocol.js'
-import type { IdentityProtocol } from '~identity/basal/protocol.js'
-import type { IdentityInstance, IdentityStatic } from '~identity/interface.js'
-import type { Blocks } from '~blocks/index.js'
-import type { StoreProtocol } from '~store/keyvalue/protocol.js'
-import type { KeyChain } from '~utils/types.js'
-import type { DatastoreClass } from '~utils/datastore.js'
-import type { Address, Manifest } from '~manifest/index.js'
-import type { AccessInstance, AccessStatic } from '~access/interface.js'
-import type { EntryStatic } from '~entry/interface.js'
-import type { StoreInstance, StoreStatic } from '~store/interface'
-import type { Replica } from '~replica/index.js'
-import type { Replicator, ReplicatorClass } from '~replicator/interface'
+import type { AccessProtocol } from '@/access/static/protocol.js'
+import type { EntryProtocol } from '@/entry/basal/protocol.js'
+import type { IdentityProtocol } from '@/identity/basal/protocol.js'
+import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { Blocks } from '@/blocks/index.js'
+import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
+import type { KeyChain } from '@/utils/types.js'
+import type { DatastoreClass } from '@/utils/datastore.js'
+import type { Address, Manifest } from '@/manifest/index.js'
+import type { AccessInstance, AccessStatic } from '@/access/interface.js'
+import type { EntryStatic } from '@/entry/interface.js'
+import type { StoreInstance, StoreStatic } from '@/store/interface'
+import type { Replica } from '@/replica/index.js'
+import type { Replicator, ReplicatorClass } from '@/replicator/interface'
 
 /** @public */
 export interface Create {
@@ -49,7 +49,7 @@ export interface Determine {
 }
 
 // /** @public */ commented out a comment lol
-// export { FetchOptions } from '~utils/types'
+// export { FetchOptions } from '@/utils/types'
 
 /** @public */
 export interface OpenOptions {

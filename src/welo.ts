@@ -5,22 +5,22 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import type { Helia } from '@helia/interface'
 import type { Libp2p } from 'libp2p'
 
-import { Manifest, Address } from '~manifest/index.js'
-import { Blocks } from '~blocks/index.js'
-import { WELO_PATH } from '~utils/constants.js'
-import { Playable } from '~utils/playable.js'
-import { getDatastore, DatastoreClass } from '~utils/datastore.js'
+import { Manifest, Address } from '@/manifest/index.js'
+import { Blocks } from '@/blocks/index.js'
+import { WELO_PATH } from '@/utils/constants.js'
+import { Playable } from '@/utils/playable.js'
+import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
 import {
   dirs,
   DirsReturn,
   defaultManifest,
   getComponents,
   cidstring
-} from '~utils/index.js'
-import type { ReplicatorClass } from '~replicator/interface.js'
-import type { IdentityInstance } from '~identity/interface.js'
-import type { ManifestData } from '~manifest/interface.js'
-import type { KeyChain } from '~utils/types.js'
+} from '@/utils/index.js'
+import type { ReplicatorClass } from '@/replicator/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { ManifestData } from '@/manifest/interface.js'
+import type { KeyChain } from '@/utils/types.js'
 
 // import * as version from './version.js'
 import { initRegistry, Registry } from './registry.js'
