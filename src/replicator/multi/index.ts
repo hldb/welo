@@ -20,10 +20,10 @@ export class MultiReplicator extends Playable implements Replicator {
 
   constructor (config: Config) {
     const starting = async (): Promise<void> => {
-      await start(this.replicators)
+      await start(...this.replicators)
     }
     const stopping = async (): Promise<void> => {
-      await stop(this.replicators)
+      await stop(...this.replicators)
     }
 
     super({ starting, stopping })
