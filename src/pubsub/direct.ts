@@ -1,5 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import type { Libp2p } from 'libp2p'
+import type { GossipLibp2p } from '@/interface'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type {
   Message,
@@ -52,7 +52,7 @@ export interface DirectEvents {
 // This implementation makes it easier to handle messages per store while the pubsub channel is still shared
 
 export class Direct extends EventEmitter<DirectEvents> implements Startable {
-  readonly libp2p: Libp2p
+  readonly libp2p: GossipLibp2p
   readonly localPeerId: PeerId
   readonly remotePeerId: PeerId
 
@@ -67,12 +67,12 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
 
   start (): void {
     if (!this.isStarted()) {
-      this.libp2p.pubsub.addEventListener(
+      this.libp2p.services.pubsub.addEventListener(
         'subscription-change',
         this.#onSubscriptionChange
       )
-      this.libp2p.pubsub.addEventListener('message', this.#onMessage)
-      this.libp2p.pubsub.subscribe(this.topic)
+      this.libp2p.services.pubsub.addEventListener('message', this.#onMessage)
+      this.libp2p.services.pubsub.subscribe(this.topic)
 
       this.#isStarted = true
     }
@@ -80,10 +80,10 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
 
   stop (): void {
     if (this.isStarted()) {
-      this.libp2p.pubsub.unsubscribe(this.topic)
+      this.libp2p.services.pubsub.unsubscribe(this.topic)
 
-      this.libp2p.pubsub.removeEventListener('message', this.#onMessage)
-      this.libp2p.pubsub.removeEventListener(
+      this.libp2p.services.pubsub.removeEventListener('message', this.#onMessage)
+      this.libp2p.services.pubsub.removeEventListener(
         'subscription-change',
         this.#onSubscriptionChange
       )
@@ -92,7 +92,7 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
     }
   }
 
-  constructor (libp2p: Libp2p, remotePeerId: PeerId) {
+  constructor (libp2p: GossipLibp2p, remotePeerId: PeerId) {
     super()
     this.libp2p = libp2p
     this.localPeerId = libp2p.peerId
@@ -110,9 +110,9 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
 
   isOpen (): boolean {
     return (
-      getPeers(this.libp2p.pubsub, this.topic).filter(
+      getPeers(this.libp2p.services.pubsub, this.topic).filter(
         this.remotePeerId.equals.bind(this.remotePeerId)
-      ).length !== 0 && getTopics(this.libp2p.pubsub).includes(this.topic)
+      ).length !== 0 && getTopics(this.libp2p.services.pubsub).includes(this.topic)
     )
   }
 
@@ -121,7 +121,7 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
       throw new Error('direct pubsub not open')
     }
 
-    return await this.libp2p.pubsub.publish(this.topic, bytes)
+    return await this.libp2p.services.pubsub.publish(this.topic, bytes)
   }
 }
 

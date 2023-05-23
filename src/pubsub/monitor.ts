@@ -1,5 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import type { Libp2p } from 'libp2p'
+import type { GossipLibp2p } from '@/interface'
 import type { SubscriptionChangeData } from '@libp2p/interface-pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 import type { PeerId } from '@libp2p/interface-peer-id'
@@ -27,7 +27,7 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
     return this._isStarted
   }
 
-  constructor (readonly libp2p: Libp2p, readonly topic: string) {
+  constructor (readonly libp2p: GossipLibp2p, readonly topic: string) {
     super()
     this._isStarted = false
     this.peers = new Set()
@@ -43,13 +43,13 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
 
   start (): void {
     if (!this.isStarted()) {
-      this.libp2p.pubsub.addEventListener(
+      this.libp2p.services.pubsub.addEventListener(
         'subscription-change',
         this.#refreshPeers
       )
-      this.libp2p.pubsub.subscribe(this.topic)
+      this.libp2p.services.pubsub.subscribe(this.topic)
       this.peers = new Set(
-        getPeers(this.libp2p.pubsub, this.topic).map(peerIdString)
+        getPeers(this.libp2p.services.pubsub, this.topic).map(peerIdString)
       )
       this._isStarted = true
     }
@@ -57,11 +57,11 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
 
   stop (): void {
     if (this.isStarted()) {
-      this.libp2p.pubsub.removeEventListener(
+      this.libp2p.services.pubsub.removeEventListener(
         'subscription-change',
         this.#refreshPeers
       )
-      this.libp2p.pubsub.unsubscribe(this.topic)
+      this.libp2p.services.pubsub.unsubscribe(this.topic)
       this.peers = new Set()
       this._isStarted = false
     }
@@ -85,7 +85,7 @@ function refreshPeers (
 
   const _peers = this.peers
   this.peers = new Set(
-    getPeers(this.libp2p.pubsub, this.topic).map(peerIdString)
+    getPeers(this.libp2p.services.pubsub, this.topic).map(peerIdString)
   )
 
   const joins: Set<string> = new Set()
