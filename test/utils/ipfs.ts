@@ -6,6 +6,7 @@ import { createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
 
+import type { GossipHelia } from '@/interface.js'
 import { createLibp2pOptions } from './libp2p-options.js'
 
 interface IpfsOptions {
@@ -25,7 +26,7 @@ type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 export const getTestIpfs = async (
   testPaths: TestPaths,
   opts: Opts
-): Promise<Helia> => {
+): Promise<GossipHelia> => {
   const options = opts(testPaths.ipfs)
 
   const datastore = new LevelDatastore(options.repo + '/data')

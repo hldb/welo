@@ -1,10 +1,10 @@
 import { webRTCStar } from '@libp2p/webrtc-star'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import { gossipsub, GossipSub } from '@chainsafe/libp2p-gossipsub'
 import type { Libp2pOptions } from 'libp2p'
 
-export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions {
+export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions<{ pubsub: GossipSub }> {
   const webRtcStar = webRTCStar()
 
   const options: Libp2pOptions = {
@@ -29,10 +29,9 @@ export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions {
       maxParallelDials: 150, // 150 total parallel multiaddr dials
       dialTimeout: 10e3 // 10 second dial timeout per peer dial
     },
-    nat: {
-      enabled: false
+    services: {
+      pubsub: gossipsub({ emitSelf: true })
     },
-    pubsub: gossipsub({ emitSelf: true }),
     ...opts
   }
 
