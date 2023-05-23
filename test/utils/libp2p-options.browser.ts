@@ -3,6 +3,7 @@ import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { gossipsub, GossipSub } from '@chainsafe/libp2p-gossipsub'
 import type { Libp2pOptions } from 'libp2p'
+import { identifyService } from 'libp2p/identify'
 
 export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions<{ pubsub: GossipSub }> {
   const webRtcStar = webRTCStar()
@@ -30,6 +31,7 @@ export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions<{ pubsu
       dialTimeout: 10e3 // 10 second dial timeout per peer dial
     },
     services: {
+      identify: identifyService(),
       pubsub: gossipsub({ emitSelf: true })
     },
     ...opts
