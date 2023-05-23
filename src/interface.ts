@@ -1,5 +1,6 @@
 import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { Libp2p, ServiceMap } from '@libp2p/interface-libp2p'
+import type { PubSub } from '@libp2p/interface-pubsub'
 import type { LevelDatastore } from 'datastore-level'
 
 import type { AccessProtocol } from '@/access/static/protocol.js'
@@ -17,12 +18,16 @@ import type { StoreInstance, StoreStatic } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorClass } from '@/replicator/interface'
 
+export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
+export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
+export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
+
 /** @public */
 export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
-  ipfs: Helia
-  libp2p: Libp2p
+  ipfs: GossipHelia
+  libp2p: GossipLibp2p
   start?: boolean
 }
 
@@ -32,8 +37,8 @@ export interface Config {
   blocks: Blocks
   identities: LevelDatastore | null
   keychain: KeyChain
-  ipfs: Helia
-  libp2p: Libp2p
+  ipfs: GossipHelia
+  libp2p: GossipLibp2p
 }
 
 /** @public */
@@ -76,8 +81,8 @@ export interface DbOpen {
   start?: boolean
   blocks: Blocks
   Replicator: ReplicatorClass
-  ipfs: Helia
-  libp2p: Libp2p
+  ipfs: GossipHelia
+  libp2p: GossipLibp2p
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessStatic
