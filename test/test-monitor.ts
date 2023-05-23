@@ -20,7 +20,6 @@ describe(testName, () => {
     libp2p2: GossipLibp2p,
     id1: PeerId,
     id2: PeerId,
-    addr1: Multiaddr,
     addr2: Multiaddr
 
   const sharedTopic = 'shared-topic'
@@ -37,10 +36,9 @@ describe(testName, () => {
     id1 = libp2p1.peerId
     id2 = libp2p2.peerId
 
-    addr1 = await getMultiaddr(ipfs1)
     addr2 = await getMultiaddr(ipfs2)
 
-    await Promise.all([libp2p1.dial(addr2), libp2p2.dial(addr1)])
+    await libp2p1.dial(addr2)
   })
 
   after(async () => {

@@ -24,7 +24,6 @@ describe(testName, () => {
     ipfs2: GossipHelia,
     libp2p1: GossipLibp2p,
     libp2p2: GossipLibp2p,
-    addr1: Multiaddr,
     addr2: Multiaddr,
     replica1: Replica,
     replica2: Replica,
@@ -43,7 +42,6 @@ describe(testName, () => {
     libp2p1 = ipfs1.libp2p
     libp2p2 = ipfs2.libp2p
 
-    addr1 = await getMultiaddr(ipfs1)
     addr2 = await getMultiaddr(ipfs2)
 
     const Datastore = LevelDatastore
@@ -127,10 +125,7 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
-      await Promise.all([
-        libp2p1.dial(addr2),
-        libp2p2.dial(addr1)
-      ])
+      await libp2p1.dial(addr2)
     })
 
     it('replicates replica entries and identities', async () => {

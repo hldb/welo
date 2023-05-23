@@ -50,11 +50,8 @@ describe(testName, () => {
 
     await Promise.all([
       libp2p1.dial(addr2),
-      libp2p1.dial(addr3),
-      libp2p2.dial(addr1),
       libp2p2.dial(addr3),
-      libp2p3.dial(addr1),
-      libp2p3.dial(addr2)
+      libp2p3.dial(addr1)
     ])
   })
 
