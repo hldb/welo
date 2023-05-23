@@ -1,11 +1,9 @@
 import all from 'it-all'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { CID } from 'multiformats/cid'
 import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
-import type { CustomEvent } from '@libp2p/interfaces/events'
 
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
@@ -29,8 +27,8 @@ const getSharedChannelTopic = (manifest: Manifest): string =>
 
 @Extends<Registrant>()
 export class LiveReplicator extends Playable {
-  readonly ipfs: Helia
-  readonly libp2p: Libp2p
+  readonly ipfs: GossipHelia
+  readonly libp2p: GossipLibp2p
   readonly manifest: Manifest
   readonly blocks: Blocks
   readonly replica: Replica
@@ -57,8 +55,8 @@ export class LiveReplicator extends Playable {
     replica,
     blocks
   }: {
-    ipfs: Helia
-    libp2p: Libp2p
+    ipfs: GossipHelia
+    libp2p: GossipLibp2p
     replica: Replica
     blocks: Blocks
   }) {

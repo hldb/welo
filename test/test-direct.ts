@@ -1,11 +1,10 @@
 import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
+import type { GossipLibp2p, GossipHelia } from '@/interface'
 
 import { Direct, DirectEvents } from '@/pubsub/direct.js'
 
@@ -15,12 +14,12 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 const testName = 'pubsub/direct'
 
 describe(testName, () => {
-  let ipfs1: Helia,
-    ipfs2: Helia,
-    ipfs3: Helia,
-    libp2p1: Libp2p,
-    libp2p2: Libp2p,
-    libp2p3: Libp2p,
+  let ipfs1: GossipHelia,
+    ipfs2: GossipHelia,
+    ipfs3: GossipHelia,
+    libp2p1: GossipLibp2p,
+    libp2p2: GossipLibp2p,
+    libp2p3: GossipLibp2p,
     id1: PeerId,
     id2: PeerId,
     // id3: PeerId,
@@ -92,13 +91,13 @@ describe(testName, () => {
 
         peer1.addEventListener('message', onMessage1)
         peer2.addEventListener('message', onMessage2)
-        libp2p3.pubsub.addEventListener('message', onMessage3)
+        libp2p3.services.pubsub.addEventListener('message', onMessage3)
       })
 
       it('emits peered when pubsub peered with remote peer', async () => {
         peer1.start()
         peer2.start()
-        libp2p3.pubsub.subscribe(topic)
+        libp2p3.services.pubsub.subscribe(topic)
 
         let listener1, listener2, listener3
         const promise = Promise.all([
@@ -111,17 +110,17 @@ describe(testName, () => {
           new Promise<void>((resolve) => {
             let i: number = 0
             listener1 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p1.pubsub.addEventListener('subscription-change', listener1)
+            libp2p1.services.pubsub.addEventListener('subscription-change', listener1)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener2 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p2.pubsub.addEventListener('subscription-change', listener2)
+            libp2p2.services.pubsub.addEventListener('subscription-change', listener2)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener3 = () => !Number.isNaN(i++) && i === 2 && resolve()
-            libp2p3.pubsub.addEventListener('subscription-change', listener3)
+            libp2p3.services.pubsub.addEventListener('subscription-change', listener3)
           })
         ])
 
@@ -129,9 +128,9 @@ describe(testName, () => {
         assert.strictEqual(peer2.isOpen(), false)
 
         await promise
-        libp2p1.pubsub.removeEventListener('subscription-change', listener1)
-        libp2p2.pubsub.removeEventListener('subscription-change', listener2)
-        libp2p3.pubsub.removeEventListener('subscription-change', listener3)
+        libp2p1.services.pubsub.removeEventListener('subscription-change', listener1)
+        libp2p2.services.pubsub.removeEventListener('subscription-change', listener2)
+        libp2p3.services.pubsub.removeEventListener('subscription-change', listener3)
 
         assert.strictEqual(peer1.isOpen(), true)
         assert.strictEqual(peer2.isOpen(), true)
@@ -150,17 +149,17 @@ describe(testName, () => {
             listener = (): void => {
               messages3.length === 3 && resolve(true)
             }
-            libp2p3.pubsub.addEventListener('message', listener)
+            libp2p3.services.pubsub.addEventListener('message', listener)
           })
         ])
         void (await Promise.all([
           peer1.publish(new Uint8Array([1])),
           peer2.publish(new Uint8Array([2])),
-          libp2p3.pubsub.publish(topic, new Uint8Array([3]))
+          libp2p3.services.pubsub.publish(topic, new Uint8Array([3]))
         ]))
 
         await promise
-        libp2p1.pubsub.removeEventListener('message', listener)
+        libp2p1.services.pubsub.removeEventListener('message', listener)
 
         assert.strictEqual(messages1.length, 1)
         assert.strictEqual(messages2.length, 1)
@@ -168,7 +167,7 @@ describe(testName, () => {
 
         peer1.removeEventListener('message', onMessage1)
         peer2.removeEventListener('message', onMessage2)
-        libp2p3.pubsub.removeEventListener('message', onMessage3)
+        libp2p3.services.pubsub.removeEventListener('message', onMessage3)
       })
 
       it('emits unpeered when remote peer is no longer pubsub peered', async () => {
@@ -197,7 +196,7 @@ describe(testName, () => {
 
         peer1.stop()
         peer2.stop()
-        libp2p3.pubsub.unsubscribe(topic)
+        libp2p3.services.pubsub.unsubscribe(topic)
       })
     })
   })

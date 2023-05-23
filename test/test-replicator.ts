@@ -1,8 +1,7 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -21,10 +20,10 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 const testName = 'live-replicator'
 
 describe(testName, () => {
-  let ipfs1: Helia,
-    ipfs2: Helia,
-    libp2p1: Libp2p,
-    libp2p2: Libp2p,
+  let ipfs1: GossipHelia,
+    ipfs2: GossipHelia,
+    libp2p1: GossipLibp2p,
+    libp2p2: GossipLibp2p,
     addr1: Multiaddr,
     addr2: Multiaddr,
     replica1: Replica,

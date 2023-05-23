@@ -2,8 +2,7 @@ import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -69,8 +68,8 @@ export class Welo extends Playable {
   private readonly dirs: DirsReturn
   readonly directory: string
 
-  readonly ipfs: Helia
-  readonly libp2p: Libp2p
+  readonly ipfs: GossipHelia
+  readonly libp2p: GossipLibp2p
   readonly blocks: Blocks
 
   readonly identities: LevelDatastore | null
