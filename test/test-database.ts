@@ -1,7 +1,7 @@
 import path from 'path'
 import { assert } from './utils/chai.js'
 import { LevelDatastore } from 'datastore-level'
-import type { Helia } from '@helia/interface'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '../src/database.js'
 import { Keyvalue, Keyvalue as Store } from '@/store/keyvalue/index.js'
@@ -19,13 +19,12 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
-import type { Libp2p } from 'libp2p'
 
 const testName = 'database'
 
 describe(testName, () => {
-  let ipfs: Helia,
-    libp2p: Libp2p,
+  let ipfs: GossipHelia,
+    libp2p: GossipLibp2p,
     blocks: Blocks,
     database: Database,
     manifest: Manifest,

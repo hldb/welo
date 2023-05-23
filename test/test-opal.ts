@@ -1,6 +1,5 @@
 import { assert } from './utils/chai.js'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Welo } from '../src/index.js'
 import type { Welo as WeloType } from '../src/welo.js'
@@ -17,8 +16,8 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'welo'
 
 describe(testName, () => {
-  let ipfs: Helia,
-    libp2p: Libp2p,
+  let ipfs: GossipHelia,
+    libp2p: GossipLibp2p,
     welo: WeloType,
     directory: string,
     identity: Identity,

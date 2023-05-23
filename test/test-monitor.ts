@@ -1,8 +1,7 @@
 import { assert } from './utils/chai.js'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
 import { Monitor, MonitorEvents } from '@/pubsub/monitor.js'
@@ -15,10 +14,10 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 const testName = 'pubsub/monitor'
 
 describe(testName, () => {
-  let ipfs1: Helia,
-    ipfs2: Helia,
-    libp2p1: Libp2p,
-    libp2p2: Libp2p,
+  let ipfs1: GossipHelia,
+    ipfs2: GossipHelia,
+    libp2p1: GossipLibp2p,
+    libp2p2: GossipLibp2p,
     id1: PeerId,
     id2: PeerId,
     addr1: Multiaddr,
