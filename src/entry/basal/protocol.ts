@@ -3,8 +3,6 @@ import { prefix } from '../interface.js'
 
 const protocol  = `${prefix}basal` as const
 
-export interface EntryProtocol extends Protocol {
-  protocol: typeof protocol
-}
+export type EntryProtocol = Protocol<typeof protocol>
 
 export default protocol

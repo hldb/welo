@@ -4,9 +4,9 @@ import type { Blocks } from '@/blocks/index.js'
 
 import type { Address } from './address.js'
 
-export interface Protocol {
-  readonly protocol: string
-  readonly config?: any
+export interface Protocol<T extends string = string, C extends unknown = unknown> {
+  readonly protocol: T
+  readonly config?: C
 }
 
 export interface ManifestData {

@@ -82,7 +82,7 @@ describe(testName, () => {
         const access = new Access({ manifest })
         await start(access)
         assert.strictEqual(access.manifest, manifest)
-        assert.deepEqual(access.write, new Set(anyaccess.config.write))
+        assert.deepEqual(access.write, new Set(anyaccess.config?.write))
       })
 
       it('rejects when write access is empty', async () => {

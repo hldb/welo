@@ -87,7 +87,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.manifest = manifest
     this.directory = directory
     this.blocks = blocks
-    this.config = manifest.store.config
+    this.config = manifest.store.config as Config
     this.replica = replica
 
     this.Datastore = Datastore

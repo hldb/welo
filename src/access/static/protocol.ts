@@ -8,9 +8,6 @@ export interface Config {
   write: Array<string | Uint8Array>
 }
 
-export interface AccessProtocol extends Protocol {
-  protocol: string
-  config: Config
-}
+export type AccessProtocol = Protocol<typeof protocol, Config>
 
 export default protocol

@@ -28,7 +28,7 @@ export class StaticAccess extends Playable implements AccessInstance {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.config = manifest?.access?.config
+    this.config = manifest?.access?.config as Config
 
     if (!Array.isArray(this.config?.write)) {
       throw new Error('expected manifest.access.config.write to be an array')
