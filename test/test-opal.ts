@@ -1,8 +1,8 @@
 import { assert } from './utils/chai.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import { Welo } from '../src/index.js'
-import type { Welo as WeloType } from '../src/welo.js'
+import { createWelo } from './utils/welo.js'
+import { Welo } from '../src/welo.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
@@ -18,7 +18,7 @@ const testName = 'welo'
 describe(testName, () => {
   let ipfs: GossipHelia,
     libp2p: GossipLibp2p,
-    welo: WeloType,
+    welo: Welo,
     directory: string,
     identity: Identity,
     directory1: string
@@ -55,12 +55,12 @@ describe(testName, () => {
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await Welo.create({ ipfs, libp2p, directory })
+        welo = await createWelo({ ipfs, libp2p, directory })
       })
 
       it('returns an instance of Welo with an identity option', async () => {
         const directory = directory1
-        const welo = await Welo.create({ ipfs, libp2p, directory, identity })
+        const welo = await createWelo({ ipfs, libp2p, directory, identity })
         await welo.stop()
       })
 
@@ -68,7 +68,7 @@ describe(testName, () => {
         const Datastore = Welo.Datastore
         Welo.Datastore = undefined
 
-        const promise = Welo.create({ ipfs, libp2p, directory })
+        const promise = createWelo({ ipfs, libp2p, directory })
         await assert.isRejected(promise)
 
         Welo.Datastore = Datastore
