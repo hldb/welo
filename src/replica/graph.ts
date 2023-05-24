@@ -22,7 +22,7 @@ const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
 export const loader = (blocks: Blocks): Loader => ({
   get: async (cid: CID): Promise<Uint8Array> =>
     await blocks.get(cid).then((b) => b.bytes),
-  put: async (cid: CID, bytes: Uint8Array): Promise<void> => {
+  put: async (_: CID, bytes: Uint8Array): Promise<void> => {
     const block = await blocks.decode<any>({ bytes })
     await blocks.put(block)
   }

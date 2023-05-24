@@ -126,7 +126,7 @@ class Identity implements IdentityInstance<IdentityValue> {
   static async fetch ({ blocks, auth: cid }: Fetch): Promise<Identity> {
     const block = await blocks.get<IdentityValue>(cid)
 
-    const identity = await this.asIdentity({ block })
+    const identity = this.asIdentity({ block })
     if (identity === null) {
       throw new Error('cid did not resolve to a valid identity')
     }
