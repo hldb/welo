@@ -89,6 +89,7 @@
     "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
+    "@alanshaw/pail": "github:tabcat/pail#dist",
     "@helia/interface": "^1.1.1",
     "@ipld/dag-cbor": "^9.0.1",
     "@libp2p/crypto": "^1.0.17",
@@ -98,6 +99,7 @@
     "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^2.0.3",
     "@libp2p/webrtc-star": "^7.0.0",
+    "blockstore-core": "^4.1.0",
     "datastore-level": "^10.1.1",
     "helia": "^1.1.2",
     "interface-datastore": "^8.2.0",
