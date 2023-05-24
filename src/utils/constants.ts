@@ -1,3 +1,3 @@
 export const WELO_PATH: '/welo' = '/welo'
 
-export const OPALSNT_PREFIX: '/hldb/' = '/hldb/'
+export const HLDB_PREFIX: '/hldb/' = '/hldb/'

@@ -2,7 +2,7 @@ import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '@/blocks/index.js'
-import { OPALSNT_PREFIX } from '@/utils/constants.js'
+import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Registrant } from '@/utils/register.js'
 import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
 
@@ -42,4 +42,4 @@ export interface EntryStatic<Value> extends Registrant {
   verify: (entry: EntryInstance<Value>) => Promise<boolean>
 }
 
-export const prefix = `${OPALSNT_PREFIX}entry/` as const
+export const prefix = `${HLDB_PREFIX}entry/` as const
