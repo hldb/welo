@@ -2,8 +2,7 @@ import type { Protocol } from '@/manifest/interface.js'
 
 import protocolPrefix from '../prefix.js'
 
-const type = 'static'
-const protocol: '/hldb/access/static' = `${protocolPrefix}${type}`
+const protocol = `${protocolPrefix}static` as const
 
 export interface Config {
   write: Array<string | Uint8Array>

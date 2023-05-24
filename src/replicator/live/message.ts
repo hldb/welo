@@ -3,7 +3,7 @@ import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '@/blocks/index.js'
 
-import { protocol } from './protocol.js'
+import protocol from './protocol.js'
 
 interface BlockData<Protocol> {
   protocol: Protocol

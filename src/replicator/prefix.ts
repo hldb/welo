@@ -1,4 +1,3 @@
 import { OPALSNT_PREFIX as prefix } from '@/utils/constants.js'
 
-const type = 'replicator'
-export const replicatorPrefix: '/hldb/replicator' = `${prefix}${type}`
+export default `${prefix}replicator/` as const

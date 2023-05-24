@@ -4,8 +4,7 @@ import type { Protocol } from '@/manifest/interface.js'
 
 import prefix from '../prefix.js'
 
-const type = 'keyvalue'
-const protocol: '/hldb/store/keyvalue' = `${prefix}${type}`
+const protocol = `${prefix}keyvalue` as const
 
 export interface Config {
   snap?: CID

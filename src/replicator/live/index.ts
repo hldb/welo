@@ -20,10 +20,9 @@ import type { AccessInstance } from '@/access/interface.js'
 import type { Registrant } from '@/utils/register.js'
 
 import * as Advert from './message.js'
-import { protocol } from './protocol.js'
+import protocol from './protocol.js'
 
-const getSharedChannelTopic = (manifest: Manifest): string =>
-  '/hldb/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
+const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
 @Extends<Registrant>()
 export class LiveReplicator extends Playable {
