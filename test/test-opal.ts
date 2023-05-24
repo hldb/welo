@@ -6,7 +6,10 @@ import { Welo } from '../src/welo.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
-import type { Identity } from '@/identity/basal/index.js'
+import { StaticAccess } from '@/access/static/index.js'
+import { Entry } from '@/entry/basal/index.js'
+import { Identity } from '@/identity/basal/index.js'
+import { Keyvalue } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -80,6 +83,7 @@ describe(testName, () => {
       assert.isOk(welo.determine)
       assert.isOk(welo.fetch)
       assert.isOk(welo.open)
+      assert.isOk(welo.getComponents)
     })
 
     describe('determineManifest', () => {
@@ -115,6 +119,16 @@ describe(testName, () => {
         assert.strictEqual(welo.opened.size, 1)
         await database.close()
         assert.strictEqual(welo.opened.size, 0)
+      })
+    })
+
+    describe('getComponents', () => {
+      it('returns the components for the manifest', () => {
+        const components = welo.getComponents(manifest)
+        assert.strictEqual(components.Store, Keyvalue)
+        assert.strictEqual(components.Access, StaticAccess)
+        assert.strictEqual(components.Entry, Entry)
+        assert.strictEqual(components.Identity, Identity)
       })
     })
   })

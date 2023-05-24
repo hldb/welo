@@ -13,8 +13,8 @@ import { Identity } from '@/identity/basal/index.js'
 import {
   dirs,
   DirsReturn,
+  Components,
   defaultManifest,
-  getComponents,
   cidstring
 } from '@/utils/index.js'
 import type { ReplicatorClass } from '@/replicator/interface.js'
@@ -56,6 +56,8 @@ export class Welo extends Playable {
   static Datastore?: DatastoreClass
   static Replicator?: ReplicatorClass
 
+  private readonly handlers: Config['handlers']
+
   private readonly dirs: DirsReturn
   readonly directory: string
 
@@ -80,7 +82,8 @@ export class Welo extends Playable {
     identities,
     keychain,
     ipfs,
-    libp2p
+    libp2p,
+    handlers
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -107,6 +110,8 @@ export class Welo extends Playable {
 
     this.opened = new Map()
     this._opening = new Map()
+
+    this.handlers = handlers;
   }
 
   /**
@@ -196,7 +201,7 @@ export class Welo extends Playable {
     await this.blocks.put(manifest.block)
 
     try {
-      getComponents()
+      this.getComponents(manifest)
     } catch (e) {
       console.warn('manifest configuration contains unregistered components')
     }
@@ -272,6 +277,16 @@ export class Welo extends Playable {
       cidstring(manifest.address.cid)
     )
 
+    const components = this.getComponents(manifest);
+
+    if (components.Access == null ||
+      components.Entry == null ||
+      components.Identity == null ||
+      components.Store == null
+    ) {
+      throw new Error('missing components')
+    }
+
     const promise = Database.open({
       directory,
       manifest,
@@ -281,7 +296,7 @@ export class Welo extends Playable {
       blocks: this.blocks,
       Datastore,
       Replicator,
-      ...getComponents()
+      ...components
     })
       .then((database) => {
         this.opened.set(addr, database)
@@ -315,5 +330,23 @@ export class Welo extends Playable {
     this._opening.set(addr, promise)
 
     return await promise
+  }
+
+  getComponents (manifest: Manifest): Components {
+    const access = this.handlers.access.find(h => h.protocol === manifest.access.protocol)
+    const entry = this.handlers.entry.find(h => h.protocol === manifest.entry.protocol)
+    const identity = this.handlers.identity.find(h => h.protocol === manifest.identity.protocol)
+    const store = this.handlers.store.find(h => h.protocol === manifest.store.protocol)
+
+    if (access == null || entry == null || identity == null || store == null) {
+      throw new Error('missing component(s)')
+    }
+
+    return {
+      Access: access,
+      Entry: entry,
+      Identity: identity,
+      Store: store
+    }
   }
 }

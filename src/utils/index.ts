@@ -53,16 +53,9 @@ export const defaultManifest = (
   }
 })
 
-interface Components {
+export interface Components {
   Access: AccessStatic
   Entry: EntryStatic<any>
   Identity: IdentityStatic<any>
   Store: StoreStatic
 }
-
-export const getComponents = (): Components => ({
-  Access: StaticAccess,
-  Store: Keyvalue,
-  Entry,
-  Identity
-})

@@ -9,7 +9,6 @@ import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 import { initRegistry } from '../src/registry.js'
-import { getComponents } from '@/utils/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -126,16 +125,6 @@ describe(testName, () => {
           block: false as unknown as BlockView<any>
         })
         assert.strictEqual(_manifest, null)
-      })
-    })
-
-    describe('.getComponents', () => {
-      it('returns the components for the manifest', () => {
-        const components = getComponents()
-        assert.strictEqual(components.Store, Keyvalue)
-        assert.strictEqual(components.Access, StaticAccess)
-        assert.strictEqual(components.Entry, Entry)
-        assert.strictEqual(components.Identity, Identity)
       })
     })
   })
