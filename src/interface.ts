@@ -33,8 +33,8 @@ export interface Create {
   handlers: {
     access: AccessStatic[]
     store: StoreStatic[]
-    entry: EntryStatic<any>[]
-    identity: IdentityStatic<any>[]
+    entry: Array<EntryStatic<any>>
+    identity: Array<IdentityStatic<any>>
   }
 }
 
@@ -50,8 +50,8 @@ export interface Config {
   handlers: {
     access: AccessStatic[]
     store: StoreStatic[]
-    entry: EntryStatic<any>[]
-    identity: IdentityStatic<any>[]
+    entry: Array<EntryStatic<any>>
+    identity: Array<IdentityStatic<any>>
   }
 }
 

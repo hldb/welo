@@ -3,9 +3,9 @@ import { StaticAccess } from '@/access/static/index.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
-import type { Create } from '@/interface.js';
+import type { Create } from '@/interface.js'
 
-export default (config: Omit<Create, "handlers">) => Welo.create({
+export default async (config: Omit<Create, 'handlers'>): Promise<Welo> => await Welo.create({
   handlers: {
     identity: [Identity],
     access: [StaticAccess],

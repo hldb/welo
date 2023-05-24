@@ -62,7 +62,7 @@ interface Components {
 
 export const getComponents = (): Components => ({
   Access: StaticAccess,
-  Entry: Entry,
-  Identity: Identity,
-  Store: Keyvalue
+  Store: Keyvalue,
+  Entry,
+  Identity
 })
