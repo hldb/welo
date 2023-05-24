@@ -50,7 +50,7 @@ export class Paily extends BaseDatastore {
   }
 
   async put (key: Key, val: Uint8Array): Promise<Key> {
-    const resolved = await this.#queue.add(async () => await unqueuePut.apply(this, [key, val]))
+    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val]))
 
     if (resolved == null) {
       throw new CodeError('why tf this undefined', 'UNDEFINED')
@@ -66,7 +66,7 @@ export class Paily extends BaseDatastore {
 
 const toPair = ({ cid, bytes }: ShardBlockView): Pair => ({ cid, block: bytes })
 
-async function unqueuePut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
+async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
   const cid = CID.create(1, code, await sha256.digest(val))
   const { root: newRoot, additions, removals } = await put(
     this.blocks as unknown as BlockFetcher,
