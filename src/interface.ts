@@ -29,6 +29,13 @@ export interface Create {
   ipfs: GossipHelia
   libp2p: GossipLibp2p
   start?: boolean
+
+  handlers: {
+    access: AccessStatic[]
+    store: StoreStatic[]
+    entry: EntryStatic<any>[]
+    identity: IdentityStatic<any>[]
+  }
 }
 
 export interface Config {
@@ -39,6 +46,13 @@ export interface Config {
   keychain: KeyChain
   ipfs: GossipHelia
   libp2p: GossipLibp2p
+
+  handlers: {
+    access: AccessStatic[]
+    store: StoreStatic[]
+    entry: EntryStatic<any>[]
+    identity: IdentityStatic<any>[]
+  }
 }
 
 /** @public */
