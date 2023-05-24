@@ -226,7 +226,7 @@ export class Replica extends Playable {
       await this.blocks.put(entry.block)
       await this.blocks.put(entry.identity.block)
 
-      if (await this.access.canAppend(entry)) {
+      if (await this.access.canAppend(entry) === true) {
         await this.graph.add(entry.cid, entry.next)
       } else {
         await this.graph.deny(entry.cid)

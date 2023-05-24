@@ -67,6 +67,6 @@ export class Node implements NodeObj {
       missing: this.missing,
       denied: this.denied
     }
-    return await Blocks.encode<NodeValue>({ value: simple })
+    return Blocks.encode<NodeValue>({ value: simple })
   }
 }

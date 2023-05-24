@@ -37,7 +37,7 @@ export function loadEntry ({
   Identity: IdentityStatic<any>
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await Entry.fetch({ blocks, cid, Identity }).catch(() => null)
+    return Entry.fetch({ blocks, cid, Identity }).catch(() => null)
   }
   return load
 }
