@@ -4,30 +4,23 @@
  * @packageDocumentation
  */
 
-import { Welo as _Welo } from './welo.js'
-
+import { Welo } from './welo.js'
 import { LevelDatastore } from 'datastore-level'
 import { MultiReplicator } from '@/replicator/multi/index.js'
 import { LiveReplicator } from '@/replicator/live/index.js'
 
-import { StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
-
-_Welo.registry.access.add(StaticAccess)
-_Welo.registry.entry.add(Entry)
-_Welo.registry.identity.add(Identity)
-_Welo.registry.store.add(Keyvalue)
+export { StaticAccess } from '@/access/static/index.js'
+export { Entry } from '@/entry/basal/index.js'
+export { Identity } from '@/identity/basal/index.js'
+export { Keyvalue } from '@/store/keyvalue/index.js'
 
 MultiReplicator.register.add(LiveReplicator)
 
-_Welo.Datastore = LevelDatastore
-_Welo.Replicator = MultiReplicator
+Welo.Datastore = LevelDatastore
+Welo.Replicator = MultiReplicator
 
-export { _Welo as Welo }
+export { Welo }
 
-export { StaticAccess, Entry, Identity, Keyvalue }
 export type { Manifest, Address } from '@/manifest/index.js'
 export type { Playable } from '@/utils/playable.js'
 export type { Database } from './database.js'

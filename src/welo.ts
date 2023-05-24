@@ -9,6 +9,7 @@ import { Blocks } from '@/blocks/index.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
 import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
+import { Identity } from '@/identity/basal/index.js'
 import {
   dirs,
   DirsReturn,
@@ -22,7 +23,6 @@ import type { ManifestData } from '@/manifest/interface.js'
 import type { KeyChain } from '@/utils/types.js'
 
 // import * as version from './version.js'
-import { initRegistry, Registry } from './registry.js'
 import { Database } from './database.js'
 import type {
   ClosedEmit,
@@ -35,8 +35,6 @@ import type {
   OpenOptions
 } from './interface.js'
 import type { LevelDatastore } from 'datastore-level'
-
-const registry = initRegistry()
 
 export { Manifest, Address }
 export type {
@@ -55,13 +53,6 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  /**
-   *
-   */
-  static get registry (): Registry {
-    return registry
-  }
-
   static Datastore?: DatastoreClass
   static Replicator?: ReplicatorClass
 
@@ -156,7 +147,6 @@ export class Welo extends Playable {
       )
 
       await identities.open()
-      const Identity = this.registry.identity.star
       identity = await Identity.get({
         name: 'default',
         identities,
@@ -172,7 +162,8 @@ export class Welo extends Playable {
       ipfs,
       blocks: new Blocks(ipfs),
       libp2p,
-      keychain: libp2p.keychain
+      keychain: libp2p.keychain,
+      handlers: options.handlers
     }
 
     const welo = new Welo(config)
@@ -197,7 +188,7 @@ export class Welo extends Playable {
    */
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
-      ...defaultManifest(options.name, this.identity, registry),
+      ...defaultManifest(options.name, this.identity),
       ...options
     }
 
@@ -205,7 +196,7 @@ export class Welo extends Playable {
     await this.blocks.put(manifest.block)
 
     try {
-      getComponents(registry, manifest)
+      getComponents()
     } catch (e) {
       console.warn('manifest configuration contains unregistered components')
     }
@@ -290,7 +281,7 @@ export class Welo extends Playable {
       blocks: this.blocks,
       Datastore,
       Replicator,
-      ...getComponents(registry, manifest)
+      ...getComponents()
     })
       .then((database) => {
         this.opened.set(addr, database)
