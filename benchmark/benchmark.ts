@@ -1,7 +1,7 @@
 import all from 'it-all'
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { parsedcid } from '@/utils/index.js'
-import { Welo } from '../src/index.js'
+import createWelo from '@/utils/createDefaultWelo.js'
 import { getTestPaths, tempPath } from '../test/utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from '../test/utils/ipfs.js'
 
@@ -12,7 +12,7 @@ if (ipfs.libp2p == null) {
 }
 const libp2p = ipfs.libp2p
 
-const welo = await Welo.create({ ipfs, libp2p, directory: paths.database })
+const welo = await createWelo({ ipfs, libp2p, directory: paths.database })
 const db = await welo.open(await welo.determine({ name: '1000' }))
 
 const num = 1000

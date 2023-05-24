@@ -70,7 +70,7 @@ describe('traversal', () => {
 
     access = new StaticAccess({
       manifest: await Manifest.create({
-        ...defaultManifest(name, identity, registry),
+        ...defaultManifest(name, identity),
         access: {
           protocol: StaticAccess.protocol,
           config: { write: [identity.id] }
@@ -79,7 +79,7 @@ describe('traversal', () => {
     })
     noaccess = new StaticAccess({
       manifest: await Manifest.create({
-        ...defaultManifest(name, identity, registry),
+        ...defaultManifest(name, identity),
         access: {
           protocol: StaticAccess.protocol,
           config: { write: ['nobody'] }
@@ -327,7 +327,7 @@ describe('traversal', () => {
       await blocks.put(id1.block)
 
       const manifest = await Manifest.create({
-        ...defaultManifest(name, identity, registry),
+        ...defaultManifest(name, identity),
         access: {
           protocol: StaticAccess.protocol,
           config: { write: [id0.id, id1.id] }

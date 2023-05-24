@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import { createWelo } from './utils/welo.js'
+import createWelo from '@/utils/createDefaultWelo.js'
 import { Welo } from '../src/welo.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import type { Address, Manifest } from '@/manifest/index.js'
@@ -44,10 +44,6 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Welo.registry.access)
-      assert.isOk(Welo.registry.entry)
-      assert.isOk(Welo.registry.identity)
-      assert.isOk(Welo.registry.store)
       assert.isOk(Welo.Datastore)
       // assert.isOk(Welo.Replicator)
       assert.isOk(Welo.create)

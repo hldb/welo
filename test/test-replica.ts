@@ -58,7 +58,7 @@ describe(testName, () => {
     await blocks.put(identity.block)
 
     manifest = await Manifest.create({
-      ...defaultManifest('name', identity, registry),
+      ...defaultManifest('name', identity),
       tag: new Uint8Array()
     })
     access = new StaticAccess({ manifest })

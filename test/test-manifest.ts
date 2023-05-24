@@ -131,7 +131,7 @@ describe(testName, () => {
 
     describe('.getComponents', () => {
       it('returns the components for the manifest', () => {
-        const components = getComponents(registry, manifest)
+        const components = getComponents()
         assert.strictEqual(components.Store, Keyvalue)
         assert.strictEqual(components.Access, StaticAccess)
         assert.strictEqual(components.Entry, Entry)

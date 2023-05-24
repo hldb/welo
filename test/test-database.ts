@@ -4,12 +4,11 @@ import { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '../src/database.js'
-import { Keyvalue, Keyvalue as Store } from '@/store/keyvalue/index.js'
+import { Keyvalue as Store } from '@/store/keyvalue/index.js'
 import { StaticAccess as Access, StaticAccess } from '@/access/static/index.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
 import { Blocks } from '@/blocks/index.js'
 import { defaultManifest } from '@/utils/index.js'
 import { MultiReplicator } from '@/replicator/multi/index.js'
@@ -32,13 +31,6 @@ describe(testName, () => {
     directory: string,
     Datastore: DatastoreClass
 
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
-
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
@@ -50,7 +42,7 @@ describe(testName, () => {
     identity = await getTestIdentity(identities, libp2p.keychain, testName)
 
     manifest = await Manifest.create({
-      ...defaultManifest('name', identity, registry),
+      ...defaultManifest('name', identity),
       access: {
         protocol: StaticAccess.protocol,
         config: { write: [identity.id] }

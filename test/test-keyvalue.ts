@@ -67,7 +67,7 @@ describe(testName, () => {
 
     before(async () => {
       manifest = await Manifest.create({
-        ...defaultManifest('name', identity, registry),
+        ...defaultManifest('name', identity),
         access: {
           protocol: StaticAccess.protocol,
           config: { write: [identity.id] }
