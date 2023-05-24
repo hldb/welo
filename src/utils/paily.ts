@@ -86,7 +86,11 @@ async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key
 }
 
 async function unqueuedDelete (this: Paily, key: Key): Promise<void> {
-  const { root: newRoot, additions, removals } = await del(this.blocks as unknown as BlockFetcher, this.root, key.toString())
+  const { root: newRoot, additions, removals } = await del(
+    this.blocks as unknown as BlockFetcher,
+    this.root,
+    key.toString()
+  )
 
   await Promise.all([
     await drain(this.blocks.putMany(additions.map(toPair))),
