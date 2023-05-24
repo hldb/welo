@@ -1,3 +1,3 @@
-import protocolPrefix from '../prefix.js'
+import { prefix } from '../interface.js'
 
-export default `${protocolPrefix}live/1.0.0/` as const
+export default `${prefix}live/1.0.0/` as const

@@ -4,6 +4,7 @@ import type { EventEmitter } from '@libp2p/interfaces/events'
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
+import { OPALSNT_PREFIX } from '@/utils/constants.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Registrant } from '@/utils/register.js'
 
@@ -37,3 +38,5 @@ export interface StoreInstance extends Startable {
 export interface StoreStatic extends Registrant {
   new (props: Props): StoreInstance
 }
+
+export const prefix = `${OPALSNT_PREFIX}store/` as const

@@ -10,7 +10,7 @@ import { initRegistry } from '../src/registry.js'
 import { defaultManifest } from '@/utils/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
-import { wildcard } from '@/access/util.js'
+import { wildcard } from '@/access/interface.js'
 
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'

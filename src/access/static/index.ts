@@ -6,7 +6,7 @@ import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
-import { wildcard } from '../util.js'
+import { wildcard } from '../interface.js'
 import type { AccessInstance, AccessStatic } from '../interface.js'
 
 @Extends<AccessStatic>()

@@ -3,6 +3,7 @@ import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
 
 import type { Blocks } from '@/blocks/index.js'
+import { OPALSNT_PREFIX } from '@/utils/constants.js'
 import type { Registrant } from '@/utils/register.js'
 import type { KeyChain } from '@/utils/types.js'
 
@@ -59,3 +60,5 @@ export interface IdentityStatic<Value> extends Registrant {
     sig: Uint8Array
   ) => Promise<boolean>
 }
+
+export const prefix = `${OPALSNT_PREFIX}identity/` as const

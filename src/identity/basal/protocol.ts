@@ -1,8 +1,8 @@
 import type { Protocol } from '@/manifest/interface.js'
 
-import protocolPrefix from '../prefix.js'
+import { prefix } from '../interface.js'
 
-const protocol = `${protocolPrefix}basal` as const
+const protocol = `${prefix}basal` as const
 
 export interface IdentityProtocol extends Protocol {
   protocol: typeof protocol

@@ -1,6 +1,7 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import type { EntryInstance } from '@/entry/interface.js'
+import { OPALSNT_PREFIX } from '@/utils/constants.js'
 import type { Registrant } from '@/utils/register.js'
 import type { Manifest } from '@/manifest/index'
 
@@ -16,3 +17,7 @@ export interface Open {
 export interface AccessStatic extends Registrant {
   new (props: any): AccessInstance
 }
+
+export const wildcard = '*'
+
+export const prefix = `${OPALSNT_PREFIX}access/` as const
