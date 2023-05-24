@@ -4,15 +4,10 @@ import { base32 } from 'multiformats/bases/base32'
 import { peerIdFromString } from '@libp2p/peer-id'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-import type { ManifestData } from '@/manifest/interface.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityStatic } from '@/identity/interface.js'
 import type { AccessStatic } from '@/access/interface.js'
 import type { StoreStatic } from '@/store/interface.js'
 import type { EntryStatic } from '@/entry/interface.js'
-import { StaticAccess } from '@/access/static/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)
@@ -32,26 +27,6 @@ export const dirs = (root: string): DirsReturn =>
   Object.fromEntries(
     ['databases', 'identities', 'keychain'].map((k) => [k, path.join(root, k)])
   )
-
-export const defaultManifest = (
-  name: string,
-  identity: IdentityInstance<any>
-): ManifestData => ({
-  name,
-  store: {
-    protocol: Keyvalue.protocol
-  },
-  access: {
-    protocol: StaticAccess.protocol,
-    config: { write: [identity.id] }
-  },
-  entry: {
-    protocol: Entry.protocol
-  },
-  identity: {
-    protocol: Identity.protocol
-  }
-})
 
 export interface Components {
   Access: AccessStatic

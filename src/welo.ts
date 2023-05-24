@@ -14,7 +14,6 @@ import {
   dirs,
   DirsReturn,
   Components,
-  defaultManifest,
   cidstring
 } from '@/utils/index.js'
 import type { ReplicatorClass } from '@/replicator/interface.js'
@@ -111,7 +110,7 @@ export class Welo extends Playable {
     this.opened = new Map()
     this._opening = new Map()
 
-    this.handlers = handlers;
+    this.handlers = handlers
   }
 
   /**
@@ -193,7 +192,7 @@ export class Welo extends Playable {
    */
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
-      ...defaultManifest(options.name, this.identity),
+      ...this.getDefaultManifest(options.name),
       ...options
     }
 
@@ -277,7 +276,7 @@ export class Welo extends Playable {
       cidstring(manifest.address.cid)
     )
 
-    const components = this.getComponents(manifest);
+    const components = this.getComponents(manifest)
 
     if (components.Access == null ||
       components.Entry == null ||
@@ -347,6 +346,25 @@ export class Welo extends Playable {
       Entry: entry,
       Identity: identity,
       Store: store
+    }
+  }
+
+  private getDefaultManifest (name: string): ManifestData {
+    return {
+      name,
+      store: {
+        protocol: this.handlers.store[0].protocol
+      },
+      access: {
+        protocol: this.handlers.access[0].protocol,
+        config: { write: [this.identity.id] }
+      },
+      entry: {
+        protocol: this.handlers.entry[0].protocol
+      },
+      identity: {
+        protocol: this.handlers.identity[0].protocol
+      }
     }
   }
 }
