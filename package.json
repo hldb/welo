@@ -89,7 +89,7 @@
     "typescript-transform-paths": "^3.4.4"
   },
   "dependencies": {
-    "@alanshaw/pail": "github:tabcat/pail#dist",
+    "@alanshaw/pail": "^0.3.3",
     "@helia/interface": "^1.1.1",
     "@ipld/dag-cbor": "^9.0.1",
     "@libp2p/crypto": "^1.0.17",

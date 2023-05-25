@@ -8,7 +8,7 @@ import { CodeError } from '@libp2p/interfaces/errors'
 import { BaseDatastore } from 'datastore-core'
 import type { ShardLink, ShardBlockView } from '@alanshaw/pail/shard'
 import type { AnyLink } from '@alanshaw/pail/link'
-import type { BlockFetcher } from '@alanshaw/pail/block'
+import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { BaseBlockstore } from 'blockstore-core'
 import type { Key } from 'interface-datastore'
 import type { Pair } from 'interface-blockstore'
@@ -69,7 +69,18 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
 }
 
 const blockFetcher = (blockstore: BaseBlockstore): BlockFetcher => ({
-  get: async (link): Promise<Uint8Array> => await blockstore.get(linkToCid(link))
+  get: async (link): Promise<AnyBlock | undefined> => {
+    try {
+      const bytes = await blockstore.get(linkToCid(link))
+
+      return { cid: link, bytes }
+    } catch (e) {
+      if (e instanceof CodeError && e?.code === 'ERR_NOT_FOUND') {
+        return undefined
+      }
+      throw e
+    }
+  }
 })
 
 const linkToCid = (link: AnyLink): CID => {
