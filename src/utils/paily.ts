@@ -7,6 +7,7 @@ import PQueue from 'p-queue'
 import { CodeError } from '@libp2p/interfaces/errors'
 import { BaseDatastore } from 'datastore-core'
 import type { ShardLink, ShardBlockView } from '@alanshaw/pail/shard'
+import type { AnyLink } from '@alanshaw/pail/link'
 import type { BlockFetcher } from '@alanshaw/pail/block'
 import type { BaseBlockstore } from 'blockstore-core'
 import type { Key } from 'interface-datastore'
@@ -45,7 +46,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
       throw new CodeError('Not Found', 'ERR_NOT_FOUND')
     }
 
-    return await this.blocks.get(CID.create(1, link.code, link?.multihash))
+    return await this.blocks.get(linkToCid(link))
   }
 
   async has (key: Key): Promise<boolean> {
@@ -68,16 +69,18 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
 }
 
 const blockFetcher = (blockstore: BaseBlockstore): BlockFetcher => ({
-  get: async (link): Promise<Uint8Array> => {
-    const cid = CID.asCID(link)
-
-    if (cid == null) {
-      throw new Error('Invalid link provided')
-    }
-
-    return await blockstore.get(cid)
-  }
+  get: async (link): Promise<Uint8Array> => await blockstore.get(linkToCid(link))
 })
+
+const linkToCid = (link: AnyLink): CID => {
+  const cid = CID.asCID(link)
+
+  if (cid == null) {
+    throw new Error('Failed to turn link to cid.')
+  }
+
+  return cid
+}
 
 const toPair = ({ cid, bytes }: ShardBlockView): Pair => ({ cid, block: bytes })
 
