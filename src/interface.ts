@@ -22,6 +22,10 @@ export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
 export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
 
+export interface Module {
+  protocol: string
+}
+
 /** @public */
 export interface Create {
   datastore: DatastoreClass

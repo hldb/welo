@@ -8,7 +8,6 @@ import { StaticAccess } from '@/access/static/index.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
-import { initRegistry } from '../src/registry.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -18,26 +17,20 @@ const testName = 'manifest'
 describe(testName, () => {
   let ipfs: Helia, blocks: Blocks, manifest: Manifest
 
-  const registry = initRegistry()
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
-
   const config = {
     name: 'test',
     store: {
-      protocol: registry.store.star.protocol
+      protocol: Keyvalue.protocol
     },
     access: {
-      protocol: registry.access.star.protocol,
+      protocol: StaticAccess.protocol,
       write: []
     },
     entry: {
-      protocol: registry.entry.star.protocol
+      protocol: Entry.protocol
     },
     identity: {
-      protocol: registry.identity.star.protocol
+      protocol: Identity.protocol
     }
   }
 

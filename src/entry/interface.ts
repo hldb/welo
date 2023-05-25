@@ -3,7 +3,7 @@ import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { Registrant } from '@/utils/register.js'
+import type { Module } from '@/interface.js'
 import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
 
 export interface EntryData {
@@ -34,7 +34,7 @@ export type AsEntry<Value> =
   | EntryInstance<Value>
   | { block: BlockView<Value>, identity: IdentityInstance<any> }
 
-export interface EntryStatic<Value> extends Registrant {
+export interface EntryStatic<Value> extends Module {
   new (props: any): EntryInstance<Value>
   create: (create: Create) => Promise<EntryInstance<Value>>
   fetch: (fetch: Fetch) => Promise<EntryInstance<Value>>

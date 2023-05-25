@@ -4,7 +4,7 @@ import type { Datastore } from 'interface-datastore'
 
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { Registrant } from '@/utils/register.js'
+import type { Module } from '@/interface.js'
 import type { KeyChain } from '@/utils/types.js'
 
 export type Gen = string
@@ -42,7 +42,7 @@ export interface IdentityInstance<Value> {
   verify: (data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }
 
-export interface IdentityStatic<Value> extends Registrant {
+export interface IdentityStatic<Value> extends Module {
   new (props: any): IdentityInstance<Value>
   gen: (gen: Gen) => Promise<IdentityInstance<Value>>
   get: (get: Get) => Promise<IdentityInstance<Value>>

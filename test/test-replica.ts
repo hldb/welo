@@ -7,13 +7,11 @@ import type { CID } from 'multiformats/cid'
 
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
 
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
@@ -37,13 +35,6 @@ describe(testName, () => {
     testPaths: TestPaths
 
   const Datastore = LevelDatastore
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)

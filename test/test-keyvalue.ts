@@ -9,7 +9,6 @@ import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
-import { initRegistry } from '../src/registry.js'
 import { Manifest } from '@/manifest/index.js'
 
 import defaultManifest from './utils/defaultManifest.js'
@@ -24,13 +23,6 @@ describe(testName, () => {
   let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths
   const expectedProtocol = '/hldb/store/keyvalue'
   const Datastore = LevelDatastore
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)

@@ -17,11 +17,9 @@ import { Blocks } from '@/blocks/index.js'
 import type { EntryInstance } from '@/entry/interface.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { Graph, loadHashMap } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
-import { initRegistry } from '../src/registry.js'
 import { Manifest } from '@/manifest/index.js'
 
 import defaultManifest from './utils/defaultManifest.js'
@@ -49,13 +47,6 @@ describe('traversal', () => {
   const next: CID[] = []
   const refs: CID[] = []
   const payload = {}
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)

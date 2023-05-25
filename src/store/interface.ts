@@ -6,7 +6,7 @@ import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
-import type { Registrant } from '@/utils/register.js'
+import type { Module } from '@/interface.js'
 
 export interface Props {
   manifest: Manifest
@@ -35,7 +35,7 @@ export interface StoreInstance extends Startable {
   events: EventEmitter<Events>
 }
 
-export interface StoreStatic extends Registrant {
+export interface StoreStatic extends Module {
   new (props: Props): StoreInstance
 }
 

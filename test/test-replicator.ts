@@ -11,7 +11,6 @@ import { StaticAccess as Access } from '@/access/static/index.js'
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
-import { getTestRegistry } from './utils/registry.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
@@ -63,12 +62,11 @@ describe(testName, () => {
       testName
     )
 
-    const registry = getTestRegistry()
     const write = [identity1.id, identity2.id]
     const accessConfig = {
       access: { protocol: Access.protocol, config: { write } }
     }
-    const manifest = await getTestManifest(testName, registry, accessConfig)
+    const manifest = await getTestManifest(testName, accessConfig)
 
     access = new Access({ manifest })
     await start(access)

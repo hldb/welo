@@ -10,21 +10,18 @@ import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
-import { Extends } from '@/utils/decorators.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { EntryStatic } from '@/entry/interface.js'
 import type { IdentityStatic } from '@/identity/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Registrant } from '@/utils/register.js'
 
 import * as Advert from './message.js'
 import protocol from './protocol.js'
 
 const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
-@Extends<Registrant>()
 export class LiveReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly libp2p: GossipLibp2p
