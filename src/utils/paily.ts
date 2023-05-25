@@ -15,6 +15,7 @@ import type { IpldDatastore } from './types'
 
 export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   root: ShardLink
+  #blocks: BlockFetcher
   readonly #queue: PQueue
 
   constructor (
@@ -23,6 +24,8 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   ) {
     super()
     this.root = root
+    // BlockFetcher: "I take Links, you take CIDs. We are not the same"
+    this.#blocks = this.blocks as unknown as BlockFetcher
     this.#queue = new PQueue({ concurrency: 1 })
   }
 
@@ -37,7 +40,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async get (key: Key): Promise<Uint8Array> {
-    const link = await get(this.blocks as unknown as BlockFetcher, this.root, key.toString())
+    const link = await get(this.#blocks, this.root, key.toString())
 
     if (link == null) {
       throw new CodeError('Not Found', 'ERR_NOT_FOUND')
@@ -47,11 +50,11 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async has (key: Key): Promise<boolean> {
-    return Boolean(await get(this.blocks as unknown as BlockFetcher, this.root, key.toString()))
+    return Boolean(await get(this.#blocks, this.root, key.toString()))
   }
 
   async put (key: Key, val: Uint8Array): Promise<Key> {
-    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val]))
+    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [this.#blocks, key, val]))
 
     if (resolved == null) {
       throw new CodeError('why tf this undefined', 'UNDEFINED')
@@ -61,16 +64,16 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async delete (key: Key): Promise<void> {
-    return await this.#queue.add(async () => await unqueuedDelete.apply(this, [key]))
+    return await this.#queue.add(async () => await unqueuedDelete.apply(this, [this.#blocks, key]))
   }
 }
 
 const toPair = ({ cid, bytes }: ShardBlockView): Pair => ({ cid, block: bytes })
 
-async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
+async function unqueuedPut (this: Paily, blocks: BlockFetcher, key: Key, val: Uint8Array): Promise<Key> {
   const cid = CID.create(1, code, await sha256.digest(val))
   const { root: newRoot, additions, removals } = await put(
-    this.blocks as unknown as BlockFetcher,
+    blocks,
     this.root,
     key.toString(),
     cid
@@ -86,9 +89,9 @@ async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key
   return key
 }
 
-async function unqueuedDelete (this: Paily, key: Key): Promise<void> {
+async function unqueuedDelete (this: Paily, blocks: BlockFetcher, key: Key): Promise<void> {
   const { root: newRoot, additions, removals } = await del(
-    this.blocks as unknown as BlockFetcher,
+    blocks,
     this.root,
     key.toString()
   )
