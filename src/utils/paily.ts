@@ -1,5 +1,5 @@
 import { ShardBlock, put, get, del } from '@alanshaw/pail'
-import { CID } from 'multiformats/cid'
+import { CID } from 'multiformats'
 import { code } from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import drain from 'it-drain'
@@ -15,7 +15,7 @@ import type { IpldDatastore } from './types'
 
 export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   root: ShardLink
-  #blocks: BlockFetcher
+  readonly blockFetcher: BlockFetcher
   readonly #queue: PQueue
 
   constructor (
@@ -24,8 +24,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   ) {
     super()
     this.root = root
-    // BlockFetcher: "I take Links, you take CIDs. We are not the same"
-    this.#blocks = this.blocks as unknown as BlockFetcher
+    this.blockFetcher = blockFetcher(this.blocks)
     this.#queue = new PQueue({ concurrency: 1 })
   }
 
@@ -40,7 +39,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async get (key: Key): Promise<Uint8Array> {
-    const link = await get(this.#blocks, this.root, key.toString())
+    const link = await get(this.blockFetcher, this.root, key.toString())
 
     if (link == null) {
       throw new CodeError('Not Found', 'ERR_NOT_FOUND')
@@ -50,11 +49,11 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async has (key: Key): Promise<boolean> {
-    return Boolean(await get(this.#blocks, this.root, key.toString()))
+    return Boolean(await get(this.blockFetcher, this.root, key.toString()))
   }
 
   async put (key: Key, val: Uint8Array): Promise<Key> {
-    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [this.#blocks, key, val]))
+    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val]))
 
     if (resolved == null) {
       throw new CodeError('why tf this undefined', 'UNDEFINED')
@@ -64,16 +63,28 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async delete (key: Key): Promise<void> {
-    return await this.#queue.add(async () => await unqueuedDelete.apply(this, [this.#blocks, key]))
+    return await this.#queue.add(async () => await unqueuedDelete.apply(this, [key]))
   }
 }
 
+const blockFetcher = (blockstore: BaseBlockstore): BlockFetcher => ({
+  get: async (link): Promise<Uint8Array> => {
+    const cid = CID.asCID(link)
+
+    if (cid == null) {
+      throw new Error('Invalid link provided')
+    }
+
+    return await blockstore.get(cid)
+  }
+})
+
 const toPair = ({ cid, bytes }: ShardBlockView): Pair => ({ cid, block: bytes })
 
-async function unqueuedPut (this: Paily, blocks: BlockFetcher, key: Key, val: Uint8Array): Promise<Key> {
+async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
   const cid = CID.create(1, code, await sha256.digest(val))
   const { root: newRoot, additions, removals } = await put(
-    blocks,
+    this.blockFetcher,
     this.root,
     key.toString(),
     cid
@@ -89,9 +100,9 @@ async function unqueuedPut (this: Paily, blocks: BlockFetcher, key: Key, val: Ui
   return key
 }
 
-async function unqueuedDelete (this: Paily, blocks: BlockFetcher, key: Key): Promise<void> {
+async function unqueuedDelete (this: Paily, key: Key): Promise<void> {
   const { root: newRoot, additions, removals } = await del(
-    blocks,
+    this.blockFetcher,
     this.root,
     key.toString()
   )
