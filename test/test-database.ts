@@ -10,7 +10,6 @@ import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
-import { MultiReplicator } from '@/replicator/multi/index.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
 
 import defaultManifest from './utils/defaultManifest.js'
@@ -76,7 +75,7 @@ describe(testName, () => {
           Access,
           Entry,
           Identity,
-          Replicator: MultiReplicator // empty replicator
+          replicators: [] // empty replicator
         })
       })
     })

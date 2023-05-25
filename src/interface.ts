@@ -78,7 +78,7 @@ export interface Determine {
 export interface OpenOptions {
   identity?: IdentityInstance<any>
   Datastore?: DatastoreClass
-  Replicator?: ReplicatorClass
+  replicators?: ReplicatorClass[]
 }
 
 interface AddressEmit {
@@ -98,7 +98,7 @@ export interface DbOpen {
   Datastore: DatastoreClass
   start?: boolean
   blocks: Blocks
-  Replicator: ReplicatorClass
+  replicators: ReplicatorClass[]
   ipfs: GossipHelia
   libp2p: GossipLibp2p
   identity: IdentityInstance<any>
@@ -109,8 +109,8 @@ export interface DbOpen {
   Store: StoreStatic
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p'> {
-  replicator: Replicator
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p' | 'replicators'> {
+  replicators: Replicator[]
   replica: Replica
   store: StoreInstance
   access: AccessInstance

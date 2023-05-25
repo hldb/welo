@@ -26,7 +26,7 @@ export class Database extends Playable {
   readonly blocks: Blocks
   readonly manifest: Manifest
   readonly identity: IdentityInstance<any>
-  readonly replicator: Replicator
+  readonly replicators: Replicator[]
 
   readonly replica: Replica
   readonly access: AccessInstance
@@ -46,11 +46,11 @@ export class Database extends Playable {
   constructor (config: DbConfig) {
     const starting = async (): Promise<void> => {
       this.store.events.addEventListener('update', this.#onStoreUpdate)
-      await start(this.access, this.replica, this.store, this.replicator)
+      await start(this.access, this.replica, this.store, ...this.replicators)
     }
     const stopping = async (): Promise<void> => {
       this.replica.events.removeEventListener('update', this.#onStoreUpdate)
-      await stop(this.store, this.replica, this.access, this.replicator)
+      await stop(this.store, this.replica, this.access, ...this.replicators)
     }
     super({ starting, stopping })
 
@@ -59,10 +59,8 @@ export class Database extends Playable {
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
-    this.replicator = config.replicator
+    this.replicators = config.replicators
     this.replica = config.replica
-
-    this.replicator = config.replicator
 
     this.store = config.store
     this.access = config.access
@@ -129,7 +127,7 @@ export class Database extends Playable {
       directory,
       Datastore,
       manifest,
-      Replicator,
+      replicators,
       ipfs,
       libp2p,
       identity,
@@ -167,24 +165,23 @@ export class Database extends Playable {
       directory: directories.store,
       replica
     })
-    const replicator = new Replicator({
+    const replicatorInstances = replicators.map(Replicator => new Replicator({
       ...common,
       ipfs,
       libp2p,
       replica
-    })
+    }))
 
     const config: DbConfig = {
       directory,
       Datastore,
       blocks,
-      replicator,
+      replicators: replicatorInstances,
       identity,
       manifest,
       replica,
       store,
       access,
-      Replicator,
       Access,
       Entry,
       Identity,

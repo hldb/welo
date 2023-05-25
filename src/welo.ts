@@ -10,7 +10,6 @@ import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
 import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
 import { Identity } from '@/identity/basal/index.js'
-import { MultiReplicator } from '@/replicator/multi/index.js'
 import {
   dirs,
   DirsReturn,
@@ -53,7 +52,7 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  private readonly replicator = MultiReplicator
+  private readonly replicators: ReplicatorClass[]
   private readonly datastore: DatastoreClass
   private readonly handlers: Config['handlers']
 
@@ -83,7 +82,8 @@ export class Welo extends Playable {
     ipfs,
     libp2p,
     handlers,
-    datastore
+    datastore,
+    replicators
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -113,6 +113,7 @@ export class Welo extends Playable {
 
     this.handlers = handlers
     this.datastore = datastore
+    this.replicators = replicators
   }
 
   /**
@@ -262,14 +263,7 @@ export class Welo extends Playable {
       throw new Error('no Datastore attached to Welo class')
     }
 
-    let Replicator: ReplicatorClass
-    if (options.Replicator != null) {
-      Replicator = options.Replicator
-    } else if (this.replicator != null) {
-      Replicator = this.replicator
-    } else {
-      throw new Error('no Replicator attached to Welo class')
-    }
+    const replicators = options.replicators ?? this.replicators
 
     const directory = path.join(
       this.dirs.databases,
@@ -294,7 +288,7 @@ export class Welo extends Playable {
       libp2p: this.libp2p,
       blocks: this.blocks,
       Datastore,
-      Replicator,
+      replicators,
       ...components
     })
       .then((database) => {
