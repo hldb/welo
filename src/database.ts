@@ -129,7 +129,6 @@ export class Database extends Playable {
       manifest,
       replicators,
       ipfs,
-      libp2p,
       identity,
       blocks,
       Store,
@@ -168,7 +167,6 @@ export class Database extends Playable {
     const replicatorInstances = replicators.map(Replicator => new Replicator({
       ...common,
       ipfs,
-      libp2p,
       replica
     }))
 

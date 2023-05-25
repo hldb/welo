@@ -10,9 +10,8 @@ const ipfs = await getTestIpfs(paths, offlineIpfsOptions)
 if (ipfs.libp2p == null) {
   throw new Error('ipfs.libp2p is not defined')
 }
-const libp2p = ipfs.libp2p
 
-const welo = await createWelo({ ipfs, libp2p, directory: paths.database })
+const welo = await createWelo({ ipfs, directory: paths.database })
 const db = await welo.open(await welo.determine({ name: '1000' }))
 
 const num = 1000

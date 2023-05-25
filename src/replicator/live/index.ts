@@ -1,7 +1,7 @@
 import all from 'it-all'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
 import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
 
@@ -24,7 +24,6 @@ const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cids
 
 export class LiveReplicator extends Playable {
   readonly ipfs: GossipHelia
-  readonly libp2p: GossipLibp2p
   readonly manifest: Manifest
   readonly blocks: Blocks
   readonly replica: Replica
@@ -47,12 +46,10 @@ export class LiveReplicator extends Playable {
 
   constructor ({
     ipfs,
-    libp2p,
     replica,
     blocks
   }: {
     ipfs: GossipHelia
-    libp2p: GossipLibp2p
     replica: Replica
     blocks: Blocks
   }) {
@@ -85,7 +82,6 @@ export class LiveReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
-    this.libp2p = libp2p
     this.blocks = blocks
     this.replica = replica
     this.manifest = replica.manifest
@@ -99,7 +95,7 @@ export class LiveReplicator extends Playable {
     this.#onReplicaHeadsUpdate = onReplicaHeadsUpdate.bind(this)
     this._onHeadsMessage = onHeadsMessage.bind(this)
 
-    this.shared = new Monitor(this.libp2p, getSharedChannelTopic(this.manifest))
+    this.shared = new Monitor(this.ipfs.libp2p, getSharedChannelTopic(this.manifest))
     this.directs = new Map()
   }
 
@@ -156,7 +152,7 @@ function onPeerJoin (
   evt: CustomEvent<PeerStatusChangeData>
 ): void {
   const { peerId: remotePeerId } = evt.detail
-  const direct = new Direct(this.libp2p, remotePeerId)
+  const direct = new Direct(this.ipfs.libp2p, remotePeerId)
   direct.addEventListener(
     'peered',
     () => {

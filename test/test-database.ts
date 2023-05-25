@@ -69,7 +69,6 @@ describe(testName, () => {
           manifest,
           identity,
           ipfs,
-          libp2p,
           blocks,
           Store,
           Access,

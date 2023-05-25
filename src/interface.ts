@@ -33,7 +33,6 @@ export interface Create {
   directory?: string
   identity?: IdentityInstance<any>
   ipfs: GossipHelia
-  libp2p: GossipLibp2p
   start?: boolean
 
   handlers: {
@@ -53,7 +52,6 @@ export interface Config {
   identities: LevelDatastore | null
   keychain: KeyChain
   ipfs: GossipHelia
-  libp2p: GossipLibp2p
 
   handlers: {
     access: AccessStatic[]
@@ -104,7 +102,6 @@ export interface DbOpen {
   blocks: Blocks
   replicators: ReplicatorClass[]
   ipfs: GossipHelia
-  libp2p: GossipLibp2p
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessStatic
@@ -113,7 +110,7 @@ export interface DbOpen {
   Store: StoreStatic
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'libp2p' | 'replicators'> {
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'> {
   replicators: Replicator[]
   replica: Replica
   store: StoreInstance

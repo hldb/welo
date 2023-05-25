@@ -53,17 +53,17 @@ describe(testName, () => {
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await createWelo({ ipfs, libp2p, directory })
+        welo = await createWelo({ ipfs, directory })
       })
 
       it('returns an instance of Welo with an identity option', async () => {
         const directory = directory1
-        const welo = await createWelo({ ipfs, libp2p, directory, identity })
+        const welo = await createWelo({ ipfs, directory, identity })
         await welo.stop()
       })
 
       it.skip('rejects if no identity option or Welo.Datastore', async () => {
-        const promise = createWelo({ ipfs, libp2p, directory })
+        const promise = createWelo({ ipfs, directory })
         await assert.isRejected(promise)
       })
     })

@@ -2,7 +2,7 @@ import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { GossipHelia } from '@/interface'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -60,7 +60,6 @@ export class Welo extends Playable {
   readonly directory: string
 
   readonly ipfs: GossipHelia
-  readonly libp2p: GossipLibp2p
   readonly blocks: Blocks
 
   readonly identities: LevelDatastore | null
@@ -80,7 +79,6 @@ export class Welo extends Playable {
     identities,
     keychain,
     ipfs,
-    libp2p,
     handlers,
     datastore,
     replicators
@@ -104,7 +102,6 @@ export class Welo extends Playable {
     this.keychain = keychain
 
     this.ipfs = ipfs
-    this.libp2p = libp2p
 
     this.events = new EventEmitter()
 
@@ -133,11 +130,6 @@ export class Welo extends Playable {
       throw new Error('ipfs is a required option')
     }
 
-    const libp2p = options.libp2p
-    if (libp2p == null) {
-      throw new Error('libp2p is a required option')
-    }
-
     let identity: IdentityInstance<any>
     let identities: LevelDatastore | null = null
 
@@ -153,7 +145,7 @@ export class Welo extends Playable {
       identity = await Identity.get({
         name: 'default',
         identities,
-        keychain: libp2p.keychain
+        keychain: ipfs.libp2p.keychain
       })
       await identities.close()
     }
@@ -164,8 +156,7 @@ export class Welo extends Playable {
       identities,
       ipfs,
       blocks: new Blocks(ipfs),
-      libp2p,
-      keychain: libp2p.keychain,
+      keychain: ipfs.libp2p.keychain,
       handlers: options.handlers,
       datastore: options.datastore,
       replicators: options.replicators ?? []
@@ -285,7 +276,6 @@ export class Welo extends Playable {
       manifest,
       identity,
       ipfs: this.ipfs,
-      libp2p: this.libp2p,
       blocks: this.blocks,
       Datastore,
       replicators,
