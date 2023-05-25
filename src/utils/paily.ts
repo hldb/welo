@@ -35,6 +35,10 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
     return new Paily(blocks, cid)
   }
 
+  static load (blocks: BaseBlockstore, root: ShardLink): Paily {
+    return new Paily(blocks, root)
+  }
+
   async get (key: Key): Promise<Uint8Array> {
     const link = await get(this.blockFetcher, this.root, key.toString())
 
