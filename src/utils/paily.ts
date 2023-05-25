@@ -97,17 +97,20 @@ const toPair = ({ cid, bytes }: ShardBlockView): Pair => ({ cid, block: bytes })
 
 async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
   const cid = CID.create(1, code, await sha256.digest(val))
-  const { root: newRoot, additions, removals } = await put(
+  const { root: newRoot, additions/** , removals */ } = await put(
     this.blockFetcher,
     this.root,
     key.toString(),
     cid
   )
 
-  await Promise.all([
-    await drain(this.blocks.putMany(additions.map(toPair).concat([{ cid, block: val }]))),
-    await drain(this.blocks.putMany(removals.map(toPair)))
-  ])
+  // worried about losing access to blocks during replica.traverse
+  // will look at doing this by unpinning the blocks or the root in the future
+  // await Promise.all([
+  //   await drain(this.blocks.putMany(additions.map(toPair).concat([{ cid, block: val }]))),
+  //   await drain(this.blocks.putMany(removals.map(toPair)))
+  // ])
+  await drain(this.blocks.putMany(additions.map(toPair).concat([{ cid, block: val }])))
 
   this.root = newRoot
 
