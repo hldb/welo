@@ -11,8 +11,9 @@ import type { BlockFetcher } from '@alanshaw/pail/block'
 import type { BaseBlockstore } from 'blockstore-core'
 import type { Key } from 'interface-datastore'
 import type { Pair } from 'interface-blockstore'
+import type { IpldDatastore } from './types'
 
-export class Paily extends BaseDatastore {
+export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   root: ShardLink
   readonly #queue: PQueue
 
