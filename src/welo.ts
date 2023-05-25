@@ -10,6 +10,7 @@ import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
 import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
 import { Identity } from '@/identity/basal/index.js'
+import { MultiReplicator } from '@/replicator/multi/index.js'
 import {
   dirs,
   DirsReturn,
@@ -52,8 +53,7 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  static Replicator?: ReplicatorClass
-
+  private readonly replicator = MultiReplicator
   private readonly datastore: DatastoreClass
   private readonly handlers: Config['handlers']
 
@@ -166,7 +166,8 @@ export class Welo extends Playable {
       libp2p,
       keychain: libp2p.keychain,
       handlers: options.handlers,
-      datastore: options.datastore
+      datastore: options.datastore,
+      replicators: options.replicators ?? []
     }
 
     const welo = new Welo(config)
@@ -264,8 +265,8 @@ export class Welo extends Playable {
     let Replicator: ReplicatorClass
     if (options.Replicator != null) {
       Replicator = options.Replicator
-    } else if (Welo.Replicator != null) {
-      Replicator = Welo.Replicator
+    } else if (this.replicator != null) {
+      Replicator = this.replicator
     } else {
       throw new Error('no Replicator attached to Welo class')
     }

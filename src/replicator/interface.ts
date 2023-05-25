@@ -1,14 +1,12 @@
-import type { Helia } from '@helia/interface'
-import type { Libp2p } from 'libp2p'
-
+import type { GossipHelia, GossipLibp2p } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Playable } from '@/utils/playable.js'
 
 export interface Config {
-  ipfs: Helia
-  libp2p: Libp2p
+  ipfs: GossipHelia
+  libp2p: GossipLibp2p
   replica: Replica
   blocks: Blocks
 }

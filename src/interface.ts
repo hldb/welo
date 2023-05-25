@@ -25,6 +25,7 @@ export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<
 /** @public */
 export interface Create {
   datastore: DatastoreClass
+  replicators?: ReplicatorClass[]
   directory?: string
   identity?: IdentityInstance<any>
   ipfs: GossipHelia
@@ -40,6 +41,7 @@ export interface Create {
 }
 
 export interface Config {
+  replicators: ReplicatorClass[]
   datastore: DatastoreClass
   directory: string
   identity: IdentityInstance<any>

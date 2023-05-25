@@ -15,8 +15,6 @@ export { Keyvalue } from '@/store/keyvalue/index.js'
 
 MultiReplicator.register.add(LiveReplicator)
 
-Welo.Replicator = MultiReplicator
-
 export { Welo }
 
 export type { Manifest, Address } from '@/manifest/index.js'
