@@ -5,7 +5,6 @@
  */
 
 import { Welo } from './welo.js'
-import { LevelDatastore } from 'datastore-level'
 import { MultiReplicator } from '@/replicator/multi/index.js'
 import { LiveReplicator } from '@/replicator/live/index.js'
 
@@ -16,7 +15,6 @@ export { Keyvalue } from '@/store/keyvalue/index.js'
 
 MultiReplicator.register.add(LiveReplicator)
 
-Welo.Datastore = LevelDatastore
 Welo.Replicator = MultiReplicator
 
 export { Welo }

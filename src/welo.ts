@@ -52,9 +52,9 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  static Datastore?: DatastoreClass
   static Replicator?: ReplicatorClass
 
+  private readonly datastore: DatastoreClass
   private readonly handlers: Config['handlers']
 
   private readonly dirs: DirsReturn
@@ -82,7 +82,8 @@ export class Welo extends Playable {
     keychain,
     ipfs,
     libp2p,
-    handlers
+    handlers,
+    datastore
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -111,6 +112,7 @@ export class Welo extends Playable {
     this._opening = new Map()
 
     this.handlers = handlers
+    this.datastore = datastore
   }
 
   /**
@@ -141,12 +143,8 @@ export class Welo extends Playable {
     if (options.identity != null) {
       identity = options.identity
     } else {
-      if (this.Datastore == null) {
-        throw new Error('Welo.create: missing Datastore')
-      }
-
       identities = await getDatastore(
-        this.Datastore,
+        options.datastore,
         dirs(directory).identities
       )
 
@@ -167,7 +165,8 @@ export class Welo extends Playable {
       blocks: new Blocks(ipfs),
       libp2p,
       keychain: libp2p.keychain,
-      handlers: options.handlers
+      handlers: options.handlers,
+      datastore: options.datastore
     }
 
     const welo = new Welo(config)
@@ -256,8 +255,8 @@ export class Welo extends Playable {
     let Datastore: DatastoreClass
     if (options.Datastore != null) {
       Datastore = options.Datastore
-    } else if (Welo.Datastore != null) {
-      Datastore = Welo.Datastore
+    } else if (this.datastore != null) {
+      Datastore = this.datastore
     } else {
       throw new Error('no Datastore attached to Welo class')
     }

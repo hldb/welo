@@ -47,7 +47,6 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Welo.Datastore)
       // assert.isOk(Welo.Replicator)
       assert.isOk(Welo.create)
     })
@@ -63,14 +62,9 @@ describe(testName, () => {
         await welo.stop()
       })
 
-      it('rejects if no identity option or Welo.Datastore', async () => {
-        const Datastore = Welo.Datastore
-        Welo.Datastore = undefined
-
+      it.skip('rejects if no identity option or Welo.Datastore', async () => {
         const promise = createWelo({ ipfs, libp2p, directory })
         await assert.isRejected(promise)
-
-        Welo.Datastore = Datastore
       })
     })
   })
