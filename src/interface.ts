@@ -12,7 +12,7 @@ import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
 import type { KeyChain } from '@/utils/types.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Address, Manifest } from '@/manifest/index.js'
-import type { AccessInstance, AccessStatic } from '@/access/interface.js'
+import type { AccessInstance, AccessModule } from '@/access/interface.js'
 import type { EntryStatic } from '@/entry/interface.js'
 import type { StoreInstance, StoreStatic } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
@@ -22,8 +22,8 @@ export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
 export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
 
-export interface Module {
-  protocol: string
+export interface Module<T extends string = string> {
+  protocol: T
 }
 
 /** @public */
@@ -36,7 +36,7 @@ export interface Create {
   start?: boolean
 
   handlers: {
-    access: AccessStatic[]
+    access: AccessModule[]
     store: StoreStatic[]
     entry: Array<EntryStatic<any>>
     identity: Array<IdentityStatic<any>>
@@ -54,7 +54,7 @@ export interface Config {
   ipfs: GossipHelia
 
   handlers: {
-    access: AccessStatic[]
+    access: AccessModule[]
     store: StoreStatic[]
     entry: Array<EntryStatic<any>>
     identity: Array<IdentityStatic<any>>
@@ -104,7 +104,7 @@ export interface DbOpen {
   ipfs: GossipHelia
   identity: IdentityInstance<any>
   manifest: Manifest
-  Access: AccessStatic
+  Access: AccessModule
   Entry: EntryStatic<any>
   Identity: IdentityStatic<any>
   Store: StoreStatic

@@ -14,8 +14,8 @@ export interface Open {
   manifest: Manifest
 }
 
-export interface AccessStatic extends Module {
-  new (props: any): AccessInstance
+export interface AccessModule<T extends AccessInstance = AccessInstance, P extends string = string> extends Module<P> {
+  create: (config: Open) => T
 }
 
 export const wildcard = '*'

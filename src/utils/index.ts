@@ -5,7 +5,7 @@ import { peerIdFromString } from '@libp2p/peer-id'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
 import type { IdentityStatic } from '@/identity/interface.js'
-import type { AccessStatic } from '@/access/interface.js'
+import type { AccessModule } from '@/access/interface.js'
 import type { StoreStatic } from '@/store/interface.js'
 import type { EntryStatic } from '@/entry/interface.js'
 
@@ -29,7 +29,7 @@ export const dirs = (root: string): DirsReturn =>
   )
 
 export interface Components {
-  Access: AccessStatic
+  Access: AccessModule
   Entry: EntryStatic<any>
   Identity: IdentityStatic<any>
   Store: StoreStatic

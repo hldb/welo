@@ -18,6 +18,7 @@ import type { EntryInstance } from '@/entry/interface.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { StaticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 import { Graph, loadHashMap } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
@@ -64,7 +65,7 @@ describe('traversal', () => {
       manifest: await Manifest.create({
         ...defaultManifest(name, identity),
         access: {
-          protocol: StaticAccess.protocol,
+          protocol: staticAccessProtocol,
           config: { write: [identity.id] }
         }
       })
@@ -73,7 +74,7 @@ describe('traversal', () => {
       manifest: await Manifest.create({
         ...defaultManifest(name, identity),
         access: {
-          protocol: StaticAccess.protocol,
+          protocol: staticAccessProtocol,
           config: { write: ['nobody'] }
         }
       })
@@ -321,7 +322,7 @@ describe('traversal', () => {
       const manifest = await Manifest.create({
         ...defaultManifest(name, identity),
         access: {
-          protocol: StaticAccess.protocol,
+          protocol: staticAccessProtocol,
           config: { write: [id0.id, id1.id] }
         }
       })

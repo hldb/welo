@@ -7,6 +7,7 @@ import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
@@ -64,7 +65,7 @@ describe(testName, () => {
 
     const write = [identity1.id, identity2.id]
     const accessConfig = {
-      access: { protocol: Access.protocol, config: { write } }
+      access: { protocol: staticAccessProtocol, config: { write } }
     }
     const manifest = await getTestManifest(testName, accessConfig)
 

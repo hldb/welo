@@ -7,6 +7,7 @@ import { Keyvalue } from '@/store/keyvalue/index.js'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
@@ -61,7 +62,7 @@ describe(testName, () => {
       manifest = await Manifest.create({
         ...defaultManifest('name', identity),
         access: {
-          protocol: StaticAccess.protocol,
+          protocol: staticAccessProtocol,
           config: { write: [identity.id] }
         }
       })

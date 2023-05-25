@@ -1,6 +1,6 @@
 import { Manifest } from '@/manifest/index.js'
 import type { ManifestData } from '@/manifest/interface.js'
-import { StaticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
@@ -13,7 +13,7 @@ export const getTestManifestConfig = (
     protocol: Keyvalue.protocol
   },
   access: {
-    protocol: StaticAccess.protocol,
+    protocol: staticAccessProtocol,
     config: { write: [] }
   },
   entry: {

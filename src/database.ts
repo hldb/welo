@@ -150,7 +150,7 @@ export class Database extends Playable {
       // replicator: directory + '/replicator'
     }
 
-    const access = new Access(common)
+    const access = Access.create(common)
     const replica = new Replica({
       ...common,
       directory: directories.replica,

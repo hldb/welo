@@ -5,7 +5,8 @@ import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '../src/database.js'
 import { Keyvalue as Store } from '@/store/keyvalue/index.js'
-import { StaticAccess as Access, StaticAccess } from '@/access/static/index.js'
+import { createStaticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 import { Entry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
@@ -43,7 +44,7 @@ describe(testName, () => {
     manifest = await Manifest.create({
       ...defaultManifest('name', identity),
       access: {
-        protocol: StaticAccess.protocol,
+        protocol: staticAccessProtocol,
         config: { write: [identity.id] }
       }
     })
@@ -71,7 +72,7 @@ describe(testName, () => {
           ipfs,
           blocks,
           Store,
-          Access,
+          Access: createStaticAccess(),
           Entry,
           Identity,
           replicators: [] // empty replicator
