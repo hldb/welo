@@ -116,7 +116,7 @@ export class Welo extends Playable {
     if (options.identity != null) {
       identity = options.identity
     } else {
-      identities = new NamespaceDatastore(options.datastore, new Key("identities"))
+      identities = new NamespaceDatastore(options.datastore, new Key('identities'))
 
       identity = await options.handlers.identity[0].get({
         name: 'default',
@@ -245,7 +245,7 @@ export class Welo extends Playable {
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      Datastore: new NamespaceDatastore(Datastore, new Key(`databases/${manifest.address.cid}`)),
+      Datastore: new NamespaceDatastore(Datastore, new Key(`databases/${manifest.address.cid.toString()}`)),
       replicators,
       ...components
     })

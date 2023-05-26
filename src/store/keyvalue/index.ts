@@ -44,7 +44,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     const starting = async (): Promise<void> => {
       this._storage = Datastore
 
-      let indexesCID: Uint8Array | undefined = undefined
+      let indexesCID: Uint8Array | undefined
 
       try {
         indexesCID = await this.storage.get(indexesKey)
