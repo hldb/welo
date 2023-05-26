@@ -1,7 +1,6 @@
 import type { Helia } from '@helia/interface'
 import type { Libp2p, ServiceMap } from '@libp2p/interface-libp2p'
 import type { PubSub } from '@libp2p/interface-pubsub'
-import type { LevelDatastore } from 'datastore-level'
 import type { Datastore } from 'interface-datastore'
 
 import type { AccessProtocol } from '@/access/static/protocol.js'
@@ -11,7 +10,6 @@ import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
 import type { KeyChain } from '@/utils/types.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { AccessInstance, AccessModule } from '@/access/interface.js'
 import type { EntryModule } from '@/entry/interface.js'
@@ -29,7 +27,7 @@ export interface Module<T extends string = string> {
 
 /** @public */
 export interface Create {
-  datastore: DatastoreClass
+  datastore: Datastore
   replicators?: ReplicatorModule[]
   directory?: string
   identity?: IdentityInstance<any>
@@ -46,11 +44,11 @@ export interface Create {
 
 export interface Config {
   replicators: ReplicatorModule[]
-  datastore: DatastoreClass
+  datastore: Datastore
   directory: string
   identity: IdentityInstance<any>
   blocks: Blocks
-  identities: LevelDatastore | null
+  identities: Datastore | null
   keychain: KeyChain
   ipfs: GossipHelia
 
@@ -80,7 +78,7 @@ export interface Determine {
 /** @public */
 export interface OpenOptions {
   identity?: IdentityInstance<any>
-  Datastore?: DatastoreClass
+  Datastore?: Datastore
   replicators?: ReplicatorModule[]
 }
 

@@ -3,12 +3,14 @@ import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { GossipHelia } from '@/interface'
+import type { Datastore } from 'interface-datastore'
+import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
-import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
 import {
   dirs,
   DirsReturn,
@@ -32,7 +34,6 @@ import type {
   OpenedEmit,
   OpenOptions
 } from './interface.js'
-import type { LevelDatastore } from 'datastore-level'
 
 export { Manifest, Address }
 export type {
@@ -52,7 +53,7 @@ export type {
  */
 export class Welo extends Playable {
   private readonly replicators: ReplicatorModule[]
-  private readonly datastore: DatastoreClass
+  private readonly datastore: Datastore
   private readonly handlers: Config['handlers']
 
   private readonly dirs: DirsReturn
@@ -61,7 +62,7 @@ export class Welo extends Playable {
   readonly ipfs: GossipHelia
   readonly blocks: Blocks
 
-  readonly identities: LevelDatastore | null
+  readonly identities: Datastore | null
   readonly keychain: KeyChain
 
   readonly identity: IdentityInstance<any>
@@ -130,23 +131,18 @@ export class Welo extends Playable {
     }
 
     let identity: IdentityInstance<any>
-    let identities: LevelDatastore | null = null
+    let identities: Datastore | null = null
 
     if (options.identity != null) {
       identity = options.identity
     } else {
-      identities = await getDatastore(
-        options.datastore,
-        dirs(directory).identities
-      )
+      identities = new NamespaceDatastore(options.datastore, new Key(dirs(directory).identities))
 
-      await identities.open()
       identity = await options.handlers.identity[0].get({
         name: 'default',
         identities,
         keychain: ipfs.libp2p.keychain
       })
-      await identities.close()
     }
 
     const config: Config = {
@@ -244,7 +240,7 @@ export class Welo extends Playable {
       throw new Error('no identity available')
     }
 
-    let Datastore: DatastoreClass
+    let Datastore: Datastore
     if (options.Datastore != null) {
       Datastore = options.Datastore
     } else if (this.datastore != null) {
@@ -270,8 +266,7 @@ export class Welo extends Playable {
       throw new Error('missing components')
     }
 
-    const datastore = await getDatastore(Datastore, directory)
-    await datastore.open()
+    const datastore = new NamespaceDatastore(Datastore, new Key(directory))
 
     const promise = Database.open({
       directory,
