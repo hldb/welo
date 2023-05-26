@@ -155,7 +155,7 @@ export class Database extends Playable {
       Identity,
       access
     })
-    const store = new Store({
+    const store = Store.create({
       ...common,
       directory: directories.store,
       replica

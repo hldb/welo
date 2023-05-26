@@ -7,7 +7,7 @@ import { Manifest, Address } from '@/manifest/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -20,7 +20,7 @@ describe(testName, () => {
   const config = {
     name: 'test',
     store: {
-      protocol: Keyvalue.protocol
+      protocol: keyvalueStoreProtocol
     },
     access: {
       protocol: staticAccessProtocol,

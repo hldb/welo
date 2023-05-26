@@ -3,7 +3,8 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import { Keyvalue, createKeyValueStore } from '@/store/keyvalue/index.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
@@ -24,6 +25,7 @@ describe(testName, () => {
   let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths
   const expectedProtocol = '/hldb/store/keyvalue'
   const Datastore = LevelDatastore
+  const storeModule = createKeyValueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
@@ -45,8 +47,8 @@ describe(testName, () => {
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Keyvalue)
-      assert.strictEqual(Keyvalue.protocol, expectedProtocol)
+      assert.isOk(storeModule)
+      assert.strictEqual(keyvalueStoreProtocol, expectedProtocol)
     })
   })
 
@@ -79,7 +81,7 @@ describe(testName, () => {
         Identity: createBasalIdentity()
       })
       await start(replica)
-      keyvalue = new Keyvalue({
+      keyvalue = storeModule.create({
         manifest,
         directory: testPaths.store,
         blocks,

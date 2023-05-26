@@ -14,7 +14,7 @@ import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { AccessInstance, AccessModule } from '@/access/interface.js'
 import type { EntryModule } from '@/entry/interface.js'
-import type { StoreInstance, StoreStatic } from '@/store/interface'
+import type { StoreInstance, StoreModule } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorClass } from '@/replicator/interface'
 
@@ -37,7 +37,7 @@ export interface Create {
 
   handlers: {
     access: AccessModule[]
-    store: StoreStatic[]
+    store: StoreModule[]
     entry: EntryModule[]
     identity: IdentityModule[]
   }
@@ -55,7 +55,7 @@ export interface Config {
 
   handlers: {
     access: AccessModule[]
-    store: StoreStatic[]
+    store: StoreModule[]
     entry: EntryModule[]
     identity: IdentityModule[]
   }
@@ -107,7 +107,7 @@ export interface DbOpen {
   Access: AccessModule
   Entry: EntryModule
   Identity: IdentityModule
-  Store: StoreStatic
+  Store: StoreModule
 }
 
 export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'> {

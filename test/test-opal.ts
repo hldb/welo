@@ -9,7 +9,7 @@ import type { Database } from '../src/database.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import { createKeyValueStore } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -119,7 +119,7 @@ describe(testName, () => {
     describe.skip('getComponents', () => {
       it('returns the components for the manifest', () => {
         const components = welo.getComponents(manifest)
-        assert.strictEqual(components.Store, Keyvalue)
+        assert.strictEqual(components.Store, createKeyValueStore())
         assert.strictEqual(components.Access, createStaticAccess())
         assert.strictEqual(components.Entry, createBasalEntry())
         assert.strictEqual(components.Identity, createBasalIdentity())

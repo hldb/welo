@@ -4,7 +4,7 @@ import { Welo } from '@/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
 import { createBasalIdentity } from '@/identity/basal/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import { createKeyValueStore } from '@/store/keyvalue/index.js'
 import { LiveReplicator } from '@/replicator/live/index.js'
 import type { Create } from '@/interface.js'
 
@@ -15,7 +15,7 @@ export default async (config: Omit<Create, 'handlers' | 'datastore' | 'replicato
   handlers: {
     identity: [createBasalIdentity()],
     access: [createStaticAccess()],
-    store: [Keyvalue],
+    store: [createKeyValueStore()],
     entry: [createBasalEntry()]
   },
 

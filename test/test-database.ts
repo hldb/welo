@@ -4,7 +4,7 @@ import { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '../src/database.js'
-import { Keyvalue as Store } from '@/store/keyvalue/index.js'
+import { createKeyValueStore } from '@/store/keyvalue/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
@@ -71,7 +71,7 @@ describe(testName, () => {
           identity,
           ipfs,
           blocks,
-          Store,
+          Store: createKeyValueStore(),
           Access: createStaticAccess(),
           Entry: createBasalEntry(),
           Identity: createBasalIdentity(),

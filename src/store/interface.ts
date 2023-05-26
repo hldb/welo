@@ -35,8 +35,8 @@ export interface StoreInstance extends Startable {
   events: EventEmitter<Events>
 }
 
-export interface StoreStatic extends Module {
-  new (props: Props): StoreInstance
+export interface StoreModule<T extends StoreInstance = StoreInstance, P extends string = string> extends Module<P> {
+  create: (props: Props) => T
 }
 
 export const prefix = `${HLDB_PREFIX}store/` as const

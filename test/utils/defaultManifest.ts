@@ -1,6 +1,6 @@
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
@@ -11,7 +11,7 @@ export default (
 ): ManifestData => ({
   name,
   store: {
-    protocol: Keyvalue.protocol
+    protocol: keyvalueStoreProtocol
   },
   access: {
     protocol: staticAccessProtocol,

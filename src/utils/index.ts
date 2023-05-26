@@ -6,7 +6,7 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 
 import type { IdentityModule } from '@/identity/interface.js'
 import type { AccessModule } from '@/access/interface.js'
-import type { StoreStatic } from '@/store/interface.js'
+import type { StoreModule } from '@/store/interface.js'
 import type { EntryModule } from '@/entry/interface.js'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
@@ -32,5 +32,5 @@ export interface Components {
   Access: AccessModule
   Entry: EntryModule
   Identity: IdentityModule
-  Store: StoreStatic
+  Store: StoreModule
 }

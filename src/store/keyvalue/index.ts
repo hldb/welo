@@ -3,7 +3,6 @@ import { Key } from 'interface-datastore'
 import type { HashMap } from 'ipld-hashmap'
 import type { LevelDatastore } from 'datastore-level'
 
-import { Extends } from '@/utils/decorators.js'
 import { Playable } from '@/utils/playable.js'
 import { loadHashMap } from '@/replica/graph.js'
 import { decodedcid, encodedcid } from '@/utils/index.js'
@@ -14,16 +13,11 @@ import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
-import type { StoreStatic, StoreInstance, Events } from '../interface.js'
+import type { StoreModule, StoreInstance, Events, Props } from '../interface.js'
 
 const indexesKey = new Key('indexes')
 
-@Extends<StoreStatic>()
 export class Keyvalue extends Playable implements StoreInstance {
-  static get protocol (): string {
-    return protocol
-  }
-
   get selectors (): typeof selectors {
     return selectors
   }
@@ -49,13 +43,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     blocks,
     replica,
     Datastore
-  }: {
-    manifest: Manifest
-    directory: string
-    blocks: Blocks
-    replica: Replica
-    Datastore: DatastoreClass
-  }) {
+  }: Props) {
     const starting = async (): Promise<void> => {
       this._storage = await getDatastore(Datastore, directory)
       await this._storage.open()
@@ -135,3 +123,8 @@ export class Keyvalue extends Playable implements StoreInstance {
     return index
   }
 }
+
+export const createKeyValueStore: () => StoreModule<Keyvalue, typeof protocol> = () => ({
+  protocol,
+  create: (props: Props) => new Keyvalue(props)
+})
