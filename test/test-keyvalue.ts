@@ -23,15 +23,16 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore
+  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore, storeStore: LevelDatastore
   const expectedProtocol = '/hldb/store/keyvalue'
-  const Datastore = LevelDatastore
   const storeModule = createKeyValueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
     datastore = await getDatastore(LevelDatastore, testPaths.replica)
+    storeStore = await getDatastore(LevelDatastore, testPaths.store)
     await datastore.open()
+    await storeStore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -46,6 +47,7 @@ describe(testName, () => {
 
   after(async () => {
     await datastore.close()
+    await storeStore.close()
     await ipfs.stop()
   })
 
@@ -75,7 +77,7 @@ describe(testName, () => {
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Datastore: await getDatastore(Datastore, testPaths.replica),
+        Datastore: datastore,
         manifest,
         directory: testPaths.replica,
         blocks,
@@ -90,7 +92,7 @@ describe(testName, () => {
         directory: testPaths.store,
         blocks,
         replica,
-        Datastore
+        Datastore: storeStore
       })
       await start(keyvalue)
     })

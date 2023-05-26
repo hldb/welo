@@ -1,11 +1,11 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 import type { EventEmitter } from '@libp2p/interfaces/events'
+import type { Datastore } from 'interface-datastore'
 
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Module } from '@/interface.js'
 
 export interface Props {
@@ -13,7 +13,7 @@ export interface Props {
   directory: string
   blocks: Blocks
   replica: Replica
-  Datastore: DatastoreClass
+  Datastore: Datastore
 }
 
 export type Creator = (...args: any[]) => any

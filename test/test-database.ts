@@ -11,7 +11,6 @@ import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -28,8 +27,7 @@ describe(testName, () => {
     database: Database,
     manifest: Manifest,
     identity: Identity,
-    directory: string,
-    Datastore: DatastoreClass
+    directory: string
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -50,7 +48,6 @@ describe(testName, () => {
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
-    Datastore = LevelDatastore
   })
 
   after(async () => {
@@ -66,7 +63,7 @@ describe(testName, () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
           directory,
-          Datastore,
+          Datastore: LevelDatastore,
           manifest,
           identity,
           ipfs,

@@ -1,12 +1,12 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
+import { NamespaceDatastore } from 'datastore-core'
 import type { HashMap } from 'ipld-hashmap'
-import type { LevelDatastore } from 'datastore-level'
+import type { Datastore } from 'interface-datastore'
 
 import { Playable } from '@/utils/playable.js'
 import { loadHashMap } from '@/replica/graph.js'
 import { decodedcid, encodedcid } from '@/utils/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -31,8 +31,8 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
-  readonly Datastore: DatastoreClass
-  private _storage: LevelDatastore | null
+  readonly Datastore: Datastore
+  private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter<Events>
@@ -45,11 +45,14 @@ export class Keyvalue extends Playable implements StoreInstance {
     Datastore
   }: Props) {
     const starting = async (): Promise<void> => {
-      this._storage = await getDatastore(Datastore, directory)
-      await this._storage.open()
+      this._storage = new NamespaceDatastore(Datastore, new Key(directory))
 
-      const indexesCID = await this.storage.get(indexesKey)
-        .catch(() => undefined)
+      let indexesCID: Uint8Array | undefined = undefined
+
+      try {
+        indexesCID = await this.storage.get(indexesKey)
+      } catch (error) {}
+
       this._indexes = await loadHashMap(
         blocks,
         indexesCID === undefined ? undefined : decodedcid(indexesCID)
@@ -64,8 +67,6 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
-      await this.storage.close()
-
       this._storage = null
       this._indexes = null
       this._index = null
@@ -86,7 +87,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
+  get storage (): Datastore {
     if (this._storage === null) {
       throw new Error()
     }

@@ -147,7 +147,8 @@ export class Database extends Playable {
     }
 
     const access = Access.create(common)
-    const datastore = await getDatastore(Datastore, directories.replica)
+    const datastore = await getDatastore(Datastore, directory)
+
 
     await datastore.open()
 
@@ -162,6 +163,7 @@ export class Database extends Playable {
     })
     const store = Store.create({
       ...common,
+      Datastore: datastore,
       directory: directories.store,
       replica
     })
