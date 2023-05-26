@@ -270,13 +270,16 @@ export class Welo extends Playable {
       throw new Error('missing components')
     }
 
+    const datastore = await getDatastore(Datastore, directory)
+    await datastore.open()
+
     const promise = Database.open({
       directory,
       manifest,
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      Datastore,
+      Datastore: datastore,
       replicators,
       ...components
     })

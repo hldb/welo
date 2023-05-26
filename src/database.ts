@@ -1,10 +1,10 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { CID } from 'multiformats/cid'
+import type { Datastore } from 'interface-datastore'
 
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { EntryModule } from '@/entry/interface.js'
 import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
@@ -32,7 +32,7 @@ export class Database extends Playable {
   readonly access: AccessInstance
   readonly store: StoreInstance
 
-  readonly Datastore: DatastoreClass
+  readonly Datastore: Datastore
   readonly Entry: EntryModule
   readonly Identity: IdentityModule
 
@@ -147,14 +147,10 @@ export class Database extends Playable {
     }
 
     const access = Access.create(common)
-    const datastore = await getDatastore(Datastore, directory)
-
-
-    await datastore.open()
 
     const replica = new Replica({
       ...common,
-      Datastore: datastore,
+      Datastore,
       directory: directories.replica,
       identity,
       Entry,
@@ -163,7 +159,7 @@ export class Database extends Playable {
     })
     const store = Store.create({
       ...common,
-      Datastore: datastore,
+      Datastore,
       directory: directories.store,
       replica
     })

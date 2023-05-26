@@ -3,7 +3,8 @@ import { assert } from './utils/chai.js'
 import { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import { Database } from '../src/database.js'
+import { Database } from '@/database.js'
+import { getDatastore } from '@/utils/datastore.js'
 import { createKeyValueStore } from '@/store/keyvalue/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -27,7 +28,8 @@ describe(testName, () => {
     database: Database,
     manifest: Manifest,
     identity: Identity,
-    directory: string
+    directory: string,
+    datastore: LevelDatastore
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -48,9 +50,12 @@ describe(testName, () => {
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
+
+    datastore = await getDatastore(LevelDatastore, directory)
   })
 
   after(async () => {
+    await datastore.close()
     await ipfs.stop()
   })
 
@@ -63,7 +68,7 @@ describe(testName, () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
           directory,
-          Datastore: LevelDatastore,
+          Datastore: datastore,
           manifest,
           identity,
           ipfs,

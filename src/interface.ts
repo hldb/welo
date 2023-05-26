@@ -2,6 +2,7 @@ import type { Helia } from '@helia/interface'
 import type { Libp2p, ServiceMap } from '@libp2p/interface-libp2p'
 import type { PubSub } from '@libp2p/interface-pubsub'
 import type { LevelDatastore } from 'datastore-level'
+import type { Datastore } from 'interface-datastore'
 
 import type { AccessProtocol } from '@/access/static/protocol.js'
 import type { EntryProtocol } from '@/entry/basal/protocol.js'
@@ -97,7 +98,7 @@ export interface Events {
 
 export interface DbOpen {
   directory: string
-  Datastore: DatastoreClass
+  Datastore: Datastore
   start?: boolean
   blocks: Blocks
   replicators: ReplicatorModule[]
