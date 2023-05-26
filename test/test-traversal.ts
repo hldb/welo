@@ -15,7 +15,7 @@ import {
 } from '@/replica/traversal.js'
 import { Blocks } from '@/blocks/index.js'
 import type { EntryInstance } from '@/entry/interface.js'
-import { Entry } from '@/entry/basal/index.js'
+import { Entry, createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -48,6 +48,7 @@ describe('traversal', () => {
   const next: CID[] = []
   const refs: CID[] = []
   const payload = {}
+  const entryModule = createBasalEntry()
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -81,21 +82,21 @@ describe('traversal', () => {
     })
     await start(access, noaccess)
 
-    entries[0] = await Entry.create({
+    entries[0] = await entryModule.create({
       identity,
       tag,
       next,
       refs,
       payload
     })
-    entries[1] = await Entry.create({
+    entries[1] = await entryModule.create({
       identity,
       tag,
       next: [entries[0].cid],
       refs,
       payload
     })
-    entries[2] = await Entry.create({
+    entries[2] = await entryModule.create({
       identity,
       tag,
       next: [entries[1].cid],
@@ -133,7 +134,7 @@ describe('traversal', () => {
 
   describe('load', () => {
     it('returns an entry by cid', async () => {
-      const load = loadEntry({ blocks, Entry, Identity })
+      const load = loadEntry({ blocks, Entry: entryModule, Identity })
       const entry = entries[0]
       const cid = entry.cid
 
@@ -400,7 +401,7 @@ describe('traversal', () => {
             const graph = new Graph({ blocks })
             await start(graph)
 
-            const load = loadEntry({ blocks, Entry, Identity })
+            const load = loadEntry({ blocks, Entry: entryModule, Identity })
             const links = dagLinks({ graph, access: sharedAccess })
 
             const cids = heads.get(topology)
@@ -439,7 +440,7 @@ describe('traversal', () => {
 
             const tails = graph.tails
             const edge = 'out'
-            const load = loadEntry({ blocks, Entry, Identity })
+            const load = loadEntry({ blocks, Entry: entryModule, Identity })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntries
 
@@ -476,7 +477,7 @@ describe('traversal', () => {
 
             const tails = graph.heads
             const edge = 'in'
-            const load = loadEntry({ blocks, Entry, Identity })
+            const load = loadEntry({ blocks, Entry: entryModule, Identity })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntriesRev
 

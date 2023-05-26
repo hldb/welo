@@ -5,7 +5,7 @@ import type { CID } from 'multiformats/cid'
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryStatic } from '@/entry/interface.js'
+import type { EntryModule } from '@/entry/interface.js'
 import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -33,7 +33,7 @@ export class Database extends Playable {
   readonly store: StoreInstance
 
   readonly Datastore: DatastoreClass
-  readonly Entry: EntryStatic<any>
+  readonly Entry: EntryModule
   readonly Identity: IdentityStatic<any>
 
   readonly events: EventEmitter<DbEvents>

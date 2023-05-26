@@ -13,7 +13,7 @@ import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { Entry } from '@/entry/basal/index.js'
+import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
@@ -79,7 +79,7 @@ describe(testName, () => {
       blocks: blocks1,
       access,
       identity: identity1,
-      Entry,
+      Entry: createBasalEntry(),
       Identity
     })
     replica2 = new Replica({
@@ -89,7 +89,7 @@ describe(testName, () => {
       blocks: blocks2,
       access,
       identity: identity2,
-      Entry,
+      Entry: createBasalEntry(),
       Identity
     })
     await start(replica1, replica2)

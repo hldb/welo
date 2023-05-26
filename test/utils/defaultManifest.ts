@@ -2,7 +2,7 @@ import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { Entry } from '@/entry/basal/index.js'
+import basalEntryProtocol from '@/entry/basal/protocol.js'
 import { Identity } from '@/identity/basal/index.js'
 
 export default (
@@ -18,7 +18,7 @@ export default (
     config: { write: [identity.id] }
   },
   entry: {
-    protocol: Entry.protocol
+    protocol: basalEntryProtocol
   },
   identity: {
     protocol: Identity.protocol

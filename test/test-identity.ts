@@ -117,7 +117,7 @@ describe(testName, () => {
 
     describe('.asIdentity', () => {
       it('returns the same instance if possible', async () => {
-        const _identity = (await Identity.asIdentity(identity)) as Identity
+        const _identity = (Identity.asIdentity(identity)) as Identity
         assert.strictEqual(_identity, identity)
         assert.strictEqual(
           _identity.block.cid.toString(base32),
@@ -128,7 +128,7 @@ describe(testName, () => {
       })
 
       it('returns a new instance if needed', async () => {
-        const _identity = (await Identity.asIdentity({
+        const _identity = (Identity.asIdentity({
           block: identity.block
         })) as Identity
         assert.notStrictEqual(_identity, identity)
@@ -219,7 +219,7 @@ describe(testName, () => {
       })
 
       it('rejects verifying signatures without a pubkey', async () => {
-        const _identity = (await Identity.asIdentity({
+        const _identity = (Identity.asIdentity({
           block: identity.block
         })) as Identity
         _identity.pubkey = undefined as unknown as PublicKey
@@ -262,7 +262,7 @@ describe(testName, () => {
       })
 
       it('rejects signing data without private key', async () => {
-        const _identity = (await Identity.asIdentity({
+        const _identity = (Identity.asIdentity({
           block: identity.block
         })) as Identity
         const data = dataEmpty

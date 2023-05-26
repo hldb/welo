@@ -30,16 +30,13 @@ export interface Fetch {
   timeout?: number
 }
 
-export type AsEntry<Value> =
-  | EntryInstance<Value>
-  | { block: BlockView<Value>, identity: IdentityInstance<any> }
+export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
-export interface EntryStatic<Value> extends Module {
-  new (props: any): EntryInstance<Value>
-  create: (create: Create) => Promise<EntryInstance<Value>>
-  fetch: (fetch: Fetch) => Promise<EntryInstance<Value>>
-  asEntry: (entry: AsEntry<Value>) => Promise<EntryInstance<Value> | null>
-  verify: (entry: EntryInstance<Value>) => Promise<boolean>
+export interface EntryModule<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends Module<P> {
+  create: (create: Create) => Promise<T>
+  fetch: (fetch: Fetch) => Promise<T>
+  asEntry: (entry: AsEntry<unknown>) => Promise<T | null>
+  verify: (entry: AsEntry<unknown>) => Promise<boolean>
 }
 
 export const prefix = `${HLDB_PREFIX}entry/` as const

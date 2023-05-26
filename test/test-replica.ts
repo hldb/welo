@@ -8,7 +8,7 @@ import type { CID } from 'multiformats/cid'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
+import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
@@ -35,6 +35,7 @@ describe(testName, () => {
     testPaths: TestPaths
 
   const Datastore = LevelDatastore
+  const entryModule = createBasalEntry()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
@@ -82,7 +83,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry,
+          Entry: entryModule,
           Identity
         })
         await start(replica)
@@ -124,7 +125,7 @@ describe(testName, () => {
 
       it('does not add entry with mismatched tag', async () => {
         const tag = new Uint8Array([7])
-        const entry = await Entry.create({
+        const entry = await entryModule.create({
           identity,
           tag,
           payload,
@@ -190,7 +191,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry,
+          Entry: entryModule,
           Identity
         })
         await start(replica)
@@ -268,7 +269,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry,
+          Entry: entryModule,
           Identity
         })
         await start(replica)

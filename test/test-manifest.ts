@@ -5,7 +5,7 @@ import type { BlockView } from 'multiformats/interface'
 import { Blocks } from '@/blocks/index.js'
 import { Manifest, Address } from '@/manifest/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { Entry } from '@/entry/basal/index.js'
+import basalEntryProtocol from '@/entry/basal/protocol.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 
@@ -27,7 +27,7 @@ describe(testName, () => {
       write: []
     },
     entry: {
-      protocol: Entry.protocol
+      protocol: basalEntryProtocol
     },
     identity: {
       protocol: Identity.protocol

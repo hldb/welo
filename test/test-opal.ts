@@ -7,7 +7,7 @@ import { WELO_PATH } from '@/utils/constants.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
 import { createStaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
+import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 
@@ -121,7 +121,7 @@ describe(testName, () => {
         const components = welo.getComponents(manifest)
         assert.strictEqual(components.Store, Keyvalue)
         assert.strictEqual(components.Access, createStaticAccess())
-        assert.strictEqual(components.Entry, Entry)
+        assert.strictEqual(components.Entry, createBasalEntry())
         assert.strictEqual(components.Identity, Identity)
       })
     })

@@ -8,7 +8,7 @@ import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { Entry } from '@/entry/basal/index.js'
+import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
@@ -75,7 +75,7 @@ describe(testName, () => {
         blocks,
         access,
         identity,
-        Entry,
+        Entry: createBasalEntry(),
         Identity
       })
       await start(replica)

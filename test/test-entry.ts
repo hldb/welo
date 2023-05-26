@@ -5,7 +5,7 @@ import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
 
 import { Blocks } from '@/blocks/index.js'
-import { Entry } from '@/entry/basal/index.js'
+import { Entry, createBasalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
 import { Identity } from '@/identity/basal/index.js'
 import type { KeyChain } from '@/utils/types.js'
@@ -33,6 +33,7 @@ describe(testName, () => {
   const payload = {}
   const next: CID[] = []
   const refs: CID[] = []
+  const entryModule = createBasalEntry()
 
   before(async () => {
     const testPaths = getTestPaths(fixtPath, testName)
@@ -49,7 +50,7 @@ describe(testName, () => {
       identities,
       keychain,
       kpi
-    }).catch(async (e) => await Identity.get({ name, identities, keychain }))
+    }).catch(async () => await Identity.get({ name, identities, keychain }))
   })
 
   after(async () => {
@@ -58,19 +59,18 @@ describe(testName, () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Entry.protocol)
-      assert.isOk(Entry.create)
-      assert.isOk(Entry.fetch)
-      assert.isOk(Entry.asEntry)
-      assert.isOk(Entry.verify)
+      assert.isOk(entryModule.create)
+      assert.isOk(entryModule.fetch)
+      assert.isOk(entryModule.asEntry)
+      assert.isOk(entryModule.verify)
     })
 
     it(`.type is equal to '${expectedProtocol}'`, () => {
-      assert.strictEqual(Entry.protocol, expectedProtocol)
+      assert.strictEqual(entryModule.protocol, expectedProtocol)
     })
 
     it('.create returns a new entry', async () => {
-      entry = await Entry.create({ identity, tag, payload, next, refs })
+      entry = await entryModule.create({ identity, tag, payload, next, refs })
       assert.strictEqual(entry.identity, identity)
       assert.deepEqual(entry.tag, tag)
       assert.deepEqual(entry.payload, payload)
@@ -85,7 +85,7 @@ describe(testName, () => {
     it('.fetch grabs an existing entry', async () => {
       await blocks.put(entry.block)
       await blocks.put(identity.block)
-      const _entry = await Entry.fetch({ blocks, Identity, cid: entry.cid })
+      const _entry = await entryModule.fetch({ blocks, Identity, cid: entry.cid })
       assert.notStrictEqual(_entry, entry)
       assert.deepEqual(_entry.block, entry.block)
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
@@ -95,20 +95,20 @@ describe(testName, () => {
       const value = { ...entry.block.value, sig: new Uint8Array() }
       const block = await Blocks.encode({ value })
       await blocks.put(block)
-      invalidEntry = (await Entry.asEntry({ block, identity })) as Entry
+      invalidEntry = (await entryModule.asEntry({ block, identity })) as Entry
 
-      const promise = Entry.fetch({ blocks, Identity, cid: invalidEntry.cid })
+      const promise = entryModule.fetch({ blocks, Identity, cid: invalidEntry.cid })
       await assert.isRejected(promise)
     })
 
     describe('.asEntry', () => {
       it('returns the same instance if possible', async () => {
-        const _entry = await Entry.asEntry(entry)
+        const _entry = await entryModule.asEntry(entry)
         assert.strictEqual(_entry, entry)
       })
 
       it('returns a new instance if necessary', async () => {
-        const _entry = await Entry.asEntry({
+        const _entry = await entryModule.asEntry({
           block: entry.block,
           identity: entry.identity
         })
@@ -119,13 +119,13 @@ describe(testName, () => {
 
     describe('.verify', () => {
       it('verifies entry with valid signature', async () => {
-        const verified = await Entry.verify(entry)
+        const verified = await entryModule.verify(entry)
         assert.strictEqual(verified, true)
       })
 
       it('unverifies entry with invalid signature', async () => {
         const _entry = invalidEntry
-        const verified = await Entry.verify(_entry)
+        const verified = await entryModule.verify(_entry)
         assert.strictEqual(verified, false)
       })
 
@@ -136,11 +136,11 @@ describe(testName, () => {
           names.name1
         )
 
-        const _entry = (await Entry.asEntry({
+        const _entry = (await entryModule.asEntry({
           block: entry.block,
           identity
         })) as Entry
-        const verified = await Entry.verify(_entry)
+        const verified = await entryModule.verify(_entry)
         assert.strictEqual(verified, false)
       })
     })

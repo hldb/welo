@@ -6,7 +6,7 @@ import { compare } from 'uint8arrays/compare'
 
 import type { Blocks } from '@/blocks/index.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
-import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
+import type { EntryInstance, EntryModule } from '@/entry/interface.js'
 import type { IdentityStatic } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
@@ -33,7 +33,7 @@ export function loadEntry ({
   Identity
 }: {
   blocks: Blocks
-  Entry: EntryStatic<any>
+  Entry: EntryModule<any>
   Identity: IdentityStatic<any>
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {

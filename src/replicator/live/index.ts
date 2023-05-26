@@ -12,7 +12,7 @@ import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryStatic } from '@/entry/interface.js'
+import type { EntryModule } from '@/entry/interface.js'
 import type { IdentityStatic } from '@/identity/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
@@ -28,7 +28,7 @@ export class LiveReplicator extends Playable {
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
-  readonly Entry: EntryStatic<any>
+  readonly Entry: EntryModule
   readonly Identity: IdentityStatic<any>
 
   readonly shared: Monitor

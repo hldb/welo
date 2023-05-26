@@ -7,7 +7,7 @@ import { Database } from '../src/database.js'
 import { Keyvalue as Store } from '@/store/keyvalue/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { Entry } from '@/entry/basal/index.js'
+import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -73,7 +73,7 @@ describe(testName, () => {
           blocks,
           Store,
           Access: createStaticAccess(),
-          Entry,
+          Entry: createBasalEntry(),
           Identity,
           replicators: [] // empty replicator
         })

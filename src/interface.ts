@@ -13,7 +13,7 @@ import type { KeyChain } from '@/utils/types.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { AccessInstance, AccessModule } from '@/access/interface.js'
-import type { EntryStatic } from '@/entry/interface.js'
+import type { EntryModule } from '@/entry/interface.js'
 import type { StoreInstance, StoreStatic } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorClass } from '@/replicator/interface'
@@ -38,7 +38,7 @@ export interface Create {
   handlers: {
     access: AccessModule[]
     store: StoreStatic[]
-    entry: Array<EntryStatic<any>>
+    entry: EntryModule[]
     identity: Array<IdentityStatic<any>>
   }
 }
@@ -56,7 +56,7 @@ export interface Config {
   handlers: {
     access: AccessModule[]
     store: StoreStatic[]
-    entry: Array<EntryStatic<any>>
+    entry: EntryModule[]
     identity: Array<IdentityStatic<any>>
   }
 }
@@ -105,7 +105,7 @@ export interface DbOpen {
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessModule
-  Entry: EntryStatic<any>
+  Entry: EntryModule
   Identity: IdentityStatic<any>
   Store: StoreStatic
 }
