@@ -8,7 +8,7 @@ import { Keyvalue as Store } from '@/store/keyvalue/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 import type { DatastoreClass } from '@/utils/datastore.js'
@@ -74,7 +74,7 @@ describe(testName, () => {
           Store,
           Access: createStaticAccess(),
           Entry: createBasalEntry(),
-          Identity,
+          Identity: createBasalIdentity(),
           replicators: [] // empty replicator
         })
       })

@@ -9,7 +9,7 @@ import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
 import defaultManifest from './utils/defaultManifest.js'
@@ -76,7 +76,7 @@ describe(testName, () => {
         access,
         identity,
         Entry: createBasalEntry(),
-        Identity
+        Identity: createBasalIdentity()
       })
       await start(replica)
       keyvalue = new Keyvalue({

@@ -7,7 +7,7 @@ import type { LevelDatastore } from 'datastore-level'
 import { Blocks } from '@/blocks/index.js'
 import { Entry, createBasalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import type { KeyChain } from '@/utils/types.js'
 
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
@@ -34,6 +34,7 @@ describe(testName, () => {
   const next: CID[] = []
   const refs: CID[] = []
   const entryModule = createBasalEntry()
+  const identityModule = createBasalIdentity()
 
   before(async () => {
     const testPaths = getTestPaths(fixtPath, testName)
@@ -45,12 +46,12 @@ describe(testName, () => {
     const libp2p = await getTestLibp2p(ipfs)
     keychain = libp2p.keychain
 
-    identity = await Identity.import({
+    identity = await identityModule.import({
       name,
       identities,
       keychain,
       kpi
-    }).catch(async () => await Identity.get({ name, identities, keychain }))
+    }).catch(async () => await identityModule.get({ name, identities, keychain }))
   })
 
   after(async () => {
@@ -85,7 +86,7 @@ describe(testName, () => {
     it('.fetch grabs an existing entry', async () => {
       await blocks.put(entry.block)
       await blocks.put(identity.block)
-      const _entry = await entryModule.fetch({ blocks, Identity, cid: entry.cid })
+      const _entry = await entryModule.fetch({ blocks, Identity: identityModule, cid: entry.cid })
       assert.notStrictEqual(_entry, entry)
       assert.deepEqual(_entry.block, entry.block)
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
@@ -97,7 +98,7 @@ describe(testName, () => {
       await blocks.put(block)
       invalidEntry = (await entryModule.asEntry({ block, identity })) as Entry
 
-      const promise = entryModule.fetch({ blocks, Identity, cid: invalidEntry.cid })
+      const promise = entryModule.fetch({ blocks, Identity: identityModule, cid: invalidEntry.cid })
       await assert.isRejected(promise)
     })
 

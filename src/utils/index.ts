@@ -4,7 +4,7 @@ import { base32 } from 'multiformats/bases/base32'
 import { peerIdFromString } from '@libp2p/peer-id'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-import type { IdentityStatic } from '@/identity/interface.js'
+import type { IdentityModule } from '@/identity/interface.js'
 import type { AccessModule } from '@/access/interface.js'
 import type { StoreStatic } from '@/store/interface.js'
 import type { EntryModule } from '@/entry/interface.js'
@@ -31,6 +31,6 @@ export const dirs = (root: string): DirsReturn =>
 export interface Components {
   Access: AccessModule
   Entry: EntryModule
-  Identity: IdentityStatic<any>
+  Identity: IdentityModule
   Store: StoreStatic
 }

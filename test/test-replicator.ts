@@ -14,7 +14,7 @@ import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { createBasalIdentity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
 const testName = 'live-replicator'
@@ -80,7 +80,7 @@ describe(testName, () => {
       access,
       identity: identity1,
       Entry: createBasalEntry(),
-      Identity
+      Identity: createBasalIdentity()
     })
     replica2 = new Replica({
       manifest,
@@ -90,7 +90,7 @@ describe(testName, () => {
       access,
       identity: identity2,
       Entry: createBasalEntry(),
-      Identity
+      Identity: createBasalIdentity()
     })
     await start(replica1, replica2)
 

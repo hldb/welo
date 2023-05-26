@@ -3,7 +3,7 @@ import { LevelDatastore } from 'datastore-level'
 import { Welo } from '@/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { createBasalIdentity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 import { LiveReplicator } from '@/replicator/live/index.js'
 import type { Create } from '@/interface.js'
@@ -13,7 +13,7 @@ export default async (config: Omit<Create, 'handlers' | 'datastore' | 'replicato
   replicators: [LiveReplicator],
 
   handlers: {
-    identity: [Identity],
+    identity: [createBasalIdentity()],
     access: [createStaticAccess()],
     store: [Keyvalue],
     entry: [createBasalEntry()]

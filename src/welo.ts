@@ -9,7 +9,6 @@ import { Blocks } from '@/blocks/index.js'
 import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
 import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
-import { Identity } from '@/identity/basal/index.js'
 import {
   dirs,
   DirsReturn,
@@ -142,7 +141,7 @@ export class Welo extends Playable {
       )
 
       await identities.open()
-      identity = await Identity.get({
+      identity = await options.handlers.identity[0].get({
         name: 'default',
         identities,
         keychain: ipfs.libp2p.keychain

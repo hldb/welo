@@ -6,7 +6,7 @@ import type { LevelDatastore } from 'datastore-level'
 import type { AccessProtocol } from '@/access/static/protocol.js'
 import type { EntryProtocol } from '@/entry/basal/protocol.js'
 import type { IdentityProtocol } from '@/identity/basal/protocol.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
 import type { KeyChain } from '@/utils/types.js'
@@ -39,7 +39,7 @@ export interface Create {
     access: AccessModule[]
     store: StoreStatic[]
     entry: EntryModule[]
-    identity: Array<IdentityStatic<any>>
+    identity: IdentityModule[]
   }
 }
 
@@ -57,7 +57,7 @@ export interface Config {
     access: AccessModule[]
     store: StoreStatic[]
     entry: EntryModule[]
-    identity: Array<IdentityStatic<any>>
+    identity: IdentityModule[]
   }
 }
 
@@ -106,7 +106,7 @@ export interface DbOpen {
   manifest: Manifest
   Access: AccessModule
   Entry: EntryModule
-  Identity: IdentityStatic<any>
+  Identity: IdentityModule
   Store: StoreStatic
 }
 

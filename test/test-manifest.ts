@@ -6,7 +6,7 @@ import { Blocks } from '@/blocks/index.js'
 import { Manifest, Address } from '@/manifest/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
-import { Identity } from '@/identity/basal/index.js'
+import basalIdentityProtocol from '@/identity/basal/protocol.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -30,7 +30,7 @@ describe(testName, () => {
       protocol: basalEntryProtocol
     },
     identity: {
-      protocol: Identity.protocol
+      protocol: basalIdentityProtocol
     }
   }
 

@@ -13,7 +13,7 @@ import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
 import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 import type { EntryInstance, EntryModule } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
@@ -42,7 +42,7 @@ export class Replica extends Playable {
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
   readonly Entry: EntryModule<any>
-  readonly Identity: IdentityStatic<any>
+  readonly Identity: IdentityModule<any>
   readonly events: EventEmitter<ReplicaEvents>
 
   Datastore: DatastoreClass
@@ -67,8 +67,8 @@ export class Replica extends Playable {
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    Entry: EntryModule<any>
-    Identity: IdentityStatic<any>
+    Entry: EntryModule
+    Identity: IdentityModule
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))

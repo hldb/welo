@@ -6,7 +6,7 @@ import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { EntryModule } from '@/entry/interface.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
@@ -34,7 +34,7 @@ export class Database extends Playable {
 
   readonly Datastore: DatastoreClass
   readonly Entry: EntryModule
-  readonly Identity: IdentityStatic<any>
+  readonly Identity: IdentityModule
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate
@@ -136,10 +136,6 @@ export class Database extends Playable {
       Entry,
       Identity
     } = options
-
-    if (identity.constructor !== Identity) {
-      throw new Error('identity instance type does not match Identity class')
-    }
 
     const common = { manifest, blocks, Datastore }
 

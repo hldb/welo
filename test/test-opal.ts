@@ -8,7 +8,7 @@ import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
@@ -122,7 +122,7 @@ describe(testName, () => {
         assert.strictEqual(components.Store, Keyvalue)
         assert.strictEqual(components.Access, createStaticAccess())
         assert.strictEqual(components.Entry, createBasalEntry())
-        assert.strictEqual(components.Identity, Identity)
+        assert.strictEqual(components.Identity, createBasalIdentity())
       })
     })
   })

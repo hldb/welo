@@ -3,7 +3,7 @@ import type { ManifestData } from '@/manifest/interface.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
-import { Identity } from '@/identity/basal/index.js'
+import basalIdentityProtocol from '@/identity/basal/protocol.js'
 
 export default (
   name: string,
@@ -21,6 +21,6 @@ export default (
     protocol: basalEntryProtocol
   },
   identity: {
-    protocol: Identity.protocol
+    protocol: basalIdentityProtocol
   }
 })

@@ -9,7 +9,7 @@ import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
@@ -36,6 +36,7 @@ describe(testName, () => {
 
   const Datastore = LevelDatastore
   const entryModule = createBasalEntry()
+  const identityModule = createBasalIdentity()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
@@ -84,7 +85,7 @@ describe(testName, () => {
           access,
           identity,
           Entry: entryModule,
-          Identity
+          Identity: identityModule
         })
         await start(replica)
       })
@@ -192,7 +193,7 @@ describe(testName, () => {
           access,
           identity,
           Entry: entryModule,
-          Identity
+          Identity: identityModule
         })
         await start(replica)
       })
@@ -270,7 +271,7 @@ describe(testName, () => {
           access,
           identity,
           Entry: entryModule,
-          Identity
+          Identity: identityModule
         })
         await start(replica)
 

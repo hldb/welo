@@ -42,20 +42,19 @@ export interface IdentityInstance<Value> {
   verify: (data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }
 
-export interface IdentityStatic<Value> extends Module {
-  new (props: any): IdentityInstance<Value>
-  gen: (gen: Gen) => Promise<IdentityInstance<Value>>
-  get: (get: Get) => Promise<IdentityInstance<Value>>
-  fetch: (fetch: Fetch) => Promise<IdentityInstance<Value>>
-  asIdentity: (asIdentity: AsIdentity<Value>) => IdentityInstance<Value> | null
-  import: (imp: Import) => Promise<IdentityInstance<Value>>
+export interface IdentityModule<T extends IdentityInstance<unknown> = IdentityInstance<unknown>, P extends string = string> extends Module<P> {
+  gen: (gen: Gen) => Promise<T>
+  get: (get: Get) => Promise<T>
+  fetch: (fetch: Fetch) => Promise<T>
+  asIdentity: (asIdentity: AsIdentity<unknown>) => T | null
+  import: (imp: Import) => Promise<T>
   export: (exp: Export) => Promise<Uint8Array>
   sign: (
-    identity: IdentityInstance<Value>,
+    identity: AsIdentity<unknown>,
     data: Uint8Array
   ) => Promise<Uint8Array>
   verify: (
-    identity: IdentityInstance<Value>,
+    identity: AsIdentity<unknown>,
     data: Uint8Array,
     sig: Uint8Array
   ) => Promise<boolean>

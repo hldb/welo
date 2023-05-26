@@ -4,7 +4,7 @@ import type { CID } from 'multiformats/cid'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Module } from '@/interface.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 
 export interface EntryData {
   tag: Uint8Array
@@ -25,7 +25,7 @@ export interface Create extends EntryData {
 
 export interface Fetch {
   blocks: Blocks
-  Identity: IdentityStatic<any>
+  Identity: IdentityModule<any>
   cid: CID
   timeout?: number
 }

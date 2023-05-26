@@ -4,7 +4,7 @@ import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
 
-import { Identity } from '@/identity/basal/index.js'
+import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Blocks } from '@/blocks/index.js'
 import type { KeyChain } from '@/utils/types.js'
 
@@ -25,6 +25,7 @@ describe(testName, () => {
   const expectedProtocol = '/hldb/identity/basal'
   const name = names.name0
   const password = ''
+  const identityModule = createBasalIdentity()
 
   const dataEmpty = new Uint8Array()
   const signedEmpty = base32.decode(
@@ -42,12 +43,12 @@ describe(testName, () => {
     const libp2p = await getTestLibp2p(ipfs)
     keychain = libp2p.keychain
 
-    identity = await Identity.import({
+    identity = await identityModule.import({
       name,
       identities,
       keychain,
       kpi
-    }).catch(async () => await Identity.get({ name, identities, keychain }))
+    }).catch(async () => await identityModule.get({ name, identities, keychain }))
 
     const tempTestPaths = getTestPaths(tempPath, testName)
     tempIpfs = await getTestIpfs(tempTestPaths, offlineIpfsOptions)
@@ -64,22 +65,22 @@ describe(testName, () => {
 
   describe('Class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Identity.protocol)
-      assert.isOk(Identity.get)
-      assert.isOk(Identity.fetch)
-      assert.isOk(Identity.asIdentity)
-      assert.isOk(Identity.export)
-      assert.isOk(Identity.import)
-      assert.isOk(Identity.verify)
+      assert.isOk(identityModule.protocol)
+      assert.isOk(identityModule.get)
+      assert.isOk(identityModule.fetch)
+      assert.isOk(identityModule.asIdentity)
+      assert.isOk(identityModule.export)
+      assert.isOk(identityModule.import)
+      assert.isOk(identityModule.verify)
     })
 
     it(`.type is equal to '${expectedProtocol}'`, () => {
-      assert.strictEqual(Identity.protocol, expectedProtocol)
+      assert.strictEqual(identityModule.protocol, expectedProtocol)
     })
 
     describe('.get', () => {
       it('grabs existing identity', async () => {
-        identity = await Identity.get({ name, identities, keychain })
+        identity = await identityModule.get({ name, identities, keychain })
         assert.strictEqual(identity.name, name)
         assert.strictEqual(identity.block.cid.toString(base32), authstring)
         assert.isOk(identity instanceof Identity)
@@ -87,7 +88,7 @@ describe(testName, () => {
 
       it('creates a new identity', async () => {
         const randomName = Math.random().toString()
-        const _identity = await Identity.get({
+        const _identity = await identityModule.get({
           name: randomName,
           identities: tempIdentities,
           keychain: tempKeychain
@@ -102,7 +103,7 @@ describe(testName, () => {
     describe('.fetch', () => {
       it('fetches valid identity', async () => {
         await blocks.put(identity.block)
-        const _identity = await Identity.fetch({ blocks, auth: identity.auth })
+        const _identity = await identityModule.fetch({ blocks, auth: identity.auth })
         assert.notStrictEqual(_identity, identity)
         assert.strictEqual(
           _identity.block.cid.toString(base32),
@@ -117,7 +118,7 @@ describe(testName, () => {
 
     describe('.asIdentity', () => {
       it('returns the same instance if possible', async () => {
-        const _identity = (Identity.asIdentity(identity)) as Identity
+        const _identity = (identityModule.asIdentity(identity)) as Identity
         assert.strictEqual(_identity, identity)
         assert.strictEqual(
           _identity.block.cid.toString(base32),
@@ -128,7 +129,7 @@ describe(testName, () => {
       })
 
       it('returns a new instance if needed', async () => {
-        const _identity = (Identity.asIdentity({
+        const _identity = (identityModule.asIdentity({
           block: identity.block
         })) as Identity
         assert.notStrictEqual(_identity, identity)
@@ -144,7 +145,7 @@ describe(testName, () => {
     describe('.import and .export', () => {
       it('imports an encoded identity/keypair', async () => {
         const name = names.name1
-        const imported = await Identity.import({
+        const imported = await identityModule.import({
           name,
           identities: tempIdentities,
           keychain: tempKeychain,
@@ -161,7 +162,7 @@ describe(testName, () => {
 
       it('rejects importing to an existing identity', async () => {
         const name = names.name1
-        const promise = Identity.import({
+        const promise = identityModule.import({
           name,
           identities: tempIdentities,
           keychain: tempKeychain,
@@ -173,7 +174,7 @@ describe(testName, () => {
 
       it('exports an encoded identity/keypair', async () => {
         const name = names.name1
-        const exported = await Identity.export({
+        const exported = await identityModule.export({
           name,
           identities: tempIdentities,
           keychain: tempKeychain
@@ -184,7 +185,7 @@ describe(testName, () => {
 
       it('rejects exporting a non-existant identity', async () => {
         const name = names.name2
-        const promise = Identity.export({
+        const promise = identityModule.export({
           name,
           identities: tempIdentities,
           keychain: tempKeychain
@@ -197,7 +198,7 @@ describe(testName, () => {
     describe('.sign', () => {
       it('signs an empty byte array', async () => {
         const data = dataEmpty
-        const sig = await Identity.sign(identity, data)
+        const sig = await identityModule.sign(identity, data)
         assert.isOk(sig instanceof Uint8Array)
         assert.strictEqual(sig.toString(), signedEmpty.toString())
       })
@@ -207,26 +208,26 @@ describe(testName, () => {
       it('verifies a valid signature', async () => {
         const data = dataEmpty
         const sig = signedEmpty
-        const verified = await Identity.verify(identity, data, sig)
+        const verified = await identityModule.verify(identity, data, sig)
         assert.strictEqual(verified, true)
       })
 
       it('unverifies an invalid signature', async () => {
         const data = new Uint8Array([1])
         const sig = signedEmpty
-        const verified = await Identity.verify(identity, data, sig)
+        const verified = await identityModule.verify(identity, data, sig)
         assert.strictEqual(verified, false)
       })
 
       it('rejects verifying signatures without a pubkey', async () => {
-        const _identity = (Identity.asIdentity({
+        const _identity = (identityModule.asIdentity({
           block: identity.block
         })) as Identity
         _identity.pubkey = undefined as unknown as PublicKey
 
         const data = new Uint8Array([1])
         const sig = signedEmpty
-        const promise = Identity.verify(_identity, data, sig)
+        const promise = identityModule.verify(_identity, data, sig)
         await assert.isRejected(promise)
       })
     })
@@ -262,7 +263,7 @@ describe(testName, () => {
       })
 
       it('rejects signing data without private key', async () => {
-        const _identity = (Identity.asIdentity({
+        const _identity = (identityModule.asIdentity({
           block: identity.block
         })) as Identity
         const data = dataEmpty

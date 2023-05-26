@@ -2,7 +2,7 @@ import { Manifest } from '@/manifest/index.js'
 import type { ManifestData } from '@/manifest/interface.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
-import { Identity } from '@/identity/basal/index.js'
+import basalIdentityProtocol from '@/identity/basal/protocol.js'
 import { Keyvalue } from '@/store/keyvalue/index.js'
 
 export const getTestManifestConfig = (
@@ -20,7 +20,7 @@ export const getTestManifestConfig = (
     protocol: basalEntryProtocol
   },
   identity: {
-    protocol: Identity.protocol
+    protocol: basalIdentityProtocol
   }
 })
 
