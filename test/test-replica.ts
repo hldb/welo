@@ -34,8 +34,7 @@ describe(testName, () => {
     identity: Identity,
     tempIdentity: Identity,
     testPaths: TestPaths,
-    datastore: LevelDatastore,
-    tempDatastore: LevelDatastore
+    datastore: LevelDatastore
 
   const entryModule = createBasalEntry()
   const identityModule = createBasalIdentity()
@@ -43,9 +42,7 @@ describe(testName, () => {
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
     datastore = await getDatastore(LevelDatastore, testPaths.replica)
-    tempDatastore = await getDatastore(LevelDatastore, testPaths.replica + '/temp')
     await datastore.open()
-    await tempDatastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -77,7 +74,6 @@ describe(testName, () => {
 
   after(async () => {
     await datastore.close()
-    await tempDatastore.close()
     await stop(ipfs)
     await stop(tempIpfs)
   })
@@ -86,9 +82,8 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
-          Datastore: tempDatastore,
+          Datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
           manifest,
-          directory: testPaths.replica + '/temp',
           blocks,
           access,
           identity,
@@ -194,9 +189,8 @@ describe(testName, () => {
     describe('write', () => {
       before(async () => {
         replica = new Replica({
-          Datastore: datastore,
+          Datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
           manifest,
-          directory: testPaths.replica,
           blocks,
           access,
           identity,
@@ -261,6 +255,7 @@ describe(testName, () => {
         await stop(replica)
 
         const newDatastore = await getDatastore(LevelDatastore, testPaths.replica)
+        await newDatastore.open()
         const storage = new NamespaceDatastore(newDatastore, new Key(testPaths.replica))
 
         assert.strictEqual(await storage.has(rootHashKey), true)
@@ -273,10 +268,12 @@ describe(testName, () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
 
+        const newDatastore = await getDatastore(LevelDatastore, testPaths.replica)
+        await newDatastore.open()
+
         const replica = new Replica({
-          Datastore: await getDatastore(LevelDatastore, testPaths.replica),
+          Datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
           manifest,
-          directory: testPaths.replica,
           blocks,
           access,
           identity,

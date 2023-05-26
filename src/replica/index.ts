@@ -5,7 +5,6 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
-import { NamespaceDatastore } from 'datastore-core'
 import type { Datastore } from 'interface-datastore'
 import type { BlockView } from 'multiformats/interface'
 import type { HashMap } from 'ipld-hashmap/interface'
@@ -37,7 +36,6 @@ interface ReplicaEvents {
 
 export class Replica extends Playable {
   readonly manifest: Manifest
-  readonly directory: string
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
@@ -53,7 +51,6 @@ export class Replica extends Playable {
 
   constructor ({
     manifest,
-    directory,
     Datastore,
     blocks,
     access,
@@ -62,7 +59,6 @@ export class Replica extends Playable {
     Identity
   }: {
     manifest: Manifest
-    directory: string
     Datastore: Datastore
     blocks: Blocks
     identity: IdentityInstance<any>
@@ -74,7 +70,7 @@ export class Replica extends Playable {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
     }
     const starting = async (): Promise<void> => {
-      this._storage = new NamespaceDatastore(this.Datastore, new Key(directory))
+      this._storage = this.Datastore
 
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
 
@@ -95,7 +91,6 @@ export class Replica extends Playable {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.directory = directory
     this.blocks = blocks
     this.access = access
     this.identity = identity

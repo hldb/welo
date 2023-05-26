@@ -1,22 +1,14 @@
-import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { GossipHelia } from '@/interface'
-import type { Datastore } from 'interface-datastore'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
+import type { GossipHelia } from '@/interface'
+import type { Datastore } from 'interface-datastore'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
-import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
-import {
-  dirs,
-  DirsReturn,
-  Components,
-  cidstring
-} from '@/utils/index.js'
+import type { Components } from '@/utils/index.js'
 import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
@@ -56,9 +48,6 @@ export class Welo extends Playable {
   private readonly datastore: Datastore
   private readonly handlers: Config['handlers']
 
-  private readonly dirs: DirsReturn
-  readonly directory: string
-
   readonly ipfs: GossipHelia
   readonly blocks: Blocks
 
@@ -73,7 +62,6 @@ export class Welo extends Playable {
   private readonly _opening: Map<string, Promise<Database>>
 
   constructor ({
-    directory,
     identity,
     blocks,
     identities,
@@ -91,9 +79,6 @@ export class Welo extends Playable {
       await Promise.all(Object.values(this.opened).map(stop))
     }
     super({ starting, stopping })
-
-    this.directory = directory
-    this.dirs = dirs(this.directory)
 
     this.identity = identity
     this.blocks = blocks
@@ -120,11 +105,6 @@ export class Welo extends Playable {
    * @returns a promise which resolves to an Welo instance
    */
   static async create (options: Create): Promise<Welo> {
-    let directory: string = WELO_PATH
-    if (where.isNode && typeof options.directory === 'string') {
-      directory = options.directory ?? '.' + directory
-    }
-
     const ipfs = options.ipfs
     if (ipfs == null) {
       throw new Error('ipfs is a required option')
@@ -136,7 +116,7 @@ export class Welo extends Playable {
     if (options.identity != null) {
       identity = options.identity
     } else {
-      identities = new NamespaceDatastore(options.datastore, new Key(dirs(directory).identities))
+      identities = new NamespaceDatastore(options.datastore, new Key("identities"))
 
       identity = await options.handlers.identity[0].get({
         name: 'default',
@@ -146,7 +126,6 @@ export class Welo extends Playable {
     }
 
     const config: Config = {
-      directory,
       identity,
       identities,
       ipfs,
@@ -251,11 +230,6 @@ export class Welo extends Playable {
 
     const replicators = options.replicators ?? this.replicators
 
-    const directory = path.join(
-      this.dirs.databases,
-      cidstring(manifest.address.cid)
-    )
-
     const components = this.getComponents(manifest)
 
     if (components.Access == null ||
@@ -266,15 +240,12 @@ export class Welo extends Playable {
       throw new Error('missing components')
     }
 
-    const datastore = new NamespaceDatastore(Datastore, new Key(directory))
-
     const promise = Database.open({
-      directory,
       manifest,
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      Datastore: datastore,
+      Datastore: new NamespaceDatastore(Datastore, new Key(`databases/${manifest.address.cid}`)),
       replicators,
       ...components
     })

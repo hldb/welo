@@ -1,6 +1,8 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
+import { Key } from 'interface-datastore'
+import { NamespaceDatastore } from 'datastore-core'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
@@ -33,15 +35,14 @@ describe(testName, () => {
     testPaths1: TestPaths,
     testPaths2: TestPaths,
     access: Access,
-    datastore1: LevelDatastore,
-    datastore2: LevelDatastore
+    datastore: LevelDatastore
 
   before(async () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
-    datastore1 = await getDatastore(LevelDatastore, testPaths1.replica)
-    datastore2 = await getDatastore(LevelDatastore, testPaths2.replica)
+    datastore = await getDatastore(LevelDatastore, testPaths1.replica)
+    await datastore.open()
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
@@ -78,8 +79,7 @@ describe(testName, () => {
 
     replica1 = new Replica({
       manifest,
-      directory: testPaths1.replica,
-      Datastore: datastore1,
+      Datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
       blocks: blocks1,
       access,
       identity: identity1,
@@ -88,8 +88,7 @@ describe(testName, () => {
     })
     replica2 = new Replica({
       manifest,
-      directory: testPaths2.replica,
-      Datastore: datastore2,
+      Datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
       blocks: blocks2,
       access,
       identity: identity2,
@@ -116,8 +115,7 @@ describe(testName, () => {
     await stop(replica1, replica2)
     await stop(ipfs1)
     await stop(ipfs2)
-    await datastore1.close()
-    await datastore2.close()
+    await datastore.close()
   })
 
   describe('instance', () => {

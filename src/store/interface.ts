@@ -10,7 +10,6 @@ import type { Module } from '@/interface.js'
 
 export interface Props {
   manifest: Manifest
-  directory: string
   blocks: Blocks
   replica: Replica
   Datastore: Datastore

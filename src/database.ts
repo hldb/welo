@@ -1,5 +1,7 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
 
@@ -22,7 +24,6 @@ import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
  * @public
  */
 export class Database extends Playable {
-  readonly directory: string
   readonly blocks: Blocks
   readonly manifest: Manifest
   readonly identity: IdentityInstance<any>
@@ -55,7 +56,6 @@ export class Database extends Playable {
     super({ starting, stopping })
 
     this.Datastore = config.Datastore
-    this.directory = config.directory
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
@@ -124,7 +124,6 @@ export class Database extends Playable {
    */
   static async open (options: DbOpen): Promise<Database> {
     const {
-      directory,
       Datastore,
       manifest,
       replicators,
@@ -139,19 +138,11 @@ export class Database extends Playable {
 
     const common = { manifest, blocks, Datastore }
 
-    const directories = {
-      // access: directory + '/access',
-      replica: directory + '/replica',
-      store: directory + '/store'
-      // replicator: directory + '/replicator'
-    }
-
     const access = Access.create(common)
 
     const replica = new Replica({
       ...common,
-      Datastore,
-      directory: directories.replica,
+      Datastore: new NamespaceDatastore(Datastore, new Key('replica')),
       identity,
       Entry,
       Identity,
@@ -159,8 +150,7 @@ export class Database extends Playable {
     })
     const store = Store.create({
       ...common,
-      Datastore,
-      directory: directories.store,
+      Datastore: new NamespaceDatastore(Datastore, new Key('store')),
       replica
     })
     const replicatorInstances = replicators.map(replicator => replicator.create({
@@ -170,7 +160,6 @@ export class Database extends Playable {
     }))
 
     const config: DbConfig = {
-      directory,
       Datastore,
       blocks,
       replicators: replicatorInstances,

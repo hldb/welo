@@ -1,6 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
-import { NamespaceDatastore } from 'datastore-core'
 import type { HashMap } from 'ipld-hashmap'
 import type { Datastore } from 'interface-datastore'
 
@@ -27,7 +26,6 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   readonly manifest: Manifest
-  readonly directory: string
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
@@ -39,13 +37,12 @@ export class Keyvalue extends Playable implements StoreInstance {
 
   constructor ({
     manifest,
-    directory,
     blocks,
     replica,
     Datastore
   }: Props) {
     const starting = async (): Promise<void> => {
-      this._storage = new NamespaceDatastore(Datastore, new Key(directory))
+      this._storage = Datastore
 
       let indexesCID: Uint8Array | undefined = undefined
 
@@ -74,7 +71,6 @@ export class Keyvalue extends Playable implements StoreInstance {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.directory = directory
     this.blocks = blocks
     this.config = manifest.store.config as Config
     this.replica = replica

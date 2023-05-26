@@ -29,7 +29,6 @@ export interface Module<T extends string = string> {
 export interface Create {
   datastore: Datastore
   replicators?: ReplicatorModule[]
-  directory?: string
   identity?: IdentityInstance<any>
   ipfs: GossipHelia
   start?: boolean
@@ -45,7 +44,6 @@ export interface Create {
 export interface Config {
   replicators: ReplicatorModule[]
   datastore: Datastore
-  directory: string
   identity: IdentityInstance<any>
   blocks: Blocks
   identities: Datastore | null
@@ -95,7 +93,6 @@ export interface Events {
 }
 
 export interface DbOpen {
-  directory: string
   Datastore: Datastore
   start?: boolean
   blocks: Blocks

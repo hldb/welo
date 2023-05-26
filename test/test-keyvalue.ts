@@ -1,6 +1,8 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { LevelDatastore } from 'datastore-level'
+import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
 import type { Helia } from '@helia/interface'
 
 import { Keyvalue, createKeyValueStore } from '@/store/keyvalue/index.js'
@@ -23,16 +25,14 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore, storeStore: LevelDatastore
+  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore
   const expectedProtocol = '/hldb/store/keyvalue'
   const storeModule = createKeyValueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getDatastore(LevelDatastore, testPaths.replica)
-    storeStore = await getDatastore(LevelDatastore, testPaths.store)
+    datastore = await getDatastore(LevelDatastore, tempPath)
     await datastore.open()
-    await storeStore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -47,7 +47,6 @@ describe(testName, () => {
 
   after(async () => {
     await datastore.close()
-    await storeStore.close()
     await ipfs.stop()
   })
 
@@ -77,9 +76,8 @@ describe(testName, () => {
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Datastore: datastore,
+        Datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
         manifest,
-        directory: testPaths.replica,
         blocks,
         access,
         identity,
@@ -89,10 +87,9 @@ describe(testName, () => {
       await start(replica)
       keyvalue = storeModule.create({
         manifest,
-        directory: testPaths.store,
         blocks,
         replica,
-        Datastore: storeStore
+        Datastore: new NamespaceDatastore(datastore, new Key(testPaths.store))
       })
       await start(keyvalue)
     })

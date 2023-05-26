@@ -3,7 +3,6 @@ import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import createWelo from '@/utils/createDefaultWelo.js'
 import { Welo } from '../src/welo.js'
-import { WELO_PATH } from '@/utils/constants.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'
 import { createStaticAccess } from '@/access/static/index.js'
@@ -22,9 +21,7 @@ describe(testName, () => {
   let ipfs: GossipHelia,
     libp2p: GossipLibp2p,
     welo: Welo,
-    directory: string,
-    identity: Identity,
-    directory1: string
+    identity: Identity
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -35,9 +32,6 @@ describe(testName, () => {
     const keychain = libp2p.keychain
 
     identity = await getTestIdentity(identities, keychain, names.name0)
-
-    directory = testPaths.test + WELO_PATH
-    directory1 = directory + '1'
   })
 
   after(async () => {
@@ -53,17 +47,16 @@ describe(testName, () => {
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await createWelo({ ipfs, directory })
+        welo = await createWelo({ ipfs })
       })
 
       it('returns an instance of Welo with an identity option', async () => {
-        const directory = directory1
-        const welo = await createWelo({ ipfs, directory, identity })
+        const welo = await createWelo({ ipfs, identity })
         await welo.stop()
       })
 
       it.skip('rejects if no identity option or Welo.Datastore', async () => {
-        const promise = createWelo({ ipfs, directory })
+        const promise = createWelo({ ipfs })
         await assert.isRejected(promise)
       })
     })
