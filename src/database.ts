@@ -160,7 +160,7 @@ export class Database extends Playable {
       directory: directories.store,
       replica
     })
-    const replicatorInstances = replicators.map(Replicator => new Replicator({
+    const replicatorInstances = replicators.map(replicator => replicator.create({
       ...common,
       ipfs,
       replica

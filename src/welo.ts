@@ -15,7 +15,7 @@ import {
   Components,
   cidstring
 } from '@/utils/index.js'
-import type { ReplicatorClass } from '@/replicator/interface.js'
+import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
 import type { KeyChain } from '@/utils/types.js'
@@ -51,7 +51,7 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  private readonly replicators: ReplicatorClass[]
+  private readonly replicators: ReplicatorModule[]
   private readonly datastore: DatastoreClass
   private readonly handlers: Config['handlers']
 

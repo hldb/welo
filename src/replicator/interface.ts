@@ -1,4 +1,4 @@
-import type { GossipHelia } from '@/interface.js'
+import type { GossipHelia, Module } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
@@ -12,6 +12,8 @@ export interface Config {
 
 export interface Replicator extends Playable {}
 
-export type ReplicatorClass = new (config: Config) => Replicator
+export interface ReplicatorModule<T extends Replicator = Replicator, P extends string = string> extends Module<P> {
+  create: (config: Config) => T
+}
 
 export const prefix = `${HLDB_PREFIX}replicator/` as const

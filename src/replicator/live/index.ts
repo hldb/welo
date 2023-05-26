@@ -17,6 +17,7 @@ import type { IdentityModule } from '@/identity/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
+import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
 import protocol from './protocol.js'
 
@@ -40,19 +41,11 @@ export class LiveReplicator extends Playable {
   readonly #onReplicaHeadsUpdate: typeof onReplicaHeadsUpdate
   readonly _onHeadsMessage: typeof onHeadsMessage
 
-  static get protocol (): typeof protocol {
-    return protocol
-  }
-
   constructor ({
     ipfs,
     replica,
     blocks
-  }: {
-    ipfs: GossipHelia
-    replica: Replica
-    blocks: Blocks
-  }) {
+  }: Config) {
     const starting = async (): Promise<void> => {
       this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
       this.shared.addEventListener('peer-leave', this.#onPeersLeave) // if a peer leaves and the direct connection is closed then delete the direct
@@ -179,3 +172,8 @@ function onPeersLeave (
     this.directs.delete(key)
   }
 }
+
+export const createLiveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
+  protocol,
+  create: (config: Config) => new LiveReplicator(config)
+})

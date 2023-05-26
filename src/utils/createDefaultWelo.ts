@@ -5,12 +5,12 @@ import { createStaticAccess } from '@/access/static/index.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
 import { createBasalIdentity } from '@/identity/basal/index.js'
 import { createKeyValueStore } from '@/store/keyvalue/index.js'
-import { LiveReplicator } from '@/replicator/live/index.js'
+import { createLiveReplicator } from '@/replicator/live/index.js'
 import type { Create } from '@/interface.js'
 
 export default async (config: Omit<Create, 'handlers' | 'datastore' | 'replicators'>): Promise<Welo> => await Welo.create({
   datastore: LevelDatastore,
-  replicators: [LiveReplicator],
+  replicators: [createLiveReplicator()],
 
   handlers: {
     identity: [createBasalIdentity()],

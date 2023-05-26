@@ -16,7 +16,7 @@ import type { AccessInstance, AccessModule } from '@/access/interface.js'
 import type { EntryModule } from '@/entry/interface.js'
 import type { StoreInstance, StoreModule } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
-import type { Replicator, ReplicatorClass } from '@/replicator/interface'
+import type { Replicator, ReplicatorModule } from '@/replicator/interface'
 
 export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
@@ -29,7 +29,7 @@ export interface Module<T extends string = string> {
 /** @public */
 export interface Create {
   datastore: DatastoreClass
-  replicators?: ReplicatorClass[]
+  replicators?: ReplicatorModule[]
   directory?: string
   identity?: IdentityInstance<any>
   ipfs: GossipHelia
@@ -44,7 +44,7 @@ export interface Create {
 }
 
 export interface Config {
-  replicators: ReplicatorClass[]
+  replicators: ReplicatorModule[]
   datastore: DatastoreClass
   directory: string
   identity: IdentityInstance<any>
@@ -80,7 +80,7 @@ export interface Determine {
 export interface OpenOptions {
   identity?: IdentityInstance<any>
   Datastore?: DatastoreClass
-  replicators?: ReplicatorClass[]
+  replicators?: ReplicatorModule[]
 }
 
 interface AddressEmit {
@@ -100,7 +100,7 @@ export interface DbOpen {
   Datastore: DatastoreClass
   start?: boolean
   blocks: Blocks
-  replicators: ReplicatorClass[]
+  replicators: ReplicatorModule[]
   ipfs: GossipHelia
   identity: IdentityInstance<any>
   manifest: Manifest
