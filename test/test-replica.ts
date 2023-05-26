@@ -4,6 +4,7 @@ import { Key } from 'interface-datastore'
 import { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
+import { NamespaceDatastore } from 'datastore-core'
 
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -12,6 +13,7 @@ import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
+import { getDatastore } from '@/utils/datastore.js'
 
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
@@ -19,7 +21,6 @@ import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
-import { getDatastore } from '@/utils/datastore.js'
 
 const testName = 'replica'
 
@@ -32,14 +33,19 @@ describe(testName, () => {
     access: StaticAccess,
     identity: Identity,
     tempIdentity: Identity,
-    testPaths: TestPaths
+    testPaths: TestPaths,
+    datastore: LevelDatastore,
+    tempDatastore: LevelDatastore
 
-  const Datastore = LevelDatastore
   const entryModule = createBasalEntry()
   const identityModule = createBasalIdentity()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
+    datastore = await getDatastore(LevelDatastore, testPaths.replica)
+    tempDatastore = await getDatastore(LevelDatastore, testPaths.replica + '/temp')
+    await datastore.open()
+    await tempDatastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -70,6 +76,8 @@ describe(testName, () => {
   })
 
   after(async () => {
+    await datastore.close()
+    await tempDatastore.close()
     await stop(ipfs)
     await stop(tempIpfs)
   })
@@ -78,7 +86,7 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
-          Datastore,
+          Datastore: tempDatastore,
           manifest,
           directory: testPaths.replica + '/temp',
           blocks,
@@ -186,7 +194,7 @@ describe(testName, () => {
     describe('write', () => {
       before(async () => {
         replica = new Replica({
-          Datastore,
+          Datastore: datastore,
           manifest,
           directory: testPaths.replica,
           blocks,
@@ -249,22 +257,24 @@ describe(testName, () => {
         const rootHashKey = new Key('rootHash')
         const block = await blocks.encode({ value: replica.graph.root })
 
+        await datastore.close()
         await stop(replica)
 
-        const storage = await getDatastore(Datastore, testPaths.replica)
-        await storage.open()
+        const newDatastore = await getDatastore(LevelDatastore, testPaths.replica)
+        const storage = new NamespaceDatastore(newDatastore, new Key(testPaths.replica))
 
         assert.strictEqual(await storage.has(rootHashKey), true)
 
         assert.deepEqual(decodedcid(await storage.get(rootHashKey)), block.cid)
-        await storage.close()
+        await newDatastore.close()
       })
 
       it('loads the graph root from disk on start', async () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
+
         const replica = new Replica({
-          Datastore,
+          Datastore: await getDatastore(LevelDatastore, testPaths.replica),
           manifest,
           directory: testPaths.replica,
           blocks,

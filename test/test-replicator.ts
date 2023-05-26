@@ -8,6 +8,7 @@ import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
+import { getDatastore } from '@/utils/datastore.js'
 
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
@@ -31,11 +32,16 @@ describe(testName, () => {
     replicator2: Replicator,
     testPaths1: TestPaths,
     testPaths2: TestPaths,
-    access: Access
+    access: Access,
+    datastore1: LevelDatastore,
+    datastore2: LevelDatastore
 
   before(async () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
+
+    datastore1 = await getDatastore(LevelDatastore, testPaths1.replica)
+    datastore2 = await getDatastore(LevelDatastore, testPaths2.replica)
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
@@ -43,8 +49,6 @@ describe(testName, () => {
     libp2p2 = ipfs2.libp2p
 
     addr2 = await getMultiaddr(ipfs2)
-
-    const Datastore = LevelDatastore
 
     const blocks1 = new Blocks(ipfs1)
     const blocks2 = new Blocks(ipfs2)
@@ -75,7 +79,7 @@ describe(testName, () => {
     replica1 = new Replica({
       manifest,
       directory: testPaths1.replica,
-      Datastore,
+      Datastore: datastore1,
       blocks: blocks1,
       access,
       identity: identity1,
@@ -85,7 +89,7 @@ describe(testName, () => {
     replica2 = new Replica({
       manifest,
       directory: testPaths2.replica,
-      Datastore,
+      Datastore: datastore2,
       blocks: blocks2,
       access,
       identity: identity2,
@@ -112,6 +116,8 @@ describe(testName, () => {
     await stop(replica1, replica2)
     await stop(ipfs1)
     await stop(ipfs2)
+    await datastore1.close()
+    await datastore2.close()
   })
 
   describe('instance', () => {

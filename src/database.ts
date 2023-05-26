@@ -4,6 +4,7 @@ import type { CID } from 'multiformats/cid'
 
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
+import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { EntryModule } from '@/entry/interface.js'
 import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
@@ -11,7 +12,6 @@ import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Replicator } from '@/replicator/interface.js'
 
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
@@ -147,8 +147,13 @@ export class Database extends Playable {
     }
 
     const access = Access.create(common)
+    const datastore = await getDatastore(Datastore, directories.replica)
+
+    await datastore.open()
+
     const replica = new Replica({
       ...common,
+      Datastore: datastore,
       directory: directories.replica,
       identity,
       Entry,

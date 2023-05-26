@@ -5,13 +5,13 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
+import { NamespaceDatastore } from 'datastore-core'
+import type { Datastore } from 'interface-datastore'
 import type { BlockView } from 'multiformats/interface'
 import type { HashMap } from 'ipld-hashmap/interface'
-import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
 import type { EntryInstance, EntryModule } from '@/entry/interface.js'
@@ -45,9 +45,9 @@ export class Replica extends Playable {
   readonly Identity: IdentityModule<any>
   readonly events: EventEmitter<ReplicaEvents>
 
-  Datastore: DatastoreClass
+  Datastore: Datastore
 
-  _storage: LevelDatastore | null
+  _storage: Datastore | null
   _graph: Graph | null
   _queue: PQueue
 
@@ -63,7 +63,7 @@ export class Replica extends Playable {
   }: {
     manifest: Manifest
     directory: string
-    Datastore: DatastoreClass
+    Datastore: Datastore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
@@ -74,8 +74,7 @@ export class Replica extends Playable {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
     }
     const starting = async (): Promise<void> => {
-      this._storage = await getDatastore(this.Datastore, directory)
-      await this._storage.open()
+      this._storage = new NamespaceDatastore(this.Datastore, new Key(directory))
 
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
 
@@ -87,7 +86,6 @@ export class Replica extends Playable {
     const stopping = async (): Promise<void> => {
       this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
-      await this.storage.close()
       await stop(this._graph)
 
       this._storage = null
@@ -113,7 +111,7 @@ export class Replica extends Playable {
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
+  get storage (): Datastore {
     if (this._storage === null) {
       throw new Error()
     }

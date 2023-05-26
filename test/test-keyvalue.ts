@@ -12,6 +12,7 @@ import staticAccessProtocol from '@/access/static/protocol.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
+import { getDatastore } from '@/utils/datastore.js'
 
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
@@ -22,13 +23,15 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths
+  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore
   const expectedProtocol = '/hldb/store/keyvalue'
   const Datastore = LevelDatastore
   const storeModule = createKeyValueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
+    datastore = await getDatastore(LevelDatastore, testPaths.replica)
+    await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -42,6 +45,7 @@ describe(testName, () => {
   })
 
   after(async () => {
+    await datastore.close()
     await ipfs.stop()
   })
 
@@ -71,7 +75,7 @@ describe(testName, () => {
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Datastore,
+        Datastore: await getDatastore(Datastore, testPaths.replica),
         manifest,
         directory: testPaths.replica,
         blocks,
