@@ -73,7 +73,7 @@ describe(testName, () => {
           ipfs,
           blocks,
           Store: createKeyValueStore(),
-          Access: createStaticAccess(),
+          access: createStaticAccess(),
           entry: createBasalEntry(),
           Identity: createBasalIdentity(),
           replicators: [] // empty replicator

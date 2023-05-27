@@ -113,7 +113,7 @@ describe(testName, () => {
       it('returns the components for the manifest', () => {
         const components = welo.getComponents(manifest)
         assert.strictEqual(components.Store, createKeyValueStore())
-        assert.strictEqual(components.Access, createStaticAccess())
+        assert.strictEqual(components.access, createStaticAccess())
         assert.strictEqual(components.entry, createBasalEntry())
         assert.strictEqual(components.Identity, createBasalIdentity())
       })

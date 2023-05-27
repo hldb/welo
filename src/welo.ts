@@ -225,7 +225,8 @@ export class Welo extends Playable {
 
     const components = this.getComponents(manifest)
 
-    if (components.Access == null ||
+    if (
+      components.access == null ||
       components.entry == null ||
       components.Identity == null ||
       components.Store == null
@@ -287,8 +288,8 @@ export class Welo extends Playable {
     }
 
     return {
-      Access: access,
-      entry: entry,
+      access,
+      entry,
       Identity: identity,
       Store: store
     }

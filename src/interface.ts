@@ -100,13 +100,13 @@ export interface DbOpen {
   ipfs: GossipHelia
   identity: IdentityInstance<any>
   manifest: Manifest
-  Access: AccessModule
+  access: AccessModule
   entry: EntryModule
   Identity: IdentityModule
   Store: StoreModule
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'> {
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators' | 'access'> {
   replicators: Replicator[]
   replica: Replica
   store: StoreInstance

@@ -132,14 +132,14 @@ export class Database extends Playable {
       identity,
       blocks,
       Store,
-      Access,
+      access: accessModule,
       entry,
       Identity
     } = options
 
     const common = { manifest, blocks, datastore }
 
-    const access = Access.create(common)
+    const access = accessModule.create(common)
 
     const replica = new Replica({
       ...common,
@@ -169,7 +169,6 @@ export class Database extends Playable {
       replica,
       store,
       access,
-      Access,
       entry,
       Identity,
       Store

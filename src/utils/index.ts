@@ -23,7 +23,7 @@ export interface DirsReturn {
 }
 
 export interface Components {
-  Access: AccessModule
+  access: AccessModule
   entry: EntryModule
   Identity: IdentityModule
   Store: StoreModule
