@@ -229,7 +229,7 @@ export class Welo extends Playable {
       components.access == null ||
       components.entry == null ||
       components.Identity == null ||
-      components.Store == null
+      components.store == null
     ) {
       throw new Error('missing components')
     }
@@ -291,7 +291,7 @@ export class Welo extends Playable {
       access,
       entry,
       Identity: identity,
-      Store: store
+      store: store
     }
   }
 

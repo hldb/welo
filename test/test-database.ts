@@ -72,7 +72,7 @@ describe(testName, () => {
           identity,
           ipfs,
           blocks,
-          Store: createKeyValueStore(),
+          store: createKeyValueStore(),
           access: createStaticAccess(),
           entry: createBasalEntry(),
           Identity: createBasalIdentity(),

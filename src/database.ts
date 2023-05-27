@@ -131,7 +131,7 @@ export class Database extends Playable {
       ipfs,
       identity,
       blocks,
-      Store,
+      store: storeModule,
       access: accessModule,
       entry,
       Identity
@@ -149,7 +149,7 @@ export class Database extends Playable {
       Identity,
       access
     })
-    const store = Store.create({
+    const store = storeModule.create({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
       replica
@@ -170,8 +170,7 @@ export class Database extends Playable {
       store,
       access,
       entry,
-      Identity,
-      Store
+      Identity
     }
 
     const database = new Database(config)

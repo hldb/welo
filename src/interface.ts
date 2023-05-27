@@ -103,10 +103,10 @@ export interface DbOpen {
   access: AccessModule
   entry: EntryModule
   Identity: IdentityModule
-  Store: StoreModule
+  store: StoreModule
 }
 
-export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators' | 'access'> {
+export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators' | 'access' | 'store'> {
   replicators: Replicator[]
   replica: Replica
   store: StoreInstance

@@ -26,5 +26,5 @@ export interface Components {
   access: AccessModule
   entry: EntryModule
   Identity: IdentityModule
-  Store: StoreModule
+  store: StoreModule
 }
