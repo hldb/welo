@@ -23,7 +23,7 @@ import { Graph, loadHashMap } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import defaultManifest from './utils/defaultManifest.js'
+import defaultManifest from './utils/default-manifest.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'

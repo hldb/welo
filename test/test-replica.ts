@@ -15,7 +15,7 @@ import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
 import getDatastore from './utils/level-datastore.js'
-import defaultManifest from './utils/defaultManifest.js'
+import defaultManifest from './utils/default-manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'

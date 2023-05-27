@@ -1,9 +1,9 @@
 import all from 'it-all'
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { parsedcid } from '@/utils/index.js'
-import createWelo from '@/utils/createDefaultWelo.js'
 import { getTestPaths, tempPath } from '../test/utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from '../test/utils/ipfs.js'
+import createWelo from '../test/utils/default-welo.js'
 
 const paths = getTestPaths(tempPath, 'benchmark')
 const ipfs = await getTestIpfs(paths, offlineIpfsOptions)

@@ -1,7 +1,7 @@
 import { assert } from './utils/chai.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import createWelo from '@/utils/createDefaultWelo.js'
+import createWelo from './utils/default-welo.js'
 import { Welo } from '../src/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '../src/database.js'

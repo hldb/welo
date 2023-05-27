@@ -9,7 +9,7 @@ import { createStaticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
 import { wildcard } from '@/access/interface.js'
 
-import defaultManifest from './utils/defaultManifest.js'
+import defaultManifest from './utils/default-manifest.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
