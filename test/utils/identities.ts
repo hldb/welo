@@ -1,8 +1,8 @@
 import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
+import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
-import type { KeyChain } from '@/utils/types.js'
 
 import getDatastore from './level-datastore.js'
 import type { TestPaths } from './constants.js'

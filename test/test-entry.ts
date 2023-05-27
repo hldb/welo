@@ -3,12 +3,12 @@ import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
+import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Blocks } from '@/blocks/index.js'
 import { Entry, createBasalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
-import type { KeyChain } from '@/utils/types.js'
 
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

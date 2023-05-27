@@ -3,10 +3,10 @@ import type { Helia } from '@helia/interface'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
+import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Blocks } from '@/blocks/index.js'
-import type { KeyChain } from '@/utils/types.js'
 
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'

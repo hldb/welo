@@ -1,3 +1,4 @@
+import type { KeyChain } from '@libp2p/interface-keychain'
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
@@ -5,7 +6,6 @@ import type { Datastore } from 'interface-datastore'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Module } from '@/interface.js'
-import type { KeyChain } from '@/utils/types.js'
 
 export type Gen = string
 
