@@ -220,15 +220,7 @@ export class Welo extends Playable {
       throw new Error('no identity available')
     }
 
-    let Datastore: Datastore
-    if (options.Datastore != null) {
-      Datastore = options.Datastore
-    } else if (this.datastore != null) {
-      Datastore = this.datastore
-    } else {
-      throw new Error('no Datastore attached to Welo class')
-    }
-
+    const datastore = options.datastore ?? this.datastore
     const replicators = options.replicators ?? this.replicators
 
     const components = this.getComponents(manifest)
@@ -246,7 +238,7 @@ export class Welo extends Playable {
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      Datastore: new NamespaceDatastore(Datastore, new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)),
+      datastore: new NamespaceDatastore(datastore, new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)),
       replicators,
       ...components
     })

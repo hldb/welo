@@ -76,7 +76,7 @@ export interface Determine {
 /** @public */
 export interface OpenOptions {
   identity?: IdentityInstance<any>
-  Datastore?: Datastore
+  datastore?: Datastore
   replicators?: ReplicatorModule[]
 }
 
@@ -93,7 +93,7 @@ export interface Events {
 }
 
 export interface DbOpen {
-  Datastore: Datastore
+  datastore: Datastore
   start?: boolean
   blocks: Blocks
   replicators: ReplicatorModule[]

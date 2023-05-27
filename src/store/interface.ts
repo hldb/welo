@@ -12,7 +12,7 @@ export interface Props {
   manifest: Manifest
   blocks: Blocks
   replica: Replica
-  Datastore: Datastore
+  datastore: Datastore
 }
 
 export type Creator = (...args: any[]) => any

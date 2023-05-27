@@ -15,6 +15,7 @@ import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
 import type { Replicator } from '@/replicator/interface.js'
+import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
 
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
 
@@ -33,7 +34,7 @@ export class Database extends Playable {
   readonly access: AccessInstance
   readonly store: StoreInstance
 
-  readonly Datastore: Datastore
+  readonly datastore: Datastore
   readonly Entry: EntryModule
   readonly Identity: IdentityModule
 
@@ -55,7 +56,7 @@ export class Database extends Playable {
     }
     super({ starting, stopping })
 
-    this.Datastore = config.Datastore
+    this.datastore = config.datastore
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
@@ -124,7 +125,7 @@ export class Database extends Playable {
    */
   static async open (options: DbOpen): Promise<Database> {
     const {
-      Datastore,
+      datastore,
       manifest,
       replicators,
       ipfs,
@@ -136,13 +137,13 @@ export class Database extends Playable {
       Identity
     } = options
 
-    const common = { manifest, blocks, Datastore }
+    const common = { manifest, blocks, datastore }
 
     const access = Access.create(common)
 
     const replica = new Replica({
       ...common,
-      Datastore: new NamespaceDatastore(Datastore, new Key('replica')),
+      datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
       identity,
       Entry,
       Identity,
@@ -150,7 +151,7 @@ export class Database extends Playable {
     })
     const store = Store.create({
       ...common,
-      Datastore: new NamespaceDatastore(Datastore, new Key('store')),
+      datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
       replica
     })
     const replicatorInstances = replicators.map(replicator => replicator.create({
@@ -160,7 +161,7 @@ export class Database extends Playable {
     }))
 
     const config: DbConfig = {
-      Datastore,
+      datastore,
       blocks,
       replicators: replicatorInstances,
       identity,

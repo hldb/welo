@@ -79,7 +79,7 @@ describe(testName, () => {
 
     replica1 = new Replica({
       manifest,
-      Datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
+      datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
       blocks: blocks1,
       access,
       identity: identity1,
@@ -88,7 +88,7 @@ describe(testName, () => {
     })
     replica2 = new Replica({
       manifest,
-      Datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
+      datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
       blocks: blocks2,
       access,
       identity: identity2,

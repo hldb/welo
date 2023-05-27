@@ -82,7 +82,7 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
-          Datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
+          datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
           manifest,
           blocks,
           access,
@@ -189,7 +189,7 @@ describe(testName, () => {
     describe('write', () => {
       before(async () => {
         replica = new Replica({
-          Datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
+          datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
           manifest,
           blocks,
           access,
@@ -272,7 +272,7 @@ describe(testName, () => {
         await newDatastore.open()
 
         const replica = new Replica({
-          Datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
+          datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
           manifest,
           blocks,
           access,

@@ -76,7 +76,7 @@ describe(testName, () => {
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
+        datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
         manifest,
         blocks,
         access,
@@ -89,7 +89,7 @@ describe(testName, () => {
         manifest,
         blocks,
         replica,
-        Datastore: new NamespaceDatastore(datastore, new Key(testPaths.store))
+        datastore: new NamespaceDatastore(datastore, new Key(testPaths.store))
       })
       await start(keyvalue)
     })

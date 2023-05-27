@@ -43,14 +43,14 @@ export class Replica extends Playable {
   readonly Identity: IdentityModule<any>
   readonly events: EventEmitter<ReplicaEvents>
 
-  Datastore: Datastore
+  datastore: Datastore
 
   _graph: Graph | null
   _queue: PQueue
 
   constructor ({
     manifest,
-    Datastore,
+    datastore,
     blocks,
     access,
     identity,
@@ -58,7 +58,7 @@ export class Replica extends Playable {
     Identity
   }: {
     manifest: Manifest
-    Datastore: Datastore
+    datastore: Datastore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
@@ -92,7 +92,7 @@ export class Replica extends Playable {
     this.Entry = Entry
     this.Identity = Identity
 
-    this.Datastore = Datastore
+    this.datastore = datastore
     this._graph = null
     this._queue = new PQueue({})
 
@@ -100,7 +100,7 @@ export class Replica extends Playable {
   }
 
   get storage (): Datastore {
-    return this.Datastore
+    return this.datastore
   }
 
   get graph (): Graph {
@@ -147,7 +147,7 @@ export class Replica extends Playable {
     try {
       const block = await this.blocks.encode({ value: root })
       await this.blocks.put(block)
-      await this.Datastore.put(rootHashKey, encodedcid(block.cid))
+      await this.datastore.put(rootHashKey, encodedcid(block.cid))
     } catch (e) {
       throw new Error('failed to set root')
     }

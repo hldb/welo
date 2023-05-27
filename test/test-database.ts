@@ -67,7 +67,7 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
-          Datastore: datastore,
+          datastore: datastore,
           manifest,
           identity,
           ipfs,

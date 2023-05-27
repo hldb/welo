@@ -29,7 +29,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
-  readonly Datastore: Datastore
+  readonly datastore: Datastore
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter<Events>
@@ -38,7 +38,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     manifest,
     blocks,
     replica,
-    Datastore
+    datastore
   }: Props) {
     const starting = async (): Promise<void> => {
       let indexesCID: Uint8Array | undefined
@@ -71,7 +71,7 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.config = manifest.store.config as Config
     this.replica = replica
 
-    this.Datastore = Datastore
+    this.datastore = datastore
     this._indexes = null
     this._index = null
 
@@ -79,7 +79,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   get storage (): Datastore {
-    return this.Datastore
+    return this.datastore
   }
 
   get indexes (): HashMap<any> {
