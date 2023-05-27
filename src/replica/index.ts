@@ -5,14 +5,14 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
+import { LevelBlockstore } from 'blockstore-level'
 import type { BlockView } from 'multiformats/interface'
-import type { HashMap } from 'ipld-hashmap/interface'
 import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
 import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
-import type { Blocks } from '@/blocks/index.js'
+import { Blocks } from '@/blocks/index.js'
 import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
 import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -27,6 +27,8 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
+import type { IpldDatastore } from '@/utils/types.js'
+import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -47,8 +49,9 @@ export class Replica extends Playable {
 
   Datastore: DatastoreClass
 
-  _storage: LevelDatastore | null
-  _graph: Graph | null
+  #storage: LevelDatastore | null
+  #blockstore: LevelBlockstore | null
+  #graph: Graph | null
   _queue: PQueue
 
   constructor ({
@@ -70,28 +73,30 @@ export class Replica extends Playable {
     Entry: EntryStatic<any>
     Identity: IdentityStatic<any>
   }) {
-    const onUpdate = (): void => {
-      void this._queue.add(async () => await this.setRoot(this.graph.root))
-    }
     const starting = async (): Promise<void> => {
-      this._storage = await getDatastore(this.Datastore, directory)
-      await this._storage.open()
+      this.#storage = await getDatastore(this.Datastore, directory)
+      this.#blockstore = new LevelBlockstore(directory + '/blocks')
 
-      const root: Root | undefined = await this.getRoot().catch(() => undefined)
+      await this.#storage.open()
+      await this.#blockstore.open()
+      const root: Root | undefined = await getRoot(
+        this.#storage,
+        this.#blockstore
+      ).catch(() => undefined)
 
-      this._graph = new Graph({ blocks, root })
+      this.#graph = new Graph(this.#blockstore, root)
 
-      this.events.addEventListener('update', onUpdate)
-      await start(this._graph)
+      await start(this.#graph)
     }
     const stopping = async (): Promise<void> => {
-      this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
-      await this.storage.close()
-      await stop(this._graph)
+      this.#storage !== null && await this.#storage.close()
+      this.#blockstore !== null && await this.#blockstore.close()
+      await stop(this.#graph)
 
-      this._storage = null
-      this._graph = null
+      this.#storage = null
+      this.#blockstore = null
+      this.#graph = null
     }
 
     super({ starting, stopping })
@@ -106,69 +111,36 @@ export class Replica extends Playable {
 
     this.Datastore = Datastore
 
-    this._storage = null
-    this._graph = null
+    this.#storage = null
+    this.#blockstore = null
+    this.#graph = null
     this._queue = new PQueue({})
 
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
-  }
-
   get graph (): Graph {
-    if (this._graph === null) {
-      throw new Error('graph has not been set yet')
+    if (this.#graph == null) {
+      throw new Error('Cannot read graph before replica is started')
     }
 
-    return this._graph
+    return this.#graph
   }
 
-  get heads (): HashMap<null> {
+  get heads (): IpldDatastore<ShardLink> {
     return this.graph.heads
   }
 
-  get tails (): HashMap<null> {
+  get tails (): IpldDatastore<ShardLink> {
     return this.graph.tails
   }
 
-  get missing (): HashMap<null> {
+  get missing (): IpldDatastore<ShardLink> {
     return this.graph.missing
   }
 
-  get denied (): HashMap<null> {
+  get denied (): IpldDatastore<ShardLink> {
     return this.graph.denied
-  }
-
-  get size (): () => Promise<number> {
-    return this.graph.size.bind(this.graph)
-  }
-
-  async getRoot (): Promise<Root> {
-    try {
-      const rootHash = await this.storage.get(rootHashKey)
-      const block: BlockView<Root> = await this.blocks.get<Root>(
-        decodedcid(rootHash)
-      )
-      return block.value
-    } catch (e) {
-      throw new Error('failed to get root')
-    }
-  }
-
-  async setRoot (root: Root): Promise<void> {
-    try {
-      const block = await this.blocks.encode({ value: root })
-      await this.blocks.put(block)
-      await this._storage?.put(rootHashKey, encodedcid(block.cid))
-    } catch (e) {
-      throw new Error('failed to set root')
-    }
   }
 
   async traverse (
@@ -181,7 +153,6 @@ export class Replica extends Playable {
     const Identity = this.Identity
 
     const graph = this.graph.clone()
-    await start(graph)
 
     const headsAndTails = [graph.heads, graph.tails]
 
@@ -200,7 +171,7 @@ export class Replica extends Playable {
     // todo: less wordy way to assign heads and tails from direction
     const [heads, tails] = headsAndTails
 
-    const cids = (await all(heads.keys())).map(parsedcid)
+    const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.toString()))
     const load = loadEntry({ blocks, Entry, Identity })
     const links = graphLinks({ graph, tails, edge })
 
@@ -208,15 +179,28 @@ export class Replica extends Playable {
   }
 
   async has (cid: CID | string): Promise<boolean> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     return await this.graph.has(cid)
   }
 
   async known (cid: CID | string): Promise<boolean> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     return await this.graph.known(cid)
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
-    const size = await this.graph.size()
+    if (this.#storage == null || this.#blockstore == null) {
+      throw new Error('replica not started')
+    }
+
+    const clone = this.graph.clone()
+
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag())) {
         console.warn('replica received entry with mismatched tag')
@@ -226,24 +210,29 @@ export class Replica extends Playable {
       await this.blocks.put(entry.block)
       await this.blocks.put(entry.identity.block)
 
-      if (await this.access.canAppend(entry) === true) {
+      if (await this.access.canAppend(entry)) {
         await this.graph.add(entry.cid, entry.next)
       } else {
         await this.graph.deny(entry.cid)
       }
     }
 
-    if ((await this.graph.size()) - size > 0) {
+    if (!this.graph.equals(clone)) {
       this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+      await setRoot(this.#storage, this.#blockstore, await encodeRoot(this.graph.root))
     }
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     const entry = await this.Entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,
-      next: (await all(this.heads.keys())).map((string) => CID.parse(string)),
+      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.toString())),
       refs: [] // refs are empty for now
     })
 
@@ -261,4 +250,36 @@ export class Replica extends Playable {
   //
   //   }
   // }
+}
+
+type EncodedRoot = BlockView<Root>
+
+const encodeRoot = async (root: Root): Promise<EncodedRoot> => await Blocks.encode({ value: root })
+
+const getRoot = async (
+  datastore: LevelDatastore,
+  blockstore: LevelBlockstore
+): Promise<Root> => {
+  try {
+    const rootHash = await datastore.get(rootHashKey)
+    const bytes = await blockstore.get(decodedcid(rootHash))
+    return (await Blocks.decode<Root>({ bytes })).value
+  } catch (e) {
+    throw new Error('failed to get root')
+  }
+}
+
+const setRoot = async (
+  datastore: LevelDatastore,
+  blockstore: LevelBlockstore,
+  block: EncodedRoot
+): Promise<void> => {
+  try {
+    await Promise.all([
+      blockstore.put(block.cid, block.bytes),
+      datastore.put(rootHashKey, encodedcid(block.cid))
+    ])
+  } catch (e) {
+    throw new Error('failed to get root')
+  }
 }

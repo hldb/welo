@@ -1,6 +1,7 @@
-import type { HashMap } from 'ipld-hashmap'
-import type { CID } from 'multiformats/cid'
 import { compare } from 'uint8arrays/compare'
+import { Key } from 'interface-datastore'
+import type { CID } from 'multiformats/cid'
+import type { ShardLink } from '@alanshaw/pail/shard'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
 
@@ -11,6 +12,7 @@ import type { IdentityStatic } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
+import type { IpldDatastore } from '@/utils/types.js'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order
@@ -37,7 +39,7 @@ export function loadEntry ({
   Identity: IdentityStatic<any>
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return Entry.fetch({ blocks, cid, Identity }).catch(() => null)
+    return await Entry.fetch({ blocks, cid, Identity }).catch(() => null)
   }
   return load
 }
@@ -85,7 +87,7 @@ export function graphLinks ({
   edge
 }: {
   graph: Graph
-  tails: HashMap<null>
+  tails: IpldDatastore<ShardLink>
   edge: Edge
 }): LinksFunc {
   const seen: Set<string> = new Set()
@@ -94,7 +96,7 @@ export function graphLinks ({
     const str = cidstring(entry.cid)
 
     // do not traverse past the tails
-    if (await tails.has(str)) {
+    if (await tails.has(new Key(str))) {
       return []
     }
 

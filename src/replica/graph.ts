@@ -1,15 +1,23 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import PQueue from 'p-queue'
-import { HashMap, create, load, Loader, CreateOptions } from 'ipld-hashmap'
+import { HashMap, create, load, type Loader, CreateOptions } from 'ipld-hashmap'
 import * as blockCodec from '@ipld/dag-cbor'
 import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
+import { Key } from 'interface-datastore'
+import { CodeError } from '@libp2p/interfaces/errors'
 import type { CID } from 'multiformats/cid'
+import type { ShardLink } from '@alanshaw/pail/shard'
+import type { BaseBlockstore } from 'blockstore-core'
+import type { BlockView } from 'multiformats'
 
 import { Playable } from '@/utils/playable.js'
 import { cidstring } from '@/utils/index.js'
 import type { Blocks } from '@/blocks/index.js'
 
 import { Node } from './graph-node.js'
+import { empty as emptyBytes } from 'multiformats/bytes'
+import { Paily } from '@/utils/paily.js'
+import type { IpldDatastore } from '@/utils/types.js'
 
 const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
   blockCodec,
@@ -21,7 +29,7 @@ const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
 
 export const loader = (blocks: Blocks): Loader => ({
   get: async (cid: CID): Promise<Uint8Array> =>
-    blocks.get(cid).then((b) => b.bytes),
+    await blocks.get(cid).then((b) => b.bytes),
   put: async (cid: CID, bytes: Uint8Array): Promise<void> => {
     const block = await blocks.decode<any>({ bytes })
     await blocks.put(block)
@@ -36,52 +44,46 @@ export const loadHashMap = async <V>(
     ? await load(loader(blocks), cid, hashmapOptions)
     : await create(loader(blocks), hashmapOptions)
 
-interface State {
-  nodes: HashMap<Uint8Array>
-  missing: HashMap<null> // used as sets
-  denied: HashMap<null> // used as sets
-  heads: HashMap<null> // used as sets
-  tails: HashMap<null> // used as sets
+type StateKeys = 'nodes' | 'missing' | 'denied' | 'heads' | 'tails'
+
+const stateKeys: StateKeys[] = ['nodes', 'missing', 'denied', 'heads', 'tails']
+
+type State = {
+  [K in StateKeys]: IpldDatastore<ShardLink>
 }
 
-export interface Root {
-  nodes: CID
-  missing: CID
-  denied: CID
-  heads: CID
-  tails: CID
+export type Root = {
+  [K in StateKeys]: ShardLink
 }
 
-const getState = async (blocks: Blocks, root?: Root): Promise<State> => ({
-  nodes: await loadHashMap<Uint8Array>(blocks, root?.nodes),
-  missing: await loadHashMap<null>(blocks, root?.missing),
-  denied: await loadHashMap<null>(blocks, root?.denied),
-  heads: await loadHashMap<null>(blocks, root?.heads),
-  tails: await loadHashMap<null>(blocks, root?.tails)
-})
+export type EncodedRoot = BlockView<Root>
 
-const getRoot = (state: State): Root => ({
-  nodes: state.nodes.cid,
-  missing: state.missing.cid,
-  denied: state.denied.cid,
-  heads: state.heads.cid,
-  tails: state.tails.cid
-})
+const createState = async (blockstore: BaseBlockstore, root?: Root): Promise<State> =>
+  ({
+    nodes: await Paily.create(blockstore),
+    missing: await Paily.create(blockstore),
+    denied: await Paily.create(blockstore),
+    heads: await Paily.create(blockstore),
+    tails: await Paily.create(blockstore)
+  })
 
-const getSize = async (blocks: Blocks, state: State): Promise<number> => {
-  const toSize =
-    <V>() =>
-      async (hashmap: HashMap<V>): Promise<number> =>
-        await hashmap.size()
-  const [nodes, missing, denied] = await Promise.all([
-    // grabs hashmap root cids synchronously
-    loadHashMap<Uint8Array>(blocks, state.nodes.cid).then(toSize<Uint8Array>()),
-    loadHashMap<null>(blocks, state.missing.cid).then(toSize<null>()),
-    loadHashMap<null>(blocks, state.denied.cid).then(toSize<null>())
-  ])
+const openState = (blockstore: BaseBlockstore, root: Root): State =>
+  ({
+    nodes: Paily.open(blockstore, root.nodes),
+    missing: Paily.open(blockstore, root.missing),
+    denied: Paily.open(blockstore, root.denied),
+    heads: Paily.open(blockstore, root.heads),
+    tails: Paily.open(blockstore, root.tails)
+  })
 
-  return nodes - missing - denied
-}
+const getRoot = (state: State): Root =>
+  ({
+    nodes: state.nodes.root,
+    missing: state.missing.root,
+    denied: state.denied.root,
+    heads: state.heads.root,
+    tails: state.tails.root
+  })
 
 interface GraphChangeData {
   cid: CID
@@ -94,15 +96,17 @@ interface GraphEvents {
 }
 
 export class Graph extends Playable {
-  blocks: Blocks
+  blockstore: BaseBlockstore
   _root: Root | null
   _state: State | null
   readonly events: EventEmitter<GraphEvents>
   readonly queue: PQueue
 
-  constructor ({ blocks, root }: { blocks: Blocks, root?: Root }) {
+  constructor (blockstore: BaseBlockstore, root?: Root) {
     const starting = async (): Promise<void> => {
-      this._state = await getState(blocks, root)
+      this._state = root != null
+        ? openState(blockstore, root)
+        : await createState(blockstore)
       this._root = getRoot(this._state)
     }
     const stopping = async (): Promise<void> => {
@@ -111,7 +115,7 @@ export class Graph extends Playable {
     }
     super({ starting, stopping })
 
-    this.blocks = blocks
+    this.blockstore = blockstore
     this._root = root ?? null
     this._state = null
     this.events = new EventEmitter()
@@ -119,47 +123,61 @@ export class Graph extends Playable {
   }
 
   clone (): Graph {
-    return new Graph({ blocks: this.blocks, root: this._root ?? undefined })
+    if (this._root == null) {
+      throw new Error('cannot clone graph without root')
+    }
+
+    return new Graph(this.blockstore, this._root)
+  }
+
+  equals (graph: Graph): boolean {
+    for (const k of stateKeys) {
+      if (!this.root[k].equals(graph.root[k])) {
+        return false
+      }
+    }
+
+    return true
   }
 
   get root (): Root {
-    if (this.isStarted() === false) {
-      throw new Error()
+    if (this._root == null) {
+      throw new Error('failed to read graph root')
     }
 
-    return this._root as Root
+    return this._root
   }
 
   get state (): State {
-    if (this.isStarted() === false) {
+    if (!this.isStarted()) {
       throw new Error()
     }
 
     return this._state as State
   }
 
-  get nodes (): HashMap<Uint8Array> {
+  get nodes (): IpldDatastore<ShardLink> {
     return this.state.nodes
   }
 
-  get heads (): HashMap<null> {
+  get heads (): IpldDatastore<ShardLink> {
     return this.state.heads
   }
 
-  get tails (): HashMap<null> {
+  get tails (): IpldDatastore<ShardLink> {
     return this.state.tails
   }
 
-  get missing (): HashMap<null> {
+  get missing (): IpldDatastore<ShardLink> {
     return this.state.missing
   }
 
-  get denied (): HashMap<null> {
+  get denied (): IpldDatastore<ShardLink> {
     return this.state.denied
   }
 
   async known (cid: CID | string): Promise<boolean> {
-    return await this.nodes.has(cidstring(cid))
+    return await this.nodes.has(new Key(cidstring(cid)))
   }
 
   async get (cid: CID | string): Promise<Node | undefined> {
@@ -170,12 +188,8 @@ export class Graph extends Playable {
     return Node.exists(await this.get(cid))
   }
 
-  async size (): Promise<number> {
-    return await getSize(this.blocks, this.state)
-  }
-
   async add (cid: CID, out: CID[]): Promise<void> {
-    const state = await getState(this.blocks, this.root)
+    const state = openState(this.blockstore, this.root)
 
     const func = async (): Promise<void> => {
       const newState = await add(state, cid, out)
@@ -190,7 +204,7 @@ export class Graph extends Playable {
   }
 
   async miss (cid: CID): Promise<void> {
-    const state = await getState(this.blocks, this.root)
+    const state = openState(this.blockstore, this.root)
 
     const func = async (): Promise<void> => {
       const newState = await remove(state, cid, missing)
@@ -205,7 +219,7 @@ export class Graph extends Playable {
   }
 
   async deny (cid: CID): Promise<void> {
-    const state = await getState(this.blocks, this.root)
+    const state = openState(this.blockstore, this.root)
 
     const func = async (): Promise<void> => {
       const newState = await remove(state, cid, denied)
@@ -230,9 +244,16 @@ export async function get (
   state: State,
   cid: string
 ): Promise<Node | undefined> {
-  const value = await state.nodes.get(cid)
+  try {
+    const value = await state.nodes.get(new Key(cid))
+    return await Node.decode(value)
+  } catch (e) {
+    if (e instanceof CodeError && e.code === 'ERR_NOT_FOUND') {
+      return undefined
+    }
 
-  return value instanceof Uint8Array ? await Node.decode(value) : undefined
+    throw e
+  }
 }
 
 export async function set (
@@ -241,7 +262,7 @@ export async function set (
   node: Node
 ): Promise<void> {
   const block = await node.encode()
-  return await state.nodes.set(cid, block.bytes)
+  await state.nodes.put(new Key(cid), block.bytes)
 }
 
 export async function add (state: State, cid: CID, out: CID[]): Promise<State> {
@@ -283,47 +304,47 @@ export async function add (state: State, cid: CID, out: CID[]): Promise<State> {
     }
 
     if (_node.missing === true) {
-      await state.missing.set(_string, null)
+      await state.missing.put(new Key(_string), emptyBytes)
     }
 
     _node.in.add(string)
     const block = await _node.encode()
 
-    await state.nodes.set(_string, block.bytes)
+    await state.nodes.put(new Key(_string), block.bytes)
   }
 
   if (node.missing === true) {
     node.missing = false
-    await state.missing.delete(string)
+    await state.missing.delete(new Key(string))
   }
 
   if (node.denied === true) {
     node.denied = false
-    await state.denied.delete(string)
+    await state.denied.delete(new Key(string))
   }
 
   // update heads
 
   if (node.in.size === 0) {
-    await state.heads.set(string, null)
+    await state.heads.put(new Key(string), emptyBytes)
   }
   for (const _string of existing) {
     // this is not exact
-    await state.heads.delete(_string)
+    await state.heads.delete(new Key(_string))
   }
 
   // update tails
 
   if (existing.size === 0) {
-    await state.tails.set(string, null)
+    await state.tails.put(new Key(string), emptyBytes)
   }
   for (const _string of node.in) {
     // this is not exact
-    await state.tails.delete(_string)
+    await state.tails.delete(new Key(_string))
   }
 
   const block = await node.encode()
-  await state.nodes.set(string, block.bytes)
+  await state.nodes.put(new Key(string), block.bytes)
 
   return state
 }
@@ -356,8 +377,8 @@ export async function remove (
   // remove in reference to node from all nodes referenced in node.out
   // update heads
 
-  if (exists && (await state.heads.has(string))) {
-    await state.heads.delete(string)
+  if (exists && (await state.heads.has(new Key(string)))) {
+    await state.heads.delete(new Key(string))
   }
 
   for (const _string of node.out) {
@@ -369,20 +390,20 @@ export async function remove (
     await set(state, _string, _node)
     if (_node.in.size === 0) {
       if (_exists) {
-        await state.heads.set(_string, null)
+        await state.heads.put(new Key(_string), emptyBytes)
       } else {
         // remove referenced orphaned node
-        await state.nodes.delete(_string)
-        _node.missing === true && (await state.missing.delete(_string))
-        _node.denied === true && (await state.denied.delete(_string))
+        await state.nodes.delete(new Key(_string))
+        _node.missing === true && (await state.missing.delete(new Key(_string)))
+        _node.denied === true && (await state.denied.delete(new Key(_string)))
       }
     }
   }
 
   // update tails
 
-  if (exists && (await state.tails.has(string))) {
-    await state.tails.delete(string)
+  if (exists && (await state.tails.has(new Key(string)))) {
+    await state.tails.delete(new Key(string))
 
     for (const _string of node.in) {
       const _node = (await get(state, _string)) as Node
@@ -392,8 +413,8 @@ export async function remove (
         if (
           _string !== string &&
           !(
-            (await state.missing.has(_string)) ||
-            (await state.denied.has(_string))
+            (await state.missing.has(new Key(_string))) ||
+            (await state.denied.has(new Key(_string)))
           )
         ) {
           tail = false
@@ -402,7 +423,7 @@ export async function remove (
       }
 
       if (tail) {
-        await state.tails.set(_string, null)
+        await state.tails.put(new Key(_string), emptyBytes)
       }
     }
   }
@@ -412,17 +433,17 @@ export async function remove (
   // miss -> deny | deny -> miss
   if (node[unreason] === true) {
     node[unreason] = false
-    await state[unreason].delete(string)
+    await state[unreason].delete(new Key(string))
   }
 
   // node is orphaned
   if (node.in.size === 0) {
-    await state.nodes.delete(string)
+    await state.nodes.delete(new Key(string))
   } else {
     node[reason] = true
     node.out.clear()
 
-    await state[reason].set(string, null)
+    await state[reason].put(new Key(string), emptyBytes)
     await set(state, string, node)
   }
 

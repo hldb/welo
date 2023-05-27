@@ -29,13 +29,13 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
     this.#queue = new PQueue({ concurrency: 1 })
   }
 
-  static async create (blocks: BaseBlockstore): Promise<Paily> {
+  static async create (blockstore: BaseBlockstore): Promise<Paily> {
     const { bytes, cid } = await ShardBlock.create()
-    await blocks.put(cid, bytes)
-    return new Paily(blocks, cid)
+    await blockstore.put(cid, bytes)
+    return new Paily(blockstore, cid)
   }
 
-  static load (blocks: BaseBlockstore, root: ShardLink): Paily {
+  static open (blocks: BaseBlockstore, root: ShardLink): Paily {
     return new Paily(blocks, root)
   }
 
