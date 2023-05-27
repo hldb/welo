@@ -16,8 +16,8 @@ import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { createBasalEntry } from '@/entry/basal/index.js'
-import { createBasalIdentity } from '@/identity/basal/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { basalIdentity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
 const testName = 'live-replicator'
@@ -83,8 +83,8 @@ describe(testName, () => {
       blocks: blocks1,
       access,
       identity: identity1,
-      entry: createBasalEntry(),
-      identityModule: createBasalIdentity()
+      entry: basalEntry(),
+      identityModule: basalIdentity()
     })
     replica2 = new Replica({
       manifest,
@@ -92,8 +92,8 @@ describe(testName, () => {
       blocks: blocks2,
       access,
       identity: identity2,
-      entry: createBasalEntry(),
-      identityModule: createBasalIdentity()
+      entry: basalEntry(),
+      identityModule: basalIdentity()
     })
     await start(replica1, replica2)
 

@@ -5,7 +5,7 @@ import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Blocks } from '@/blocks/index.js'
 
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
@@ -25,7 +25,7 @@ describe(testName, () => {
   const expectedProtocol = '/hldb/identity/basal'
   const name = names.name0
   const password = ''
-  const identityModule = createBasalIdentity()
+  const identityModule = basalIdentity()
 
   const dataEmpty = new Uint8Array()
   const signedEmpty = base32.decode(

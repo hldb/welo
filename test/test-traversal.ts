@@ -15,8 +15,8 @@ import {
 } from '@/replica/traversal.js'
 import { Blocks } from '@/blocks/index.js'
 import type { EntryInstance } from '@/entry/interface.js'
-import { Entry, createBasalEntry } from '@/entry/basal/index.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { Entry, basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import { Graph, loadHashMap } from '@/replica/graph.js'
@@ -48,8 +48,8 @@ describe('traversal', () => {
   const next: CID[] = []
   const refs: CID[] = []
   const payload = {}
-  const entryModule = createBasalEntry()
-  const identityModule = createBasalIdentity()
+  const entryModule = basalEntry()
+  const identityModule = basalIdentity()
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)

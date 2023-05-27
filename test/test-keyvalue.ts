@@ -5,14 +5,14 @@ import { Key } from 'interface-datastore'
 import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 
-import { Keyvalue, createKeyValueStore } from '@/store/keyvalue/index.js'
+import { Keyvalue, keyvalueStore } from '@/store/keyvalue/index.js'
 import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
 import getDatastore from './utils/level-datastore.js'
@@ -27,7 +27,7 @@ const testName = 'keyvalue'
 describe(testName, () => {
   let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore
   const expectedProtocol = '/hldb/store/keyvalue'
-  const storeModule = createKeyValueStore()
+  const storeModule = keyvalueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
@@ -81,8 +81,8 @@ describe(testName, () => {
         blocks,
         access,
         identity,
-        entry: createBasalEntry(),
-        identityModule: createBasalIdentity()
+        entry: basalEntry(),
+        identityModule: basalIdentity()
       })
       await start(replica)
       keyvalue = storeModule.create({

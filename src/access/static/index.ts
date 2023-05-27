@@ -49,7 +49,7 @@ export class StaticAccess extends Playable implements AccessInstance {
   }
 }
 
-export const createStaticAccess: () => AccessModule<StaticAccess, typeof protocol> = () => ({
+export const staticAccess: () => AccessModule<StaticAccess, typeof protocol> = () => ({
   protocol,
   create: (open: Open) => new StaticAccess(open)
 })

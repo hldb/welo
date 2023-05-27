@@ -112,7 +112,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 }
 
-export const createKeyValueStore: () => StoreModule<Keyvalue, typeof protocol> = () => ({
+export const keyvalueStore: () => StoreModule<Keyvalue, typeof protocol> = () => ({
   protocol,
   create: (props: Props) => new Keyvalue(props)
 })

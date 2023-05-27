@@ -5,7 +5,7 @@ import { start } from '@libp2p/interfaces/startable'
 import type { Entry } from '@/entry/basal/index.js'
 import type { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { createStaticAccess } from '@/access/static/index.js'
+import { staticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
 import { wildcard } from '@/access/interface.js'
 
@@ -20,7 +20,7 @@ const testName = 'static access'
 
 describe(testName, () => {
   let identity: Identity, entry: Entry
-  const Access = createStaticAccess()
+  const Access = staticAccess()
   const name = 'name'
 
   const makeaccess = (write: Array<Uint8Array | string>): AccessProtocol => ({

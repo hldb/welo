@@ -134,7 +134,7 @@ const create = async ({
   return new Entry({ block, data, identity })
 }
 
-export const createBasalEntry: () => EntryModule<Entry, typeof protocol> = () => ({
+export const basalEntry: () => EntryModule<Entry, typeof protocol> = () => ({
   protocol,
   create,
   fetch,

@@ -4,11 +4,11 @@ import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '@/database.js'
-import { createKeyValueStore } from '@/store/keyvalue/index.js'
-import { createStaticAccess } from '@/access/static/index.js'
+import { keyvalueStore } from '@/store/keyvalue/index.js'
+import { staticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 
@@ -72,10 +72,10 @@ describe(testName, () => {
           identity,
           ipfs,
           blocks,
-          store: createKeyValueStore(),
-          access: createStaticAccess(),
-          entry: createBasalEntry(),
-          identityModule: createBasalIdentity(),
+          store: keyvalueStore(),
+          access: staticAccess(),
+          entry: basalEntry(),
+          identityModule: basalIdentity(),
           replicators: [] // empty replicator
         })
       })

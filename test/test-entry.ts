@@ -6,9 +6,9 @@ import type { LevelDatastore } from 'datastore-level'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Blocks } from '@/blocks/index.js'
-import { Entry, createBasalEntry } from '@/entry/basal/index.js'
+import { Entry, basalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -33,8 +33,8 @@ describe(testName, () => {
   const payload = {}
   const next: CID[] = []
   const refs: CID[] = []
-  const entryModule = createBasalEntry()
-  const identityModule = createBasalIdentity()
+  const entryModule = basalEntry()
+  const identityModule = basalIdentity()
 
   before(async () => {
     const testPaths = getTestPaths(fixtPath, testName)

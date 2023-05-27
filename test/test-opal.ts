@@ -5,10 +5,10 @@ import createWelo from './utils/default-welo.js'
 import { Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '@/database.js'
-import { createStaticAccess } from '@/access/static/index.js'
-import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
-import { createKeyValueStore } from '@/store/keyvalue/index.js'
+import { staticAccess } from '@/access/static/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
+import { keyvalueStore } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -112,10 +112,10 @@ describe(testName, () => {
     describe.skip('getComponents', () => {
       it('returns the components for the manifest', () => {
         const components = welo.getComponents(manifest)
-        assert.strictEqual(components.store, createKeyValueStore())
-        assert.strictEqual(components.access, createStaticAccess())
-        assert.strictEqual(components.entry, createBasalEntry())
-        assert.strictEqual(components.identity, createBasalIdentity())
+        assert.strictEqual(components.store, keyvalueStore())
+        assert.strictEqual(components.access, staticAccess())
+        assert.strictEqual(components.entry, basalEntry())
+        assert.strictEqual(components.identity, basalIdentity())
       })
     })
   })

@@ -9,8 +9,8 @@ import type { CID } from 'multiformats/cid'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
-import { createBasalEntry } from '@/entry/basal/index.js'
-import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
@@ -36,8 +36,8 @@ describe(testName, () => {
     testPaths: TestPaths,
     datastore: LevelDatastore
 
-  const entryModule = createBasalEntry()
-  const identityModule = createBasalIdentity()
+  const entryModule = basalEntry()
+  const identityModule = basalIdentity()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)

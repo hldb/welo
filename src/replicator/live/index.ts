@@ -173,7 +173,7 @@ function onPeersLeave (
   }
 }
 
-export const createLiveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
+export const liveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
   protocol,
   create: (config: Config) => new LiveReplicator(config)
 })
