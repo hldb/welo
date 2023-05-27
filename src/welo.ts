@@ -52,7 +52,6 @@ export class Welo extends Playable {
   readonly ipfs: GossipHelia
   readonly blocks: Blocks
 
-  readonly identities: Datastore | null
   readonly keychain: KeyChain
 
   readonly identity: IdentityInstance<any>
@@ -65,7 +64,6 @@ export class Welo extends Playable {
   constructor ({
     identity,
     blocks,
-    identities,
     keychain,
     ipfs,
     handlers,
@@ -84,7 +82,6 @@ export class Welo extends Playable {
     this.identity = identity
     this.blocks = blocks
 
-    this.identities = identities
     this.keychain = keychain
 
     this.ipfs = ipfs
@@ -128,7 +125,6 @@ export class Welo extends Playable {
 
     const config: Config = {
       identity,
-      identities,
       ipfs,
       blocks: new Blocks(ipfs),
       keychain: ipfs.libp2p.keychain,

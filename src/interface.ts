@@ -46,7 +46,6 @@ export interface Config {
   datastore: Datastore
   identity: IdentityInstance<any>
   blocks: Blocks
-  identities: Datastore | null
   keychain: KeyChain
   ipfs: GossipHelia
 
