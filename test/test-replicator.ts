@@ -84,7 +84,7 @@ describe(testName, () => {
       access,
       identity: identity1,
       entry: createBasalEntry(),
-      Identity: createBasalIdentity()
+      identityModule: createBasalIdentity()
     })
     replica2 = new Replica({
       manifest,
@@ -93,7 +93,7 @@ describe(testName, () => {
       access,
       identity: identity2,
       entry: createBasalEntry(),
-      Identity: createBasalIdentity()
+      identityModule: createBasalIdentity()
     })
     await start(replica1, replica2)
 

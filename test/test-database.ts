@@ -75,7 +75,7 @@ describe(testName, () => {
           store: createKeyValueStore(),
           access: createStaticAccess(),
           entry: createBasalEntry(),
-          Identity: createBasalIdentity(),
+          identityModule: createBasalIdentity(),
           replicators: [] // empty replicator
         })
       })
@@ -91,7 +91,7 @@ describe(testName, () => {
       assert.isOk(database.store)
       assert.isOk(database.access)
       assert.isOk(database.entry)
-      assert.isOk(database.Identity)
+      assert.isOk(database.identityModule)
       // see about doing this with generics
       // assert.isOk(database.put);
       // assert.isOk(database.del);

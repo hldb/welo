@@ -36,7 +36,7 @@ export class Database extends Playable {
 
   readonly datastore: Datastore
   readonly entry: EntryModule
-  readonly Identity: IdentityModule
+  readonly identityModule: IdentityModule
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate
@@ -66,7 +66,7 @@ export class Database extends Playable {
     this.store = config.store
     this.access = config.access
     this.entry = config.entry
-    this.Identity = config.Identity
+    this.identityModule = config.identityModule
 
     this.events = new EventEmitter()
     this.#onStoreUpdate = onStoreUpdate.bind(this)
@@ -134,7 +134,7 @@ export class Database extends Playable {
       store: storeModule,
       access: accessModule,
       entry,
-      Identity
+      identityModule
     } = options
 
     const common = { manifest, blocks, datastore }
@@ -146,7 +146,7 @@ export class Database extends Playable {
       datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
       identity,
       entry,
-      Identity,
+      identityModule,
       access
     })
     const store = storeModule.create({
@@ -170,7 +170,7 @@ export class Database extends Playable {
       store,
       access,
       entry,
-      Identity
+      identityModule
     }
 
     const database = new Database(config)

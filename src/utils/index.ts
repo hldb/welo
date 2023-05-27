@@ -25,6 +25,6 @@ export interface DirsReturn {
 export interface Components {
   access: AccessModule
   entry: EntryModule
-  Identity: IdentityModule
+  identity: IdentityModule
   store: StoreModule
 }

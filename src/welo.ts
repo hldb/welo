@@ -224,20 +224,21 @@ export class Welo extends Playable {
     if (
       components.access == null ||
       components.entry == null ||
-      components.Identity == null ||
+      components.identity == null ||
       components.store == null
     ) {
       throw new Error('missing components')
     }
 
     const promise = Database.open({
+      ...components,
       manifest,
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
       datastore: new NamespaceDatastore(datastore, new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)),
       replicators,
-      ...components
+      identityModule: components.identity
     })
       .then((database) => {
         this.opened.set(addr, database)
@@ -286,7 +287,7 @@ export class Welo extends Playable {
     return {
       access,
       entry,
-      Identity: identity,
+      identity: identity,
       store: store
     }
   }

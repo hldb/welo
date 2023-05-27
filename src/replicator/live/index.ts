@@ -30,7 +30,7 @@ export class LiveReplicator extends Playable {
   readonly replica: Replica
   readonly access: AccessInstance
   readonly entry: EntryModule
-  readonly Identity: IdentityModule<any>
+  readonly identityModule: IdentityModule<any>
 
   readonly shared: Monitor
   readonly directs: Map<string, Direct>
@@ -80,7 +80,7 @@ export class LiveReplicator extends Playable {
     this.manifest = replica.manifest
     this.access = replica.access
     this.entry = replica.entry
-    this.Identity = replica.Identity
+    this.identityModule = replica.identityModule
 
     // this.events = new EventEmitter()
     this.#onPeerJoin = onPeerJoin.bind(this)
@@ -128,7 +128,7 @@ function onHeadsMessage (
     const load = loadEntry({
       blocks: this.blocks,
       entry: this.entry,
-      Identity: this.Identity
+      identityModule: this.identityModule
     })
     const links = dagLinks({
       graph: this.replica.graph,

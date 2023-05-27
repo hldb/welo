@@ -82,7 +82,7 @@ describe(testName, () => {
         access,
         identity,
         entry: createBasalEntry(),
-        Identity: createBasalIdentity()
+        identityModule: createBasalIdentity()
       })
       await start(replica)
       keyvalue = storeModule.create({

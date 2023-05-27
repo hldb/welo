@@ -40,7 +40,7 @@ export class Replica extends Playable {
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
   readonly entry: EntryModule<any>
-  readonly Identity: IdentityModule<any>
+  readonly identityModule: IdentityModule<any>
   readonly events: EventEmitter<ReplicaEvents>
 
   datastore: Datastore
@@ -55,7 +55,7 @@ export class Replica extends Playable {
     access,
     identity,
     entry,
-    Identity
+    identityModule
   }: {
     manifest: Manifest
     datastore: Datastore
@@ -63,7 +63,7 @@ export class Replica extends Playable {
     identity: IdentityInstance<any>
     access: AccessInstance
     entry: EntryModule
-    Identity: IdentityModule
+    identityModule: IdentityModule
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
@@ -90,7 +90,7 @@ export class Replica extends Playable {
     this.access = access
     this.identity = identity
     this.entry = entry
-    this.Identity = Identity
+    this.identityModule = identityModule
 
     this.datastore = datastore
     this._graph = null
@@ -160,7 +160,7 @@ export class Replica extends Playable {
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
     const entry = this.entry
-    const Identity = this.Identity
+    const identityModule = this.identityModule
 
     const graph = this.graph.clone()
     await start(graph)
@@ -183,7 +183,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.keys())).map(parsedcid)
-    const load = loadEntry({ blocks, entry, Identity })
+    const load = loadEntry({ blocks, entry, identityModule })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })

@@ -86,7 +86,7 @@ describe(testName, () => {
     it('.fetch grabs an existing entry', async () => {
       await blocks.put(entry.block)
       await blocks.put(identity.block)
-      const _entry = await entryModule.fetch({ blocks, Identity: identityModule, cid: entry.cid })
+      const _entry = await entryModule.fetch({ blocks, identityModule, cid: entry.cid })
       assert.notStrictEqual(_entry, entry)
       assert.deepEqual(_entry.block, entry.block)
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
@@ -98,7 +98,7 @@ describe(testName, () => {
       await blocks.put(block)
       invalidEntry = (await entryModule.asEntry({ block, identity })) as Entry
 
-      const promise = entryModule.fetch({ blocks, Identity: identityModule, cid: invalidEntry.cid })
+      const promise = entryModule.fetch({ blocks, identityModule, cid: invalidEntry.cid })
       await assert.isRejected(promise)
     })
 

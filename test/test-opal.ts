@@ -115,7 +115,7 @@ describe(testName, () => {
         assert.strictEqual(components.store, createKeyValueStore())
         assert.strictEqual(components.access, createStaticAccess())
         assert.strictEqual(components.entry, createBasalEntry())
-        assert.strictEqual(components.Identity, createBasalIdentity())
+        assert.strictEqual(components.identity, createBasalIdentity())
       })
     })
   })

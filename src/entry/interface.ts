@@ -25,7 +25,7 @@ export interface Create extends EntryData {
 
 export interface Fetch {
   blocks: Blocks
-  Identity: IdentityModule<any>
+  identityModule: IdentityModule<any>
   cid: CID
   timeout?: number
 }
