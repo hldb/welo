@@ -238,12 +238,7 @@ export class Welo extends Playable {
       throw new Error('missing component(s)')
     }
 
-    return {
-      access,
-      entry,
-      identity: identity,
-      store: store
-    }
+    return { access, entry, identity, store }
   }
 
   private getDefaultManifest (name: string): ManifestData {
@@ -266,49 +261,48 @@ export class Welo extends Playable {
   }
 }
 
-
 /**
  * Create an Welo instance
  *
  * @param options - options
  * @returns a promise which resolves to an Welo instance
  */
-export const createWelo =  async(options: Create): Promise<Welo> => {
-	const ipfs = options.ipfs
-	if (ipfs == null) {
-		throw new Error('ipfs is a required option')
-	}
+export const createWelo = async (options: Create): Promise<Welo> => {
+  const ipfs = options.ipfs
+  if (ipfs == null) {
+    throw new Error('ipfs is a required option')
+  }
 
-	let identity: IdentityInstance<any>
-	let identities: Datastore | null = null
+  let identity: IdentityInstance<any>
+  let identities: Datastore | null = null
 
-	if (options.identity != null) {
-		identity = options.identity
-	} else {
-		identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
+  if (options.identity != null) {
+    identity = options.identity
+  } else {
+    identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
 
-		identity = await options.handlers.identity[0].get({
-			name: 'default',
-			identities,
-			keychain: ipfs.libp2p.keychain
-		})
-	}
+    identity = await options.handlers.identity[0].get({
+      name: 'default',
+      identities,
+      keychain: ipfs.libp2p.keychain
+    })
+  }
 
-	const config: Config = {
-		identity,
-		ipfs,
-		blocks: new Blocks(ipfs),
-		keychain: ipfs.libp2p.keychain,
-		handlers: options.handlers,
-		datastore: options.datastore,
-		replicators: options.replicators ?? []
-	}
+  const config: Config = {
+    identity,
+    ipfs,
+    blocks: new Blocks(ipfs),
+    keychain: ipfs.libp2p.keychain,
+    handlers: options.handlers,
+    datastore: options.datastore,
+    replicators: options.replicators ?? []
+  }
 
-	const welo = new Welo(config)
+  const welo = new Welo(config)
 
-	if (options.start !== false) {
-		await start(welo)
-	}
+  if (options.start !== false) {
+    await start(welo)
+  }
 
-	return welo
+  return welo
 }

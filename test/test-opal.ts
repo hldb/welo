@@ -42,7 +42,7 @@ describe(testName, () => {
   describe('class', () => {
     it.skip('exposes static properties', () => {
       // assert.isOk(Welo.Replicator)
-      //assert.isOk(Welo.create)
+      // assert.isOk(Welo.create)
     })
 
     describe('create', () => {
