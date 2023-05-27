@@ -30,7 +30,6 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly config?: Config
   readonly replica: Replica
   readonly Datastore: Datastore
-  private _storage: Datastore | null
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter<Events>
@@ -42,8 +41,6 @@ export class Keyvalue extends Playable implements StoreInstance {
     Datastore
   }: Props) {
     const starting = async (): Promise<void> => {
-      this._storage = Datastore
-
       let indexesCID: Uint8Array | undefined
 
       try {
@@ -64,7 +61,6 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
-      this._storage = null
       this._indexes = null
       this._index = null
     }
@@ -76,7 +72,6 @@ export class Keyvalue extends Playable implements StoreInstance {
     this.replica = replica
 
     this.Datastore = Datastore
-    this._storage = null
     this._indexes = null
     this._index = null
 
@@ -84,11 +79,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   get storage (): Datastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
+    return this.Datastore
   }
 
   get indexes (): HashMap<any> {

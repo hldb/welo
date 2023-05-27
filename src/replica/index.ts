@@ -45,7 +45,6 @@ export class Replica extends Playable {
 
   Datastore: Datastore
 
-  _storage: Datastore | null
   _graph: Graph | null
   _queue: PQueue
 
@@ -70,8 +69,6 @@ export class Replica extends Playable {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
     }
     const starting = async (): Promise<void> => {
-      this._storage = this.Datastore
-
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
 
       this._graph = new Graph({ blocks, root })
@@ -83,8 +80,6 @@ export class Replica extends Playable {
       this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
       await stop(this._graph)
-
-      this._storage = null
       this._graph = null
     }
 
@@ -98,8 +93,6 @@ export class Replica extends Playable {
     this.Identity = Identity
 
     this.Datastore = Datastore
-
-    this._storage = null
     this._graph = null
     this._queue = new PQueue({})
 
@@ -107,11 +100,7 @@ export class Replica extends Playable {
   }
 
   get storage (): Datastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
+    return this.Datastore
   }
 
   get graph (): Graph {
@@ -158,7 +147,7 @@ export class Replica extends Playable {
     try {
       const block = await this.blocks.encode({ value: root })
       await this.blocks.put(block)
-      await this._storage?.put(rootHashKey, encodedcid(block.cid))
+      await this.Datastore.put(rootHashKey, encodedcid(block.cid))
     } catch (e) {
       throw new Error('failed to set root')
     }
