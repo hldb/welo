@@ -116,3 +116,10 @@ export interface DbEvents {
   closed: CustomEvent<ClosedEmit>
   update: CustomEvent<undefined>
 }
+
+export interface Components {
+  access: AccessModule
+  entry: EntryModule
+  identity: IdentityModule
+  store: StoreModule
+}

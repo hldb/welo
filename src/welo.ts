@@ -8,7 +8,6 @@ import type { Datastore } from 'interface-datastore'
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { Playable } from '@/utils/playable.js'
-import type { Components } from '@/utils/index.js'
 import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
@@ -25,7 +24,8 @@ import type {
   Events,
   // FetchOptions,
   OpenedEmit,
-  OpenOptions
+  OpenOptions,
+  Components
 } from './interface.js'
 
 export { Manifest, Address }
