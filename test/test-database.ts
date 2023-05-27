@@ -1,10 +1,9 @@
 import path from 'path'
 import { assert } from './utils/chai.js'
-import { LevelDatastore } from 'datastore-level'
+import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '@/database.js'
-import { getDatastore } from '@/utils/datastore.js'
 import { createKeyValueStore } from '@/store/keyvalue/index.js'
 import { createStaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -13,6 +12,7 @@ import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 
+import getDatastore from './utils/level-datastore.js'
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -51,7 +51,7 @@ describe(testName, () => {
 
     directory = path.join(testPaths.test, manifest.address.toString())
 
-    datastore = await getDatastore(LevelDatastore, directory)
+    datastore = await getDatastore(directory)
   })
 
   after(async () => {

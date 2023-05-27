@@ -1,10 +1,10 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
-import { LevelDatastore } from 'datastore-level'
+import { NamespaceDatastore } from 'datastore-core'
+import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
-import { NamespaceDatastore } from 'datastore-core'
 
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
@@ -13,8 +13,8 @@ import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { getDatastore } from '@/utils/datastore.js'
 
+import getDatastore from './utils/level-datastore.js'
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -41,7 +41,7 @@ describe(testName, () => {
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getDatastore(LevelDatastore, testPaths.replica)
+    datastore = await getDatastore(testPaths.replica)
     await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
@@ -254,7 +254,7 @@ describe(testName, () => {
         await datastore.close()
         await stop(replica)
 
-        const newDatastore = await getDatastore(LevelDatastore, testPaths.replica)
+        const newDatastore = await getDatastore(testPaths.replica)
         await newDatastore.open()
         const storage = new NamespaceDatastore(newDatastore, new Key(testPaths.replica))
 
@@ -268,7 +268,7 @@ describe(testName, () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
 
-        const newDatastore = await getDatastore(LevelDatastore, testPaths.replica)
+        const newDatastore = await getDatastore(testPaths.replica)
         await newDatastore.open()
 
         const replica = new Replica({

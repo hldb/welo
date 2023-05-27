@@ -1,8 +1,8 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { LevelDatastore } from 'datastore-level'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
+import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 
 import { Keyvalue, createKeyValueStore } from '@/store/keyvalue/index.js'
@@ -14,8 +14,8 @@ import staticAccessProtocol from '@/access/static/protocol.js'
 import { createBasalEntry } from '@/entry/basal/index.js'
 import { Identity, createBasalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { getDatastore } from '@/utils/datastore.js'
 
+import getDatastore from './utils/level-datastore.js'
 import defaultManifest from './utils/defaultManifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -31,7 +31,7 @@ describe(testName, () => {
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getDatastore(LevelDatastore, tempPath)
+    datastore = await getDatastore(tempPath)
     await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)

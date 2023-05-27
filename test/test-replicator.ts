@@ -1,6 +1,6 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { LevelDatastore } from 'datastore-level'
+import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'
 import { NamespaceDatastore } from 'datastore-core'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
@@ -10,8 +10,8 @@ import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { getDatastore } from '@/utils/datastore.js'
 
+import getDatastore from './utils/level-datastore.js'
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
@@ -41,7 +41,7 @@ describe(testName, () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
-    datastore = await getDatastore(LevelDatastore, testPaths1.replica)
+    datastore = await getDatastore(testPaths1.replica)
     await datastore.open()
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
