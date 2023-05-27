@@ -86,30 +86,30 @@
     "ts-node": "^10.9.1",
     "ts-patch": "^2.0.2",
     "typescript": "^4.8.4",
-    "typescript-transform-paths": "^3.4.4"
-  },
-  "dependencies": {
-    "@helia/interface": "^1.1.1",
-    "@ipld/dag-cbor": "^9.0.1",
-    "@libp2p/crypto": "^1.0.17",
+    "typescript-transform-paths": "^3.4.4",
+    "make-dir": "^3.1.0",
+    "level": "^8.0.0",
+    "datastore-level": "^10.1.1",
     "@libp2p/interface-keys": "^1.0.8",
     "@libp2p/interface-peer-id": "^2.0.2",
     "@libp2p/interface-pubsub": "^4.0.1",
+    "@libp2p/webrtc-star": "^7.0.0",
+    "@helia/interface": "^1.1.1",
+    "libp2p": "^0.45.3",
+    "wherearewe": "^2.0.1"
+  },
+  "dependencies": {
+    "@ipld/dag-cbor": "^9.0.1",
+    "@libp2p/crypto": "^1.0.17",
     "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^2.0.3",
-    "@libp2p/webrtc-star": "^7.0.0",
-    "datastore-level": "^10.1.1",
     "helia": "^1.1.2",
     "interface-datastore": "^8.2.0",
     "ipld-hashmap": "^2.1.13",
     "it-all": "^2.0.0",
-    "level": "^8.0.0",
-    "libp2p": "^0.45.3",
-    "make-dir": "^3.1.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.0",
-    "uint8arrays": "^4.0.3",
-    "wherearewe": "^2.0.1"
+    "uint8arrays": "^4.0.3"
   },
   "copyDependencies": {
     "ipfs-core": [
