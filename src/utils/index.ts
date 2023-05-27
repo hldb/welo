@@ -1,4 +1,3 @@
-import path from 'path'
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import { peerIdFromString } from '@libp2p/peer-id'
@@ -22,11 +21,6 @@ export const parsedPeerId = (peerId: string): PeerId => peerIdFromString(peerId)
 export interface DirsReturn {
   [name: string]: string
 }
-
-export const dirs = (root: string): DirsReturn =>
-  Object.fromEntries(
-    ['databases', 'identities', 'keychain'].map((k) => [k, path.join(root, k)])
-  )
 
 export interface Components {
   Access: AccessModule

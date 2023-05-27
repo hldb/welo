@@ -13,6 +13,7 @@ import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
 import type { KeyChain } from '@/utils/types.js'
+import { DATABASE_NAMESPACE, IDENTITY_NAMESPACE } from '@/utils/constants.js'
 
 // import * as version from './version.js'
 import { Database } from './database.js'
@@ -116,7 +117,7 @@ export class Welo extends Playable {
     if (options.identity != null) {
       identity = options.identity
     } else {
-      identities = new NamespaceDatastore(options.datastore, new Key('identities'))
+      identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
 
       identity = await options.handlers.identity[0].get({
         name: 'default',
@@ -245,7 +246,7 @@ export class Welo extends Playable {
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      Datastore: new NamespaceDatastore(Datastore, new Key(`databases/${manifest.address.cid.toString()}`)),
+      Datastore: new NamespaceDatastore(Datastore, new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)),
       replicators,
       ...components
     })
