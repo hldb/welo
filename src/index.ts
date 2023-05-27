@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-export { Welo } from '@/welo.js'
+export { Welo, createWelo } from '@/welo.js'
 export { StaticAccess, staticAccess } from '@/access/static/index.js'
 export { Entry, basalEntry } from '@/entry/basal/index.js'
 export { Identity, basalIdentity } from '@/identity/basal/index.js'

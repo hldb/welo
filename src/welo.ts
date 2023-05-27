@@ -96,52 +96,6 @@ export class Welo extends Playable {
     this.replicators = replicators
   }
 
-  /**
-   * Create an Welo instance
-   *
-   * @param options - options
-   * @returns a promise which resolves to an Welo instance
-   */
-  static async create (options: Create): Promise<Welo> {
-    const ipfs = options.ipfs
-    if (ipfs == null) {
-      throw new Error('ipfs is a required option')
-    }
-
-    let identity: IdentityInstance<any>
-    let identities: Datastore | null = null
-
-    if (options.identity != null) {
-      identity = options.identity
-    } else {
-      identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
-
-      identity = await options.handlers.identity[0].get({
-        name: 'default',
-        identities,
-        keychain: ipfs.libp2p.keychain
-      })
-    }
-
-    const config: Config = {
-      identity,
-      ipfs,
-      blocks: new Blocks(ipfs),
-      keychain: ipfs.libp2p.keychain,
-      handlers: options.handlers,
-      datastore: options.datastore,
-      replicators: options.replicators ?? []
-    }
-
-    const welo = new Welo(config)
-
-    if (options.start !== false) {
-      await start(welo)
-    }
-
-    return welo
-  }
-
   // static get version () { return version }
 
   /**
@@ -310,4 +264,51 @@ export class Welo extends Playable {
       }
     }
   }
+}
+
+
+/**
+ * Create an Welo instance
+ *
+ * @param options - options
+ * @returns a promise which resolves to an Welo instance
+ */
+export const createWelo =  async(options: Create): Promise<Welo> => {
+	const ipfs = options.ipfs
+	if (ipfs == null) {
+		throw new Error('ipfs is a required option')
+	}
+
+	let identity: IdentityInstance<any>
+	let identities: Datastore | null = null
+
+	if (options.identity != null) {
+		identity = options.identity
+	} else {
+		identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
+
+		identity = await options.handlers.identity[0].get({
+			name: 'default',
+			identities,
+			keychain: ipfs.libp2p.keychain
+		})
+	}
+
+	const config: Config = {
+		identity,
+		ipfs,
+		blocks: new Blocks(ipfs),
+		keychain: ipfs.libp2p.keychain,
+		handlers: options.handlers,
+		datastore: options.datastore,
+		replicators: options.replicators ?? []
+	}
+
+	const welo = new Welo(config)
+
+	if (options.start !== false) {
+		await start(welo)
+	}
+
+	return welo
 }
