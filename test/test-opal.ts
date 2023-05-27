@@ -114,7 +114,7 @@ describe(testName, () => {
         const components = welo.getComponents(manifest)
         assert.strictEqual(components.Store, createKeyValueStore())
         assert.strictEqual(components.Access, createStaticAccess())
-        assert.strictEqual(components.Entry, createBasalEntry())
+        assert.strictEqual(components.entry, createBasalEntry())
         assert.strictEqual(components.Identity, createBasalIdentity())
       })
     })

@@ -83,7 +83,7 @@ describe(testName, () => {
       blocks: blocks1,
       access,
       identity: identity1,
-      Entry: createBasalEntry(),
+      entry: createBasalEntry(),
       Identity: createBasalIdentity()
     })
     replica2 = new Replica({
@@ -92,7 +92,7 @@ describe(testName, () => {
       blocks: blocks2,
       access,
       identity: identity2,
-      Entry: createBasalEntry(),
+      entry: createBasalEntry(),
       Identity: createBasalIdentity()
     })
     await start(replica1, replica2)

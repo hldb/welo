@@ -101,7 +101,7 @@ export interface DbOpen {
   identity: IdentityInstance<any>
   manifest: Manifest
   Access: AccessModule
-  Entry: EntryModule
+  entry: EntryModule
   Identity: IdentityModule
   Store: StoreModule
 }

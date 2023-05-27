@@ -29,7 +29,7 @@ export class LiveReplicator extends Playable {
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
-  readonly Entry: EntryModule
+  readonly entry: EntryModule
   readonly Identity: IdentityModule<any>
 
   readonly shared: Monitor
@@ -79,7 +79,7 @@ export class LiveReplicator extends Playable {
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
-    this.Entry = replica.Entry
+    this.entry = replica.entry
     this.Identity = replica.Identity
 
     // this.events = new EventEmitter()
@@ -127,7 +127,7 @@ function onHeadsMessage (
 
     const load = loadEntry({
       blocks: this.blocks,
-      Entry: this.Entry,
+      entry: this.entry,
       Identity: this.Identity
     })
     const links = dagLinks({

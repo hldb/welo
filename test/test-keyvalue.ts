@@ -81,7 +81,7 @@ describe(testName, () => {
         blocks,
         access,
         identity,
-        Entry: createBasalEntry(),
+        entry: createBasalEntry(),
         Identity: createBasalIdentity()
       })
       await start(replica)

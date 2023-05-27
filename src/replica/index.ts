@@ -39,7 +39,7 @@ export class Replica extends Playable {
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
-  readonly Entry: EntryModule<any>
+  readonly entry: EntryModule<any>
   readonly Identity: IdentityModule<any>
   readonly events: EventEmitter<ReplicaEvents>
 
@@ -54,7 +54,7 @@ export class Replica extends Playable {
     blocks,
     access,
     identity,
-    Entry,
+    entry,
     Identity
   }: {
     manifest: Manifest
@@ -62,7 +62,7 @@ export class Replica extends Playable {
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    Entry: EntryModule
+    entry: EntryModule
     Identity: IdentityModule
   }) {
     const onUpdate = (): void => {
@@ -89,7 +89,7 @@ export class Replica extends Playable {
     this.blocks = blocks
     this.access = access
     this.identity = identity
-    this.Entry = Entry
+    this.entry = entry
     this.Identity = Identity
 
     this.datastore = datastore
@@ -159,7 +159,7 @@ export class Replica extends Playable {
     }
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
-    const Entry = this.Entry
+    const entry = this.entry
     const Identity = this.Identity
 
     const graph = this.graph.clone()
@@ -183,7 +183,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.keys())).map(parsedcid)
-    const load = loadEntry({ blocks, Entry, Identity })
+    const load = loadEntry({ blocks, entry, Identity })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })
@@ -221,7 +221,7 @@ export class Replica extends Playable {
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
-    const entry = await this.Entry.create({
+    const entry = await this.entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,

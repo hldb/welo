@@ -35,7 +35,7 @@ export class Database extends Playable {
   readonly store: StoreInstance
 
   readonly datastore: Datastore
-  readonly Entry: EntryModule
+  readonly entry: EntryModule
   readonly Identity: IdentityModule
 
   readonly events: EventEmitter<DbEvents>
@@ -65,7 +65,7 @@ export class Database extends Playable {
 
     this.store = config.store
     this.access = config.access
-    this.Entry = config.Entry
+    this.entry = config.entry
     this.Identity = config.Identity
 
     this.events = new EventEmitter()
@@ -133,7 +133,7 @@ export class Database extends Playable {
       blocks,
       Store,
       Access,
-      Entry,
+      entry,
       Identity
     } = options
 
@@ -145,7 +145,7 @@ export class Database extends Playable {
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
       identity,
-      Entry,
+      entry,
       Identity,
       access
     })
@@ -170,7 +170,7 @@ export class Database extends Playable {
       store,
       access,
       Access,
-      Entry,
+      entry,
       Identity,
       Store
     }

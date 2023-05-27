@@ -29,15 +29,15 @@ export type LinksFunc = (entry: EntryInstance<any>) => Promise<CID[]>
 
 export function loadEntry ({
   blocks,
-  Entry,
+  entry,
   Identity
 }: {
   blocks: Blocks
-  Entry: EntryModule
+  entry: EntryModule
   Identity: IdentityModule
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await Entry.fetch({ blocks, cid, Identity }).catch(() => null)
+    return await entry.fetch({ blocks, cid, Identity }).catch(() => null)
   }
   return load
 }

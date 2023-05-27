@@ -87,7 +87,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry: entryModule,
+          entry: entryModule,
           Identity: identityModule
         })
         await start(replica)
@@ -104,7 +104,7 @@ describe(testName, () => {
       assert.isOk(replica.blocks)
       assert.isOk(replica.access)
       assert.isOk(replica.identity)
-      assert.isOk(replica.Entry)
+      assert.isOk(replica.entry)
       assert.isOk(replica.Identity)
       assert.isOk(replica.events)
       assert.isOk(replica.heads)
@@ -194,7 +194,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry: entryModule,
+          entry: entryModule,
           Identity: identityModule
         })
         await start(replica)
@@ -277,7 +277,7 @@ describe(testName, () => {
           blocks,
           access,
           identity,
-          Entry: entryModule,
+          entry: entryModule,
           Identity: identityModule
         })
         await start(replica)

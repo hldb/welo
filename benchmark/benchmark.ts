@@ -54,8 +54,8 @@ console.timeEnd('ascending ordered traversal')
  */
 console.log('traversing unordered entries')
 console.time('unordered traversal')
-const { blocks, access, Entry, Identity } = db.replica
-const load = loadEntry({ blocks, Entry, Identity })
+const { blocks, access, entry, Identity } = db.replica
+const load = loadEntry({ blocks, entry, Identity })
 const links = dagLinks({ graph: { has: (): boolean => false }, access })
 await traverser({ cids: (await all(db.replica.heads.keys())).map(parsedcid), load, links })
 console.timeEnd('unordered traversal')
