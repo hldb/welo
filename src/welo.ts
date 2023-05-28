@@ -186,7 +186,7 @@ export class Welo extends Playable {
         new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)
       ),
       replicators,
-      identityModule: components.identity
+      components
     })
       .then((database) => {
         this.opened.set(addr, database)

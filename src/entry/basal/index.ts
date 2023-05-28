@@ -95,12 +95,12 @@ const asEntry = async (entry: AsEntry<unknown>): Promise<Entry | null> => {
   return new Entry({ block: asSigned, data, identity })
 }
 
-const fetch = async ({ blocks, identityModule, cid }: Fetch): Promise<Entry> => {
+const fetch = async ({ blocks, identity, cid }: Fetch): Promise<Entry> => {
   const block: BlockView<SignedEntry> = await blocks.get<SignedEntry>(cid)
   const { auth } = block.value
-  const identity = await identityModule.fetch({ blocks, auth })
+  const identityInstance = await identity.fetch({ blocks, auth })
 
-  const entry = await asEntry({ block, identity })
+  const entry = await asEntry({ block, identity: identityInstance })
 
   if (entry === null) {
     throw new Error('cid did not resolve to a valid entry')

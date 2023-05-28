@@ -72,11 +72,13 @@ describe(testName, () => {
           identity,
           ipfs,
           blocks,
-          store: keyvalueStore(),
-          access: staticAccess(),
-          entry: basalEntry(),
-          identityModule: basalIdentity(),
-          replicators: [] // empty replicator
+          replicators: [], // empty replicator
+          components: {
+            store: keyvalueStore(),
+            access: staticAccess(),
+            entry: basalEntry(),
+            identity: basalIdentity()
+          }
         })
       })
     })
@@ -90,8 +92,8 @@ describe(testName, () => {
       assert.isOk(database.manifest)
       assert.isOk(database.store)
       assert.isOk(database.access)
-      assert.isOk(database.entry)
-      assert.isOk(database.identityModule)
+      assert.isOk(database.components.entry)
+      assert.isOk(database.components.identity)
       // see about doing this with generics
       // assert.isOk(database.put);
       // assert.isOk(database.del);

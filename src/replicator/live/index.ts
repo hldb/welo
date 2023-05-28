@@ -10,10 +10,9 @@ import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
+import type { Components } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryComponent } from '@/entry/interface.js'
-import type { IdentityComponent } from '@/identity/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
@@ -29,8 +28,7 @@ export class LiveReplicator extends Playable {
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
-  readonly entry: EntryComponent
-  readonly identityModule: IdentityComponent<any>
+  readonly components: Pick<Components, 'entry' | 'identity'>
 
   readonly shared: Monitor
   readonly directs: Map<string, Direct>
@@ -79,8 +77,7 @@ export class LiveReplicator extends Playable {
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
-    this.entry = replica.entry
-    this.identityModule = replica.identityModule
+    this.components = replica.components
 
     // this.events = new EventEmitter()
     this.#onPeerJoin = onPeerJoin.bind(this)
@@ -127,8 +124,8 @@ function onHeadsMessage (
 
     const load = loadEntry({
       blocks: this.blocks,
-      entry: this.entry,
-      identityModule: this.identityModule
+      entry: this.components.entry,
+      identity: this.components.identity
     })
     const links = dagLinks({
       graph: this.replica.graph,

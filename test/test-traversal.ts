@@ -135,7 +135,7 @@ describe('traversal', () => {
 
   describe('load', () => {
     it('returns an entry by cid', async () => {
-      const load = loadEntry({ blocks, entry: entryModule, identityModule })
+      const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
       const entry = entries[0]
       const cid = entry.cid
 
@@ -402,7 +402,7 @@ describe('traversal', () => {
             const graph = new Graph({ blocks })
             await start(graph)
 
-            const load = loadEntry({ blocks, entry: entryModule, identityModule })
+            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
             const links = dagLinks({ graph, access: sharedAccess })
 
             const cids = heads.get(topology)
@@ -441,7 +441,7 @@ describe('traversal', () => {
 
             const tails = graph.tails
             const edge = 'out'
-            const load = loadEntry({ blocks, entry: entryModule, identityModule })
+            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntries
 
@@ -478,7 +478,7 @@ describe('traversal', () => {
 
             const tails = graph.heads
             const edge = 'in'
-            const load = loadEntry({ blocks, entry: entryModule, identityModule })
+            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntriesRev
 

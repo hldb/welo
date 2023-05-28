@@ -83,8 +83,10 @@ describe(testName, () => {
       blocks: blocks1,
       access,
       identity: identity1,
-      entry: basalEntry(),
-      identityModule: basalIdentity()
+      components: {
+        entry: basalEntry(),
+        identity: basalIdentity()
+      }
     })
     replica2 = new Replica({
       manifest,
@@ -92,8 +94,10 @@ describe(testName, () => {
       blocks: blocks2,
       access,
       identity: identity2,
-      entry: basalEntry(),
-      identityModule: basalIdentity()
+      components: {
+        entry: basalEntry(),
+        identity: basalIdentity()
+      }
     })
     await start(replica1, replica2)
 

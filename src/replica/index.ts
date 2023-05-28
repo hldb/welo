@@ -11,9 +11,10 @@ import type { HashMap } from 'ipld-hashmap/interface'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
+import type { Components } from '@/interface.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
-import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
@@ -39,9 +40,8 @@ export class Replica extends Playable {
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
-  readonly entry: EntryComponent<any>
-  readonly identityModule: IdentityComponent<any>
   readonly events: EventEmitter<ReplicaEvents>
+  readonly components: Pick<Components, 'entry' | 'identity'>
 
   datastore: Datastore
 
@@ -54,16 +54,14 @@ export class Replica extends Playable {
     blocks,
     access,
     identity,
-    entry,
-    identityModule
+    components
   }: {
     manifest: Manifest
     datastore: Datastore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    entry: EntryComponent
-    identityModule: IdentityComponent
+    components: Pick<Components, 'entry' | 'identity'>
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
@@ -89,8 +87,7 @@ export class Replica extends Playable {
     this.blocks = blocks
     this.access = access
     this.identity = identity
-    this.entry = entry
-    this.identityModule = identityModule
+    this.components = components
 
     this.datastore = datastore
     this._graph = null
@@ -159,8 +156,8 @@ export class Replica extends Playable {
     }
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
-    const entry = this.entry
-    const identityModule = this.identityModule
+    const entry = this.components.entry
+    const identity = this.components.identity
 
     const graph = this.graph.clone()
     await start(graph)
@@ -183,7 +180,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.keys())).map(parsedcid)
-    const load = loadEntry({ blocks, entry, identityModule })
+    const load = loadEntry({ blocks, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })
@@ -221,7 +218,7 @@ export class Replica extends Playable {
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
-    const entry = await this.entry.create({
+    const entry = await this.components.entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,

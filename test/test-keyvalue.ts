@@ -81,8 +81,10 @@ describe(testName, () => {
         blocks,
         access,
         identity,
-        entry: basalEntry(),
-        identityModule: basalIdentity()
+        components: {
+          entry: basalEntry(),
+          identity: basalIdentity()
+        }
       })
       await start(replica)
       keyvalue = storeModule.create({

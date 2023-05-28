@@ -8,8 +8,7 @@ import type { Datastore } from 'interface-datastore'
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryComponent } from '@/entry/interface.js'
-import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
@@ -17,7 +16,7 @@ import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
 import type { Replicator } from '@/replicator/interface.js'
 import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
 
-import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
+import type { DbConfig, DbOpen, DbEvents, ClosedEmit, Components } from './interface.js'
 
 /**
  * Database Class
@@ -35,8 +34,7 @@ export class Database extends Playable {
   readonly store: StoreInstance
 
   readonly datastore: Datastore
-  readonly entry: EntryComponent
-  readonly identityModule: IdentityComponent
+  readonly components: Components
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate
@@ -65,8 +63,7 @@ export class Database extends Playable {
 
     this.store = config.store
     this.access = config.access
-    this.entry = config.entry
-    this.identityModule = config.identityModule
+    this.components = config.components
 
     this.events = new EventEmitter()
     this.#onStoreUpdate = onStoreUpdate.bind(this)
@@ -131,25 +128,21 @@ export class Database extends Playable {
       ipfs,
       identity,
       blocks,
-      store: storeModule,
-      access: accessModule,
-      entry,
-      identityModule
+      components
     } = options
 
     const common = { manifest, blocks, datastore }
 
-    const access = accessModule.create(common)
+    const access = components.access.create(common)
 
     const replica = new Replica({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
       identity,
-      entry,
-      identityModule,
+      components,
       access
     })
-    const store = storeModule.create({
+    const store = components.store.create({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
       replica
@@ -169,8 +162,7 @@ export class Database extends Playable {
       replica,
       store,
       access,
-      entry,
-      identityModule
+      components
     }
 
     const database = new Database(config)
