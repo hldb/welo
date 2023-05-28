@@ -27,7 +27,7 @@ export interface Module<T extends string = string> {
 
 /** @public */
 export interface Create {
-  datastore: Datastore
+  datastore?: Datastore
   replicators?: ReplicatorModule[]
   identity?: IdentityInstance<any>
   ipfs: GossipHelia

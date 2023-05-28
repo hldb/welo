@@ -1,6 +1,6 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { NamespaceDatastore } from 'datastore-core'
+import { NamespaceDatastore, MemoryDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { GossipHelia } from '@/interface'
 import type { Datastore } from 'interface-datastore'
@@ -263,6 +263,8 @@ export class Welo extends Playable {
  */
 export const createWelo = async (options: Create): Promise<Welo> => {
   const ipfs = options.ipfs
+  const datastore = options.datastore ?? new MemoryDatastore()
+
   if (ipfs == null) {
     throw new Error('ipfs is a required option')
   }
@@ -273,7 +275,7 @@ export const createWelo = async (options: Create): Promise<Welo> => {
   if (options.identity != null) {
     identity = options.identity
   } else {
-    identities = new NamespaceDatastore(options.datastore, new Key(IDENTITY_NAMESPACE))
+    identities = new NamespaceDatastore(datastore, new Key(IDENTITY_NAMESPACE))
 
     identity = await options.handlers.identity[0].get({
       name: 'default',
@@ -288,7 +290,7 @@ export const createWelo = async (options: Create): Promise<Welo> => {
     blocks: new Blocks(ipfs),
     keychain: ipfs.libp2p.keychain,
     handlers: options.handlers,
-    datastore: options.datastore,
+    datastore,
     replicators: options.replicators ?? []
   }
 

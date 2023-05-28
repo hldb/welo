@@ -22,7 +22,6 @@ npm install welo
 
 ```typescript
 import { createHelia } from 'helia'
-import { MemoryDatastore } from 'datastore-core'
 import {
   createWelo,
   staticAccess,
@@ -38,7 +37,6 @@ const ipfs = await createHelia()
 /** see more config options in the API docs */
 const welo = await createWelo({
   ipfs,
-  datastore: new MemoryDatastore(),
   replicators: [liveReplicator()],
 
   handlers: {

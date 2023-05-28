@@ -1,5 +1,3 @@
-import { MemoryDatastore } from 'datastore-core'
-
 import { createWelo, Welo } from '@/index.js'
 import { staticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
@@ -8,8 +6,7 @@ import { keyvalueStore } from '@/store/keyvalue/index.js'
 import { liveReplicator } from '@/replicator/live/index.js'
 import type { Create } from '@/interface.js'
 
-export default async (config: Omit<Create, 'handlers' | 'datastore' | 'replicators'>): Promise<Welo> => await createWelo({
-  datastore: new MemoryDatastore(),
+export default async (config: Omit<Create, 'handlers' | 'replicators'>): Promise<Welo> => await createWelo({
   replicators: [liveReplicator()],
 
   handlers: {
