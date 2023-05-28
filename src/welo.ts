@@ -175,15 +175,6 @@ export class Welo extends Playable {
 
     const components = this.getComponents(manifest)
 
-    if (
-      components.access == null ||
-      components.entry == null ||
-      components.identity == null ||
-      components.store == null
-    ) {
-      throw new Error('missing components')
-    }
-
     const promise = Database.open({
       ...components,
       manifest,
