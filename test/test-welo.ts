@@ -5,6 +5,10 @@ import createWelo from './utils/default-welo.js'
 import type { Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '@/database.js'
+import type { StoreModule } from '@/store/interface.js'
+import type { IdentityModule } from '@/identity/interface.js'
+import type { EntryModule } from '@/entry/interface.js'
+import type { AccessModule } from '@/access/interface.js'
 import { staticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -21,7 +25,13 @@ describe(testName, () => {
   let ipfs: GossipHelia,
     libp2p: GossipLibp2p,
     welo: Welo,
-    identity: Identity
+    identity: Identity,
+    components: {
+      store: StoreModule[],
+      identity: IdentityModule[],
+      entry: EntryModule[],
+      access: AccessModule[]
+    }
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -30,6 +40,13 @@ describe(testName, () => {
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
     const keychain = libp2p.keychain
+
+    components = {
+      store: [keyvalueStore()],
+      identity: [basalIdentity()],
+      entry: [basalEntry()],
+      access: [staticAccess()]
+    }
 
     identity = await getTestIdentity(identities, keychain, names.name0)
   })
@@ -47,7 +64,7 @@ describe(testName, () => {
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await createWelo({ ipfs })
+        welo = await createWelo({ ipfs, handlers: { ...components } })
       })
 
       it('returns an instance of Welo with an identity option', async () => {
@@ -109,13 +126,13 @@ describe(testName, () => {
       })
     })
 
-    describe.skip('getComponents', () => {
+    describe('getComponents', () => {
       it('returns the components for the manifest', () => {
-        const components = welo.getComponents(manifest)
-        assert.strictEqual(components.store, keyvalueStore())
-        assert.strictEqual(components.access, staticAccess())
-        assert.strictEqual(components.entry, basalEntry())
-        assert.strictEqual(components.identity, basalIdentity())
+        const localComponents = welo.getComponents(manifest)
+        assert.strictEqual(localComponents.store, components.store[0])
+        assert.strictEqual(localComponents.access, components.access[0])
+        assert.strictEqual(localComponents.entry, components.entry[0])
+        assert.strictEqual(localComponents.identity, components.identity[0])
       })
     })
   })
