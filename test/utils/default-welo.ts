@@ -6,10 +6,10 @@ import { keyvalueStore } from '@/store/keyvalue/index.js'
 import { liveReplicator } from '@/replicator/live/index.js'
 import type { Create } from '@/interface.js'
 
-export default async (config: Omit<Create, 'handlers' | 'replicators'> & Partial<Create>): Promise<Welo> => await createWelo({
+export default async (config: Omit<Create, 'components' | 'replicators'> & Partial<Create>): Promise<Welo> => await createWelo({
   replicators: [liveReplicator()],
 
-  handlers: {
+  components: {
     identity: [basalIdentity()],
     access: [staticAccess()],
     store: [keyvalueStore()],

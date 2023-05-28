@@ -33,7 +33,7 @@ export interface Create {
   ipfs: GossipHelia
   start?: boolean
 
-  handlers: {
+  components: {
     access: AccessModule[]
     store: StoreModule[]
     entry: EntryModule[]
@@ -49,7 +49,7 @@ export interface Config {
   keychain: KeyChain
   ipfs: GossipHelia
 
-  handlers: {
+  components: {
     access: AccessModule[]
     store: StoreModule[]
     entry: EntryModule[]

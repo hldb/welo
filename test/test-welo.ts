@@ -64,7 +64,7 @@ describe(testName, () => {
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await createWelo({ ipfs, handlers: { ...components } })
+        welo = await createWelo({ ipfs, components })
       })
 
       it('returns an instance of Welo with an identity option', async () => {

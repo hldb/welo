@@ -47,7 +47,7 @@ export type {
 export class Welo extends Playable {
   private readonly replicators: ReplicatorModule[]
   private readonly datastore: Datastore
-  private readonly handlers: Config['handlers']
+  private readonly components: Config['components']
 
   readonly ipfs: GossipHelia
   readonly blocks: Blocks
@@ -66,7 +66,7 @@ export class Welo extends Playable {
     blocks,
     keychain,
     ipfs,
-    handlers,
+    components,
     datastore,
     replicators
   }: Config) {
@@ -91,7 +91,7 @@ export class Welo extends Playable {
     this.opened = new Map()
     this._opening = new Map()
 
-    this.handlers = handlers
+    this.components = components
     this.datastore = datastore
     this.replicators = replicators
   }
@@ -223,10 +223,10 @@ export class Welo extends Playable {
   }
 
   getComponents (manifest: Manifest): Components {
-    const access = this.handlers.access.find(h => h.protocol === manifest.access.protocol)
-    const entry = this.handlers.entry.find(h => h.protocol === manifest.entry.protocol)
-    const identity = this.handlers.identity.find(h => h.protocol === manifest.identity.protocol)
-    const store = this.handlers.store.find(h => h.protocol === manifest.store.protocol)
+    const access = this.components.access.find(h => h.protocol === manifest.access.protocol)
+    const entry = this.components.entry.find(h => h.protocol === manifest.entry.protocol)
+    const identity = this.components.identity.find(h => h.protocol === manifest.identity.protocol)
+    const store = this.components.store.find(h => h.protocol === manifest.store.protocol)
 
     if (access == null || entry == null || identity == null || store == null) {
       throw new Error('missing component(s)')
@@ -239,17 +239,17 @@ export class Welo extends Playable {
     return {
       name,
       store: {
-        protocol: this.handlers.store[0].protocol
+        protocol: this.components.store[0].protocol
       },
       access: {
-        protocol: this.handlers.access[0].protocol,
+        protocol: this.components.access[0].protocol,
         config: { write: [this.identity.id] }
       },
       entry: {
-        protocol: this.handlers.entry[0].protocol
+        protocol: this.components.entry[0].protocol
       },
       identity: {
-        protocol: this.handlers.identity[0].protocol
+        protocol: this.components.identity[0].protocol
       }
     }
   }
@@ -277,7 +277,7 @@ export const createWelo = async (options: Create): Promise<Welo> => {
   } else {
     identities = new NamespaceDatastore(datastore, new Key(IDENTITY_NAMESPACE))
 
-    identity = await options.handlers.identity[0].get({
+    identity = await options.components.identity[0].get({
       name: 'default',
       identities,
       keychain: ipfs.libp2p.keychain
@@ -289,7 +289,7 @@ export const createWelo = async (options: Create): Promise<Welo> => {
     ipfs,
     blocks: new Blocks(ipfs),
     keychain: ipfs.libp2p.keychain,
-    handlers: options.handlers,
+    components: options.components,
     datastore,
     replicators: options.replicators ?? []
   }
