@@ -27,9 +27,9 @@ describe(testName, () => {
     welo: Welo,
     identity: Identity,
     components: {
-      store: StoreModule[],
-      identity: IdentityModule[],
-      entry: EntryModule[],
+      store: StoreModule[]
+      identity: IdentityModule[]
+      entry: EntryModule[]
       access: AccessModule[]
     }
 
