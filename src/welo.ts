@@ -181,7 +181,10 @@ export class Welo extends Playable {
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      datastore: new NamespaceDatastore(datastore, new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)),
+      datastore: new NamespaceDatastore(
+        datastore,
+        new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)
+      ),
       replicators,
       identityModule: components.identity
     })
