@@ -39,7 +39,7 @@ const welo = await createWelo({
   ipfs,
   replicators: [liveReplicator()],
 
-  handlers: {
+  components: {
     identity: [basalIdentity()],
     access: [staticAccess()],
     store: [keyvalueStore()],
