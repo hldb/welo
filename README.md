@@ -36,7 +36,7 @@ import {
 const ipfs = await createHelia()
 
 /** see more config options in the API docs */
-await createWelo({
+const welo = await createWelo({
   ipfs,
   datastore: new MemoryDatastore(),
   replicators: [liveReplicator()],
