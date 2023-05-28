@@ -144,4 +144,4 @@ describe(testName, () => {
       ])
     })
   })
-}).timeout(5000)
+})
