@@ -5,7 +5,7 @@ import type { Datastore } from 'interface-datastore'
 
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { Module } from '@/interface.js'
+import type { Component } from '@/interface.js'
 
 export type Gen = string
 
@@ -42,7 +42,7 @@ export interface IdentityInstance<Value> {
   verify: (data: Uint8Array, sig: Uint8Array) => Promise<boolean>
 }
 
-export interface IdentityModule<T extends IdentityInstance<unknown> = IdentityInstance<unknown>, P extends string = string> extends Module<P> {
+export interface IdentityComponent<T extends IdentityInstance<unknown> = IdentityInstance<unknown>, P extends string = string> extends Component<P> {
   gen: (gen: Gen) => Promise<T>
   get: (get: Get) => Promise<T>
   fetch: (fetch: Fetch) => Promise<T>

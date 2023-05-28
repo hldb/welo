@@ -8,8 +8,8 @@ import type { Datastore } from 'interface-datastore'
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryModule } from '@/entry/interface.js'
-import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
+import type { EntryComponent } from '@/entry/interface.js'
+import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
@@ -35,8 +35,8 @@ export class Database extends Playable {
   readonly store: StoreInstance
 
   readonly datastore: Datastore
-  readonly entry: EntryModule
-  readonly identityModule: IdentityModule
+  readonly entry: EntryComponent
+  readonly identityModule: IdentityComponent
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate

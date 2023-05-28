@@ -7,13 +7,13 @@ import type { KeyChain } from '@libp2p/interface-keychain'
 import type { AccessProtocol } from '@/access/static/protocol.js'
 import type { EntryProtocol } from '@/entry/basal/protocol.js'
 import type { IdentityProtocol } from '@/identity/basal/protocol.js'
-import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
+import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
 import type { Address, Manifest } from '@/manifest/index.js'
-import type { AccessInstance, AccessModule } from '@/access/interface.js'
-import type { EntryModule } from '@/entry/interface.js'
-import type { StoreInstance, StoreModule } from '@/store/interface'
+import type { AccessInstance, AccessComponent } from '@/access/interface.js'
+import type { EntryComponent } from '@/entry/interface.js'
+import type { StoreInstance, StoreComponent } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorModule } from '@/replicator/interface'
 
@@ -21,7 +21,7 @@ export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
 export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
 
-export interface Module<T extends string = string> {
+export interface Component<T extends string = string> {
   protocol: T
 }
 
@@ -34,10 +34,10 @@ export interface Create {
   start?: boolean
 
   components: {
-    access: AccessModule[]
-    store: StoreModule[]
-    entry: EntryModule[]
-    identity: IdentityModule[]
+    access: AccessComponent[]
+    store: StoreComponent[]
+    entry: EntryComponent[]
+    identity: IdentityComponent[]
   }
 }
 
@@ -50,10 +50,10 @@ export interface Config {
   ipfs: GossipHelia
 
   components: {
-    access: AccessModule[]
-    store: StoreModule[]
-    entry: EntryModule[]
-    identity: IdentityModule[]
+    access: AccessComponent[]
+    store: StoreComponent[]
+    entry: EntryComponent[]
+    identity: IdentityComponent[]
   }
 }
 
@@ -99,10 +99,10 @@ export interface DbOpen {
   ipfs: GossipHelia
   identity: IdentityInstance<any>
   manifest: Manifest
-  access: AccessModule
-  entry: EntryModule
-  identityModule: IdentityModule
-  store: StoreModule
+  access: AccessComponent
+  entry: EntryComponent
+  identityModule: IdentityComponent
+  store: StoreComponent
 }
 
 export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators' | 'access' | 'store'> {
@@ -118,8 +118,8 @@ export interface DbEvents {
 }
 
 export interface Components {
-  access: AccessModule
-  entry: EntryModule
-  identity: IdentityModule
-  store: StoreModule
+  access: AccessComponent
+  entry: EntryComponent
+  identity: IdentityComponent
+  store: StoreComponent
 }

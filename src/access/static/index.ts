@@ -5,7 +5,7 @@ import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
-import { wildcard, Open, AccessInstance, AccessModule } from '../interface.js'
+import { wildcard, Open, AccessInstance, AccessComponent } from '../interface.js'
 
 // the Static in StaticAccess means the ACL is immutable and does not change
 export class StaticAccess extends Playable implements AccessInstance {
@@ -49,7 +49,7 @@ export class StaticAccess extends Playable implements AccessInstance {
   }
 }
 
-export const staticAccess: () => AccessModule<StaticAccess, typeof protocol> = () => ({
+export const staticAccess: () => AccessComponent<StaticAccess, typeof protocol> = () => ({
   protocol,
   create: (open: Open) => new StaticAccess(open)
 })

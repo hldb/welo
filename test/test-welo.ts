@@ -5,10 +5,10 @@ import createWelo from './utils/default-welo.js'
 import type { Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '@/database.js'
-import type { StoreModule } from '@/store/interface.js'
-import type { IdentityModule } from '@/identity/interface.js'
-import type { EntryModule } from '@/entry/interface.js'
-import type { AccessModule } from '@/access/interface.js'
+import type { StoreComponent } from '@/store/interface.js'
+import type { IdentityComponent } from '@/identity/interface.js'
+import type { EntryComponent } from '@/entry/interface.js'
+import type { AccessComponent } from '@/access/interface.js'
 import { staticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -27,10 +27,10 @@ describe(testName, () => {
     welo: Welo,
     identity: Identity,
     components: {
-      store: StoreModule[]
-      identity: IdentityModule[]
-      entry: EntryModule[]
-      access: AccessModule[]
+      store: StoreComponent[]
+      identity: IdentityComponent[]
+      entry: EntryComponent[]
+      access: AccessComponent[]
     }
 
   before(async () => {

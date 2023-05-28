@@ -8,7 +8,7 @@ import protocol from './protocol.js'
 import type {
   EntryData,
   EntryInstance,
-  EntryModule,
+  EntryComponent,
   Create,
   Fetch,
   AsEntry
@@ -134,7 +134,7 @@ const create = async ({
   return new Entry({ block, data, identity })
 }
 
-export const basalEntry: () => EntryModule<Entry, typeof protocol> = () => ({
+export const basalEntry: () => EntryComponent<Entry, typeof protocol> = () => ({
   protocol,
   create,
   fetch,

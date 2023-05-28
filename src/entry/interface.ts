@@ -3,8 +3,8 @@ import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { Module } from '@/interface.js'
-import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
+import type { Component } from '@/interface.js'
+import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 
 export interface EntryData {
   tag: Uint8Array
@@ -25,14 +25,14 @@ export interface Create extends EntryData {
 
 export interface Fetch {
   blocks: Blocks
-  identityModule: IdentityModule<any>
+  identityModule: IdentityComponent<any>
   cid: CID
   timeout?: number
 }
 
 export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
-export interface EntryModule<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends Module<P> {
+export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends Component<P> {
   create: (create: Create) => Promise<T>
   fetch: (fetch: Fetch) => Promise<T>
   asEntry: (entry: AsEntry<unknown>) => Promise<T | null>

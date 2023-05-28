@@ -9,7 +9,7 @@ import { Blocks } from '@/blocks/index.js'
 import protocol from './protocol.js'
 import type {
   IdentityInstance,
-  IdentityModule,
+  IdentityComponent,
   AsIdentity,
   Export,
   Fetch,
@@ -268,7 +268,7 @@ const verify = async (
   return await _identity.pubkey.verify(data, sig)
 }
 
-export const basalIdentity: () => IdentityModule<Identity, typeof protocol> = () => ({
+export const basalIdentity: () => IdentityComponent<Identity, typeof protocol> = () => ({
   protocol,
   gen,
   get,

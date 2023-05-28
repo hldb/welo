@@ -6,8 +6,8 @@ import { compare } from 'uint8arrays/compare'
 
 import type { Blocks } from '@/blocks/index.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
-import type { EntryInstance, EntryModule } from '@/entry/interface.js'
-import type { IdentityModule } from '@/identity/interface.js'
+import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
+import type { IdentityComponent } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
@@ -33,8 +33,8 @@ export function loadEntry ({
   identityModule
 }: {
   blocks: Blocks
-  entry: EntryModule
-  identityModule: IdentityModule
+  entry: EntryComponent
+  identityModule: IdentityComponent
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
     return await entry.fetch({ blocks, cid, identityModule }).catch(() => null)

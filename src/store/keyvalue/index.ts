@@ -12,7 +12,7 @@ import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
-import type { StoreModule, StoreInstance, Events, Props } from '../interface.js'
+import type { StoreComponent, StoreInstance, Events, Props } from '../interface.js'
 
 const indexesKey = new Key('indexes')
 
@@ -112,7 +112,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 }
 
-export const keyvalueStore: () => StoreModule<Keyvalue, typeof protocol> = () => ({
+export const keyvalueStore: () => StoreComponent<Keyvalue, typeof protocol> = () => ({
   protocol,
   create: (props: Props) => new Keyvalue(props)
 })

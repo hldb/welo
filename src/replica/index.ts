@@ -12,8 +12,8 @@ import type { HashMap } from 'ipld-hashmap/interface'
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { IdentityInstance, IdentityModule } from '@/identity/interface.js'
-import type { EntryInstance, EntryModule } from '@/entry/interface.js'
+import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
+import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
@@ -39,8 +39,8 @@ export class Replica extends Playable {
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
-  readonly entry: EntryModule<any>
-  readonly identityModule: IdentityModule<any>
+  readonly entry: EntryComponent<any>
+  readonly identityModule: IdentityComponent<any>
   readonly events: EventEmitter<ReplicaEvents>
 
   datastore: Datastore
@@ -62,8 +62,8 @@ export class Replica extends Playable {
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    entry: EntryModule
-    identityModule: IdentityModule
+    entry: EntryComponent
+    identityModule: IdentityComponent
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
