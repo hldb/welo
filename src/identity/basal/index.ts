@@ -107,6 +107,11 @@ const get = async ({ name, identities, keychain }: Get): Promise<Identity> => {
     const block = identity.block
 
     const pem = await keypair.export(empty)
+
+    try {
+      await keychain.removeKey(name)
+    } catch (e) {}
+
     await keychain.importKey(name, pem, empty)
     await identities.put(key, block.bytes)
 
