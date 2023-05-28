@@ -260,10 +260,6 @@ const verify = async (
     throw new Error('invalid identity used')
   }
 
-  if (_identity.pubkey == null) {
-    throw new Error('public key required to verify signed data')
-  }
-
   return await _identity.pubkey.verify(data, sig)
 }
 
