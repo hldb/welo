@@ -14,7 +14,7 @@ import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { Blockstore, Pair as BlockstorePair } from 'interface-blockstore'
 import type { Await } from '@helia/interface'
 
-export interface IpldDatastore<L extends AnyLink> extends Datastore {
+export interface IpldDatastore<L extends AnyLink = AnyLink> extends Datastore {
   root: L
   diff: (link: L) => Await<CombinedDiff>
 }
