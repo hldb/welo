@@ -1,2 +1,3 @@
-export const protocol: '/hldb/replicator/live/1.0.0/' =
-  '/hldb/replicator/live/1.0.0/'
+import { prefix } from '../interface.js'
+
+export default `${prefix}live/1.0.0/` as const

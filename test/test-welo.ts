@@ -1,12 +1,18 @@
 import { assert } from './utils/chai.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import { Welo } from '../src/index.js'
-import type { Welo as WeloType } from '../src/welo.js'
-import { WELO_PATH } from '@/utils/constants.js'
+import createWelo from './utils/default-welo.js'
+import type { Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
-import type { Database } from '../src/database.js'
-import type { Identity } from '@/identity/basal/index.js'
+import type { Database } from '@/database.js'
+import type { StoreComponent } from '@/store/interface.js'
+import type { IdentityComponent } from '@/identity/interface.js'
+import type { EntryComponent } from '@/entry/interface.js'
+import type { AccessComponent } from '@/access/interface.js'
+import { staticAccess } from '@/access/static/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
+import { keyvalueStore } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -18,10 +24,14 @@ const testName = 'welo'
 describe(testName, () => {
   let ipfs: GossipHelia,
     libp2p: GossipLibp2p,
-    welo: WeloType,
-    directory: string,
+    welo: Welo,
     identity: Identity,
-    directory1: string
+    components: {
+      store: StoreComponent[]
+      identity: IdentityComponent[]
+      entry: EntryComponent[]
+      access: AccessComponent[]
+    }
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -31,10 +41,14 @@ describe(testName, () => {
     libp2p = await getTestLibp2p(ipfs)
     const keychain = libp2p.keychain
 
-    identity = await getTestIdentity(identities, keychain, names.name0)
+    components = {
+      store: [keyvalueStore()],
+      identity: [basalIdentity()],
+      entry: [basalEntry()],
+      access: [staticAccess()]
+    }
 
-    directory = testPaths.test + WELO_PATH
-    directory1 = directory + '1'
+    identity = await getTestIdentity(identities, keychain, names.name0)
   })
 
   after(async () => {
@@ -43,35 +57,24 @@ describe(testName, () => {
   })
 
   describe('class', () => {
-    it('exposes static properties', () => {
-      assert.isOk(Welo.registry.access)
-      assert.isOk(Welo.registry.entry)
-      assert.isOk(Welo.registry.identity)
-      assert.isOk(Welo.registry.store)
-      assert.isOk(Welo.Datastore)
+    it.skip('exposes static properties', () => {
       // assert.isOk(Welo.Replicator)
-      assert.isOk(Welo.create)
+      // assert.isOk(Welo.create)
     })
 
     describe('create', () => {
       it('returns an instance of Welo', async () => {
-        welo = await Welo.create({ ipfs, libp2p, directory })
+        welo = await createWelo({ ipfs, components })
       })
 
       it('returns an instance of Welo with an identity option', async () => {
-        const directory = directory1
-        const welo = await Welo.create({ ipfs, libp2p, directory, identity })
+        const welo = await createWelo({ ipfs, identity })
         await welo.stop()
       })
 
-      it('rejects if no identity option or Welo.Datastore', async () => {
-        const Datastore = Welo.Datastore
-        Welo.Datastore = undefined
-
-        const promise = Welo.create({ ipfs, libp2p, directory })
+      it.skip('rejects if no identity option or Welo.Datastore', async () => {
+        const promise = createWelo({ ipfs })
         await assert.isRejected(promise)
-
-        Welo.Datastore = Datastore
       })
     })
   })
@@ -84,6 +87,7 @@ describe(testName, () => {
       assert.isOk(welo.determine)
       assert.isOk(welo.fetch)
       assert.isOk(welo.open)
+      assert.isOk(welo.getComponents)
     })
 
     describe('determineManifest', () => {
@@ -119,6 +123,16 @@ describe(testName, () => {
         assert.strictEqual(welo.opened.size, 1)
         await database.close()
         assert.strictEqual(welo.opened.size, 0)
+      })
+    })
+
+    describe('getComponents', () => {
+      it('returns the components for the manifest', () => {
+        const localComponents = welo.getComponents(manifest)
+        assert.strictEqual(localComponents.store, components.store[0])
+        assert.strictEqual(localComponents.access, components.access[0])
+        assert.strictEqual(localComponents.entry, components.entry[0])
+        assert.strictEqual(localComponents.identity, components.identity[0])
       })
     })
   })

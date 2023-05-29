@@ -2,16 +2,14 @@ import { assert } from './utils/chai.js'
 import { base32 } from 'multiformats/bases/base32'
 import { start } from '@libp2p/interfaces/startable'
 
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import type { Entry } from '@/entry/basal/index.js'
+import type { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
-import { initRegistry } from '../src/registry.js'
-import { defaultManifest } from '@/utils/index.js'
-import { StaticAccess } from '@/access/static/index.js'
+import { staticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
-import { wildcard } from '@/access/util.js'
+import { wildcard } from '@/access/interface.js'
 
+import defaultManifest from './utils/default-manifest.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -22,15 +20,8 @@ const testName = 'static access'
 
 describe(testName, () => {
   let identity: Identity, entry: Entry
-  const Access = StaticAccess
+  const Access = staticAccess()
   const name = 'name'
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
 
   const makeaccess = (write: Array<Uint8Array | string>): AccessProtocol => ({
     protocol: Access.protocol,
@@ -65,10 +56,10 @@ describe(testName, () => {
     describe('.open', () => {
       it('returns an instance of Static Access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: yesaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         await start(access)
         assert.strictEqual(access.manifest, manifest)
         assert.deepEqual(access.write, new Set([base32.encode(identity.id)]))
@@ -76,21 +67,21 @@ describe(testName, () => {
 
       it('returns an instance with a wildcard write', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: anyaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         await start(access)
         assert.strictEqual(access.manifest, manifest)
-        assert.deepEqual(access.write, new Set(anyaccess.config.write))
+        assert.deepEqual(access.write, new Set(anyaccess.config?.write))
       })
 
       it('rejects when write access is empty', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: emptyaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         const promise = access.start()
         await assert.isRejected(promise)
       })
@@ -100,10 +91,10 @@ describe(testName, () => {
   describe('Instance', () => {
     it('exposes instance properties', async () => {
       const manifest = await Manifest.create({
-        ...defaultManifest(name, identity, registry),
+        ...defaultManifest(name, identity),
         access: yesaccess
       })
-      const access = new Access({ manifest })
+      const access = Access.create({ manifest })
       await start(access)
       assert.strictEqual(access.manifest, manifest)
       assert.deepEqual(access.write, new Set([base32.encode(identity.id)]))
@@ -112,30 +103,30 @@ describe(testName, () => {
     describe('.canAppend', () => {
       it('returns true if identity has write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: yesaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         await start(access)
         assert.strictEqual(await access.canAppend(entry), true)
       })
 
       it('returns true if wildcard has write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: anyaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         await start(access)
         assert.strictEqual(await access.canAppend(entry), true)
       })
 
       it('returns false if identity has no write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity, registry),
+          ...defaultManifest(name, identity),
           access: noaccess
         })
-        const access = new Access({ manifest })
+        const access = Access.create({ manifest })
         await start(access)
         assert.strictEqual(await access.canAppend(entry), false)
       })

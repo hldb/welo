@@ -5,16 +5,16 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
+import type { Datastore } from 'interface-datastore'
 import type { BlockView } from 'multiformats/interface'
 import type { HashMap } from 'ipld-hashmap/interface'
-import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
+import type { Components } from '@/interface.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
-import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
@@ -37,46 +37,36 @@ interface ReplicaEvents {
 
 export class Replica extends Playable {
   readonly manifest: Manifest
-  readonly directory: string
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
-  readonly Entry: EntryStatic<any>
-  readonly Identity: IdentityStatic<any>
   readonly events: EventEmitter<ReplicaEvents>
+  readonly components: Pick<Components, 'entry' | 'identity'>
 
-  Datastore: DatastoreClass
+  datastore: Datastore
 
-  _storage: LevelDatastore | null
   _graph: Graph | null
   _queue: PQueue
 
   constructor ({
     manifest,
-    directory,
-    Datastore,
+    datastore,
     blocks,
     access,
     identity,
-    Entry,
-    Identity
+    components
   }: {
     manifest: Manifest
-    directory: string
-    Datastore: DatastoreClass
+    datastore: Datastore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    Entry: EntryStatic<any>
-    Identity: IdentityStatic<any>
+    components: Pick<Components, 'entry' | 'identity'>
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))
     }
     const starting = async (): Promise<void> => {
-      this._storage = await getDatastore(this.Datastore, directory)
-      await this._storage.open()
-
       const root: Root | undefined = await this.getRoot().catch(() => undefined)
 
       this._graph = new Graph({ blocks, root })
@@ -87,38 +77,27 @@ export class Replica extends Playable {
     const stopping = async (): Promise<void> => {
       this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
-      await this.storage.close()
       await stop(this._graph)
-
-      this._storage = null
       this._graph = null
     }
 
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.directory = directory
     this.blocks = blocks
     this.access = access
     this.identity = identity
-    this.Entry = Entry
-    this.Identity = Identity
+    this.components = components
 
-    this.Datastore = Datastore
-
-    this._storage = null
+    this.datastore = datastore
     this._graph = null
     this._queue = new PQueue({})
 
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
+  get storage (): Datastore {
+    return this.datastore
   }
 
   get graph (): Graph {
@@ -165,7 +144,7 @@ export class Replica extends Playable {
     try {
       const block = await this.blocks.encode({ value: root })
       await this.blocks.put(block)
-      await this._storage?.put(rootHashKey, encodedcid(block.cid))
+      await this.datastore.put(rootHashKey, encodedcid(block.cid))
     } catch (e) {
       throw new Error('failed to set root')
     }
@@ -177,8 +156,8 @@ export class Replica extends Playable {
     }
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
-    const Entry = this.Entry
-    const Identity = this.Identity
+    const entry = this.components.entry
+    const identity = this.components.identity
 
     const graph = this.graph.clone()
     await start(graph)
@@ -201,7 +180,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.keys())).map(parsedcid)
-    const load = loadEntry({ blocks, Entry, Identity })
+    const load = loadEntry({ blocks, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })
@@ -239,7 +218,7 @@ export class Replica extends Playable {
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
-    const entry = await this.Entry.create({
+    const entry = await this.components.entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,

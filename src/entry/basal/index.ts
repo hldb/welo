@@ -2,14 +2,13 @@ import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Blocks } from '@/blocks/index.js'
-import { Extends } from '@/utils/decorators.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 
 import protocol from './protocol.js'
 import type {
   EntryData,
   EntryInstance,
-  EntryStatic,
+  EntryComponent,
   Create,
   Fetch,
   AsEntry
@@ -21,8 +20,7 @@ interface SignedEntry {
   sig: Uint8Array
 }
 
-@Extends<EntryStatic<SignedEntry>>()
-export class Entry implements EntryInstance<SignedEntry> {
+export class Entry implements EntryInstance<SignedEntry>, EntryData {
   readonly identity: IdentityInstance<any>
   readonly block: BlockView<SignedEntry>
 
@@ -56,73 +54,90 @@ export class Entry implements EntryInstance<SignedEntry> {
     this.next = data.value.next
     this.refs = data.value.refs
   }
+}
 
-  static get protocol (): string {
-    return protocol
+const verify = async (entry: AsEntry<unknown>): Promise<boolean> => {
+  const parsedEntry = await asEntry(entry)
+
+  if (parsedEntry == null) {
+    return false
   }
 
-  static async create ({
-    identity,
-    tag,
-    payload,
-    next,
-    refs
-  }: Create): Promise<Entry> {
-    const data: BlockView<EntryData> = await Blocks.encode({
-      value: { tag, payload, next, refs }
-    })
+  const { block, identity } = parsedEntry
+  const { auth, data, sig } = block.value
 
-    const auth = identity.auth
-    const sig = await identity.sign(data.bytes)
+  return auth.equals(identity.auth) && (await identity.verify(data, sig))
+}
 
-    const block: BlockView<SignedEntry> = await Blocks.encode({
-      value: { auth, data: data.bytes, sig }
-    })
-
-    return new Entry({ block, data, identity })
-  }
-
-  static async fetch ({ blocks, Identity, cid }: Fetch): Promise<Entry> {
-    const block: BlockView<SignedEntry> = await blocks.get<SignedEntry>(cid)
-    const { auth } = block.value
-    const identity = await Identity.fetch({ blocks, auth })
-
-    const entry = await this.asEntry({ block, identity })
-    if (entry === null) {
-      throw new Error('cid did not resolve to a valid entry')
-    }
-
-    if (!(await Entry.verify({ block, identity }))) {
-      throw new Error(
-        `entry with cid: ${block.cid.toString()} has invalid signature`
-      )
-    }
-
+const asEntry = async (entry: AsEntry<unknown>): Promise<Entry | null> => {
+  if (entry instanceof Entry) {
     return entry
   }
 
-  static async asEntry (entry: AsEntry<SignedEntry>): Promise<Entry | null> {
-    if (entry instanceof Entry) {
-      return entry
-    }
+  const { block, identity } = entry
 
-    const { block, identity } = entry
-    const data: BlockView<EntryData> = await Blocks.decode({
-      bytes: block.value.data
-    })
-
-    return new Entry({ block, data, identity })
+  if (block.value == null || typeof block.value !== 'object') {
+    return null
   }
 
-  static async verify ({
-    block,
-    identity
-  }: {
-    block: BlockView<SignedEntry>
-    identity: IdentityInstance<any>
-  }): Promise<boolean> {
-    const { auth, data, sig } = block.value
+  const asPartial = block as BlockView<Partial<SignedEntry>>
 
-    return auth.equals(identity.auth) && (await identity.verify(data, sig))
+  if (asPartial.value.auth == null || asPartial.value.data == null || asPartial.value.sig == null) {
+    return null
   }
+
+  const asSigned = block as BlockView<SignedEntry>
+
+  const data: BlockView<EntryData> = await Blocks.decode({
+    bytes: asSigned.value.data
+  })
+
+  return new Entry({ block: asSigned, data, identity })
 }
+
+const fetch = async ({ blocks, identity, cid }: Fetch): Promise<Entry> => {
+  const block: BlockView<SignedEntry> = await blocks.get<SignedEntry>(cid)
+  const { auth } = block.value
+  const identityInstance = await identity.fetch({ blocks, auth })
+
+  const entry = await asEntry({ block, identity: identityInstance })
+
+  if (entry === null) {
+    throw new Error('cid did not resolve to a valid entry')
+  }
+
+  if (!(await verify(entry))) {
+    throw new Error(`entry with cid: ${block.cid.toString()} has invalid signature`)
+  }
+
+  return entry
+}
+
+const create = async ({
+  identity,
+  tag,
+  payload,
+  next,
+  refs
+}: Create): Promise<Entry> => {
+  const data: BlockView<EntryData> = await Blocks.encode({
+    value: { tag, payload, next, refs }
+  })
+
+  const auth = identity.auth
+  const sig = await identity.sign(data.bytes)
+
+  const block: BlockView<SignedEntry> = await Blocks.encode({
+    value: { auth, data: data.bytes, sig }
+  })
+
+  return new Entry({ block, data, identity })
+}
+
+export const basalEntry: () => EntryComponent<Entry, typeof protocol> = () => ({
+  protocol,
+  create,
+  fetch,
+  asEntry,
+  verify
+})

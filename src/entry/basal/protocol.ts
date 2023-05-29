@@ -1,11 +1,8 @@
-import type { Protocol } from '../../manifest/interface.js'
-import protocolPrefix from '../prefix.js'
+import type { Protocol } from '@/manifest/interface.js'
+import { prefix } from '../interface.js'
 
-const type = 'basal'
-const protocol: '/hldb/entry/basal' = `${protocolPrefix}${type}`
+const protocol = `${prefix}basal` as const
 
-export interface EntryProtocol extends Protocol {
-  protocol: typeof protocol
-}
+export type EntryProtocol = Protocol<typeof protocol>
 
 export default protocol

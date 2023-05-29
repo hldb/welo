@@ -1,29 +1,22 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
 import type { HashMap } from 'ipld-hashmap'
-import type { LevelDatastore } from 'datastore-level'
+import type { Datastore } from 'interface-datastore'
 
-import { Extends } from '@/utils/decorators.js'
 import { Playable } from '@/utils/playable.js'
 import { loadHashMap } from '@/replica/graph.js'
 import { decodedcid, encodedcid } from '@/utils/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
-import type { StoreStatic, StoreInstance, Events } from '../interface.js'
+import type { StoreComponent, StoreInstance, Events, Props } from '../interface.js'
 
 const indexesKey = new Key('indexes')
 
-@Extends<StoreStatic>()
 export class Keyvalue extends Playable implements StoreInstance {
-  static get protocol (): string {
-    return protocol
-  }
-
   get selectors (): typeof selectors {
     return selectors
   }
@@ -33,35 +26,27 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   readonly manifest: Manifest
-  readonly directory: string
   readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
-  readonly Datastore: DatastoreClass
-  private _storage: LevelDatastore | null
+  readonly datastore: Datastore
   private _indexes: HashMap<any> | null
   private _index: HashMap<any> | null
   events: EventEmitter<Events>
 
   constructor ({
     manifest,
-    directory,
     blocks,
     replica,
-    Datastore
-  }: {
-    manifest: Manifest
-    directory: string
-    blocks: Blocks
-    replica: Replica
-    Datastore: DatastoreClass
-  }) {
+    datastore
+  }: Props) {
     const starting = async (): Promise<void> => {
-      this._storage = await getDatastore(Datastore, directory)
-      await this._storage.open()
+      let indexesCID: Uint8Array | undefined
 
-      const indexesCID = await this.storage.get(indexesKey)
-        .catch(() => undefined)
+      try {
+        indexesCID = await this.storage.get(indexesKey)
+      } catch (error) {}
+
       this._indexes = await loadHashMap(
         blocks,
         indexesCID === undefined ? undefined : decodedcid(indexesCID)
@@ -76,34 +61,25 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
-      await this.storage.close()
-
-      this._storage = null
       this._indexes = null
       this._index = null
     }
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.directory = directory
     this.blocks = blocks
-    this.config = manifest.store.config
+    this.config = manifest.store.config as Config
     this.replica = replica
 
-    this.Datastore = Datastore
-    this._storage = null
+    this.datastore = datastore
     this._indexes = null
     this._index = null
 
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
+  get storage (): Datastore {
+    return this.datastore
   }
 
   get indexes (): HashMap<any> {
@@ -135,3 +111,8 @@ export class Keyvalue extends Playable implements StoreInstance {
     return index
   }
 }
+
+export const keyvalueStore: () => StoreComponent<Keyvalue, typeof protocol> = () => ({
+  protocol,
+  create: (props: Props) => new Keyvalue(props)
+})

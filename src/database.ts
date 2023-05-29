@@ -1,20 +1,22 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
 import type { CID } from 'multiformats/cid'
+import type { Datastore } from 'interface-datastore'
 
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryStatic } from '@/entry/interface.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 import type { Replicator } from '@/replicator/interface.js'
+import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
 
-import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
+import type { DbConfig, DbOpen, DbEvents, ClosedEmit, Components } from './interface.js'
 
 /**
  * Database Class
@@ -22,19 +24,17 @@ import type { DbConfig, DbOpen, DbEvents, ClosedEmit } from './interface.js'
  * @public
  */
 export class Database extends Playable {
-  readonly directory: string
   readonly blocks: Blocks
   readonly manifest: Manifest
   readonly identity: IdentityInstance<any>
-  readonly replicator: Replicator
+  readonly replicators: Replicator[]
 
   readonly replica: Replica
   readonly access: AccessInstance
   readonly store: StoreInstance
 
-  readonly Datastore: DatastoreClass
-  readonly Entry: EntryStatic<any>
-  readonly Identity: IdentityStatic<any>
+  readonly datastore: Datastore
+  readonly components: Components
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate
@@ -46,28 +46,24 @@ export class Database extends Playable {
   constructor (config: DbConfig) {
     const starting = async (): Promise<void> => {
       this.store.events.addEventListener('update', this.#onStoreUpdate)
-      await start(this.access, this.replica, this.store, this.replicator)
+      await start(this.access, this.replica, this.store, ...this.replicators)
     }
     const stopping = async (): Promise<void> => {
       this.replica.events.removeEventListener('update', this.#onStoreUpdate)
-      await stop(this.store, this.replica, this.access, this.replicator)
+      await stop(this.store, this.replica, this.access, ...this.replicators)
     }
     super({ starting, stopping })
 
-    this.Datastore = config.Datastore
-    this.directory = config.directory
+    this.datastore = config.datastore
     this.manifest = config.manifest
     this.blocks = config.blocks
     this.identity = config.identity
-    this.replicator = config.replicator
+    this.replicators = config.replicators
     this.replica = config.replica
-
-    this.replicator = config.replicator
 
     this.store = config.store
     this.access = config.access
-    this.Entry = config.Entry
-    this.Identity = config.Identity
+    this.components = config.components
 
     this.events = new EventEmitter()
     this.#onStoreUpdate = onStoreUpdate.bind(this)
@@ -126,69 +122,53 @@ export class Database extends Playable {
    */
   static async open (options: DbOpen): Promise<Database> {
     const {
-      directory,
-      Datastore,
+      datastore,
       manifest,
-      Replicator,
+      replicators,
       ipfs,
-      libp2p,
       identity,
       blocks,
-      Store,
-      Access,
-      Entry,
-      Identity
+      components
     } = options
 
-    if (identity.constructor !== Identity) {
-      throw new Error('identity instance type does not match Identity class')
+    if (manifest.identity.protocol !== components.identity.protocol) {
+      throw new Error('identity instance type does not match identity protocol')
     }
 
-    const common = { manifest, blocks, Datastore }
+    const common = { manifest, blocks, datastore }
 
-    const directories = {
-      // access: directory + '/access',
-      replica: directory + '/replica',
-      store: directory + '/store'
-      // replicator: directory + '/replicator'
-    }
+    const access = components.access.create(common)
 
-    const access = new Access(common)
     const replica = new Replica({
       ...common,
-      directory: directories.replica,
+      datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
       identity,
-      Entry,
-      Identity,
+      components,
       access
     })
-    const store = new Store({
+
+    const store = components.store.create({
       ...common,
-      directory: directories.store,
-      replica
-    })
-    const replicator = new Replicator({
-      ...common,
-      ipfs,
-      libp2p,
+      datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
       replica
     })
 
+    const replicatorInstances = replicators.map(replicator => replicator.create({
+      ...common,
+      ipfs,
+      replica
+    }))
+
     const config: DbConfig = {
-      directory,
-      Datastore,
+      datastore,
       blocks,
-      replicator,
+      replicators: replicatorInstances,
       identity,
       manifest,
       replica,
       store,
       access,
-      Replicator,
-      Access,
-      Entry,
-      Identity,
-      Store
+      components
     }
 
     const database = new Database(config)

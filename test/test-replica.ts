@@ -1,26 +1,26 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
-import { LevelDatastore } from 'datastore-level'
+import { NamespaceDatastore } from 'datastore-core'
+import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
 import { StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
-import { cidstring, decodedcid, defaultManifest } from '@/utils/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
+import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
 
+import getDatastore from './utils/level-datastore.js'
+import defaultManifest from './utils/default-manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
-import { getDatastore } from '@/utils/datastore.js'
 
 const testName = 'replica'
 
@@ -33,19 +33,16 @@ describe(testName, () => {
     access: StaticAccess,
     identity: Identity,
     tempIdentity: Identity,
-    testPaths: TestPaths
+    testPaths: TestPaths,
+    datastore: LevelDatastore
 
-  const Datastore = LevelDatastore
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
+  const entryModule = basalEntry()
+  const identityModule = basalIdentity()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
+    datastore = await getDatastore(testPaths.replica)
+    await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -58,7 +55,7 @@ describe(testName, () => {
     await blocks.put(identity.block)
 
     manifest = await Manifest.create({
-      ...defaultManifest('name', identity, registry),
+      ...defaultManifest('name', identity),
       tag: new Uint8Array()
     })
     access = new StaticAccess({ manifest })
@@ -76,6 +73,7 @@ describe(testName, () => {
   })
 
   after(async () => {
+    await datastore.close()
     await stop(ipfs)
     await stop(tempIpfs)
   })
@@ -84,14 +82,15 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
-          Datastore,
+          datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
           manifest,
-          directory: testPaths.replica + '/temp',
           blocks,
           access,
           identity,
-          Entry,
-          Identity
+          components: {
+            entry: entryModule,
+            identity: identityModule
+          }
         })
         await start(replica)
       })
@@ -107,8 +106,8 @@ describe(testName, () => {
       assert.isOk(replica.blocks)
       assert.isOk(replica.access)
       assert.isOk(replica.identity)
-      assert.isOk(replica.Entry)
-      assert.isOk(replica.Identity)
+      assert.isOk(replica.components.entry)
+      assert.isOk(replica.components.identity)
       assert.isOk(replica.events)
       assert.isOk(replica.heads)
       assert.isOk(replica.tails)
@@ -132,7 +131,7 @@ describe(testName, () => {
 
       it('does not add entry with mismatched tag', async () => {
         const tag = new Uint8Array([7])
-        const entry = await Entry.create({
+        const entry = await entryModule.create({
           identity,
           tag,
           payload,
@@ -192,14 +191,15 @@ describe(testName, () => {
     describe('write', () => {
       before(async () => {
         replica = new Replica({
-          Datastore,
+          datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
           manifest,
-          directory: testPaths.replica,
           blocks,
           access,
           identity,
-          Entry,
-          Identity
+          components: {
+            entry: entryModule,
+            identity: identityModule
+          }
         })
         await start(replica)
       })
@@ -255,29 +255,36 @@ describe(testName, () => {
         const rootHashKey = new Key('rootHash')
         const block = await blocks.encode({ value: replica.graph.root })
 
+        await datastore.close()
         await stop(replica)
 
-        const storage = await getDatastore(Datastore, testPaths.replica)
-        await storage.open()
+        const newDatastore = await getDatastore(testPaths.replica)
+        await newDatastore.open()
+        const storage = new NamespaceDatastore(newDatastore, new Key(testPaths.replica))
 
         assert.strictEqual(await storage.has(rootHashKey), true)
 
         assert.deepEqual(decodedcid(await storage.get(rootHashKey)), block.cid)
-        await storage.close()
+        await newDatastore.close()
       })
 
       it('loads the graph root from disk on start', async () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
+
+        const newDatastore = await getDatastore(testPaths.replica)
+        await newDatastore.open()
+
         const replica = new Replica({
-          Datastore,
+          datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
           manifest,
-          directory: testPaths.replica,
           blocks,
           access,
           identity,
-          Entry,
-          Identity
+          components: {
+            entry: entryModule,
+            identity: identityModule
+          }
         })
         await start(replica)
 

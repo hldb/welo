@@ -4,12 +4,10 @@ import type { BlockView } from 'multiformats/interface'
 
 import { Blocks } from '@/blocks/index.js'
 import { Manifest, Address } from '@/manifest/index.js'
-import { StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
-import { Keyvalue } from '@/store/keyvalue/index.js'
-import { initRegistry } from '../src/registry.js'
-import { getComponents } from '@/utils/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
+import basalEntryProtocol from '@/entry/basal/protocol.js'
+import basalIdentityProtocol from '@/identity/basal/protocol.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -19,26 +17,20 @@ const testName = 'manifest'
 describe(testName, () => {
   let ipfs: Helia, blocks: Blocks, manifest: Manifest
 
-  const registry = initRegistry()
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
-
   const config = {
     name: 'test',
     store: {
-      protocol: registry.store.star.protocol
+      protocol: keyvalueStoreProtocol
     },
     access: {
-      protocol: registry.access.star.protocol,
+      protocol: staticAccessProtocol,
       write: []
     },
     entry: {
-      protocol: registry.entry.star.protocol
+      protocol: basalEntryProtocol
     },
     identity: {
-      protocol: registry.identity.star.protocol
+      protocol: basalIdentityProtocol
     }
   }
 
@@ -126,16 +118,6 @@ describe(testName, () => {
           block: false as unknown as BlockView<any>
         })
         assert.strictEqual(_manifest, null)
-      })
-    })
-
-    describe('.getComponents', () => {
-      it('returns the components for the manifest', () => {
-        const components = getComponents(registry, manifest)
-        assert.strictEqual(components.Store, Keyvalue)
-        assert.strictEqual(components.Access, StaticAccess)
-        assert.strictEqual(components.Entry, Entry)
-        assert.strictEqual(components.Identity, Identity)
       })
     })
   })

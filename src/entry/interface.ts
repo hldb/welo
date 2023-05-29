@@ -2,8 +2,9 @@ import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '@/blocks/index.js'
-import type { Registrant } from '@/utils/register.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
+import { HLDB_PREFIX } from '@/utils/constants.js'
+import type { Component } from '@/interface.js'
+import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 
 export interface EntryData {
   tag: Uint8Array
@@ -24,19 +25,18 @@ export interface Create extends EntryData {
 
 export interface Fetch {
   blocks: Blocks
-  Identity: IdentityStatic<any>
+  identity: IdentityComponent<any>
   cid: CID
   timeout?: number
 }
 
-export type AsEntry<Value> =
-  | EntryInstance<Value>
-  | { block: BlockView<Value>, identity: IdentityInstance<any> }
+export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
-export interface EntryStatic<Value> extends Registrant {
-  new (props: any): EntryInstance<Value>
-  create: (create: Create) => Promise<EntryInstance<Value>>
-  fetch: (fetch: Fetch) => Promise<EntryInstance<Value>>
-  asEntry: (entry: AsEntry<Value>) => Promise<EntryInstance<Value> | null>
-  verify: (entry: EntryInstance<Value>) => Promise<boolean>
+export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends Component<P> {
+  create: (create: Create) => Promise<T>
+  fetch: (fetch: Fetch) => Promise<T>
+  asEntry: (entry: AsEntry<unknown>) => Promise<T | null>
+  verify: (entry: AsEntry<unknown>) => Promise<boolean>
 }
+
+export const prefix = `${HLDB_PREFIX}entry/` as const

@@ -1,22 +1,19 @@
 import { base32 } from 'multiformats/bases/base32'
 
-import { Extends } from '@/utils/decorators.js'
 import { Playable } from '@/utils/playable.js'
 import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
-import { wildcard } from '../util.js'
-import type { AccessInstance, AccessStatic } from '../interface.js'
+import { wildcard, Open, AccessInstance, AccessComponent } from '../interface.js'
 
-@Extends<AccessStatic>()
 // the Static in StaticAccess means the ACL is immutable and does not change
 export class StaticAccess extends Playable implements AccessInstance {
   readonly manifest: Manifest
   readonly config: Config
   readonly write: Set<string>
 
-  constructor ({ manifest }: { manifest: Manifest }) {
+  constructor ({ manifest }: Open) {
     const starting = async (): Promise<void> => {
       if (!Array.isArray(this.config.write) || this.config.write.length === 0) {
         throw new Error(
@@ -28,7 +25,7 @@ export class StaticAccess extends Playable implements AccessInstance {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.config = manifest?.access?.config
+    this.config = manifest?.access?.config as Config
 
     if (!Array.isArray(this.config?.write)) {
       throw new Error('expected manifest.access.config.write to be an array')
@@ -41,10 +38,6 @@ export class StaticAccess extends Playable implements AccessInstance {
     )
   }
 
-  static get protocol (): typeof protocol {
-    return protocol
-  }
-
   async close (): Promise<void> {
     return undefined
   }
@@ -55,3 +48,8 @@ export class StaticAccess extends Playable implements AccessInstance {
     return this.write.has(string) || this.write.has(wildcard)
   }
 }
+
+export const staticAccess: () => AccessComponent<StaticAccess, typeof protocol> = () => ({
+  protocol,
+  create: (open: Open) => new StaticAccess(open)
+})
