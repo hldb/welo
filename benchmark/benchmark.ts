@@ -57,7 +57,7 @@ console.time('unordered traversal')
 const { blocks, access, components: { entry, identity } } = db.replica
 const load = loadEntry({ blocks, entry, identity })
 const links = dagLinks({ graph: { has: (): boolean => false }, access })
-await traverser({ cids: (await all(db.replica.heads.keys())).map(parsedcid), load, links })
+await traverser({ cids: (await all(db.replica.heads.queryKeys({}))).map(key => parsedcid(key.toString())), load, links })
 console.timeEnd('unordered traversal')
 
 await welo.stop()

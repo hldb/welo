@@ -87,6 +87,7 @@ describe(testName, () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,
@@ -205,6 +206,7 @@ describe(testName, () => {
       before(async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,
@@ -292,6 +294,7 @@ describe(testName, () => {
 
         const replica = new Replica({
           datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,

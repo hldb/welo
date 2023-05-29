@@ -51,7 +51,7 @@ export class Replica extends Playable {
 
   _queue: PQueue
 
-  hash: CID | null
+  root: CID | null
 
   constructor ({
     manifest,
@@ -77,9 +77,13 @@ export class Replica extends Playable {
       ).catch(() => null)
 
       this.#graph = new Graph(this.#blockstore, root?.value)
-      this.hash = root?.cid as CID
-
       await start(this.#graph)
+
+      if (root?.cid == null) {
+        await this.#updateRoot()
+      } else {
+        this.root = root.cid
+      }
     }
     const stopping = async (): Promise<void> => {
       await this._queue.onIdle()
@@ -100,7 +104,7 @@ export class Replica extends Playable {
     this.#graph = null
     this._queue = new PQueue({})
 
-    this.hash = null
+    this.root = null
 
     this.events = new EventEmitter()
   }
@@ -204,10 +208,7 @@ export class Replica extends Playable {
     }
 
     if (!this.graph.equals(clone)) {
-      const block = await encodeRoot(this.graph.root)
-      await setRoot(this.#datastore, this.#blockstore, block)
-      this.hash = block.cid
-      this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+      await this.#updateRoot()
     }
   }
 
@@ -238,6 +239,13 @@ export class Replica extends Playable {
   //
   //   }
   // }
+
+  async #updateRoot (): Promise<void> {
+    const block = await encodeRoot(this.graph.root)
+    await setRoot(this.#datastore, this.#blockstore, block)
+    this.root = block.cid
+    this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+  }
 }
 
 const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await Blocks.encode({ value: root })

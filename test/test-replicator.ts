@@ -80,6 +80,7 @@ describe(testName, () => {
     replica1 = new Replica({
       manifest,
       datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
+      blockstore: ipfs1.blockstore,
       blocks: blocks1,
       access,
       identity: identity1,
@@ -91,6 +92,7 @@ describe(testName, () => {
     replica2 = new Replica({
       manifest,
       datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
+      blockstore: ipfs2.blockstore,
       blocks: blocks2,
       access,
       identity: identity2,

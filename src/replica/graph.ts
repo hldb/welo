@@ -146,11 +146,11 @@ export class Graph extends Playable {
   }
 
   get state (): GraphState {
-    if (!this.isStarted()) {
-      throw new Error()
+    if (this._state == null) {
+      throw new Error('failed to read graph state')
     }
 
-    return this._state as GraphState
+    return this._state
   }
 
   get nodes (): IpldDatastore<ShardLink> {

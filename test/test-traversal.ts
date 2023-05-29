@@ -1,8 +1,10 @@
 import { assert } from './utils/chai.js'
+import { start } from '@libp2p/interfaces/startable'
+import { Key } from 'interface-datastore'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
-import { start } from '@libp2p/interfaces/startable'
-import type { HashMap } from 'ipld-hashmap'
+import type { Blockstore } from 'interface-blockstore'
+import type { ShardLink } from '@alanshaw/pail/shard'
 
 import {
   sortCids,
@@ -19,7 +21,7 @@ import { Entry, basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
-import { Graph, loadHashMap } from '@/replica/graph.js'
+import { Graph } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
@@ -29,12 +31,14 @@ import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { concurrentEntries, singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import { IpldDatastore, Paily } from '@/utils/paily.js'
 
 const testName = 'traversal'
 
 describe('traversal', () => {
   let ipfs: Helia,
     blocks: Blocks,
+    blockstore: Blockstore,
     identity: Identity,
     identity1: Identity,
     access: StaticAccess,
@@ -55,6 +59,7 @@ describe('traversal', () => {
     const testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
 
     const identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
@@ -148,7 +153,7 @@ describe('traversal', () => {
 
   describe('dagLinks', () => {
     it('returns an array of cids from the dag node', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
       const links = dagLinks({ graph, access })
@@ -158,7 +163,7 @@ describe('traversal', () => {
     })
 
     it('returns an empty array if there are no links in the dag node', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
       const links = dagLinks({ graph, access })
@@ -168,7 +173,7 @@ describe('traversal', () => {
     })
 
     it('returns an empty array if entry cannot be appended', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
       const links = dagLinks({ graph, access: noaccess })
@@ -178,7 +183,7 @@ describe('traversal', () => {
     })
 
     it('returns an empty array if all cids have been seen', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
       const links = dagLinks({ graph, access })
@@ -189,7 +194,7 @@ describe('traversal', () => {
     })
 
     it('returns an empty array if all cids are already added to the graph', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
       const links = dagLinks({ graph, access })
@@ -204,10 +209,10 @@ describe('traversal', () => {
 
   describe('graphLinks', () => {
     it('returns an array if cids from the graph node', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: HashMap<null> = await loadHashMap(blocks)
+      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[1]
 
@@ -220,10 +225,10 @@ describe('traversal', () => {
     })
 
     it('returns an emtpy array if graph node edge is empty', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: HashMap<null> = await loadHashMap(blocks)
+      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[0]
 
@@ -236,10 +241,10 @@ describe('traversal', () => {
     })
 
     it('returns an array of cids for a specified direction', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: HashMap<null> = await loadHashMap(blocks)
+      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
       const edge = 'in'
       const entry = entries[0]
 
@@ -252,11 +257,11 @@ describe('traversal', () => {
     })
 
     it('returns an empty array if entry cid exists in tails', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: HashMap<null> = await loadHashMap(blocks)
-      await tails.set(cidstring(entries[1].cid), null)
+      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      await tails.put(new Key(cidstring(entries[1].cid)), new Uint8Array())
       const edge = 'out'
       const entry = entries[1]
 
@@ -269,10 +274,10 @@ describe('traversal', () => {
     })
 
     it('throws if there is no node in graph for referenced cid', async () => {
-      const graph = new Graph({ blocks })
+      const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: HashMap<null> = await loadHashMap(blocks)
+      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[1]
 
@@ -399,7 +404,7 @@ describe('traversal', () => {
             }
             await Promise.all(promises)
 
-            const graph = new Graph({ blocks })
+            const graph = new Graph(blockstore)
             await start(graph)
 
             const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
@@ -432,7 +437,7 @@ describe('traversal', () => {
           const topology = topologies[key]
 
           it(`yields ordered entries in a ${key} topology`, async () => {
-            const graph = new Graph({ blocks })
+            const graph = new Graph(blockstore)
             await start(graph)
 
             for (const entry of topology) {
@@ -469,7 +474,7 @@ describe('traversal', () => {
           const topology = topologies[key]
 
           it(`yields ordered entries in a ${key} topology`, async () => {
-            const graph = new Graph({ blocks })
+            const graph = new Graph(blockstore)
             await start(graph)
 
             for (const entry of topology) {

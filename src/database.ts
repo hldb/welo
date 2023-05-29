@@ -46,11 +46,13 @@ export class Database extends Playable {
   constructor (config: DbConfig) {
     const starting = async (): Promise<void> => {
       this.store.events.addEventListener('update', this.#onStoreUpdate)
-      await start(this.access, this.replica, this.store, ...this.replicators)
+      await start(this.replica)
+      await start(this.access, this.store, ...this.replicators)
     }
     const stopping = async (): Promise<void> => {
       this.replica.events.removeEventListener('update', this.#onStoreUpdate)
-      await stop(this.store, this.replica, this.access, ...this.replicators)
+      await stop(this.store, this.access, ...this.replicators)
+      await stop(this.replica)
     }
     super({ starting, stopping })
 
@@ -135,21 +137,22 @@ export class Database extends Playable {
       throw new Error('identity instance type does not match identity protocol')
     }
 
-    const common = { manifest, blocks, datastore }
+    const common = { manifest, blocks, components }
 
     const access = components.access.create(common)
 
     const replica = new Replica({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(REPLICA_NAMESPACE)),
+      blockstore: ipfs.blockstore,
       identity,
-      components,
       access
     })
 
     const store = components.store.create({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
+      blockstore: ipfs.blockstore,
       replica
     })
 

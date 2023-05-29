@@ -1,25 +1,25 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
+import { encode, decode } from '@ipld/dag-cbor'
 import type { Datastore } from 'interface-datastore'
+import type { Blockstore } from 'interface-blockstore'
+import type { CID } from 'multiformats/cid'
 
 import { Playable } from '@/utils/playable.js'
-import { loadHashMap } from '@/replica/graph.js'
-import { decodedcid, encodedcid } from '@/utils/index.js'
-import { Blocks } from '@/blocks/index.js'
-import { CodeError } from '@libp2p/interfaces/errors'
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
-import { creators, selectors, reducer } from './model.js'
-import type { IpldDatastore } from '@/utils/paily.js'
-import type { AnyLink } from '@alanshaw/pail/link'
+import { creators, selectors, reducer, StateMap, init, load } from './model.js'
+import type { ShardLink } from '@alanshaw/pail/shard'
 import type { StoreComponent, StoreInstance, Events, Props } from '../interface.js'
 
 interface PersistedRoot {
-  index: AnyLink
-  replica: AnyLink
+  index: ShardLink
+  replica: CID
 }
+
+const indexKey = new Key('index')
 
 export class Keyvalue extends Playable implements StoreInstance {
   get selectors (): typeof selectors {
@@ -31,25 +31,34 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   readonly manifest: Manifest
-  readonly blocks: Blocks
   readonly config?: Config
   readonly replica: Replica
   readonly datastore: Datastore
-  private _index: IpldDatastore | null
+  readonly blockstore: Blockstore
+  private _index: StateMap | null
   events: EventEmitter<Events>
 
   constructor ({
     manifest,
     blocks,
     replica,
-    datastore
+    datastore,
+    blockstore
   }: Props) {
     const starting = async (): Promise<void> => {
-      let indexesCID: Uint8Array | undefined
-
+      let bytes: Uint8Array | undefined
       try {
-        indexesCID = await this.storage.get(indexesKey)
-      } catch (error) {}
+        bytes = await this.datastore.get(indexKey)
+      } catch {
+        bytes = undefined
+      }
+
+      if (bytes != null) {
+        const persistedRoot: PersistedRoot = decode(bytes)
+        this._index = await load(this.blockstore, persistedRoot.index)
+      } else {
+        await this.latest()
+      }
 
       // replica.events.on('update', (): void => { void this.latest() })
     }
@@ -59,21 +68,17 @@ export class Keyvalue extends Playable implements StoreInstance {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.blocks = blocks
     this.config = manifest.store.config as Config
     this.replica = replica
 
     this.datastore = datastore
+    this.blockstore = blockstore
     this._index = null
 
     this.events = new EventEmitter()
   }
 
-  get storage (): Datastore {
-    return this.datastore
-  }
-
-  get index (): IpldDatastore {
+  get index (): StateMap {
     if (this._index == null) {
       throw new Error('keyvalue not started')
     }
@@ -82,13 +87,21 @@ export class Keyvalue extends Playable implements StoreInstance {
   }
 
   // will return the latest reduced state to hand to selectors
-  async latest (): Promise<IpldDatastore> {
-    const index = await loadHashMap(this.blocks)
+  async latest (): Promise<StateMap> {
+    const index = await init(this.blockstore)
+
+    const replicaRoot = this.replica.root
+    if (replicaRoot == null) {
+      throw new Error('replica hash not defined')
+    }
+
     for await (const entry of await this.replica.traverse()) {
       await reducer(index, entry)
     }
-    await this.indexes.set('latest', encodedcid(index.cid))
-    await this.storage.put(indexesKey, encodedcid(this.indexes.cid))
+
+    const persistedRoot: PersistedRoot = { index: index.root, replica: replicaRoot }
+    await this.datastore.put(indexKey, encode(persistedRoot))
+
     this._index = index
     this.events.dispatchEvent(new CustomEvent<undefined>('update'))
     return index

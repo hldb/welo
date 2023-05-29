@@ -12,7 +12,7 @@ import type { IdentityComponent } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
-import type { IpldDatastore } from '@/utils/types.js'
+import type { IpldDatastore } from '@/utils/paily.js'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order

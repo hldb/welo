@@ -77,6 +77,7 @@ describe(testName, () => {
       await start(access)
       replica = new Replica({
         datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
+        blockstore: ipfs.blockstore,
         manifest,
         blocks,
         access,
@@ -91,7 +92,8 @@ describe(testName, () => {
         manifest,
         blocks,
         replica,
-        datastore: new NamespaceDatastore(datastore, new Key(testPaths.store))
+        datastore: new NamespaceDatastore(datastore, new Key(testPaths.store)),
+        blockstore: ipfs.blockstore
       })
       await start(keyvalue)
     })

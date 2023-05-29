@@ -90,12 +90,12 @@ export class LiveReplicator extends Playable {
   }
 
   async broadcast (): Promise<void> {
-    if (Array.from(await all(this.replica.heads.values())).length < 1) {
+    const heads: CID[] = Array.from(await all(this.replica.heads.queryKeys({})))
+      .map(key => parsedcid(key.toString()))
+
+    if (heads.length === 0) {
       return
     }
-    const heads: CID[] = Array.from(await all(this.replica.heads.keys())).map(
-      parsedcid
-    )
 
     const promises: Array<Promise<PublishResult>> = []
     const advert = await Advert.write(this.manifest.address.cid, heads)
