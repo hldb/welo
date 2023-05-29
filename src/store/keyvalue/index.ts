@@ -1,6 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
-import type { HashMap } from 'ipld-hashmap'
 import type { LevelDatastore } from 'datastore-level'
 
 import { Extends } from '@/utils/decorators.js'
@@ -8,15 +7,21 @@ import { Playable } from '@/utils/playable.js'
 import { loadHashMap } from '@/replica/graph.js'
 import { decodedcid, encodedcid } from '@/utils/index.js'
 import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
+import { Blocks } from '@/blocks/index.js'
+import { CodeError } from '@libp2p/interfaces/errors'
 import type { Replica } from '@/replica/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { Manifest } from '@/manifest/index.js'
 
 import protocol, { Config } from './protocol.js'
 import { creators, selectors, reducer } from './model.js'
 import type { StoreStatic, StoreInstance, Events } from '../interface.js'
+import type { IpldDatastore } from '@/utils/paily.js'
+import type { AnyLink } from '@alanshaw/pail/link'
 
-const indexesKey = new Key('indexes')
+interface PersistedRoot {
+  index: AnyLink
+  replica: AnyLink
+}
 
 @Extends<StoreStatic>()
 export class Keyvalue extends Playable implements StoreInstance {
@@ -39,8 +44,7 @@ export class Keyvalue extends Playable implements StoreInstance {
   readonly replica: Replica
   readonly Datastore: DatastoreClass
   private _storage: LevelDatastore | null
-  private _indexes: HashMap<any> | null
-  private _index: HashMap<any> | null
+  private _index: IpldDatastore | null
   events: EventEmitter<Events>
 
   constructor ({
@@ -60,14 +64,21 @@ export class Keyvalue extends Playable implements StoreInstance {
       this._storage = await getDatastore(Datastore, directory)
       await this._storage.open()
 
-      const indexesCID = await this.storage.get(indexesKey)
-        .catch(() => undefined)
-      this._indexes = await loadHashMap(
-        blocks,
-        indexesCID === undefined ? undefined : decodedcid(indexesCID)
-      )
+      const bytes = await this._storage.get(new Key('latest'))
+        .catch((e) => {
+          if (e instanceof CodeError && e.code === 'ERR_NOT_FOUND') {
+            return { }
+          }
 
-      const indexCID = await this.indexes.get('latest')
+          throw e
+        })
+
+      if (bytes) {
+        const block = await Blocks.decode<PersistedRoot>({ bytes })
+      } else {
+
+      }
+
       this._index = await loadHashMap(
         blocks,
         indexCID === undefined ? undefined : decodedcid(indexCID)
@@ -76,10 +87,9 @@ export class Keyvalue extends Playable implements StoreInstance {
       // replica.events.on('update', (): void => { void this.latest() })
     }
     const stopping = async (): Promise<void> => {
-      await this.storage.close()
+      this._storage != null && await this._storage.close()
 
       this._storage = null
-      this._indexes = null
       this._index = null
     }
     super({ starting, stopping })
@@ -92,38 +102,21 @@ export class Keyvalue extends Playable implements StoreInstance {
 
     this.Datastore = Datastore
     this._storage = null
-    this._indexes = null
     this._index = null
 
     this.events = new EventEmitter()
   }
 
-  get storage (): LevelDatastore {
-    if (this._storage === null) {
-      throw new Error()
-    }
-
-    return this._storage
-  }
-
-  get indexes (): HashMap<any> {
-    if (this._indexes === null) {
-      throw new Error()
-    }
-
-    return this._indexes
-  }
-
-  get index (): HashMap<any> {
-    if (this._index === null) {
-      throw new Error()
+  get index (): IpldDatastore {
+    if (this._index == null) {
+      throw new Error('keyvalue not started')
     }
 
     return this._index
   }
 
   // will return the latest reduced state to hand to selectors
-  async latest (): Promise<HashMap<any>> {
+  async latest (): Promise<IpldDatastore> {
     const index = await loadHashMap(this.blocks)
     for await (const entry of await this.replica.traverse()) {
       await reducer(index, entry)

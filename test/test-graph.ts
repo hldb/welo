@@ -60,7 +60,7 @@ describe(testName, () => {
       it('returns instance', () => {
         const graph = new Graph(blockstore)
         assert.strictEqual(graph.blockstore, blockstore)
-        assert.strictEqual(graph._root, null)
+        assert.strictEqual(graph._roots, null)
       })
 
       it('returns instance using provided root', () => {
@@ -76,7 +76,7 @@ describe(testName, () => {
     it('exposes instance properties', async () => {
       const graph = new Graph(blockstore)
 
-      assert.strictEqual(graph._root, null)
+      assert.strictEqual(graph._roots, null)
       assert.strictEqual(graph._state, null)
       assert.isOk(graph.known)
       assert.isOk(graph.get)

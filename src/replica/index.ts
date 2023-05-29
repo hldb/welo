@@ -18,7 +18,7 @@ import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
-import { Graph, Root } from './graph.js'
+import { Graph, GraphRoot } from './graph.js'
 import {
   loadEntry,
   graphLinks,
@@ -27,7 +27,7 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
-import type { IpldDatastore } from '@/utils/types.js'
+import type { IpldDatastore } from '@/utils/paily.js'
 import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
@@ -54,6 +54,8 @@ export class Replica extends Playable {
   #graph: Graph | null
   _queue: PQueue
 
+  hash: CID | null
+
   constructor ({
     manifest,
     directory,
@@ -79,12 +81,13 @@ export class Replica extends Playable {
 
       await this.#storage.open()
       await this.#blockstore.open()
-      const root: Root | undefined = await getRoot(
+      const root: BlockView<GraphRoot> | null = await getRoot(
         this.#storage,
         this.#blockstore
-      ).catch(() => undefined)
+      ).catch(() => null)
 
-      this.#graph = new Graph(this.#blockstore, root)
+      this.#graph = new Graph(this.#blockstore, root?.value)
+      this.hash = root?.cid
 
       await start(this.#graph)
     }
@@ -218,8 +221,10 @@ export class Replica extends Playable {
     }
 
     if (!this.graph.equals(clone)) {
+      const block = await encodeRoot(this.graph.root)
+      await setRoot(this.#storage, this.#blockstore, block)
+      this.hash = block.cid
       this.events.dispatchEvent(new CustomEvent<undefined>('update'))
-      await setRoot(this.#storage, this.#blockstore, await encodeRoot(this.graph.root))
     }
   }
 
@@ -252,18 +257,16 @@ export class Replica extends Playable {
   // }
 }
 
-type EncodedRoot = BlockView<Root>
-
-const encodeRoot = async (root: Root): Promise<EncodedRoot> => await Blocks.encode({ value: root })
+const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await Blocks.encode({ value: root })
 
 const getRoot = async (
   datastore: LevelDatastore,
   blockstore: LevelBlockstore
-): Promise<Root> => {
+): Promise<BlockView<GraphRoot>> => {
   try {
     const rootHash = await datastore.get(rootHashKey)
     const bytes = await blockstore.get(decodedcid(rootHash))
-    return (await Blocks.decode<Root>({ bytes })).value
+    return await Blocks.decode<GraphRoot>({ bytes })
   } catch (e) {
     throw new Error('failed to get root')
   }
@@ -272,7 +275,7 @@ const getRoot = async (
 const setRoot = async (
   datastore: LevelDatastore,
   blockstore: LevelBlockstore,
-  block: EncodedRoot
+  block: BlockView<GraphRoot>
 ): Promise<void> => {
   try {
     await Promise.all([

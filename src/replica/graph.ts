@@ -8,7 +8,6 @@ import { CodeError } from '@libp2p/interfaces/errors'
 import type { CID } from 'multiformats/cid'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { BaseBlockstore } from 'blockstore-core'
-import type { BlockView } from 'multiformats'
 
 import { Playable } from '@/utils/playable.js'
 import { cidstring } from '@/utils/index.js'
@@ -17,7 +16,7 @@ import type { Blocks } from '@/blocks/index.js'
 import { Node } from './graph-node.js'
 import { empty as emptyBytes } from 'multiformats/bytes'
 import { Paily } from '@/utils/paily.js'
-import type { IpldDatastore } from '@/utils/types.js'
+import type { IpldDatastore } from '@/utils/paily.js'
 
 const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
   blockCodec,
@@ -48,17 +47,15 @@ type StateKeys = 'nodes' | 'missing' | 'denied' | 'heads' | 'tails'
 
 const stateKeys: StateKeys[] = ['nodes', 'missing', 'denied', 'heads', 'tails']
 
-type State = {
+type GraphState = {
   [K in StateKeys]: IpldDatastore<ShardLink>
 }
 
-export type Root = {
+export type GraphRoot = {
   [K in StateKeys]: ShardLink
 }
 
-export type EncodedRoot = BlockView<Root>
-
-const createState = async (blockstore: BaseBlockstore, root?: Root): Promise<State> =>
+const createState = async (blockstore: BaseBlockstore, root?: GraphRoot): Promise<GraphState> =>
   ({
     nodes: await Paily.create(blockstore),
     missing: await Paily.create(blockstore),
@@ -67,7 +64,7 @@ const createState = async (blockstore: BaseBlockstore, root?: Root): Promise<Sta
     tails: await Paily.create(blockstore)
   })
 
-const openState = (blockstore: BaseBlockstore, root: Root): State =>
+const openState = (blockstore: BaseBlockstore, root: GraphRoot): GraphState =>
   ({
     nodes: Paily.open(blockstore, root.nodes),
     missing: Paily.open(blockstore, root.missing),
@@ -76,7 +73,7 @@ const openState = (blockstore: BaseBlockstore, root: Root): State =>
     tails: Paily.open(blockstore, root.tails)
   })
 
-const getRoot = (state: State): Root =>
+const getRoot = (state: GraphState): GraphRoot =>
   ({
     nodes: state.nodes.root,
     missing: state.missing.root,
@@ -97,12 +94,12 @@ interface GraphEvents {
 
 export class Graph extends Playable {
   blockstore: BaseBlockstore
-  _root: Root | null
-  _state: State | null
+  _root: GraphRoot | null
+  _state: GraphState | null
   readonly events: EventEmitter<GraphEvents>
   readonly queue: PQueue
 
-  constructor (blockstore: BaseBlockstore, root?: Root) {
+  constructor (blockstore: BaseBlockstore, root?: GraphRoot) {
     const starting = async (): Promise<void> => {
       this._state = root != null
         ? openState(blockstore, root)
@@ -140,7 +137,7 @@ export class Graph extends Playable {
     return true
   }
 
-  get root (): Root {
+  get root (): GraphRoot {
     if (this._root == null) {
       throw new Error('failed to read graph root')
     }
@@ -148,12 +145,12 @@ export class Graph extends Playable {
     return this._root
   }
 
-  get state (): State {
+  get state (): GraphState {
     if (!this.isStarted()) {
       throw new Error()
     }
 
-    return this._state as State
+    return this._state as GraphState
   }
 
   get nodes (): IpldDatastore<ShardLink> {
@@ -241,7 +238,7 @@ export class Graph extends Playable {
  */
 
 export async function get (
-  state: State,
+  state: GraphState,
   cid: string
 ): Promise<Node | undefined> {
   try {
@@ -257,7 +254,7 @@ export async function get (
 }
 
 export async function set (
-  state: State,
+  state: GraphState,
   cid: string,
   node: Node
 ): Promise<void> {
@@ -265,7 +262,7 @@ export async function set (
   await state.nodes.put(new Key(cid), block.bytes)
 }
 
-export async function add (state: State, cid: CID, out: CID[]): Promise<State> {
+export async function add (state: GraphState, cid: CID, out: CID[]): Promise<GraphState> {
   // could serialize operations based on add CID
   // for no duplicate adds concurrently
   const string = cidstring(cid)
@@ -355,10 +352,10 @@ const denied = 'denied'
 type Reason = typeof missing | typeof denied
 
 export async function remove (
-  state: State,
+  state: GraphState,
   cid: CID | string,
   reason: Reason
-): Promise<State> {
+): Promise<GraphState> {
   const string = cidstring(cid)
 
   //  reason === missing
