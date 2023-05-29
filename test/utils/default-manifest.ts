@@ -1,12 +1,13 @@
-import { Manifest } from '@/manifest/index.js'
+import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
-import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
-export const getTestManifestConfig = (
-  name: string
+export default (
+  name: string,
+  identity: IdentityInstance<any>
 ): ManifestData => ({
   name,
   store: {
@@ -14,7 +15,7 @@ export const getTestManifestConfig = (
   },
   access: {
     protocol: staticAccessProtocol,
-    config: { write: [] }
+    config: { write: [identity.id] }
   },
   entry: {
     protocol: basalEntryProtocol
@@ -23,12 +24,3 @@ export const getTestManifestConfig = (
     protocol: basalIdentityProtocol
   }
 })
-
-export const getTestManifest = async (
-  name: string,
-  overrides: object = {}
-): Promise<Manifest> =>
-  await Manifest.create({
-    ...getTestManifestConfig(name),
-    ...overrides
-  })

@@ -7,8 +7,8 @@ import type { ShardLink } from '@alanshaw/pail/shard'
 
 import type { Blocks } from '@/blocks/index.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
-import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
-import type { IdentityStatic } from '@/identity/interface.js'
+import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
+import type { IdentityComponent } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
@@ -31,15 +31,15 @@ export type LinksFunc = (entry: EntryInstance<any>) => Promise<CID[]>
 
 export function loadEntry ({
   blocks,
-  Entry,
-  Identity
+  entry,
+  identity
 }: {
   blocks: Blocks
-  Entry: EntryStatic<any>
-  Identity: IdentityStatic<any>
+  entry: EntryComponent
+  identity: IdentityComponent
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await Entry.fetch({ blocks, cid, Identity }).catch(() => null)
+    return await entry.fetch({ blocks, cid, identity }).catch(() => null)
   }
   return load
 }

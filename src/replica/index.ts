@@ -5,16 +5,16 @@ import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
-import { LevelBlockstore } from 'blockstore-level'
+import type { Datastore } from 'interface-datastore'
+import type { Blockstore } from 'interface-blockstore'
 import type { BlockView } from 'multiformats/interface'
-import type { LevelDatastore } from 'datastore-level'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import { DatastoreClass, getDatastore } from '@/utils/datastore.js'
 import { Blocks } from '@/blocks/index.js'
-import type { IdentityInstance, IdentityStatic } from '@/identity/interface.js'
-import type { EntryInstance, EntryStatic } from '@/entry/interface.js'
+import type { DbComponents } from '@/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
@@ -39,85 +39,68 @@ interface ReplicaEvents {
 
 export class Replica extends Playable {
   readonly manifest: Manifest
-  readonly directory: string
   readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
-  readonly Entry: EntryStatic<any>
-  readonly Identity: IdentityStatic<any>
   readonly events: EventEmitter<ReplicaEvents>
+  readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
-  Datastore: DatastoreClass
-
-  #storage: LevelDatastore | null
-  #blockstore: LevelBlockstore | null
+  #datastore: Datastore
+  #blockstore: Blockstore
   #graph: Graph | null
+
   _queue: PQueue
 
   hash: CID | null
 
   constructor ({
     manifest,
-    directory,
-    Datastore,
+    datastore,
+    blockstore,
     blocks,
     access,
     identity,
-    Entry,
-    Identity
+    components
   }: {
     manifest: Manifest
-    directory: string
-    Datastore: DatastoreClass
+    datastore: Datastore
+    blockstore: Blockstore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    Entry: EntryStatic<any>
-    Identity: IdentityStatic<any>
+    components: Pick<DbComponents, 'entry' | 'identity'>
   }) {
     const starting = async (): Promise<void> => {
-      this.#storage = await getDatastore(this.Datastore, directory)
-      this.#blockstore = new LevelBlockstore(directory + '/blocks')
-
-      await this.#storage.open()
-      await this.#blockstore.open()
       const root: BlockView<GraphRoot> | null = await getRoot(
-        this.#storage,
+        this.#datastore,
         this.#blockstore
       ).catch(() => null)
 
       this.#graph = new Graph(this.#blockstore, root?.value)
-      this.hash = root?.cid
+      this.hash = root?.cid as CID
 
       await start(this.#graph)
     }
     const stopping = async (): Promise<void> => {
       await this._queue.onIdle()
-      this.#storage !== null && await this.#storage.close()
-      this.#blockstore !== null && await this.#blockstore.close()
       await stop(this.#graph)
-
-      this.#storage = null
-      this.#blockstore = null
       this.#graph = null
     }
 
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.directory = directory
     this.blocks = blocks
     this.access = access
     this.identity = identity
-    this.Entry = Entry
-    this.Identity = Identity
+    this.components = components
 
-    this.Datastore = Datastore
-
-    this.#storage = null
-    this.#blockstore = null
+    this.#datastore = datastore
+    this.#blockstore = blockstore
     this.#graph = null
     this._queue = new PQueue({})
+
+    this.hash = null
 
     this.events = new EventEmitter()
   }
@@ -152,8 +135,8 @@ export class Replica extends Playable {
     }
   ): Promise<Array<EntryInstance<any>>> {
     const blocks = this.blocks
-    const Entry = this.Entry
-    const Identity = this.Identity
+    const entry = this.components.entry
+    const identity = this.components.identity
 
     const graph = this.graph.clone()
 
@@ -175,7 +158,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.toString()))
-    const load = loadEntry({ blocks, Entry, Identity })
+    const load = loadEntry({ blocks, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })
@@ -198,7 +181,7 @@ export class Replica extends Playable {
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
-    if (this.#storage == null || this.#blockstore == null) {
+    if (this.#datastore == null || this.#blockstore == null) {
       throw new Error('replica not started')
     }
 
@@ -222,7 +205,7 @@ export class Replica extends Playable {
 
     if (!this.graph.equals(clone)) {
       const block = await encodeRoot(this.graph.root)
-      await setRoot(this.#storage, this.#blockstore, block)
+      await setRoot(this.#datastore, this.#blockstore, block)
       this.hash = block.cid
       this.events.dispatchEvent(new CustomEvent<undefined>('update'))
     }
@@ -233,7 +216,7 @@ export class Replica extends Playable {
       throw new Error('replica not started')
     }
 
-    const entry = await this.Entry.create({
+    const entry = await this.components.entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,
@@ -260,8 +243,8 @@ export class Replica extends Playable {
 const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await Blocks.encode({ value: root })
 
 const getRoot = async (
-  datastore: LevelDatastore,
-  blockstore: LevelBlockstore
+  datastore: Datastore,
+  blockstore: Blockstore
 ): Promise<BlockView<GraphRoot>> => {
   try {
     const rootHash = await datastore.get(rootHashKey)
@@ -273,8 +256,8 @@ const getRoot = async (
 }
 
 const setRoot = async (
-  datastore: LevelDatastore,
-  blockstore: LevelBlockstore,
+  datastore: Datastore,
+  blockstore: Blockstore,
   block: BlockView<GraphRoot>
 ): Promise<void> => {
   try {

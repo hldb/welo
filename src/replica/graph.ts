@@ -7,7 +7,7 @@ import { Key } from 'interface-datastore'
 import { CodeError } from '@libp2p/interfaces/errors'
 import type { CID } from 'multiformats/cid'
 import type { ShardLink } from '@alanshaw/pail/shard'
-import type { BaseBlockstore } from 'blockstore-core'
+import type { Blockstore } from 'interface-blockstore'
 
 import { Playable } from '@/utils/playable.js'
 import { cidstring } from '@/utils/index.js'
@@ -29,7 +29,7 @@ const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
 export const loader = (blocks: Blocks): Loader => ({
   get: async (cid: CID): Promise<Uint8Array> =>
     await blocks.get(cid).then((b) => b.bytes),
-  put: async (cid: CID, bytes: Uint8Array): Promise<void> => {
+  put: async (_: CID, bytes: Uint8Array): Promise<void> => {
     const block = await blocks.decode<any>({ bytes })
     await blocks.put(block)
   }
@@ -55,7 +55,7 @@ export type GraphRoot = {
   [K in StateKeys]: ShardLink
 }
 
-const createState = async (blockstore: BaseBlockstore, root?: GraphRoot): Promise<GraphState> =>
+const createState = async (blockstore: Blockstore, root?: GraphRoot): Promise<GraphState> =>
   ({
     nodes: await Paily.create(blockstore),
     missing: await Paily.create(blockstore),
@@ -64,7 +64,7 @@ const createState = async (blockstore: BaseBlockstore, root?: GraphRoot): Promis
     tails: await Paily.create(blockstore)
   })
 
-const openState = (blockstore: BaseBlockstore, root: GraphRoot): GraphState =>
+const openState = (blockstore: Blockstore, root: GraphRoot): GraphState =>
   ({
     nodes: Paily.open(blockstore, root.nodes),
     missing: Paily.open(blockstore, root.missing),
@@ -93,13 +93,13 @@ interface GraphEvents {
 }
 
 export class Graph extends Playable {
-  blockstore: BaseBlockstore
+  blockstore: Blockstore
   _root: GraphRoot | null
   _state: GraphState | null
   readonly events: EventEmitter<GraphEvents>
   readonly queue: PQueue
 
-  constructor (blockstore: BaseBlockstore, root?: GraphRoot) {
+  constructor (blockstore: Blockstore, root?: GraphRoot) {
     const starting = async (): Promise<void> => {
       this._state = root != null
         ? openState(blockstore, root)

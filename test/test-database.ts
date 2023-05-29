@@ -1,20 +1,19 @@
 import path from 'path'
 import { assert } from './utils/chai.js'
-import { LevelDatastore } from 'datastore-level'
+import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
-import { Database } from '../src/database.js'
-import { Keyvalue, Keyvalue as Store } from '@/store/keyvalue/index.js'
-import { StaticAccess as Access, StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { Database } from '@/database.js'
+import { keyvalueStore } from '@/store/keyvalue/index.js'
+import { staticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { initRegistry } from '../src/registry.js'
 import { Blocks } from '@/blocks/index.js'
-import { defaultManifest } from '@/utils/index.js'
-import { MultiReplicator } from '@/replicator/multi/index.js'
-import type { DatastoreClass } from '@/utils/datastore.js'
 
+import getDatastore from './utils/level-datastore.js'
+import defaultManifest from './utils/default-manifest.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -30,14 +29,7 @@ describe(testName, () => {
     manifest: Manifest,
     identity: Identity,
     directory: string,
-    Datastore: DatastoreClass
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
+    datastore: LevelDatastore
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -50,18 +42,20 @@ describe(testName, () => {
     identity = await getTestIdentity(identities, libp2p.keychain, testName)
 
     manifest = await Manifest.create({
-      ...defaultManifest('name', identity, registry),
+      ...defaultManifest('name', identity),
       access: {
-        protocol: StaticAccess.protocol,
+        protocol: staticAccessProtocol,
         config: { write: [identity.id] }
       }
     })
 
     directory = path.join(testPaths.test, manifest.address.toString())
-    Datastore = LevelDatastore
+
+    datastore = await getDatastore(directory)
   })
 
   after(async () => {
+    await datastore.close()
     await ipfs.stop()
   })
 
@@ -73,18 +67,18 @@ describe(testName, () => {
     describe('open', () => {
       it('returns a new Database instance', async () => {
         database = await Database.open({
-          directory,
-          Datastore,
+          datastore,
           manifest,
           identity,
           ipfs,
-          libp2p,
           blocks,
-          Store,
-          Access,
-          Entry,
-          Identity,
-          Replicator: MultiReplicator // empty replicator
+          replicators: [], // empty replicator
+          components: {
+            store: keyvalueStore(),
+            access: staticAccess(),
+            entry: basalEntry(),
+            identity: basalIdentity()
+          }
         })
       })
     })
@@ -98,8 +92,8 @@ describe(testName, () => {
       assert.isOk(database.manifest)
       assert.isOk(database.store)
       assert.isOk(database.access)
-      assert.isOk(database.Entry)
-      assert.isOk(database.Identity)
+      assert.isOk(database.components.entry)
+      assert.isOk(database.components.identity)
       // see about doing this with generics
       // assert.isOk(database.put);
       // assert.isOk(database.del);

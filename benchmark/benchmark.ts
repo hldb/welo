@@ -1,18 +1,17 @@
 import all from 'it-all'
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { parsedcid } from '@/utils/index.js'
-import { Welo } from '../src/index.js'
 import { getTestPaths, tempPath } from '../test/utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from '../test/utils/ipfs.js'
+import createWelo from '../test/utils/default-welo.js'
 
 const paths = getTestPaths(tempPath, 'benchmark')
 const ipfs = await getTestIpfs(paths, offlineIpfsOptions)
 if (ipfs.libp2p == null) {
   throw new Error('ipfs.libp2p is not defined')
 }
-const libp2p = ipfs.libp2p
 
-const welo = await Welo.create({ ipfs, libp2p, directory: paths.database })
+const welo = await createWelo({ ipfs })
 const db = await welo.open(await welo.determine({ name: '1000' }))
 
 const num = 1000
@@ -55,9 +54,9 @@ console.timeEnd('ascending ordered traversal')
  */
 console.log('traversing unordered entries')
 console.time('unordered traversal')
-const { blocks, access, Entry, Identity } = db.replica
-const load = loadEntry({ blocks, Entry, Identity })
-const links = dagLinks({ graph: { has: (string): boolean => false }, access })
+const { blocks, access, components: { entry, identity } } = db.replica
+const load = loadEntry({ blocks, entry, identity })
+const links = dagLinks({ graph: { has: (): boolean => false }, access })
 await traverser({ cids: (await all(db.replica.heads.keys())).map(parsedcid), load, links })
 console.timeEnd('unordered traversal')
 

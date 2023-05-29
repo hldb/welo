@@ -1,7 +1,7 @@
 import all from 'it-all'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
 import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
 
@@ -10,31 +10,25 @@ import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
-import { Extends } from '@/utils/decorators.js'
+import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { EntryStatic } from '@/entry/interface.js'
-import type { IdentityStatic } from '@/identity/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Registrant } from '@/utils/register.js'
 
+import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
-import { protocol } from './protocol.js'
+import protocol from './protocol.js'
 
-const getSharedChannelTopic = (manifest: Manifest): string =>
-  '/hldb/replicator/live/1.0.0/' + cidstring(manifest.address.cid)
+const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
-@Extends<Registrant>()
 export class LiveReplicator extends Playable {
   readonly ipfs: GossipHelia
-  readonly libp2p: GossipLibp2p
   readonly manifest: Manifest
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
-  readonly Entry: EntryStatic<any>
-  readonly Identity: IdentityStatic<any>
+  readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
   readonly shared: Monitor
   readonly directs: Map<string, Direct>
@@ -45,21 +39,11 @@ export class LiveReplicator extends Playable {
   readonly #onReplicaHeadsUpdate: typeof onReplicaHeadsUpdate
   readonly _onHeadsMessage: typeof onHeadsMessage
 
-  static get protocol (): typeof protocol {
-    return protocol
-  }
-
   constructor ({
     ipfs,
-    libp2p,
     replica,
     blocks
-  }: {
-    ipfs: GossipHelia
-    libp2p: GossipLibp2p
-    replica: Replica
-    blocks: Blocks
-  }) {
+  }: Config) {
     const starting = async (): Promise<void> => {
       this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
       this.shared.addEventListener('peer-leave', this.#onPeersLeave) // if a peer leaves and the direct connection is closed then delete the direct
@@ -89,13 +73,11 @@ export class LiveReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
-    this.libp2p = libp2p
     this.blocks = blocks
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
-    this.Entry = replica.Entry
-    this.Identity = replica.Identity
+    this.components = replica.components
 
     // this.events = new EventEmitter()
     this.#onPeerJoin = onPeerJoin.bind(this)
@@ -103,7 +85,7 @@ export class LiveReplicator extends Playable {
     this.#onReplicaHeadsUpdate = onReplicaHeadsUpdate.bind(this)
     this._onHeadsMessage = onHeadsMessage.bind(this)
 
-    this.shared = new Monitor(this.libp2p, getSharedChannelTopic(this.manifest))
+    this.shared = new Monitor(this.ipfs.libp2p, getSharedChannelTopic(this.manifest))
     this.directs = new Map()
   }
 
@@ -142,8 +124,8 @@ function onHeadsMessage (
 
     const load = loadEntry({
       blocks: this.blocks,
-      Entry: this.Entry,
-      Identity: this.Identity
+      entry: this.components.entry,
+      identity: this.components.identity
     })
     const links = dagLinks({
       graph: this.replica.graph,
@@ -160,7 +142,7 @@ function onPeerJoin (
   evt: CustomEvent<PeerStatusChangeData>
 ): void {
   const { peerId: remotePeerId } = evt.detail
-  const direct = new Direct(this.libp2p, remotePeerId)
+  const direct = new Direct(this.ipfs.libp2p, remotePeerId)
   direct.addEventListener(
     'peered',
     () => {
@@ -187,3 +169,8 @@ function onPeersLeave (
     this.directs.delete(key)
   }
 }
+
+export const liveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
+  protocol,
+  create: (config: Config) => new LiveReplicator(config)
+})

@@ -1,20 +1,23 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { LevelDatastore } from 'datastore-level'
+import type { LevelDatastore } from 'datastore-level'
+import { Key } from 'interface-datastore'
+import { NamespaceDatastore } from 'datastore-core'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 
+import getDatastore from './utils/level-datastore.js'
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
-import { getTestRegistry } from './utils/registry.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { basalIdentity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
 const testName = 'live-replicator'
@@ -31,11 +34,15 @@ describe(testName, () => {
     replicator2: Replicator,
     testPaths1: TestPaths,
     testPaths2: TestPaths,
-    access: Access
+    access: Access,
+    datastore: LevelDatastore
 
   before(async () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
+
+    datastore = await getDatastore(testPaths1.replica)
+    await datastore.open()
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
@@ -43,8 +50,6 @@ describe(testName, () => {
     libp2p2 = ipfs2.libp2p
 
     addr2 = await getMultiaddr(ipfs2)
-
-    const Datastore = LevelDatastore
 
     const blocks1 = new Blocks(ipfs1)
     const blocks2 = new Blocks(ipfs2)
@@ -63,47 +68,46 @@ describe(testName, () => {
       testName
     )
 
-    const registry = getTestRegistry()
     const write = [identity1.id, identity2.id]
     const accessConfig = {
-      access: { protocol: Access.protocol, config: { write } }
+      access: { protocol: staticAccessProtocol, config: { write } }
     }
-    const manifest = await getTestManifest(testName, registry, accessConfig)
+    const manifest = await getTestManifest(testName, accessConfig)
 
     access = new Access({ manifest })
     await start(access)
 
     replica1 = new Replica({
       manifest,
-      directory: testPaths1.replica,
-      Datastore,
+      datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
       blocks: blocks1,
       access,
       identity: identity1,
-      Entry,
-      Identity
+      components: {
+        entry: basalEntry(),
+        identity: basalIdentity()
+      }
     })
     replica2 = new Replica({
       manifest,
-      directory: testPaths2.replica,
-      Datastore,
+      datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
       blocks: blocks2,
       access,
       identity: identity2,
-      Entry,
-      Identity
+      components: {
+        entry: basalEntry(),
+        identity: basalIdentity()
+      }
     })
     await start(replica1, replica2)
 
     replicator1 = new Replicator({
       ipfs: ipfs1,
-      libp2p: libp2p1,
       blocks: blocks1,
       replica: replica1
     })
     replicator2 = new Replicator({
       ipfs: ipfs2,
-      libp2p: libp2p2,
       blocks: blocks2,
       replica: replica2
     })
@@ -115,6 +119,7 @@ describe(testName, () => {
     await stop(replica1, replica2)
     await stop(ipfs1)
     await stop(ipfs2)
+    await datastore.close()
   })
 
   describe('instance', () => {

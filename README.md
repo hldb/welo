@@ -22,16 +22,13 @@ npm install welo
 
 ```typescript
 import { createHelia } from 'helia'
-import { Welo } from 'welo'
+import { createWelo } from 'welo'
 
-/** look at Helia for configurations */
+/** look at Helia for more configuration */
 const ipfs = await createHelia()
 
 /** see more config options in the API docs */
-const welo = await Welo.create({
-  ipfs,
-  libp2p: ipfs.libp2p // ipfs.libp2p will throw a typescript error; it's a hack for now
-})
+const welo = await createWelo({ ipfs })
 
 /** create a manifest for a keyvalue database */
 const manifest = await welo.determine({

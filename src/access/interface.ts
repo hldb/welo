@@ -1,7 +1,8 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import type { EntryInstance } from '@/entry/interface.js'
-import type { Registrant } from '@/utils/register.js'
+import { HLDB_PREFIX } from '@/utils/constants.js'
+import type { ComponentProtocol } from '@/interface.js'
 import type { Manifest } from '@/manifest/index'
 
 export interface AccessInstance extends Startable {
@@ -13,6 +14,10 @@ export interface Open {
   manifest: Manifest
 }
 
-export interface AccessStatic extends Registrant {
-  new (props: any): AccessInstance
+export interface AccessComponent<T extends AccessInstance = AccessInstance, P extends string = string> extends ComponentProtocol<P> {
+  create: (config: Open) => T
 }
+
+export const wildcard = '*'
+
+export const prefix = `${HLDB_PREFIX}access/` as const

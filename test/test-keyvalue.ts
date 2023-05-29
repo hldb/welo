@@ -1,18 +1,22 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { LevelDatastore } from 'datastore-level'
+import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
+import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
 
-import { Keyvalue } from '@/store/keyvalue/index.js'
+import { Keyvalue, keyvalueStore } from '@/store/keyvalue/index.js'
+import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
-import { Entry } from '@/entry/basal/index.js'
-import { Identity } from '@/identity/basal/index.js'
-import { initRegistry } from '../src/registry.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
+import { basalEntry } from '@/entry/basal/index.js'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { defaultManifest } from '@/utils/index.js'
 
+import getDatastore from './utils/level-datastore.js'
+import defaultManifest from './utils/default-manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -21,19 +25,14 @@ import { getTestLibp2p } from './utils/libp2p.js'
 const testName = 'keyvalue'
 
 describe(testName, () => {
-  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths
+  let ipfs: Helia, blocks: Blocks, identity: Identity, testPaths: TestPaths, datastore: LevelDatastore
   const expectedProtocol = '/hldb/store/keyvalue'
-  const Datastore = LevelDatastore
-
-  const registry = initRegistry()
-
-  registry.store.add(Keyvalue)
-  registry.access.add(StaticAccess)
-  registry.entry.add(Entry)
-  registry.identity.add(Identity)
+  const storeModule = keyvalueStore()
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
+    datastore = await getDatastore(tempPath)
+    await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blocks = new Blocks(ipfs)
 
@@ -47,13 +46,14 @@ describe(testName, () => {
   })
 
   after(async () => {
+    await datastore.close()
     await ipfs.stop()
   })
 
   describe('class', () => {
     it('exposes static properties', () => {
-      assert.isOk(Keyvalue)
-      assert.strictEqual(Keyvalue.protocol, expectedProtocol)
+      assert.isOk(storeModule)
+      assert.strictEqual(keyvalueStoreProtocol, expectedProtocol)
     })
   })
 
@@ -67,31 +67,31 @@ describe(testName, () => {
 
     before(async () => {
       manifest = await Manifest.create({
-        ...defaultManifest('name', identity, registry),
+        ...defaultManifest('name', identity),
         access: {
-          protocol: StaticAccess.protocol,
+          protocol: staticAccessProtocol,
           config: { write: [identity.id] }
         }
       })
       access = new StaticAccess({ manifest })
       await start(access)
       replica = new Replica({
-        Datastore,
+        datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
         manifest,
-        directory: testPaths.replica,
         blocks,
         access,
         identity,
-        Entry,
-        Identity
+        components: {
+          entry: basalEntry(),
+          identity: basalIdentity()
+        }
       })
       await start(replica)
-      keyvalue = new Keyvalue({
+      keyvalue = storeModule.create({
         manifest,
-        directory: testPaths.store,
         blocks,
         replica,
-        Datastore
+        datastore: new NamespaceDatastore(datastore, new Key(testPaths.store))
       })
       await start(keyvalue)
     })

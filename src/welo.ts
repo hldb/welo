@@ -1,49 +1,45 @@
-import path from 'path'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import * as where from 'wherearewe'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import { NamespaceDatastore, MemoryDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
+import type { Components, GossipHelia } from '@/interface'
+import type { Datastore } from 'interface-datastore'
+import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
-import { WELO_PATH } from '@/utils/constants.js'
 import { Playable } from '@/utils/playable.js'
-import { getDatastore, DatastoreClass } from '@/utils/datastore.js'
-import {
-  dirs,
-  DirsReturn,
-  defaultManifest,
-  getComponents,
-  cidstring
-} from '@/utils/index.js'
-import type { ReplicatorClass } from '@/replicator/interface.js'
+import { cidstring } from '@/utils/index.js'
+import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
-import type { KeyChain } from '@/utils/types.js'
+import { DATABASE_NAMESPACE, IDENTITY_NAMESPACE } from '@/utils/constants.js'
 
 // import * as version from './version.js'
-import { initRegistry, Registry } from './registry.js'
 import { Database } from './database.js'
 import type {
   ClosedEmit,
   Config,
-  Create,
+  WeloInit,
   Determine,
   Events,
   // FetchOptions,
   OpenedEmit,
   OpenOptions
 } from './interface.js'
-import type { LevelDatastore } from 'datastore-level'
-
-const registry = initRegistry()
+import { liveReplicator } from './replicator/live/index.js'
+import { basalIdentity } from './identity/basal/index.js'
+import { staticAccess } from './access/static/index.js'
+import { keyvalueStore } from './store/keyvalue/index.js'
+import { basalEntry } from './entry/basal/index.js'
+import type { DbComponents } from './interface'
 
 export { Manifest, Address }
 export type {
   Playable,
   Database,
   Config,
-  Create,
+  WeloInit as Create,
   Determine,
   // FetchOptions,
   OpenOptions as Options
@@ -55,24 +51,13 @@ export type {
  * @public
  */
 export class Welo extends Playable {
-  /**
-   *
-   */
-  static get registry (): Registry {
-    return registry
-  }
-
-  static Datastore?: DatastoreClass
-  static Replicator?: ReplicatorClass
-
-  private readonly dirs: DirsReturn
-  readonly directory: string
+  private readonly replicators: ReplicatorModule[]
+  private readonly datastore: Datastore
+  private readonly components: Config['components']
 
   readonly ipfs: GossipHelia
-  readonly libp2p: GossipLibp2p
   readonly blocks: Blocks
 
-  readonly identities: LevelDatastore | null
   readonly keychain: KeyChain
 
   readonly identity: IdentityInstance<any>
@@ -83,13 +68,13 @@ export class Welo extends Playable {
   private readonly _opening: Map<string, Promise<Database>>
 
   constructor ({
-    directory,
     identity,
     blocks,
-    identities,
     keychain,
     ipfs,
-    libp2p
+    components,
+    datastore,
+    replicators
   }: Config) {
     const starting = async (): Promise<void> => {
       // in the future it might make sense to open some stores automatically here
@@ -100,88 +85,21 @@ export class Welo extends Playable {
     }
     super({ starting, stopping })
 
-    this.directory = directory
-    this.dirs = dirs(this.directory)
-
     this.identity = identity
     this.blocks = blocks
 
-    this.identities = identities
     this.keychain = keychain
 
     this.ipfs = ipfs
-    this.libp2p = libp2p
 
     this.events = new EventEmitter()
 
     this.opened = new Map()
     this._opening = new Map()
-  }
 
-  /**
-   * Create an Welo instance
-   *
-   * @param options - options
-   * @returns a promise which resolves to an Welo instance
-   */
-  static async create (options: Create): Promise<Welo> {
-    let directory: string = WELO_PATH
-    if (where.isNode && typeof options.directory === 'string') {
-      directory = options.directory ?? '.' + directory
-    }
-
-    const ipfs = options.ipfs
-    if (ipfs == null) {
-      throw new Error('ipfs is a required option')
-    }
-
-    const libp2p = options.libp2p
-    if (libp2p == null) {
-      throw new Error('libp2p is a required option')
-    }
-
-    let identity: IdentityInstance<any>
-    let identities: LevelDatastore | null = null
-
-    if (options.identity != null) {
-      identity = options.identity
-    } else {
-      if (this.Datastore == null) {
-        throw new Error('Welo.create: missing Datastore')
-      }
-
-      identities = await getDatastore(
-        this.Datastore,
-        dirs(directory).identities
-      )
-
-      await identities.open()
-      const Identity = this.registry.identity.star
-      identity = await Identity.get({
-        name: 'default',
-        identities,
-        keychain: libp2p.keychain
-      })
-      await identities.close()
-    }
-
-    const config: Config = {
-      directory,
-      identity,
-      identities,
-      ipfs,
-      blocks: new Blocks(ipfs),
-      libp2p,
-      keychain: libp2p.keychain
-    }
-
-    const welo = new Welo(config)
-
-    if (options.start !== false) {
-      await start(welo)
-    }
-
-    return welo
+    this.components = components
+    this.datastore = datastore
+    this.replicators = replicators
   }
 
   // static get version () { return version }
@@ -197,7 +115,7 @@ export class Welo extends Playable {
    */
   async determine (options: Determine): Promise<Manifest> {
     const manifestObj: ManifestData = {
-      ...defaultManifest(options.name, this.identity, registry),
+      ...this.getDefaultManifest(options.name),
       ...options
     }
 
@@ -205,7 +123,7 @@ export class Welo extends Playable {
     await this.blocks.put(manifest.block)
 
     try {
-      getComponents(registry, manifest)
+      this.getComponents(manifest)
     } catch (e) {
       console.warn('manifest configuration contains unregistered components')
     }
@@ -258,39 +176,21 @@ export class Welo extends Playable {
       throw new Error('no identity available')
     }
 
-    let Datastore: DatastoreClass
-    if (options.Datastore != null) {
-      Datastore = options.Datastore
-    } else if (Welo.Datastore != null) {
-      Datastore = Welo.Datastore
-    } else {
-      throw new Error('no Datastore attached to Welo class')
-    }
+    const datastore = options.datastore ?? this.datastore
+    const replicators = options.replicators ?? this.replicators
 
-    let Replicator: ReplicatorClass
-    if (options.Replicator != null) {
-      Replicator = options.Replicator
-    } else if (Welo.Replicator != null) {
-      Replicator = Welo.Replicator
-    } else {
-      throw new Error('no Replicator attached to Welo class')
-    }
+    const components = this.getComponents(manifest)
 
-    const directory = path.join(
-      this.dirs.databases,
-      cidstring(manifest.address.cid)
-    )
+    const dbKey = new Key(`${DATABASE_NAMESPACE.toString()}/${cidstring(manifest.address.cid)}`)
 
     const promise = Database.open({
-      directory,
       manifest,
       identity,
       ipfs: this.ipfs,
-      libp2p: this.libp2p,
       blocks: this.blocks,
-      Datastore,
-      Replicator,
-      ...getComponents(registry, manifest)
+      datastore: new NamespaceDatastore(datastore, dbKey),
+      replicators,
+      components
     })
       .then((database) => {
         this.opened.set(addr, database)
@@ -325,4 +225,93 @@ export class Welo extends Playable {
 
     return await promise
   }
+
+  getComponents (manifest: Manifest): DbComponents {
+    const access = this.components.access.find(h => h.protocol === manifest.access.protocol)
+    const entry = this.components.entry.find(h => h.protocol === manifest.entry.protocol)
+    const identity = this.components.identity.find(h => h.protocol === manifest.identity.protocol)
+    const store = this.components.store.find(h => h.protocol === manifest.store.protocol)
+
+    if (access == null || entry == null || identity == null || store == null) {
+      throw new Error('missing component(s)')
+    }
+
+    return { access, entry, identity, store }
+  }
+
+  private getDefaultManifest (name: string): ManifestData {
+    return {
+      name,
+      store: {
+        protocol: this.components.store[0].protocol
+      },
+      access: {
+        protocol: this.components.access[0].protocol,
+        config: { write: [this.identity.id] }
+      },
+      entry: {
+        protocol: this.components.entry[0].protocol
+      },
+      identity: {
+        protocol: this.components.identity[0].protocol
+      }
+    }
+  }
+}
+
+const getDefaultReplicators = (): ReplicatorModule[] => [liveReplicator()]
+const getDefaultComponents = (): Components => ({
+  identity: [basalIdentity()],
+  access: [staticAccess()],
+  store: [keyvalueStore()],
+  entry: [basalEntry()]
+})
+
+/**
+ * Create an Welo instance
+ *
+ * @param opts - options
+ * @returns a promise which resolves to an Welo instance
+ */
+export const createWelo = async (init: WeloInit): Promise<Welo> => {
+  if (init.ipfs == null) {
+    throw new Error('ipfs is a required option')
+  }
+
+  const ipfs = init.ipfs
+  const datastore = init.datastore ?? new MemoryDatastore()
+  const replicators = init.replicators ?? getDefaultReplicators()
+  const components = init.components ?? getDefaultComponents()
+
+  let identity: IdentityInstance<any>
+
+  if (init.identity != null) {
+    identity = init.identity
+  } else {
+    const identities = new NamespaceDatastore(datastore, new Key(IDENTITY_NAMESPACE))
+
+    identity = await components.identity[0].get({
+      name: 'default',
+      identities,
+      keychain: ipfs.libp2p.keychain
+    })
+  }
+
+  const config: Config = {
+    ipfs,
+    keychain: ipfs.libp2p.keychain,
+    datastore,
+    identity,
+    blocks: new Blocks(ipfs),
+    replicators,
+    components
+  }
+
+  const welo = new Welo(config)
+
+  if (init.start !== false) {
+    await start(welo)
+  }
+
+  return welo
 }
