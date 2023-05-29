@@ -131,6 +131,10 @@ export class Database extends Playable {
       components
     } = options
 
+    if (manifest.identity.protocol !== components.identity.protocol) {
+      throw new Error('identity instance type does not match identity protocol')
+    }
+
     const common = { manifest, blocks, datastore }
 
     const access = components.access.create(common)
@@ -142,11 +146,13 @@ export class Database extends Playable {
       components,
       access
     })
+
     const store = components.store.create({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
       replica
     })
+
     const replicatorInstances = replicators.map(replicator => replicator.create({
       ...common,
       ipfs,
