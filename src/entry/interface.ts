@@ -3,7 +3,7 @@ import type { CID } from 'multiformats/cid'
 
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { Component } from '@/interface.js'
+import type { ComponentProtocol } from '@/interface.js'
 import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 
 export interface EntryData {
@@ -32,7 +32,7 @@ export interface Fetch {
 
 export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
-export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends Component<P> {
+export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends ComponentProtocol<P> {
   create: (create: Create) => Promise<T>
   fetch: (fetch: Fetch) => Promise<T>
   asEntry: (entry: AsEntry<unknown>) => Promise<T | null>

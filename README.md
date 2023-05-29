@@ -22,30 +22,13 @@ npm install welo
 
 ```typescript
 import { createHelia } from 'helia'
-import {
-  createWelo,
-  staticAccess,
-  basalEntry,
-  basalIdentity,
-  keyvalueStore,
-  liveReplicator
-} from 'welo'
+import { createWelo } from 'welo'
 
-/** look at Helia for configurations */
+/** look at Helia for more configuration */
 const ipfs = await createHelia()
 
 /** see more config options in the API docs */
-const welo = await createWelo({
-  ipfs,
-  replicators: [liveReplicator()],
-
-  components: {
-    identity: [basalIdentity()],
-    access: [staticAccess()],
-    store: [keyvalueStore()],
-    entry: [basalEntry()]
-  }
-})
+const welo = await createWelo({ ipfs })
 
 /** create a manifest for a keyvalue database */
 const manifest = await welo.determine({

@@ -2,7 +2,7 @@ import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { NamespaceDatastore, MemoryDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
-import type { GossipHelia } from '@/interface'
+import type { Components, GossipHelia } from '@/interface'
 import type { Datastore } from 'interface-datastore'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
@@ -20,21 +20,26 @@ import { Database } from './database.js'
 import type {
   ClosedEmit,
   Config,
-  Create,
+  WeloInit,
   Determine,
   Events,
   // FetchOptions,
   OpenedEmit,
-  OpenOptions,
-  Components
+  OpenOptions
 } from './interface.js'
+import { liveReplicator } from './replicator/live/index.js'
+import { basalIdentity } from './identity/basal/index.js'
+import { staticAccess } from './access/static/index.js'
+import { keyvalueStore } from './store/keyvalue/index.js'
+import { basalEntry } from './entry/basal/index.js'
+import type { DbComponents } from './interface'
 
 export { Manifest, Address }
 export type {
   Playable,
   Database,
   Config,
-  Create,
+  WeloInit as Create,
   Determine,
   // FetchOptions,
   OpenOptions as Options
@@ -179,7 +184,6 @@ export class Welo extends Playable {
     const dbKey = new Key(`${DATABASE_NAMESPACE.toString()}/${cidstring(manifest.address.cid)}`)
 
     const promise = Database.open({
-      ...components,
       manifest,
       identity,
       ipfs: this.ipfs,
@@ -222,7 +226,7 @@ export class Welo extends Playable {
     return await promise
   }
 
-  getComponents (manifest: Manifest): Components {
+  getComponents (manifest: Manifest): DbComponents {
     const access = this.components.access.find(h => h.protocol === manifest.access.protocol)
     const entry = this.components.entry.find(h => h.protocol === manifest.entry.protocol)
     const identity = this.components.identity.find(h => h.protocol === manifest.identity.protocol)
@@ -255,29 +259,38 @@ export class Welo extends Playable {
   }
 }
 
+const getDefaultReplicators = (): ReplicatorModule[] => [liveReplicator()]
+const getDefaultComponents = (): Components => ({
+  identity: [basalIdentity()],
+  access: [staticAccess()],
+  store: [keyvalueStore()],
+  entry: [basalEntry()]
+})
+
 /**
  * Create an Welo instance
  *
- * @param options - options
+ * @param opts - options
  * @returns a promise which resolves to an Welo instance
  */
-export const createWelo = async (options: Create): Promise<Welo> => {
-  const ipfs = options.ipfs
-  const datastore = options.datastore ?? new MemoryDatastore()
-
-  if (ipfs == null) {
+export const createWelo = async (init: WeloInit): Promise<Welo> => {
+  if (init.ipfs == null) {
     throw new Error('ipfs is a required option')
   }
 
+  const ipfs = init.ipfs
+  const datastore = init.datastore ?? new MemoryDatastore()
+  const replicators = init.replicators ?? getDefaultReplicators()
+  const components = init.components ?? getDefaultComponents()
+
   let identity: IdentityInstance<any>
-  let identities: Datastore | null = null
 
-  if (options.identity != null) {
-    identity = options.identity
+  if (init.identity != null) {
+    identity = init.identity
   } else {
-    identities = new NamespaceDatastore(datastore, new Key(IDENTITY_NAMESPACE))
+    const identities = new NamespaceDatastore(datastore, new Key(IDENTITY_NAMESPACE))
 
-    identity = await options.components.identity[0].get({
+    identity = await components.identity[0].get({
       name: 'default',
       identities,
       keychain: ipfs.libp2p.keychain
@@ -285,18 +298,18 @@ export const createWelo = async (options: Create): Promise<Welo> => {
   }
 
   const config: Config = {
-    identity,
     ipfs,
-    blocks: new Blocks(ipfs),
     keychain: ipfs.libp2p.keychain,
-    components: options.components,
     datastore,
-    replicators: options.replicators ?? []
+    identity,
+    blocks: new Blocks(ipfs),
+    replicators,
+    components
   }
 
   const welo = new Welo(config)
 
-  if (options.start !== false) {
+  if (init.start !== false) {
     await start(welo)
   }
 

@@ -11,7 +11,7 @@ import type { HashMap } from 'ipld-hashmap/interface'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import type { Components } from '@/interface.js'
+import type { DbComponents } from '@/interface.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { EntryInstance } from '@/entry/interface.js'
@@ -41,7 +41,7 @@ export class Replica extends Playable {
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
   readonly events: EventEmitter<ReplicaEvents>
-  readonly components: Pick<Components, 'entry' | 'identity'>
+  readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
   datastore: Datastore
 
@@ -61,7 +61,7 @@ export class Replica extends Playable {
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
-    components: Pick<Components, 'entry' | 'identity'>
+    components: Pick<DbComponents, 'entry' | 'identity'>
   }) {
     const onUpdate = (): void => {
       void this._queue.add(async () => await this.setRoot(this.graph.root))

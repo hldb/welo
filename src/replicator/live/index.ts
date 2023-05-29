@@ -10,7 +10,7 @@ import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
-import type { Components } from '@/interface.js'
+import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
@@ -28,7 +28,7 @@ export class LiveReplicator extends Playable {
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
-  readonly components: Pick<Components, 'entry' | 'identity'>
+  readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
   readonly shared: Monitor
   readonly directs: Map<string, Direct>

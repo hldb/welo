@@ -15,7 +15,7 @@ export type { Playable } from '@/utils/playable.js'
 export type { Database } from './database.js'
 export type {
   Config,
-  Create,
+  WeloInit as Create,
   Determine,
   // FetchOptions,
   OpenOptions

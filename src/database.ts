@@ -16,7 +16,7 @@ import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
 import type { Replicator } from '@/replicator/interface.js'
 import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
 
-import type { DbConfig, DbOpen, DbEvents, ClosedEmit, Components } from './interface.js'
+import type { DbConfig, DbOpen, DbEvents, ClosedEmit, DbComponents } from './interface.js'
 
 /**
  * Database Class
@@ -34,7 +34,7 @@ export class Database extends Playable {
   readonly store: StoreInstance
 
   readonly datastore: Datastore
-  readonly components: Components
+  readonly components: DbComponents
 
   readonly events: EventEmitter<DbEvents>
   readonly #onStoreUpdate: typeof onStoreUpdate

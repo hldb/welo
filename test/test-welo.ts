@@ -1,14 +1,10 @@
 import { assert } from './utils/chai.js'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { Components, GossipHelia, GossipLibp2p } from '@/interface'
 
 import createWelo from './utils/default-welo.js'
 import type { Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '@/database.js'
-import type { StoreComponent } from '@/store/interface.js'
-import type { IdentityComponent } from '@/identity/interface.js'
-import type { EntryComponent } from '@/entry/interface.js'
-import type { AccessComponent } from '@/access/interface.js'
 import { staticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -26,12 +22,7 @@ describe(testName, () => {
     libp2p: GossipLibp2p,
     welo: Welo,
     identity: Identity,
-    components: {
-      store: StoreComponent[]
-      identity: IdentityComponent[]
-      entry: EntryComponent[]
-      access: AccessComponent[]
-    }
+    components: Components
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
@@ -56,26 +47,15 @@ describe(testName, () => {
     await ipfs.stop()
   })
 
-  describe('class', () => {
-    it.skip('exposes static properties', () => {
-      // assert.isOk(Welo.Replicator)
-      // assert.isOk(Welo.create)
+  describe('createWelo', () => {
+    it('returns an instance of Welo', async () => {
+      welo = await createWelo({ ipfs, components })
     })
 
-    describe('create', () => {
-      it('returns an instance of Welo', async () => {
-        welo = await createWelo({ ipfs, components })
-      })
-
-      it('returns an instance of Welo with an identity option', async () => {
-        const welo = await createWelo({ ipfs, identity })
-        await welo.stop()
-      })
-
-      it.skip('rejects if no identity option or Welo.Datastore', async () => {
-        const promise = createWelo({ ipfs })
-        await assert.isRejected(promise)
-      })
+    it('returns an instance of Welo with an identity option', async () => {
+      const welo = await createWelo({ ipfs, identity })
+      assert.strictEqual(welo.identity, identity)
+      await welo.stop()
     })
   })
 

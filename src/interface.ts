@@ -21,24 +21,25 @@ export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
 export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
 
-export interface Component<T extends string = string> {
-  protocol: T
+export interface ComponentProtocol<P extends string = string> {
+  protocol: P
 }
 
 /** @public */
-export interface Create {
+export interface WeloInit {
   datastore?: Datastore
   replicators?: ReplicatorModule[]
   identity?: IdentityInstance<any>
   ipfs: GossipHelia
   start?: boolean
+  components?: Components
+}
 
-  components: {
-    access: AccessComponent[]
-    store: StoreComponent[]
-    entry: EntryComponent[]
-    identity: IdentityComponent[]
-  }
+export interface Components {
+  access: AccessComponent[]
+  store: StoreComponent[]
+  entry: EntryComponent[]
+  identity: IdentityComponent[]
 }
 
 export interface Config {
@@ -48,13 +49,7 @@ export interface Config {
   blocks: Blocks
   keychain: KeyChain
   ipfs: GossipHelia
-
-  components: {
-    access: AccessComponent[]
-    store: StoreComponent[]
-    entry: EntryComponent[]
-    identity: IdentityComponent[]
-  }
+  components: Components
 }
 
 /** @public */
@@ -91,6 +86,13 @@ export interface Events {
   closed: CustomEvent<ClosedEmit>
 }
 
+export interface DbComponents {
+  access: AccessComponent
+  entry: EntryComponent
+  identity: IdentityComponent
+  store: StoreComponent
+}
+
 export interface DbOpen {
   datastore: Datastore
   start?: boolean
@@ -99,7 +101,7 @@ export interface DbOpen {
   ipfs: GossipHelia
   identity: IdentityInstance<any>
   manifest: Manifest
-  components: Components
+  components: DbComponents
 }
 
 export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'> {
@@ -112,11 +114,4 @@ export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'>
 export interface DbEvents {
   closed: CustomEvent<ClosedEmit>
   update: CustomEvent<undefined>
-}
-
-export interface Components {
-  access: AccessComponent
-  entry: EntryComponent
-  identity: IdentityComponent
-  store: StoreComponent
 }

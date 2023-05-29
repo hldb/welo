@@ -1,4 +1,4 @@
-import type { GossipHelia, Component } from '@/interface.js'
+import type { GossipHelia, ComponentProtocol } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
@@ -12,7 +12,7 @@ export interface Config {
 
 export interface Replicator extends Playable {}
 
-export interface ReplicatorModule<T extends Replicator = Replicator, P extends string = string> extends Component<P> {
+export interface ReplicatorModule<T extends Replicator = Replicator, P extends string = string> extends ComponentProtocol<P> {
   create: (config: Config) => T
 }
 
