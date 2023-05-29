@@ -9,6 +9,7 @@ import type { KeyChain } from '@libp2p/interface-keychain'
 import { Manifest, Address } from '@/manifest/index.js'
 import { Blocks } from '@/blocks/index.js'
 import { Playable } from '@/utils/playable.js'
+import { cidstring } from '@/utils/index.js'
 import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { ManifestData } from '@/manifest/interface.js'
@@ -175,16 +176,15 @@ export class Welo extends Playable {
 
     const components = this.getComponents(manifest)
 
+    const dbKey = new Key(`${DATABASE_NAMESPACE.toString()}/${cidstring(manifest.address.cid)}`)
+
     const promise = Database.open({
       ...components,
       manifest,
       identity,
       ipfs: this.ipfs,
       blocks: this.blocks,
-      datastore: new NamespaceDatastore(
-        datastore,
-        new Key(`${DATABASE_NAMESPACE}/${manifest.address.cid.toString()}`)
-      ),
+      datastore: new NamespaceDatastore(datastore, dbKey),
       replicators,
       components
     })
