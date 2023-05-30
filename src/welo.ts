@@ -1,6 +1,6 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { NamespaceDatastore, MemoryDatastore } from 'datastore-core'
+import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { Components, GossipHelia } from '@/interface'
 import type { Datastore } from 'interface-datastore'
@@ -279,7 +279,7 @@ export const createWelo = async (init: WeloInit): Promise<Welo> => {
   }
 
   const ipfs = init.ipfs
-  const datastore = init.datastore ?? new MemoryDatastore()
+  const datastore = init.datastore ?? ipfs.datastore
   const replicators = init.replicators ?? getDefaultReplicators()
   const components = init.components ?? getDefaultComponents()
 
