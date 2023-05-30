@@ -1,6 +1,7 @@
 import type { Startable } from '@libp2p/interfaces/startable'
 import type { EventEmitter } from '@libp2p/interfaces/events'
 import type { Datastore } from 'interface-datastore'
+import type { Blockstore } from 'interface-blockstore'
 
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -13,6 +14,7 @@ export interface Props {
   blocks: Blocks
   replica: Replica
   datastore: Datastore
+  blockstore: Blockstore
 }
 
 export type Creator = (...args: any[]) => any

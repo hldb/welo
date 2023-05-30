@@ -1,6 +1,7 @@
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
+import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
 import { NamespaceDatastore } from 'datastore-core'
 import type { LevelDatastore } from 'datastore-level'
 import type { Helia } from '@helia/interface'
@@ -34,6 +35,7 @@ describe(testName, () => {
     identity: Identity,
     tempIdentity: Identity,
     testPaths: TestPaths,
+    emptyShard: ShardBlockView,
     datastore: LevelDatastore
 
   const entryModule = basalEntry()
@@ -70,6 +72,8 @@ describe(testName, () => {
       tempLibp2p.keychain,
       names.name1
     )
+
+    emptyShard = await ShardBlock.create()
   })
 
   after(async () => {
@@ -83,6 +87,7 @@ describe(testName, () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,
@@ -113,7 +118,6 @@ describe(testName, () => {
       assert.isOk(replica.tails)
       assert.isOk(replica.missing)
       assert.isOk(replica.denied)
-      assert.isOk(replica.size)
       assert.isOk(replica.traverse)
       assert.isOk(replica.has)
       assert.isOk(replica.known)
@@ -142,15 +146,19 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.strictEqual(await replica.size(), 0)
+        // assert.strictEqual(await replica.size(), 0)
         assert.strictEqual(await replica.has(cid), false)
         assert.strictEqual(await replica.known(cid), false)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.heads.size(), 0)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.tails.size(), 0)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.heads.has(new Key(cidstring(cid))), false)
+        assert.strictEqual(replica.graph.root.heads.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(new Key(cidstring(cid))), false)
+        assert.strictEqual(replica.graph.root.tails.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.tails.size(), 0)
+        // assert.strictEqual(await replica.missing.size(), 0)
+        // assert.strictEqual(await replica.denied.size(), 0)
       })
 
       it('does not add entry without access', async () => {
@@ -159,15 +167,19 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.strictEqual(await replica.size(), 0)
+        // assert.strictEqual(await replica.size(), 0)
         assert.strictEqual(await replica.has(cid), false)
         assert.strictEqual(await replica.known(cid), false)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.heads.size(), 0)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), false)
-        assert.strictEqual(await replica.tails.size(), 0)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.heads.has(new Key(cidstring(cid))), false)
+        assert.strictEqual(replica.graph.root.heads.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.heads.size(), 0)
+        assert.strictEqual(await replica.tails.has(new Key(cidstring(cid))), false)
+        assert.strictEqual(replica.graph.root.tails.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.tails.size(), 0)
+        // assert.strictEqual(await replica.missing.size(), 0)
+        // assert.strictEqual(await replica.denied.size(), 0)
       })
 
       it('adds an entry to the replica', async () => {
@@ -176,15 +188,17 @@ describe(testName, () => {
 
         await replica.add([entry])
 
-        assert.strictEqual(await replica.size(), 1)
+        // assert.strictEqual(await replica.size(), 1)
         assert.strictEqual(await replica.has(cid), true)
         assert.strictEqual(await replica.known(cid), true)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.heads.size(), 1)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.tails.size(), 1)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.heads.has(new Key(cidstring(cid))), true)
+        // assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(new Key(cidstring(cid))), true)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.tails.size(), 1)
+        // assert.strictEqual(await replica.missing.size(), 0)
+        // assert.strictEqual(await replica.denied.size(), 0)
       })
     })
 
@@ -192,6 +206,7 @@ describe(testName, () => {
       before(async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,
@@ -209,15 +224,17 @@ describe(testName, () => {
         const cid = entry.cid
         cids.push(cid)
 
-        assert.strictEqual(await replica.size(), 1)
+        // assert.strictEqual(await replica.size(), 1)
         assert.strictEqual(await replica.has(cid), true)
         assert.strictEqual(await replica.known(cid), true)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.heads.size(), 1)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.tails.size(), 1)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.heads.has(new Key(cidstring(cid))), true)
+        // assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(new Key(cidstring(cid))), true)
+        // assert.strictEqual(await replica.tails.size(), 1)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.missing.size(), 0)
+        // assert.strictEqual(await replica.denied.size(), 0)
       })
     })
 
@@ -277,6 +294,7 @@ describe(testName, () => {
 
         const replica = new Replica({
           datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
+          blockstore: ipfs.blockstore,
           manifest,
           blocks,
           access,
@@ -288,15 +306,19 @@ describe(testName, () => {
         })
         await start(replica)
 
-        assert.strictEqual(await replica.size(), 1)
+        // assert.strictEqual(await replica.size(), 1)
         assert.strictEqual(await replica.has(cid), true)
         assert.strictEqual(await replica.known(cid), true)
-        assert.strictEqual(await replica.heads.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.heads.size(), 1)
-        assert.strictEqual(await replica.tails.has(cidstring(cid)), true)
-        assert.strictEqual(await replica.tails.size(), 1)
-        assert.strictEqual(await replica.missing.size(), 0)
-        assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(await replica.heads.has(new Key(cidstring(cid))), true)
+        // assert.strictEqual(await replica.heads.size(), 1)
+        assert.strictEqual(await replica.tails.has(new Key(cidstring(cid))), true)
+        // assert.strictEqual(await replica.tails.size(), 1)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
+        // assert.strictEqual(await replica.missing.size(), 0)
+        // assert.strictEqual(await replica.denied.size(), 0)
+        assert.strictEqual(replica.graph.root.missing.equals(emptyShard.cid), true)
+        assert.strictEqual(replica.graph.root.denied.equals(emptyShard.cid), true)
 
         await stop(replica)
       })

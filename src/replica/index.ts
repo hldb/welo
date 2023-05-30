@@ -6,19 +6,19 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import all from 'it-all'
 import PQueue from 'p-queue'
 import type { Datastore } from 'interface-datastore'
+import type { Blockstore } from 'interface-blockstore'
 import type { BlockView } from 'multiformats/interface'
-import type { HashMap } from 'ipld-hashmap/interface'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
+import { Blocks } from '@/blocks/index.js'
 import type { DbComponents } from '@/interface.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
-import { Graph, Root } from './graph.js'
+import { Graph, GraphRoot } from './graph.js'
 import {
   loadEntry,
   graphLinks,
@@ -27,6 +27,8 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
+import type { IpldDatastore } from '@/utils/paily.js'
+import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -43,14 +45,18 @@ export class Replica extends Playable {
   readonly events: EventEmitter<ReplicaEvents>
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
-  datastore: Datastore
+  #datastore: Datastore
+  #blockstore: Blockstore
+  #graph: Graph | null
 
-  _graph: Graph | null
   _queue: PQueue
+
+  root: CID | null
 
   constructor ({
     manifest,
     datastore,
+    blockstore,
     blocks,
     access,
     identity,
@@ -58,27 +64,31 @@ export class Replica extends Playable {
   }: {
     manifest: Manifest
     datastore: Datastore
+    blockstore: Blockstore
     blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
     components: Pick<DbComponents, 'entry' | 'identity'>
   }) {
-    const onUpdate = (): void => {
-      void this._queue.add(async () => await this.setRoot(this.graph.root))
-    }
     const starting = async (): Promise<void> => {
-      const root: Root | undefined = await this.getRoot().catch(() => undefined)
+      const root: BlockView<GraphRoot> | null = await getRoot(
+        this.#datastore,
+        this.#blockstore
+      ).catch(() => null)
 
-      this._graph = new Graph({ blocks, root })
+      this.#graph = new Graph(this.#blockstore, root?.value)
+      await start(this.#graph)
 
-      this.events.addEventListener('update', onUpdate)
-      await start(this._graph)
+      if (root?.cid == null) {
+        await this.#updateRoot()
+      } else {
+        this.root = root.cid
+      }
     }
     const stopping = async (): Promise<void> => {
-      this.events.removeEventListener('update', onUpdate)
       await this._queue.onIdle()
-      await stop(this._graph)
-      this._graph = null
+      await stop(this.#graph)
+      this.#graph = null
     }
 
     super({ starting, stopping })
@@ -89,65 +99,38 @@ export class Replica extends Playable {
     this.identity = identity
     this.components = components
 
-    this.datastore = datastore
-    this._graph = null
+    this.#datastore = datastore
+    this.#blockstore = blockstore
+    this.#graph = null
     this._queue = new PQueue({})
+
+    this.root = null
 
     this.events = new EventEmitter()
   }
 
-  get storage (): Datastore {
-    return this.datastore
-  }
-
   get graph (): Graph {
-    if (this._graph === null) {
-      throw new Error('graph has not been set yet')
+    if (this.#graph == null) {
+      throw new Error('Cannot read graph before replica is started')
     }
 
-    return this._graph
+    return this.#graph
   }
 
-  get heads (): HashMap<null> {
+  get heads (): IpldDatastore<ShardLink> {
     return this.graph.heads
   }
 
-  get tails (): HashMap<null> {
+  get tails (): IpldDatastore<ShardLink> {
     return this.graph.tails
   }
 
-  get missing (): HashMap<null> {
+  get missing (): IpldDatastore<ShardLink> {
     return this.graph.missing
   }
 
-  get denied (): HashMap<null> {
+  get denied (): IpldDatastore<ShardLink> {
     return this.graph.denied
-  }
-
-  get size (): () => Promise<number> {
-    return this.graph.size.bind(this.graph)
-  }
-
-  async getRoot (): Promise<Root> {
-    try {
-      const rootHash = await this.storage.get(rootHashKey)
-      const block: BlockView<Root> = await this.blocks.get<Root>(
-        decodedcid(rootHash)
-      )
-      return block.value
-    } catch (e) {
-      throw new Error('failed to get root')
-    }
-  }
-
-  async setRoot (root: Root): Promise<void> {
-    try {
-      const block = await this.blocks.encode({ value: root })
-      await this.blocks.put(block)
-      await this.datastore.put(rootHashKey, encodedcid(block.cid))
-    } catch (e) {
-      throw new Error('failed to set root')
-    }
   }
 
   async traverse (
@@ -179,7 +162,7 @@ export class Replica extends Playable {
     // todo: less wordy way to assign heads and tails from direction
     const [heads, tails] = headsAndTails
 
-    const cids = (await all(heads.keys())).map(parsedcid)
+    const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
     const load = loadEntry({ blocks, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
@@ -187,15 +170,28 @@ export class Replica extends Playable {
   }
 
   async has (cid: CID | string): Promise<boolean> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     return await this.graph.has(cid)
   }
 
   async known (cid: CID | string): Promise<boolean> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     return await this.graph.known(cid)
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
-    const size = await this.graph.size()
+    if (this.#datastore == null || this.#blockstore == null) {
+      throw new Error('replica not started')
+    }
+
+    const clone = this.graph.clone()
+
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag())) {
         console.warn('replica received entry with mismatched tag')
@@ -212,17 +208,21 @@ export class Replica extends Playable {
       }
     }
 
-    if ((await this.graph.size()) - size > 0) {
-      this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+    if (!this.graph.equals(clone)) {
+      await this.#updateRoot()
     }
   }
 
   async write (payload: any): Promise<EntryInstance<any>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
     const entry = await this.components.entry.create({
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,
-      next: (await all(this.heads.keys())).map((string) => CID.parse(string)),
+      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.baseNamespace())),
       refs: [] // refs are empty for now
     })
 
@@ -240,4 +240,41 @@ export class Replica extends Playable {
   //
   //   }
   // }
+
+  async #updateRoot (): Promise<void> {
+    const block = await encodeRoot(this.graph.root)
+    await setRoot(this.#datastore, this.#blockstore, block)
+    this.root = block.cid
+    this.events.dispatchEvent(new CustomEvent<undefined>('update'))
+  }
+}
+
+const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await Blocks.encode({ value: root })
+
+const getRoot = async (
+  datastore: Datastore,
+  blockstore: Blockstore
+): Promise<BlockView<GraphRoot>> => {
+  try {
+    const rootHash = await datastore.get(rootHashKey)
+    const bytes = await blockstore.get(decodedcid(rootHash))
+    return await Blocks.decode<GraphRoot>({ bytes })
+  } catch (e) {
+    throw new Error('failed to get root')
+  }
+}
+
+const setRoot = async (
+  datastore: Datastore,
+  blockstore: Blockstore,
+  block: BlockView<GraphRoot>
+): Promise<void> => {
+  try {
+    await Promise.all([
+      blockstore.put(block.cid, block.bytes),
+      datastore.put(rootHashKey, encodedcid(block.cid))
+    ])
+  } catch (e) {
+    throw new Error('failed to get root')
+  }
 }
