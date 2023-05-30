@@ -143,6 +143,7 @@ export class Replica extends Playable {
     const identity = this.components.identity
 
     const graph = this.graph.clone()
+    await start(graph)
 
     const headsAndTails = [graph.heads, graph.tails]
 
@@ -161,7 +162,7 @@ export class Replica extends Playable {
     // todo: less wordy way to assign heads and tails from direction
     const [heads, tails] = headsAndTails
 
-    const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.toString()))
+    const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
     const load = loadEntry({ blocks, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
@@ -221,7 +222,7 @@ export class Replica extends Playable {
       identity: this.identity,
       tag: this.manifest.getTag(),
       payload,
-      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.toString())),
+      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.baseNamespace())),
       refs: [] // refs are empty for now
     })
 

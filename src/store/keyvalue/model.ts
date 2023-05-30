@@ -1,6 +1,5 @@
 import { Key } from 'interface-datastore'
 import { encode, decode } from '@ipld/dag-cbor'
-import { empty } from 'multiformats/bytes'
 import { CodeError } from '@libp2p/interfaces/errors'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { Blockstore } from 'interface-blockstore'
@@ -49,7 +48,7 @@ export const selectors = {
 
       throw e
     }
-    return decode(bytes)
+    return decode(bytes) ?? undefined
   }
 }
 
@@ -72,7 +71,7 @@ export async function reducer (
   try {
     const { op, key, value } = entry.payload
 
-    if (await state.has(key)) {
+    if (await state.has(new Key(key))) {
       return state
     }
 
@@ -81,7 +80,7 @@ export async function reducer (
         await state.put(new Key(key), encode(value))
         break
       case ops.DEL:
-        await state.put(new Key(key), empty) // set to undefined so we know this key is handled
+        await state.put(new Key(key), encode(null)) // set to undefined so we know this key is handled
         break
       default:
         break

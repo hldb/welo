@@ -91,7 +91,7 @@ export class LiveReplicator extends Playable {
 
   async broadcast (): Promise<void> {
     const heads: CID[] = Array.from(await all(this.replica.heads.queryKeys({})))
-      .map(key => parsedcid(key.toString()))
+      .map(key => parsedcid(key.baseNamespace()))
 
     if (heads.length === 0) {
       return
