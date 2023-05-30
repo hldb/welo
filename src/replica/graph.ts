@@ -1,7 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import PQueue from 'p-queue'
-import * as blockCodec from '@ipld/dag-cbor'
-import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
 import { Key } from 'interface-datastore'
 import { CodeError } from '@libp2p/interfaces/errors'
 import type { CID } from 'multiformats/cid'
@@ -10,7 +8,6 @@ import type { Blockstore } from 'interface-blockstore'
 
 import { Playable } from '@/utils/playable.js'
 import { cidstring } from '@/utils/index.js'
-import type { Blocks } from '@/blocks/index.js'
 
 import { Node } from './graph-node.js'
 import { empty as emptyBytes } from 'multiformats/bytes'
