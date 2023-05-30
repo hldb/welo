@@ -110,7 +110,6 @@
     "datastore-core": "^9.1.1",
     "helia": "^1.1.2",
     "interface-blockstore": "5.2",
-    "ipld-hashmap": "^2.1.13",
     "it-all": "^2.0.0",
     "it-drain": "3.0",
     "multiformats": "^11.0.1",

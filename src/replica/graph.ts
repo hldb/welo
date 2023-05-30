@@ -1,6 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import PQueue from 'p-queue'
-import { HashMap, create, load, type Loader, CreateOptions } from 'ipld-hashmap'
 import * as blockCodec from '@ipld/dag-cbor'
 import { sha256 as blockHasher } from 'multiformats/hashes/sha2'
 import { Key } from 'interface-datastore'
@@ -17,31 +16,6 @@ import { Node } from './graph-node.js'
 import { empty as emptyBytes } from 'multiformats/bytes'
 import { Paily } from '@/utils/paily.js'
 import type { IpldDatastore } from '@/utils/paily.js'
-
-const hashmapOptions: CreateOptions<typeof blockCodec.code, any> = {
-  blockCodec,
-  blockHasher,
-  hashBytes: 32,
-  bitWidth: 5,
-  bucketSize: 3
-}
-
-export const loader = (blocks: Blocks): Loader => ({
-  get: async (cid: CID): Promise<Uint8Array> =>
-    await blocks.get(cid).then((b) => b.bytes),
-  put: async (_: CID, bytes: Uint8Array): Promise<void> => {
-    const block = await blocks.decode<any>({ bytes })
-    await blocks.put(block)
-  }
-})
-
-export const loadHashMap = async <V>(
-  blocks: Blocks,
-  cid?: CID
-): Promise<HashMap<V>> =>
-  cid != null
-    ? await load(loader(blocks), cid, hashmapOptions)
-    : await create(loader(blocks), hashmapOptions)
 
 type StateKeys = 'nodes' | 'missing' | 'denied' | 'heads' | 'tails'
 
