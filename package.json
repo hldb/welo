@@ -106,6 +106,7 @@
     "@libp2p/crypto": "^1.0.17",
     "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^2.0.3",
+    "@tabcat/zzzync": "^0.0.0-c4938db",
     "blockstore-core": "^4.1.0",
     "datastore-core": "^9.1.1",
     "helia": "^1.1.2",

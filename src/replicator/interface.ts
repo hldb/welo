@@ -3,11 +3,13 @@ import type { Replica } from '@/replica/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Playable } from '@/utils/playable.js'
+import type { Datastore } from 'interface-datastore'
 
 export interface Config {
   ipfs: GossipHelia
   replica: Replica
   blocks: Blocks
+  datastore: Datastore
 }
 
 export interface Replicator extends Playable {}

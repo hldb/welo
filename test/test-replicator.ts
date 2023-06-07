@@ -35,7 +35,9 @@ describe(testName, () => {
     testPaths1: TestPaths,
     testPaths2: TestPaths,
     access: Access,
-    datastore: LevelDatastore
+    datastore: LevelDatastore,
+    datastore1: NamespaceDatastore,
+    datastore2: NamespaceDatastore
 
   before(async () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
@@ -43,6 +45,8 @@ describe(testName, () => {
 
     datastore = await getDatastore(testPaths1.replica)
     await datastore.open()
+    datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
+    datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
 
     ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
     ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
@@ -79,7 +83,7 @@ describe(testName, () => {
 
     replica1 = new Replica({
       manifest,
-      datastore: new NamespaceDatastore(datastore, new Key(testPaths1.replica)),
+      datastore: datastore1,
       blockstore: ipfs1.blockstore,
       blocks: blocks1,
       access,
@@ -91,7 +95,7 @@ describe(testName, () => {
     })
     replica2 = new Replica({
       manifest,
-      datastore: new NamespaceDatastore(datastore, new Key(testPaths2.replica)),
+      datastore: datastore2,
       blockstore: ipfs2.blockstore,
       blocks: blocks2,
       access,
@@ -106,12 +110,14 @@ describe(testName, () => {
     replicator1 = new Replicator({
       ipfs: ipfs1,
       blocks: blocks1,
-      replica: replica1
+      replica: replica1,
+      datastore: datastore1
     })
     replicator2 = new Replicator({
       ipfs: ipfs2,
       blocks: blocks2,
-      replica: replica2
+      replica: replica2,
+      datastore: datastore2
     })
   })
 
