@@ -85,7 +85,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async diff (link: ShardLink): Promise<CombinedDiff> {
-    return await difference(this.blockFetcher, this.root, link)
+    return await difference(this.blockFetcher, link, this.root)
   }
 }
 
