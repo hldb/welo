@@ -5,6 +5,8 @@ import { namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/
 import { advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers/dht'
 import { CID } from 'multiformats/cid'
 import { CarWriter, CarReader } from '@ipld/car'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { peerIdFromBytes } from '@libp2p/peer-id'
 
 import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
@@ -16,10 +18,12 @@ import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
 import { Paily } from '@/utils/paily'
 import type { Blockstore } from 'interface-blockstore'
 import type { ShardLink } from '@alanshaw/pail/src/shard'
-import type { Datastore } from 'interface-datastore'
+import { Datastore, Key } from 'interface-datastore'
+import { CodeError } from '@libp2p/interfaces/dist/src/errors'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
+const providerKey = new Key('provider')
 
 export class ZzzyncReplicator extends Playable {
   readonly replica: Replica
@@ -43,7 +47,19 @@ export class ZzzyncReplicator extends Playable {
       throw new Error('zzzync replicator needs the dht')
     }
 
-    const starting = async (): Promise<void> => {}
+    const starting = async (): Promise<void> => {
+      try {
+        const bytes = await datastore.get(providerKey)
+        this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
+      } catch (e) {
+        if (e instanceof CodeError && e.code === 'ERR_NOT_FOUND') {
+          this.#provider = await createEd25519PeerId()
+          await datastore.put(providerKey, this.#provider.toBytes())
+        } else {
+          throw e
+        }
+      }
+    }
     const stopping = async (): Promise<void> => {}
     super({ starting, stopping })
 
