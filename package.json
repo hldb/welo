@@ -117,6 +117,7 @@
     "p-queue": "^7.3.0",
     "uint8arrays": "^4.0.3",
     "zzzync": "github:tabcat/zzzync"
+    "web3.storage": "^4.5.4"
   },
   "copyDependencies": {
     "ipfs-core": [
