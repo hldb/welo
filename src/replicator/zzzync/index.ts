@@ -130,8 +130,10 @@ export class ZzzyncReplicator extends Playable {
 
     await this.#zync.namer.publish(this.#provider, root as CID)
 
-    if (this.#lastAdvertised - Date.now() > republishInterval) {
+    const now = Date.now()
+    if (this.#lastAdvertised - now > republishInterval) {
       await this.#zync.advertiser.collaborate(root as CID, this.#provider)
+      this.#lastAdvertised = now
     }
   }
 
