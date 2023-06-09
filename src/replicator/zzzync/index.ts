@@ -97,7 +97,7 @@ export class ZzzyncReplicator extends Playable {
     if (revision == null) {
       oldRoot = await Paily.create(this.blockstore).then(paily => paily.root)
     } else {
-      if (revision.value.startsWith(ipfsNamespace) === false) {
+      if (!revision.value.startsWith(ipfsNamespace)) {
         throw new Error('invalid revision value, value does not start with "/ipfs/"')
       }
 
