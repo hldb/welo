@@ -20,6 +20,8 @@ import type { Blockstore } from 'interface-blockstore'
 import type { ShardLink } from '@alanshaw/pail/src/shard'
 import { Datastore, Key } from 'interface-datastore'
 import { CodeError } from '@libp2p/interfaces/dist/src/errors'
+import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/src/block'
+import type { AnyLink } from '@alanshaw/pail/src/link'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -138,9 +140,44 @@ export class ZzzyncReplicator extends Playable {
   }
 
   async search (): Promise<void> {
+    const providers: Map<string, Ed25519PeerId> = new Map()
+    for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
+      if (event.name === 'PROVIDER') {
+        for (const provider of event.providers) {
+          if (provider.id.type !== 'Ed25519') {
+            continue
+          }
+          const peerIdString = provider.id.toString()
+          !providers.has(peerIdString) && providers.set(peerIdString, provider.id)
+        }
+      }
+    }
 
+    const resolveAndFetch = async (peerId: Ed25519PeerId): Promise<void> => {
+      let value: ShardLink
+      try {
+        value = await this.#zync.namer.resolve(peerId) as ShardLink
+      } catch (e) {
+        console.error(e)
+        return
+      }
+
+      const diff = this.replica.graph.nodes.diff(value, { blockFetcher: w3storageBlockFetcher(this.w3.client) })
+    }
+
+    const promises: Array<Promise<unknown>> = []
+    for (const provider of providers.values()) {
+      promises.push(resolveAndFetch(provider))
+    }
+    await Promise.all(promises)
   }
 }
+
+export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
+  get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
+    return undefined
+  }
+})
 
 interface W3 {
   client: Web3Storage

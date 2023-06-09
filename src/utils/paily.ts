@@ -16,7 +16,7 @@ import type { Await } from '@helia/interface'
 
 export interface IpldDatastore<L extends AnyLink = AnyLink> extends Datastore {
   root: L
-  diff: (link: L) => Await<CombinedDiff>
+  diff: (link: L, options?: any) => Await<CombinedDiff>
 }
 
 export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
@@ -84,8 +84,11 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
     }
   }
 
-  async diff (link: ShardLink): Promise<CombinedDiff> {
-    return await difference(this.blockFetcher, link, this.root)
+  async diff (link: ShardLink, options?: { blockFetcher: BlockFetcher }): Promise<CombinedDiff> {
+    const blocks = options?.blockFetcher != null
+      ? hybridBlockFetcher(this.blockFetcher, options.blockFetcher)
+      : this.blockFetcher
+    return await difference(blocks, link, this.root)
   }
 }
 
@@ -101,6 +104,12 @@ const blockFetcher = (blockstore: Blockstore): BlockFetcher => ({
       }
       throw e
     }
+  }
+})
+
+const hybridBlockFetcher = (...blockFetchers: BlockFetcher[]): BlockFetcher => ({
+  get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
+    return await Promise.race(blockFetchers.map(async (b) => await b.get(link)))
   }
 })
 
