@@ -10,7 +10,7 @@ import { peerIdFromBytes } from '@libp2p/peer-id'
 
 import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
-import type { Blocks } from '@/blocks/index.js'
+import { Blocks } from '@/blocks/index.js'
 
 import protocol from './protocol'
 import type { Config, ReplicatorModule } from '../interface.js'
@@ -22,6 +22,9 @@ import { Datastore, Key } from 'interface-datastore'
 import { CodeError } from '@libp2p/interfaces/dist/src/errors'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/src/block'
 import type { AnyLink } from '@alanshaw/pail/src/link'
+import type { SignedEntry } from '@/entry/basal'
+import type { IdentityInstance } from '@/identity/interface'
+import type { EntryInstance } from '@/entry/interface'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -139,7 +142,7 @@ export class ZzzyncReplicator extends Playable {
     }
   }
 
-  async search (): Promise<void> {
+  async download (): Promise<void> {
     const providers: Map<string, Ed25519PeerId> = new Map()
     for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
       if (event.name === 'PROVIDER') {
@@ -153,6 +156,51 @@ export class ZzzyncReplicator extends Playable {
       }
     }
 
+    const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
+      const response = await this.w3.client.get(cid.toString())
+
+      if (response?.status !== 200) {
+        throw new Error('base response fetching entry')
+      }
+
+      const arrayBuffer = await response.arrayBuffer()
+      const block = await Blocks.decode<SignedEntry>({ bytes: new Uint8Array(arrayBuffer) })
+      const identity = await Promise.race([
+        fetchIdentity(block.value.auth),
+        this.replica.components.identity.fetch({ blocks: this.blocks, auth: block.value.auth })
+      ])
+
+      if (identity == null) {
+        throw new Error('identity was null')
+      }
+
+      const entry = await this.replica.components.entry.asEntry({ block, identity })
+
+      if (entry == null) {
+        throw new Error('entry was null')
+      }
+
+      return entry as EntryInstance<SignedEntry>
+    }
+
+    const fetchIdentity = async (cid: CID): Promise<IdentityInstance<unknown>> => {
+      const response = await this.w3.client.get(cid.toString())
+
+      if (response?.status === 200) {
+        const arrayBuffer = await response.arrayBuffer()
+        const block = await Blocks.decode({ bytes: new Uint8Array(arrayBuffer) })
+        const identity = this.replica.components.identity.asIdentity({ block })
+
+        if (identity != null) {
+          return identity
+        } else {
+          throw new Error('want not an identity')
+        }
+      } else {
+        throw new Error('bad response fetching identity')
+      }
+    }
+
     const resolveAndFetch = async (peerId: Ed25519PeerId): Promise<void> => {
       let value: ShardLink
       try {
@@ -162,7 +210,17 @@ export class ZzzyncReplicator extends Playable {
         return
       }
 
-      const diff = this.replica.graph.nodes.diff(value, { blockFetcher: w3storageBlockFetcher(this.w3.client) })
+      const diff = await this.replica.graph.nodes.diff(value, { blockFetcher: w3storageBlockFetcher(this.w3.client) })
+
+      const promises: Array<Promise<EntryInstance<SignedEntry>>> = []
+      for (const [k, v] of diff.keys) {
+        if (v[0] != null) {
+          continue
+        }
+
+        promises.push(fetchEntry(CID.parse(k)))
+      }
+      await Promise.all(promises).then(this.replica.add)
     }
 
     const promises: Array<Promise<unknown>> = []
