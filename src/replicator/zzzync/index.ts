@@ -126,7 +126,7 @@ export class ZzzyncReplicator extends Playable {
     await writer.close()
 
     // @ts-expect-error - w3client uses old @ipld/car and CID versions
-    this.w3.client.putCar(await CarReader.fromIterable(out))
+    await this.w3.client.putCar(await CarReader.fromIterable(out))
 
     await this.#zync.namer.publish(this.#provider, root as CID)
 
