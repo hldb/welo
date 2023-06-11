@@ -160,7 +160,8 @@ export class Database extends Playable {
       ...common,
       ipfs,
       replica,
-      datastore
+      datastore,
+      blockstore: ipfs.blockstore
     }))
 
     const config: DbConfig = {

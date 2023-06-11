@@ -111,13 +111,15 @@ describe(testName, () => {
       ipfs: ipfs1,
       blocks: blocks1,
       replica: replica1,
-      datastore: datastore1
+      datastore: datastore1,
+      blockstore: ipfs1.blockstore
     })
     replicator2 = new Replicator({
       ipfs: ipfs2,
       blocks: blocks2,
       replica: replica2,
-      datastore: datastore2
+      datastore: datastore2,
+      blockstore: ipfs2.blockstore
     })
   })
 
