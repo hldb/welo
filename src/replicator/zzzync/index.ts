@@ -1,8 +1,8 @@
 import type { Web3Storage } from 'web3.storage'
 import W3NameService from 'w3name/service'
 import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
-import { namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3'
-import { advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers/dht'
+import { namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers'
+import { advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers'
 import { CID } from 'multiformats/cid'
 import { CarWriter, CarReader } from '@ipld/car'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
@@ -12,19 +12,21 @@ import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
 import { Blocks } from '@/blocks/index.js'
 
-import protocol from './protocol'
+import protocol from './protocol.js'
 import type { Config, ReplicatorModule } from '../interface.js'
 import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
-import { Paily } from '@/utils/paily'
+import { Paily } from '@/utils/paily.js'
 import type { Blockstore } from 'interface-blockstore'
 import type { ShardLink } from '@alanshaw/pail/src/shard'
 import { Datastore, Key } from 'interface-datastore'
-import { CodeError } from '@libp2p/interfaces/dist/src/errors'
-import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/src/block'
-import type { AnyLink } from '@alanshaw/pail/src/link'
+// import { CodeError } from '@libp2p/interfaces/errors'
+import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
+import type { AnyLink } from '@alanshaw/pail/link'
 import type { SignedEntry } from '@/entry/basal'
-import type { IdentityInstance } from '@/identity/interface'
 import type { EntryInstance } from '@/entry/interface'
+import { parsedcid } from '@/utils/index.js'
+import all from 'it-all'
+import drain from 'it-drain'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -56,8 +58,8 @@ export class ZzzyncReplicator extends Playable {
       try {
         const bytes = await datastore.get(providerKey)
         this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
-      } catch (e) {
-        if (e instanceof CodeError && e.code === 'ERR_NOT_FOUND') {
+      } catch (e: any) {
+        if (e.code === 'ERR_NOT_FOUND') {
           this.#provider = await createEd25519PeerId()
           await datastore.put(providerKey, this.#provider.toBytes())
         } else {
@@ -89,12 +91,12 @@ export class ZzzyncReplicator extends Playable {
     this.#provider = null
   }
 
-  async upload (peerId: Ed25519PeerId): Promise<void> {
+  async upload (): Promise<void> {
     if (this.#provider == null) {
       throw new Error('provider required. is ZzzyncReplicator started?')
     }
 
-    const revision = await this.#revisions.get(peerId)
+    const revision = await this.#revisions.get(this.#provider)
 
     const root = this.replica.graph.nodes.root
 
@@ -111,13 +113,15 @@ export class ZzzyncReplicator extends Playable {
 
     const diff = await this.replica.graph.nodes.diff(oldRoot)
 
-    const { writer, out } = await CarWriter.create(this.replica.graph.nodes.root as CID)
+    const heads = (await all(this.replica.heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
+    const { writer, out } = CarWriter.create(heads[0])
+    const reader = CarReader.fromIterable(out)
 
     for (const [k] of diff.keys) {
       const entry = await this.replica.components.entry.fetch({
         blocks: this.blocks,
         identity: this.replica.components.identity,
-        cid: CID.parse(k)
+        cid: CID.parse(new Key(k).baseNamespace())
       })
 
       await writer.put(entry.block)
@@ -131,13 +135,13 @@ export class ZzzyncReplicator extends Playable {
     await writer.close()
 
     // @ts-expect-error - w3client uses old @ipld/car and CID versions
-    await this.w3.client.putCar(await CarReader.fromIterable(out))
+    await this.w3.client.putCar(await reader)
 
     await this.#zync.namer.publish(this.#provider, root as CID)
 
     const now = Date.now()
-    if (this.#lastAdvertised - now > republishInterval) {
-      await this.#zync.advertiser.collaborate(root as CID, this.#provider)
+    if (now > (this.#lastAdvertised + republishInterval)) {
+      await drain(this.#zync.advertiser.collaborate(this.dcid, this.#provider))
       this.#lastAdvertised = now
     }
   }
@@ -153,6 +157,7 @@ export class ZzzyncReplicator extends Playable {
           const peerIdString = provider.id.toString()
           !providers.has(peerIdString) && providers.set(peerIdString, provider.id)
         }
+        break
       }
     }
 
@@ -164,11 +169,11 @@ export class ZzzyncReplicator extends Playable {
       }
 
       const arrayBuffer = await response.arrayBuffer()
-      const block = await Blocks.decode<SignedEntry>({ bytes: new Uint8Array(arrayBuffer) })
-      const identity = await Promise.race([
-        fetchIdentity(block.value.auth),
-        this.replica.components.identity.fetch({ blocks: this.blocks, auth: block.value.auth })
-      ])
+      const reader = await CarReader.fromBytes(new Uint8Array(arrayBuffer))
+      const block = await Blocks.decode<SignedEntry>({ bytes: reader._blocks[0].bytes })
+      const identity = this.replica.components.identity.asIdentity({
+        block: await Blocks.decode({ bytes: reader._blocks[1].bytes })
+      })
 
       if (identity == null) {
         throw new Error('identity was null')
@@ -181,24 +186,6 @@ export class ZzzyncReplicator extends Playable {
       }
 
       return entry as EntryInstance<SignedEntry>
-    }
-
-    const fetchIdentity = async (cid: CID): Promise<IdentityInstance<unknown>> => {
-      const response = await this.w3.client.get(cid.toString())
-
-      if (response?.status === 200) {
-        const arrayBuffer = await response.arrayBuffer()
-        const block = await Blocks.decode({ bytes: new Uint8Array(arrayBuffer) })
-        const identity = this.replica.components.identity.asIdentity({ block })
-
-        if (identity != null) {
-          return identity
-        } else {
-          throw new Error('want not an identity')
-        }
-      } else {
-        throw new Error('bad response fetching identity')
-      }
     }
 
     const resolveAndFetch = async (peerId: Ed25519PeerId): Promise<void> => {
@@ -214,13 +201,13 @@ export class ZzzyncReplicator extends Playable {
 
       const promises: Array<Promise<EntryInstance<SignedEntry>>> = []
       for (const [k, v] of diff.keys) {
-        if (v[0] != null) {
+        if (v[1] != null) {
           continue
         }
 
-        promises.push(fetchEntry(CID.parse(k)))
+        promises.push(fetchEntry(CID.parse(new Key(k).baseNamespace())))
       }
-      await Promise.all(promises).then(this.replica.add)
+      await Promise.all(promises).then(async entries => await this.replica.add(entries))
     }
 
     const promises: Array<Promise<unknown>> = []
@@ -233,6 +220,12 @@ export class ZzzyncReplicator extends Playable {
 
 export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
+    const response = await client.get(link.toString())
+
+    if (response?.status === 200) {
+      return { cid: link, bytes: new Uint8Array(await response.arrayBuffer()) }
+    }
+
     return undefined
   }
 })
