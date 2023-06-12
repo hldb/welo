@@ -159,7 +159,9 @@ export class Database extends Playable {
     const replicatorInstances = replicators.map(replicator => replicator.create({
       ...common,
       ipfs,
-      replica
+      replica,
+      datastore,
+      blockstore: ipfs.blockstore
     }))
 
     const config: DbConfig = {

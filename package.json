@@ -33,7 +33,7 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run clean && c8 -c ./test/.c8rc.json npx mocha --config ./test/.mocharc.json && npm run clean",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },
@@ -102,10 +102,12 @@
   },
   "dependencies": {
     "@alanshaw/pail": "^0.3.3",
+    "@ipld/car": "^5.1.1",
     "@ipld/dag-cbor": "^9.0.1",
     "@libp2p/crypto": "^1.0.17",
     "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^2.0.3",
+    "@tabcat/zzzync": "^0.0.0-d3db515",
     "blockstore-core": "^4.1.0",
     "datastore-core": "^9.1.1",
     "helia": "^1.1.2",
@@ -114,7 +116,8 @@
     "it-drain": "3.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.0",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "web3.storage": "^4.5.4"
   },
   "copyDependencies": {
     "ipfs-core": [

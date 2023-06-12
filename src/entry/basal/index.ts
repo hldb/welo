@@ -14,7 +14,7 @@ import type {
   AsEntry
 } from '../interface.js'
 
-interface SignedEntry {
+export interface SignedEntry {
   auth: CID
   data: Uint8Array
   sig: Uint8Array

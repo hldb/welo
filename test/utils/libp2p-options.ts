@@ -1,12 +1,10 @@
 import { tcp } from '@libp2p/tcp'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import { identifyService } from 'libp2p/identify'
 import type { Libp2pOptions } from 'libp2p'
-import type { GossipSub } from '@chainsafe/libp2p-gossipsub'
+import services, { type Services } from './libp2p-services.js'
 
-export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions<{ pubsub: GossipSub }> {
+export function createLibp2pOptions (opts?: Libp2pOptions): Libp2pOptions<Services> {
   const options: Libp2pOptions = {
     addresses: {
       listen: [
@@ -22,10 +20,7 @@ export function createLibp2pOptions (opts: Libp2pOptions): Libp2pOptions<{ pubsu
     streamMuxers: [
       yamux()
     ],
-    services: {
-      identify: identifyService(),
-      pubsub: gossipsub({ emitSelf: true })
-    },
+    services,
     ...opts
   }
 
