@@ -5,3 +5,4 @@ dist
 coverage
 API/welo.api.json
 .polendina
+.w3_token

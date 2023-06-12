@@ -37,7 +37,7 @@ export class ZzzyncReplicator extends Playable {
   readonly datastore: Datastore
   readonly blockstore: Blockstore
   readonly blocks: Blocks
-  readonly dcid: CID
+  dcid: CID | null
 
   readonly w3: Required<W3>
   #zync: Zzzync
@@ -55,6 +55,7 @@ export class ZzzyncReplicator extends Playable {
     }
 
     const starting = async (): Promise<void> => {
+      this.dcid = await toDcid(replica.manifest.block.cid)
       try {
         const bytes = await datastore.get(providerKey)
         this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
@@ -74,7 +75,7 @@ export class ZzzyncReplicator extends Playable {
     this.blocks = blocks
     this.datastore = datastore
     this.blockstore = blockstore
-    this.dcid = toDcid(replica.manifest.block.cid)
+    this.dcid = null
 
     this.w3 = { name: new W3NameService(), ...options.w3 }
 
@@ -94,6 +95,9 @@ export class ZzzyncReplicator extends Playable {
   async upload (): Promise<void> {
     if (this.#provider == null) {
       throw new Error('provider required. is ZzzyncReplicator started?')
+    }
+    if (this.dcid == null) {
+      throw new Error('dcid required. is ZzzyncReplicator started?')
     }
 
     const revision = await this.#revisions.get(this.#provider)
@@ -147,6 +151,10 @@ export class ZzzyncReplicator extends Playable {
   }
 
   async download (): Promise<void> {
+    if (this.dcid == null) {
+      throw new Error('dcid required. is ZzzyncReplicator started?')
+    }
+
     const providers: Map<string, Ed25519PeerId> = new Map()
     for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
       if (event.name === 'PROVIDER') {
@@ -157,6 +165,7 @@ export class ZzzyncReplicator extends Playable {
           const peerIdString = provider.id.toString()
           !providers.has(peerIdString) && providers.set(peerIdString, provider.id)
         }
+        // findProviders hangs
         break
       }
     }
