@@ -62,6 +62,7 @@
     "@libp2p/interface-libp2p": "^3.2.0",
     "@libp2p/interface-peer-id": "^2.0.2",
     "@libp2p/interface-pubsub": "^4.0.1",
+    "@libp2p/kad-dht": "^9.3.6",
     "@libp2p/tcp": "^7.0.1",
     "@libp2p/webrtc-star": "^7.0.0",
     "@microsoft/api-documenter": "^7.19.25",
@@ -86,6 +87,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-tsdoc": "^0.2.17",
     "interface-datastore": "^8.2.0",
+    "ipns": "^6.0.0",
     "level": "^8.0.0",
     "libp2p": "^0.45.3",
     "make-dir": "^3.1.0",
@@ -107,6 +109,7 @@
     "@libp2p/crypto": "^1.0.17",
     "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^2.0.3",
+    "@libp2p/peer-id-factory": "^2.0.3",
     "@tabcat/zzzync": "^0.0.0-d3db515",
     "blockstore-core": "^4.1.0",
     "datastore-core": "^9.1.1",
@@ -117,6 +120,7 @@
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.0",
     "uint8arrays": "^4.0.3",
+    "w3name": "^1.0.8",
     "web3.storage": "^4.5.4"
   },
   "copyDependencies": {
