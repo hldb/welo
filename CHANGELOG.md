@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/hldb/welo/compare/v1.1.0...v2.0.0) (2023-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* Merge pull request #71 from saul-jb/refactor/modularization
+
+### Features
+
+* default welo bundle ([d94dafb](https://github.com/hldb/welo/commit/d94dafb8ff880bdb5c42400fa1a309c43900b5d1)), closes [#76](https://github.com/hldb/welo/issues/76)
+
+
+### Code Refactoring
+
+* Merge pull request [#71](https://github.com/hldb/welo/issues/71) from saul-jb/refactor/modularization ([2818587](https://github.com/hldb/welo/commit/2818587ef756d767963ba7e46233f2c99ee1234f))
+
 ## [1.1.0](https://github.com/hldb/welo/compare/v1.0.2...v1.1.0) (2023-03-01)
 
 
