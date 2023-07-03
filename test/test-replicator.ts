@@ -140,11 +140,6 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
-
-      await Promise.all([
-        libp2p1.dial(addr2),
-        new Promise(resolve => libp2p2.addEventListener('peer:connect', resolve, { once: true }))
-      ])
     })
 
     it('replicates replica entries and identities', async () => {
@@ -156,6 +151,11 @@ describe(testName, () => {
         ),
         promise
       ])
+
+      if (replica1.root == null || replica2.root == null) {
+        throw new Error('replica root is null')
+      }
+      assert.equal(replica1.root.toString(), replica2.root.toString())
     })
   })
 })
