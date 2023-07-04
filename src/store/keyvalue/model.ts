@@ -49,6 +49,31 @@ export const selectors = {
       throw e
     }
     return decode(bytes) ?? undefined
+  },
+  // todo: add tests for keys/values/entries
+  keys: (state: StateMap) => async function * () {
+    for await (const { key, value } of state.query({})) {
+      const decoded = decode(value)
+      if (decoded === null) continue
+
+      yield key.baseNamespace()
+    }
+  },
+  values: (state: StateMap) => async function * () {
+    for await (const { value } of state.query({})) {
+      const decoded = decode(value)
+      if (decoded === null) continue
+
+      yield decoded
+    }
+  },
+  entries: (state: StateMap) => async function * (): AsyncIterable<[string, any]> {
+    for await (const { key, value } of state.query({})) {
+      const decoded = decode(value)
+      if (decoded === null) continue
+
+      yield [key.baseNamespace(), decoded]
+    }
   }
 }
 
