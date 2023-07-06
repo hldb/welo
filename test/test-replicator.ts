@@ -140,6 +140,10 @@ describe(testName, () => {
 
     before(async () => {
       await start(replicator1, replicator2)
+      await Promise.all([
+        libp2p1.dial(addr2),
+        new Promise(resolve => libp2p2.addEventListener('peer:connect', resolve, { once: true }))
+      ])
     })
 
     it('replicates replica entries and identities', async () => {
