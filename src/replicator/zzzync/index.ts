@@ -1,10 +1,11 @@
 import type { Web3Storage } from 'web3.storage'
 import W3NameService from 'w3name/service'
 import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
-import { namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers'
-import { advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers'
+import { w3name as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3name'
+import { dht as advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers/dht'
 import { CID } from 'multiformats/cid'
-import { CarWriter, CarReader } from '@ipld/car'
+import { CarReader } from '@ipld/car/reader'
+import { CarWriter } from '@ipld/car/writer'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { peerIdFromBytes } from '@libp2p/peer-id'
 
@@ -169,6 +170,7 @@ export class ZzzyncReplicator extends Playable {
         break
       }
     }
+    console.log(providers)
 
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
       const response = await this.w3.client.get(cid.toString())
