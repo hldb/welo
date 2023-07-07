@@ -87,7 +87,7 @@ export class ZzzyncReplicator extends Playable {
 
     this.#zync = zzzync(
       namer(this.w3.name, this.#revisions),
-      advertiser(libp2p, options.createEphemeralLibp2p)
+      advertiser(libp2p, options.createEphemeralLibp2p, { scope: options.scope })
     )
 
     this.#provider = null
@@ -249,6 +249,7 @@ interface Options {
   w3: W3
   revisions?: RevisionState
   createEphemeralLibp2p: CreateEphemeralLibp2p
+  scope?: 'lan' | 'wan'
 }
 
 export const zzzyncReplicator: (options: Options) => ReplicatorModule<ZzzyncReplicator, typeof protocol> =
