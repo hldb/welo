@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/hldb/welo/compare/v2.0.0...v2.1.0) (2023-07-07)
+
+
+### Features
+
+* iterators for keyvalue store ([e71d814](https://github.com/hldb/welo/commit/e71d8146a23258e562dd5f44897878fbb4e99264))
+* zzzync replicator can be scoped to lan|wan ([0a6a1ea](https://github.com/hldb/welo/commit/0a6a1ea216bb2807f8f0a889a9e38431d2cefa89))
+
 ## [2.0.0](https://github.com/hldb/welo/compare/v1.1.0...v2.0.0) (2023-06-13)
 
 
