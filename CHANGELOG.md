@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/hldb/welo/compare/v2.1.1...v2.2.0) (2023-07-10)
+
+
+### Features
+
+* welo.open provider option for zzzync ([14289f8](https://github.com/hldb/welo/commit/14289f8aa46a998a3960e158ae0e0409695bbc23))
+
 ## [2.1.1](https://github.com/hldb/welo/compare/v2.1.0...v2.1.1) (2023-07-10)
 
 
