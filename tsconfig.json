@@ -1,45 +1,18 @@
 {
+  "extends": "./node_modules/aegir/src/config/tsconfig.aegir.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2022",
-    "moduleResolution": "node",
-    "importsNotUsedAsValues": "error",
-    "outDir": "dist",
-    "experimentalDecorators": true,
-    "allowJs": false,
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
     "baseUrl": ".",
-
     "paths": {
       "@/*": ["src/*"]
     },
-
     "plugins": [
       { "transform": "typescript-transform-paths" },
       { "transform": "typescript-transform-paths", "afterDeclarations": true }
     ]
   },
-
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts",
-    "benchmark/**/*.ts"
-  ],
-
-  "exclude": [
-    "node_modules",
-    "<node_internals>/**",
-    "dist"
-  ],
-
-  "ts-node": {
-    "transpileOnly": true,
-    "esm": true,
-    "require": [ "typescript-transform-paths/register" ]
-  }
+    "src",
+    "test",
+    "benchmark"
+  ]
 }

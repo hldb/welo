@@ -28,7 +28,7 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build": "tsc",
+    "build": "aegir build",
     "extract-api": "api-extractor run -c ./api-extractor.json -l -v",
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
