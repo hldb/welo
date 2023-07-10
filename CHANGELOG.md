@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/hldb/welo/compare/v2.1.0...v2.1.1) (2023-07-10)
+
+
+### Bug Fixes
+
+* specify outDir when baseUrl is present ([c41e0af](https://github.com/hldb/welo/commit/c41e0af94336f67e1813ac26de8920c983081ce4))
+* ts target ES2020 ([f517e8d](https://github.com/hldb/welo/commit/f517e8d6f31df493fa75eee9d42aea639bcbe830))
+
 ## [2.1.0](https://github.com/hldb/welo/compare/v2.0.0...v2.1.0) (2023-07-07)
 
 
