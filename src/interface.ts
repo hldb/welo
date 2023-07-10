@@ -16,6 +16,7 @@ import type { EntryComponent } from '@/entry/interface.js'
 import type { StoreInstance, StoreComponent } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorModule } from '@/replicator/interface'
+import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
 
 export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
@@ -72,6 +73,7 @@ export interface OpenOptions {
   identity?: IdentityInstance<any>
   datastore?: Datastore
   replicators?: ReplicatorModule[]
+  provider?: Ed25519PeerId
 }
 
 interface AddressEmit {
@@ -102,6 +104,7 @@ export interface DbOpen {
   identity: IdentityInstance<any>
   manifest: Manifest
   components: DbComponents
+  provider?: Ed25519PeerId
 }
 
 export interface DbConfig extends Omit<DbOpen, 'start' | 'ipfs' | 'replicators'> {

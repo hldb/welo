@@ -46,7 +46,7 @@ export class ZzzyncReplicator extends Playable {
   #revisions: RevisionState
   #lastAdvertised: number
 
-  constructor ({ replica, blocks, ipfs, datastore, blockstore, options }: Config & { options: Options }) {
+  constructor ({ replica, blocks, ipfs, datastore, blockstore, provider, options }: Config & { options: Options }) {
     if (options.createEphemeralLibp2p == null) {
       throw new Error('need createEphemeralLibp2p function to be supplied')
     }
@@ -58,8 +58,12 @@ export class ZzzyncReplicator extends Playable {
     const starting = async (): Promise<void> => {
       this.dcid = await toDcid(replica.manifest.block.cid)
       try {
-        const bytes = await datastore.get(providerKey)
-        this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
+        if (provider != null) {
+          this.#provider = provider
+        } else {
+          const bytes = await datastore.get(providerKey)
+          this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
+        }
       } catch (e: any) {
         if (e.code === 'ERR_NOT_FOUND') {
           this.#provider = await createEd25519PeerId()

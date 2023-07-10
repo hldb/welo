@@ -130,7 +130,8 @@ export class Database extends Playable {
       ipfs,
       identity,
       blocks,
-      components
+      components,
+      provider
     } = options
 
     if (manifest.identity.protocol !== components.identity.protocol) {
@@ -161,7 +162,8 @@ export class Database extends Playable {
       ipfs,
       replica,
       datastore,
-      blockstore: ipfs.blockstore
+      blockstore: ipfs.blockstore,
+      provider
     }))
 
     const config: DbConfig = {

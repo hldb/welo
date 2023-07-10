@@ -190,6 +190,7 @@ export class Welo extends Playable {
       blocks: this.blocks,
       datastore: new NamespaceDatastore(datastore, dbKey),
       replicators,
+      provider: options.provider,
       components
     })
       .then((database) => {
