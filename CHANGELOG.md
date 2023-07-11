@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1](https://github.com/hldb/welo/compare/v2.2.0...v2.2.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* remove console.log(providers) artifact ([ce4b946](https://github.com/hldb/welo/commit/ce4b946474fb2e9c22f16a1fee3f7b42ae5d8ee8))
+* zzzync replicator impl and test success ([da6e9d3](https://github.com/hldb/welo/commit/da6e9d317cb024c5e21a3b62c97b0647b86e4380))
+
 ## [2.2.0](https://github.com/hldb/welo/compare/v2.1.1...v2.2.0) (2023-07-10)
 
 
