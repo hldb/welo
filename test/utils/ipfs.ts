@@ -1,15 +1,12 @@
-import type { Multiaddr } from '@multiformats/multiaddr'
 import { createHelia } from 'helia'
-import type { Helia } from '@helia/interface'
-import type { TestPaths } from './constants'
 import { Libp2pOptions, createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
-import { bootstrap } from '@libp2p/bootstrap'
-import { getAddrs } from './circuit-relay.js'
-
-import type { GossipHelia } from '@/interface.js'
 import { createLibp2pOptions } from './libp2p-options.js'
+import type { Multiaddr } from '@multiformats/multiaddr'
+import type { Helia } from '@helia/interface'
+import type { TestPaths } from './constants'
+import type { GossipHelia } from '@/interface.js'
 
 interface IpfsOptions {
   repo: string
@@ -35,11 +32,8 @@ export const getTestIpfs = async (
   const datastore = new LevelDatastore(options.repo + '/data')
   const blockstore = new LevelBlockstore(options.repo + '/blocks')
 
-  const libp2pOptions = createLibp2pOptions({
+  const libp2pOptions = await createLibp2pOptions({
     datastore,
-    peerDiscovery: [
-      bootstrap({ list: (await getAddrs()).map(String) })
-    ],
     ...libp2pOpts
   })
 

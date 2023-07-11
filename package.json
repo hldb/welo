@@ -33,7 +33,7 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-zzzync.js -- --exit && npm run clean",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },

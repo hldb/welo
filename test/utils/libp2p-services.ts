@@ -17,7 +17,7 @@ export default {
   identify: identifyService(),
   pubsub: gossipsub({ emitSelf: true }),
   dht: kadDHT({
-    clientMode: false,
+    clientMode: true,
     validators: { ipns: ipnsValidator },
     selectors: { ipns: ipnsSelector }
   })
