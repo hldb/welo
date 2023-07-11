@@ -8,7 +8,7 @@ export function createLibp2pOptions (opts?: Libp2pOptions): Libp2pOptions<Servic
   const options: Libp2pOptions = {
     addresses: {
       listen: [
-        '/ip4/0.0.0.0/tcp/0'
+        '/ip4/127.0.0.1/tcp/0'
       ]
     },
     transports: [
