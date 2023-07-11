@@ -1,6 +1,7 @@
 import { ShardBlock, put, get, del, entries } from '@alanshaw/pail'
 import { CID } from 'multiformats'
-import { code } from 'multiformats/codecs/raw'
+import type { code as rawCode } from 'multiformats/codecs/raw'
+import { code as cborCode } from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import drain from 'it-drain'
 import PQueue from 'p-queue'
@@ -19,29 +20,34 @@ export interface IpldDatastore<L extends AnyLink = AnyLink> extends Datastore {
   diff: (link: L, options?: any) => Await<CombinedDiff>
 }
 
+type Code = typeof cborCode | typeof rawCode
+
 export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   root: ShardLink
   readonly blockFetcher: BlockFetcher
+  readonly code: Code
   readonly #queue: PQueue
 
   constructor (
     readonly blockstore: Blockstore,
-    root: ShardLink
+    root: ShardLink,
+    options?: { code: Code }
   ) {
     super()
     this.root = root
     this.blockFetcher = blockFetcher(this.blockstore)
+    this.code = options?.code ?? cborCode
     this.#queue = new PQueue({ concurrency: 1 })
   }
 
-  static async create (blockstore: Blockstore): Promise<Paily> {
+  static async create (blockstore: Blockstore, options?: { code: Code }): Promise<Paily> {
     const { bytes, cid } = await ShardBlock.create()
     await blockstore.put(cid, bytes)
-    return new Paily(blockstore, cid)
+    return new Paily(blockstore, cid, options)
   }
 
-  static open (blocks: Blockstore, root: ShardLink): Paily {
-    return new Paily(blocks, root)
+  static open (blockstore: Blockstore, root: ShardLink, options?: { code: Code }): Paily {
+    return new Paily(blockstore, root, options)
   }
 
   async get (key: Key): Promise<Uint8Array> {
@@ -59,7 +65,7 @@ export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
   }
 
   async put (key: Key, val: Uint8Array): Promise<Key> {
-    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val]))
+    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val, this.code]))
 
     if (resolved == null) {
       throw new CodeError('why tf this undefined', 'UNDEFINED')
@@ -125,7 +131,7 @@ const linkToCid = (link: AnyLink): CID => {
 
 const toPair = ({ cid, bytes }: ShardBlockView): BlockstorePair => ({ cid, block: bytes })
 
-async function unqueuedPut (this: Paily, key: Key, val: Uint8Array): Promise<Key> {
+async function unqueuedPut (this: Paily, key: Key, val: Uint8Array, code: Code): Promise<Key> {
   const cid = CID.create(1, code, await sha256.digest(val))
   const { root: newRoot, additions/** , removals */ } = await put(
     this.blockFetcher,

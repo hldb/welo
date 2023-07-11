@@ -2,7 +2,7 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 import { createHelia } from 'helia'
 import type { Helia } from '@helia/interface'
 import type { TestPaths } from './constants'
-import { createLibp2p } from 'libp2p'
+import { Libp2pOptions, createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
 import { bootstrap } from '@libp2p/bootstrap'
@@ -27,7 +27,8 @@ type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 
 export const getTestIpfs = async (
   testPaths: TestPaths,
-  opts: Opts
+  opts: Opts,
+  libp2pOpts: Libp2pOptions = {}
 ): Promise<GossipHelia> => {
   const options = opts(testPaths.ipfs)
 
@@ -38,7 +39,8 @@ export const getTestIpfs = async (
     datastore,
     peerDiscovery: [
       bootstrap({ list: (await getAddrs()).map(String) })
-    ]
+    ],
+    ...libp2pOpts
   })
 
   const libp2p = await createLibp2p(libp2pOptions)

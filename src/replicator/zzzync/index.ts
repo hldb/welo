@@ -25,9 +25,11 @@ import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { AnyLink } from '@alanshaw/pail/link'
 import type { SignedEntry } from '@/entry/basal'
 import type { EntryInstance } from '@/entry/interface'
+// import { parsedcid } from '@/utils/index.js'
+// import all from 'it-all'
+import drain from 'it-drain'
 import { parsedcid } from '@/utils/index.js'
 import all from 'it-all'
-import drain from 'it-drain'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -121,20 +123,27 @@ export class ZzzyncReplicator extends Playable {
     }
 
     const diff = await this.replica.graph.nodes.diff(oldRoot)
-
     const heads = (await all(this.replica.heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
-    const { writer, out } = CarWriter.create(heads[0])
+    const rootBlock = await Blocks.encode({ value: { nodes: root, heads } })
+
+    const { writer, out } = CarWriter.create(rootBlock.cid)
     const reader = CarReader.fromIterable(out)
 
-    for (const [k] of diff.keys) {
-      const entry = await this.replica.components.entry.fetch({
-        blocks: this.blocks,
-        identity: this.replica.components.identity,
-        cid: CID.parse(new Key(k).baseNamespace())
-      })
+    await writer.put(rootBlock)
 
+    for (const [k, [, after]] of diff.keys) {
+      const [entry, node] = await Promise.all([
+        this.replica.components.entry.fetch({
+          blocks: this.blocks,
+          identity: this.replica.components.identity,
+          cid: CID.parse(new Key(k).baseNamespace())
+        }),
+        // @ts-expect-error
+        this.replica.graph.nodes.blockFetcher.get(after)
+      ])
       await writer.put(entry.block)
       await writer.put(entry.identity.block)
+      await writer.put(node)
     }
 
     for (const shard of diff.shards.additions) {
@@ -237,7 +246,10 @@ export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
     const response = await client.get(link.toString())
 
     if (response?.status === 200) {
-      return { cid: link, bytes: new Uint8Array(await response.arrayBuffer()) }
+      const carBytes = new Uint8Array(await response.arrayBuffer())
+      const reader = await CarReader.fromBytes(carBytes)
+
+      return await reader.get(link as CID)
     }
 
     return undefined
