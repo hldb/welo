@@ -4,6 +4,7 @@ import { mplex } from '@libp2p/mplex'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { noise } from '@chainsafe/libp2p-noise'
 import { circuitRelayServer } from 'libp2p/circuit-relay'
+import { tcp } from '@libp2p/tcp'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
 import { identifyService } from 'libp2p/identify'
@@ -29,6 +30,7 @@ export const getConfig = async (): Promise<Libp2pOptions> => ({
     listen: (await getAddrs()).map(String)
   },
   transports: [
+    tcp(),
     webSockets({ filter: filters.all })
   ],
   connectionEncryption: [noise()],
