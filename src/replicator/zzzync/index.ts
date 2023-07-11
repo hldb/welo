@@ -174,7 +174,6 @@ export class ZzzyncReplicator extends Playable {
         break
       }
     }
-    console.log(providers)
 
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
       const response = await this.w3.client.get(cid.toString())
