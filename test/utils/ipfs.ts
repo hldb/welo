@@ -5,6 +5,8 @@ import type { TestPaths } from './constants'
 import { createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
+import { bootstrap } from '@libp2p/bootstrap'
+import { getAddrs } from './circuit-relay.js'
 
 import type { GossipHelia } from '@/interface.js'
 import { createLibp2pOptions } from './libp2p-options.js'
@@ -32,7 +34,12 @@ export const getTestIpfs = async (
   const datastore = new LevelDatastore(options.repo + '/data')
   const blockstore = new LevelBlockstore(options.repo + '/blocks')
 
-  const libp2pOptions = createLibp2pOptions({ datastore })
+  const libp2pOptions = createLibp2pOptions({
+    datastore,
+    peerDiscovery: [
+      bootstrap({ list: (await getAddrs()).map(String) })
+    ]
+  })
 
   const libp2p = await createLibp2p(libp2pOptions)
 
