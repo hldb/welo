@@ -5,7 +5,6 @@ import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
 import { take, transform } from 'streaming-iterables'
 import { fromString as uint8ArrayFromString } from "uint8arrays";
-
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
@@ -14,22 +13,18 @@ import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Message } from '@libp2p/interface-pubsub'
 
 import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
 import protocol from './protocol.js'
 
-export class LiveReplicator extends Playable {
+export class BootstrapReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly manifest: Manifest
   readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
-
-	private readonly onReplicaHeadsUpdate: typeof this.broadcast;
-	private readonly onPubsubMessage: (evt: CustomEvent<Message>) => Promise<void>;
 
   constructor ({
     ipfs,
@@ -77,22 +72,10 @@ export class LiveReplicator extends Playable {
 			} catch (error) {
 				console.error("bootstrapping failed", error)
 			}
-
-			this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
-			this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
-
-			this.pubsub.subscribe(this.protocol)
-			this.pubsub.addEventListener("message", this.onPubsubMessage)
     }
 
     const stopping = async (): Promise<void> => {
 			await this.libp2p.unhandle(this.protocol);
-			this.pubsub.unsubscribe(this.protocol)
-
-			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
-			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
-
-			this.pubsub.removeEventListener("message", this.onPubsubMessage)
     }
 
     super({ starting, stopping })
@@ -103,19 +86,10 @@ export class LiveReplicator extends Playable {
     this.manifest = replica.manifest
     this.access = replica.access
     this.components = replica.components
-
-		this.onReplicaHeadsUpdate = () => this.broadcast();
-		this.onPubsubMessage = (evt: CustomEvent<Message>) => {
-			return this.addHeads(evt.detail.data)
-		};
   }
 
 	private get libp2p () {
 		return this.ipfs.libp2p;
-	}
-
-	private get pubsub () {
-		return this.libp2p.services.pubsub;
 	}
 
 	private get peers () {
@@ -155,13 +129,9 @@ export class LiveReplicator extends Playable {
 
 		return advert.bytes;
 	}
-
-	private async broadcast () {
-		this.pubsub.publish(this.protocol, await this.getHeads());
-	}
 }
 
-export const liveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
+export const bootstrapReplicator: () => ReplicatorModule<BootstrapReplicator, typeof protocol> = () => ({
   protocol,
-  create: (config: Config) => new LiveReplicator(config)
+  create: (config: Config) => new BootstrapReplicator(config)
 })
