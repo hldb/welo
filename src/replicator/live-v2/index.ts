@@ -33,20 +33,24 @@ export class LiveReplicator extends Playable {
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
+	private readonly onReplicaHeadsUpdate: typeof this.broadcast;
+
   constructor ({
     ipfs,
     replica,
     blocks
   }: Config) {
     const starting = async (): Promise<void> => {
-
-			this.libp2p.handle(protocol, async data => {
+			// Handle direct head requests.
+			await this.libp2p.handle(protocol, async data => {
 				const heads = await this.getHeads();
 
 				await pipe(data.stream, lp.decode, function * () {
 					yield heads;
 				}, lp.encode, data.stream);
 			});
+
+			// Bootstrap the heads
 			for await (const peer of this.peers) {
 				// We don't care about peers that don't support our protocol.
 				if (!peer.protocols.includes(protocol)) {
@@ -61,9 +65,18 @@ export class LiveReplicator extends Playable {
 
 				await this.addHeads(responses[0]);
 			}
+
+			this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
+			this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
     }
+
     const stopping = async (): Promise<void> => {
+			await this.libp2p.unhandle(protocol);
+
+			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
+			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
     }
+
     super({ starting, stopping })
 
     this.ipfs = ipfs
@@ -72,6 +85,8 @@ export class LiveReplicator extends Playable {
     this.manifest = replica.manifest
     this.access = replica.access
     this.components = replica.components
+
+		this.onReplicaHeadsUpdate = () => this.broadcast();
   }
 
 	private get libp2p () {
@@ -112,6 +127,10 @@ export class LiveReplicator extends Playable {
     const advert = await Advert.write(this.manifest.address.cid, heads)
 
 		return advert.bytes;
+	}
+
+	private broadcast () {
+
 	}
 }
 
