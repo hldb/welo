@@ -1,18 +1,14 @@
 import all from 'it-all'
-//import { start, stop } from '@libp2p/interfaces/startable'
-import { base32 } from 'multiformats/bases/base32'
 import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
-import type { Message } from '@libp2p/interface-pubsub'
 import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
 import { take } from 'streaming-iterables'
-import { toString as uint8ArrayToString, fromString as uint8ArrayFromString } from "uint8arrays";
+import { fromString as uint8ArrayFromString } from "uint8arrays";
 
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
-import { Direct } from '@/pubsub/direct.js'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
