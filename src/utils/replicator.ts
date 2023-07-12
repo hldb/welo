@@ -5,7 +5,6 @@ import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { EntryComponent } from '@/entry/interface.js'
 import type { IdentityComponent } from '@/identity/interface.js'
-import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -29,9 +28,9 @@ export const encodeHeads = async (heads: Heads): Promise<Uint8Array> => {
 }
 
 export const decodeHeads = async (bytes: Uint8Array): Promise<Heads> => {
-	const block = await Blocks.decode<BlockView<Heads>>({ bytes })
+	const block = await Blocks.decode<Heads>({ bytes })
 
-	return block.value.value;
+	return block.value;
 }
 
 export async function addHeads (heads: Heads, components: {
