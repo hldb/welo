@@ -39,6 +39,14 @@ export class LiveReplicator extends Playable {
     blocks
   }: Config) {
     const starting = async (): Promise<void> => {
+
+			this.libp2p.handle(protocol, async data => {
+				const heads = await this.getHeads();
+
+				await pipe(data.stream, lp.decode, function * () {
+					yield heads;
+				}, lp.encode, data.stream);
+			});
 			for await (const peer of this.peers) {
 				// We don't care about peers that don't support our protocol.
 				if (!peer.protocols.includes(protocol)) {
@@ -87,6 +95,7 @@ export class LiveReplicator extends Playable {
       entry: this.components.entry,
       identity: this.components.identity
     })
+
     const links = dagLinks({
       graph: this.replica.graph,
       access: this.access
@@ -94,6 +103,15 @@ export class LiveReplicator extends Playable {
 
     const traversed = await traverser({ cids, load, links })
     await this.replica.add(traversed)
+	}
+
+	private async getHeads (): Promise<Uint8Array> {
+    const heads: CID[] = Array.from(await all(this.replica.heads.queryKeys({})))
+      .map(key => parsedcid(key.baseNamespace()))
+
+    const advert = await Advert.write(this.manifest.address.cid, heads)
+
+		return advert.bytes;
 	}
 }
 
