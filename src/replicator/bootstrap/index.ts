@@ -27,7 +27,7 @@ export class BootstrapReplicator extends Playable {
     replica,
     blocks
   }: Config) {
-    const starting = async (): Promise<void> => {
+    const starting = async () => {
 			// Handle direct head requests.
 			await this.libp2p.handle(this.protocol, data => this.handle(data));
 
@@ -35,7 +35,7 @@ export class BootstrapReplicator extends Playable {
 			await this.bootstrap()
     }
 
-    const stopping = async (): Promise<void> => {
+    const stopping = async () => {
 			await this.libp2p.unhandle(this.protocol);
     }
 

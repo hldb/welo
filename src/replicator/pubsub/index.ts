@@ -21,14 +21,14 @@ export class PubsubReplicator extends Playable {
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
 	private readonly onReplicaHeadsUpdate: typeof this.broadcast;
-	private readonly onPubsubMessage: (evt: CustomEvent<Message>) => Promise<void>;
+	private readonly onPubsubMessage: typeof this.parseHeads;
 
   constructor ({
     ipfs,
     replica,
     blocks
   }: Config) {
-    const starting = async (): Promise<void> => {
+    const starting = async () => {
 			this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
 
@@ -36,7 +36,7 @@ export class PubsubReplicator extends Playable {
 			this.pubsub.addEventListener("message", this.onPubsubMessage)
     }
 
-    const stopping = async (): Promise<void> => {
+    const stopping = async () => {
 			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
 
@@ -53,8 +53,8 @@ export class PubsubReplicator extends Playable {
     this.access = replica.access
     this.components = replica.components
 
-		this.onReplicaHeadsUpdate = () => this.broadcast();
-		this.onPubsubMessage = (evt: CustomEvent<Message>) => this.parseHeads(evt.detail.data);
+		this.onReplicaHeadsUpdate = this.broadcast.bind(this);
+		this.onPubsubMessage = this.parseHeads.bind(this);
   }
 
 	private get libp2p () {
@@ -69,8 +69,8 @@ export class PubsubReplicator extends Playable {
 		return `${protocol}${cidstring(this.manifest.address.cid)}`
 	}
 
-	private async parseHeads (message: Uint8Array) {
-		const heads = await decodeHeads(message);
+	private async parseHeads (evt: CustomEvent<Message>) {
+		const heads = await decodeHeads(evt.detail.data);
 
 		await addHeads(heads, this.replica, this.components)
 	}
