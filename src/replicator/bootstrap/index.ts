@@ -1,13 +1,10 @@
-import all from 'it-all'
-import type { GossipHelia } from '@/interface'
-import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
-import { take, transform } from 'streaming-iterables'
-import { fromString as uint8ArrayFromString } from 'uint8arrays'
+import concat from 'it-concat'
 import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
+import type { GossipHelia } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
@@ -32,14 +29,8 @@ export class BootstrapReplicator extends Playable {
     const starting = async (): Promise<void> => {
 			// Handle direct head requests.
 			await this.libp2p.handle(this.protocol, async data => {
-				const heads = await this.encodeHeads();
-
-				await pipe(data.stream, lp.decode, function * () {
-					yield heads;
-				}, lp.encode, data.stream);
+				await pipe([await this.encodeHeads()], data.stream);
 			});
-
-			console.log("bootstrapping heads");
 
 			// Bootstrap the heads
 			try {
@@ -56,18 +47,9 @@ export class BootstrapReplicator extends Playable {
 					await this.libp2p.peerStore.save(peer.id, peer)
 
 					const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
-					const encoded = uint8ArrayFromString("get")
-					const responses = await pipe(
-						[encoded],
-						lp.encode,
-						stream,
-						lp.decode,
-						take(1),
-						transform(1)((item: any) => item.subarray()),
-						all
-					) as  [Uint8Array];
+					const responses = await pipe(stream, itr => concat(itr, { type: "buffer" }))
 
-					await this.parseHeads(responses[0]);
+					await this.parseHeads(responses.subarray());
 				}
 			} catch (error) {
 				console.error("bootstrapping failed", error)

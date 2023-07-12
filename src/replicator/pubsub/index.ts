@@ -1,8 +1,8 @@
-import type { GossipHelia } from '@/interface'
 import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
+import type { GossipHelia } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
@@ -37,11 +37,10 @@ export class PubsubReplicator extends Playable {
     }
 
     const stopping = async (): Promise<void> => {
-			this.pubsub.unsubscribe(this.protocol)
-
 			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
 
+			this.pubsub.unsubscribe(this.protocol)
 			this.pubsub.removeEventListener("message", this.onPubsubMessage)
     }
 
@@ -55,9 +54,7 @@ export class PubsubReplicator extends Playable {
     this.components = replica.components
 
 		this.onReplicaHeadsUpdate = () => this.broadcast();
-		this.onPubsubMessage = (evt: CustomEvent<Message>) => {
-			return this.parseHeads(evt.detail.data)
-		};
+		this.onPubsubMessage = (evt: CustomEvent<Message>) => this.parseHeads(evt.detail.data);
   }
 
 	private get libp2p () {
