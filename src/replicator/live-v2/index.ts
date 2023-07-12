@@ -3,7 +3,7 @@ import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
 import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
-import { take } from 'streaming-iterables'
+import { take, transform } from 'streaming-iterables'
 import { fromString as uint8ArrayFromString } from "uint8arrays";
 
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
@@ -14,6 +14,7 @@ import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
+import type { Message } from '@libp2p/interface-pubsub'
 
 import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
@@ -28,7 +29,7 @@ export class LiveReplicator extends Playable {
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
 	private readonly onReplicaHeadsUpdate: typeof this.broadcast;
-	private readonly onPubsubMessage: (evt: CustomEvent) => Promise<void>;
+	private readonly onPubsubMessage: (evt: CustomEvent<Message>) => Promise<void>;
 
   constructor ({
     ipfs,
@@ -46,29 +47,47 @@ export class LiveReplicator extends Playable {
 			});
 
 			// Bootstrap the heads
-			for await (const peer of this.peers) {
-				// We don't care about peers that don't support our protocol.
-				if (!peer.protocols.includes(this.protocol)) {
-					continue
+			try {
+				for await (const peer of this.peers) {
+					// We don't care about peers that don't support our protocol.
+					if (!peer.protocols.includes(this.protocol)) {
+						//continue
+					}
+
+					if (peer.id.equals(this.libp2p.peerId)) {
+						continue
+					}
+
+					await this.libp2p.peerStore.save(peer.id, peer)
+
+					const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
+					const encoded = uint8ArrayFromString("get")
+					const responses = await pipe(
+						[encoded],
+						lp.encode,
+						stream,
+						lp.decode,
+						take(1),
+						transform(1)((item: any) => item.subarray()),
+						all
+					) as  [Uint8Array];
+
+					await this.addHeads(responses[0]);
 				}
-
-				await this.libp2p.peerStore.save(peer.id, peer)
-
-				const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
-				const encoded = uint8ArrayFromString("get")
-				const responses = await pipe([encoded], lp.encode, stream, lp.decode, take(1), all) as  [Uint8Array];
-
-				await this.addHeads(responses[0]);
+			} catch (error) {
+				console.error("bootstrapping failed", error)
 			}
 
 			this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
 
+			this.pubsub.subscribe(this.protocol)
 			this.pubsub.addEventListener("message", this.onPubsubMessage)
     }
 
     const stopping = async (): Promise<void> => {
 			await this.libp2p.unhandle(this.protocol);
+			this.pubsub.unsubscribe(this.protocol)
 
 			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
@@ -86,7 +105,9 @@ export class LiveReplicator extends Playable {
     this.components = replica.components
 
 		this.onReplicaHeadsUpdate = () => this.broadcast();
-		this.onPubsubMessage = (evt: CustomEvent) => this.addHeads(evt.detail);
+		this.onPubsubMessage = (evt: CustomEvent<Message>) => {
+			return this.addHeads(evt.detail.data)
+		};
   }
 
 	private get libp2p () {
@@ -98,7 +119,9 @@ export class LiveReplicator extends Playable {
 	}
 
 	private get peers () {
-		return this.libp2p.contentRouting.findProviders(this.manifest.address.cid)
+		return this.libp2p.contentRouting.findProviders(this.manifest.address.cid, {
+			signal: AbortSignal.timeout(1000)
+		})
 	}
 
 	private get protocol () {
