@@ -171,7 +171,10 @@ export class ZzzyncReplicator extends Playable {
 
     const providers: Map<string, Ed25519PeerId> = new Map()
     for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
-      if (event.name === 'PROVIDER') {
+      if (
+        event.name === 'PROVIDER' ||
+        (event.name === 'PEER_RESPONSE' && event.messageName === 'GET_PROVIDERS')
+      ) {
         for (const provider of event.providers) {
           if (provider.id.type !== 'Ed25519') {
             continue
