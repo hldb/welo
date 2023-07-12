@@ -72,16 +72,11 @@ export class PubsubReplicator extends Playable {
 	private async parseHeads (message: Uint8Array) {
 		const heads = await decodeHeads(message);
 
-		await addHeads(heads, {
-			replica: this.replica,
-			access: this.access,
-			blocks: this.blocks,
-			...this.components
-		})
+		await addHeads(heads, this.replica, this.components)
 	}
 
 	private async encodeHeads (): Promise<Uint8Array> {
-    const heads = await getHeads(this.replica, this.manifest)
+    const heads = await getHeads(this.replica)
 
 		return await encodeHeads(heads);
 	}
