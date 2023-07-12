@@ -23,8 +23,6 @@ import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
 import protocol from './protocol.js'
 
-const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
-
 export class LiveReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly manifest: Manifest
@@ -34,6 +32,7 @@ export class LiveReplicator extends Playable {
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
 	private readonly onReplicaHeadsUpdate: typeof this.broadcast;
+	private readonly onPubsubMessage: (evt: CustomEvent) => Promise<void>;
 
   constructor ({
     ipfs,
@@ -42,7 +41,7 @@ export class LiveReplicator extends Playable {
   }: Config) {
     const starting = async (): Promise<void> => {
 			// Handle direct head requests.
-			await this.libp2p.handle(protocol, async data => {
+			await this.libp2p.handle(this.protocol, async data => {
 				const heads = await this.getHeads();
 
 				await pipe(data.stream, lp.decode, function * () {
@@ -53,13 +52,13 @@ export class LiveReplicator extends Playable {
 			// Bootstrap the heads
 			for await (const peer of this.peers) {
 				// We don't care about peers that don't support our protocol.
-				if (!peer.protocols.includes(protocol)) {
+				if (!peer.protocols.includes(this.protocol)) {
 					continue
 				}
 
 				await this.libp2p.peerStore.save(peer.id, peer)
 
-				const stream = await this.libp2p.dialProtocol(peer.id, protocol)
+				const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
 				const encoded = uint8ArrayFromString("get")
 				const responses = await pipe([encoded], lp.encode, stream, lp.decode, take(1), all) as  [Uint8Array];
 
@@ -68,13 +67,17 @@ export class LiveReplicator extends Playable {
 
 			this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
+
+			this.pubsub.addEventListener("message", this.onPubsubMessage)
     }
 
     const stopping = async (): Promise<void> => {
-			await this.libp2p.unhandle(protocol);
+			await this.libp2p.unhandle(this.protocol);
 
 			this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
 			this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
+
+			this.pubsub.removeEventListener("message", this.onPubsubMessage)
     }
 
     super({ starting, stopping })
@@ -87,6 +90,7 @@ export class LiveReplicator extends Playable {
     this.components = replica.components
 
 		this.onReplicaHeadsUpdate = () => this.broadcast();
+		this.onPubsubMessage = (evt: CustomEvent) => this.addHeads(evt.detail);
   }
 
 	private get libp2p () {
@@ -98,7 +102,11 @@ export class LiveReplicator extends Playable {
 	}
 
 	private get peers () {
-		return this.ipfs.libp2p.contentRouting.findProviders(this.manifest.address.cid)
+		return this.libp2p.contentRouting.findProviders(this.manifest.address.cid)
+	}
+
+	private get protocol () {
+		return `${protocol}${cidstring(this.manifest.address.cid)}`
 	}
 
 	private async addHeads (message: Uint8Array) {
@@ -129,8 +137,8 @@ export class LiveReplicator extends Playable {
 		return advert.bytes;
 	}
 
-	private broadcast () {
-
+	private async broadcast () {
+		this.pubsub.publish(this.protocol, await this.getHeads());
 	}
 }
 
