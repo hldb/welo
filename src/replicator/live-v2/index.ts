@@ -6,9 +6,10 @@ import type { CID } from 'multiformats/cid'
 import type { Message } from '@libp2p/interface-pubsub'
 import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
+import { take } from 'streaming-iterables'
 import { toString as uint8ArrayToString, fromString as uint8ArrayFromString } from "uint8arrays";
 
-//import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
+import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { Direct } from '@/pubsub/direct.js'
@@ -48,8 +49,9 @@ export class LiveReplicator extends Playable {
 
 				const stream = await this.libp2p.dialProtocol(peer.id, protocol)
 				const encoded = uint8ArrayFromString("get")
-				const responses = await pipe([encoded], lp.encode, stream, lp.decode, all) as  Uint8Array[];
-				const heads = await Promise.all(responses.map(r => Advert.read(r)));
+				const responses = await pipe([encoded], lp.encode, stream, lp.decode, take(1), all) as  [Uint8Array];
+
+				await this.addHeads(responses[0]);
 			}
     }
     const stopping = async (): Promise<void> => {
@@ -74,6 +76,24 @@ export class LiveReplicator extends Playable {
 
 	private get peers () {
 		return this.ipfs.libp2p.contentRouting.findProviders(this.manifest.address.cid)
+	}
+
+	private async addHeads (message: Uint8Array) {
+    const advert = await Advert.read(message)
+    const cids = advert.value.heads
+
+    const load = loadEntry({
+      blocks: this.blocks,
+      entry: this.components.entry,
+      identity: this.components.identity
+    })
+    const links = dagLinks({
+      graph: this.replica.graph,
+      access: this.access
+    })
+
+    const traversed = await traverser({ cids, load, links })
+    await this.replica.add(traversed)
 	}
 }
 

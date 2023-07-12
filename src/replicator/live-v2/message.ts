@@ -13,7 +13,7 @@ interface BlockData<Protocol> {
 
 type BlockDataP = BlockData<typeof protocol>
 
-type BlockMessage = BlockView<BlockDataP>
+export type BlockMessage = BlockView<BlockDataP>
 
 export async function write (
   database: CID,
