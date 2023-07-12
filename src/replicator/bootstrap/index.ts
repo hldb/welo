@@ -1,22 +1,20 @@
 import all from 'it-all'
 import type { GossipHelia } from '@/interface'
-import type { CID } from 'multiformats/cid'
 import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
 import { take, transform } from 'streaming-iterables'
-import { fromString as uint8ArrayFromString } from "uint8arrays";
-import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
-import { cidstring, parsedcid } from '@/utils/index.js'
+import { fromString as uint8ArrayFromString } from 'uint8arrays'
+import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
+import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
+import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
-import type { Config, ReplicatorModule } from '../interface.js'
-import * as Advert from './message.js'
-import protocol from './protocol.js'
+export const protocol = `${prefix}bootstrap/1.0.0/` as const
 
 export class BootstrapReplicator extends Playable {
   readonly ipfs: GossipHelia
@@ -34,12 +32,14 @@ export class BootstrapReplicator extends Playable {
     const starting = async (): Promise<void> => {
 			// Handle direct head requests.
 			await this.libp2p.handle(this.protocol, async data => {
-				const heads = await this.getHeads();
+				const heads = await this.encodeHeads();
 
 				await pipe(data.stream, lp.decode, function * () {
 					yield heads;
 				}, lp.encode, data.stream);
 			});
+
+			console.log("bootstrapping heads");
 
 			// Bootstrap the heads
 			try {
@@ -67,7 +67,7 @@ export class BootstrapReplicator extends Playable {
 						all
 					) as  [Uint8Array];
 
-					await this.addHeads(responses[0]);
+					await this.parseHeads(responses[0]);
 				}
 			} catch (error) {
 				console.error("bootstrapping failed", error)
@@ -102,32 +102,21 @@ export class BootstrapReplicator extends Playable {
 		return `${protocol}${cidstring(this.manifest.address.cid)}`
 	}
 
-	private async addHeads (message: Uint8Array) {
-    const advert = await Advert.read(message)
-    const cids = advert.value.heads
+	private async parseHeads (message: Uint8Array) {
+		const heads = await decodeHeads(message);
 
-    const load = loadEntry({
-      blocks: this.blocks,
-      entry: this.components.entry,
-      identity: this.components.identity
-    })
-
-    const links = dagLinks({
-      graph: this.replica.graph,
-      access: this.access
-    })
-
-    const traversed = await traverser({ cids, load, links })
-    await this.replica.add(traversed)
+		await addHeads(heads, {
+			replica: this.replica,
+			access: this.access,
+			blocks: this.blocks,
+			...this.components
+		})
 	}
 
-	private async getHeads (): Promise<Uint8Array> {
-    const heads: CID[] = Array.from(await all(this.replica.heads.queryKeys({})))
-      .map(key => parsedcid(key.baseNamespace()))
+	private async encodeHeads (): Promise<Uint8Array> {
+    const heads = await getHeads(this.replica, this.manifest)
 
-    const advert = await Advert.write(this.manifest.address.cid, heads)
-
-		return advert.bytes;
+		return await encodeHeads(heads);
 	}
 }
 
