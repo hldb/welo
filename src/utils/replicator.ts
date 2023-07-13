@@ -12,42 +12,42 @@ export interface Heads {
 }
 
 export const getHeads = async (replica: Replica): Promise<Heads> => {
-	const keys = await all(replica.heads.queryKeys({}))
-	const heads: CID[] = keys.map(key => parsedcid(key.baseNamespace()))
+  const keys = await all(replica.heads.queryKeys({}))
+  const heads: CID[] = keys.map(key => parsedcid(key.baseNamespace()))
 
-	return { database: replica.manifest.address.cid, heads }
+  return { database: replica.manifest.address.cid, heads }
 }
 
 export const encodeHeads = async (heads: Heads): Promise<Uint8Array> => {
-	const block = await Blocks.encode({ value: heads })
+  const block = await Blocks.encode({ value: heads })
 
-	return block.bytes;
+  return block.bytes
 }
 
 export const decodeHeads = async (bytes: Uint8Array): Promise<Heads> => {
-	const block = await Blocks.decode<Heads>({ bytes })
+  const block = await Blocks.decode<Heads>({ bytes })
 
-	return block.value;
+  return block.value
 }
 
 export async function addHeads (
-	heads: Heads,
-	replica: Replica,
-	components: Pick<DbComponents, 'entry' | 'identity'>
+  heads: Heads,
+  replica: Replica,
+  components: Pick<DbComponents, 'entry' | 'identity'>
 ): Promise<void> {
-	const cids = heads.heads
+  const cids = heads.heads
 
-	const load = loadEntry({
-		blocks: replica.blocks,
-		entry: components.entry,
-		identity: components.identity
-	})
+  const load = loadEntry({
+    blocks: replica.blocks,
+    entry: components.entry,
+    identity: components.identity
+  })
 
-	const links = dagLinks({
-		access: replica.access,
-		graph: replica.graph
-	})
+  const links = dagLinks({
+    access: replica.access,
+    graph: replica.graph
+  })
 
-	const traversed = await traverser({ cids, load, links })
-	await replica.add(traversed)
+  const traversed = await traverser({ cids, load, links })
+  await replica.add(traversed)
 }

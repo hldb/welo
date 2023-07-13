@@ -4,19 +4,20 @@ import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
-import type { GossipHelia } from '@/interface'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Stream } from '@libp2p/interface-connection'
+import type { PeerInfo } from '@libp2p/interface-peer-info'
 
 export const protocol = `${prefix}bootstrap/1.0.0/` as const
 
 export interface Options {
-	peers: number
-	timeout: number
+  peers: number
+  timeout: number
 }
 
 export class BootstrapReplicator extends Playable {
@@ -26,21 +27,21 @@ export class BootstrapReplicator extends Playable {
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
-	private readonly options: Options;
+  private readonly options: Options
 
   constructor ({ ipfs, replica, blocks }: Config, options: Partial<Options> = {}) {
-    const starting = async () => {
-			// Handle direct head requests.
-			await this.libp2p.handle(this.protocol, this.handle.bind(this));
+    const starting = async (): Promise<void> => {
+      // Handle direct head requests.
+      await this.libp2p.handle(this.protocol, () => this.handle.bind(this));
 
-			// Bootstrap the heads
-			(async () => {
-				await this.bootstrap()
-			})()
+      // Bootstrap the heads
+      (async () => {
+        await this.bootstrap()
+      })().catch(() => {})
     }
 
-    const stopping = async () => {
-			await this.libp2p.unhandle(this.protocol);
+    const stopping = async (): Promise<void> => {
+      await this.libp2p.unhandle(this.protocol)
     }
 
     super({ starting, stopping })
@@ -52,79 +53,79 @@ export class BootstrapReplicator extends Playable {
     this.access = replica.access
     this.components = replica.components
 
-		this.options = {
-			peers: options.peers ?? 5,
-			timeout: options.timeout ?? 3000
-		}
+    this.options = {
+      peers: options.peers ?? 5,
+      timeout: options.timeout ?? 3000
+    }
   }
 
-	private get libp2p () {
-		return this.ipfs.libp2p;
-	}
+  private get libp2p (): GossipLibp2p {
+    return this.ipfs.libp2p
+  }
 
-	private get protocol () {
-		return `${protocol}${cidstring(this.manifest.address.cid)}`
-	}
+  private get protocol (): string {
+    return `${protocol}${cidstring(this.manifest.address.cid)}`
+  }
 
-	private async * getPeers () {
-		const itr = this.libp2p.contentRouting.findProviders(this.manifest.address.cid, {
-			signal: AbortSignal.timeout(this.options.timeout)
-		});
+  private async * getPeers (): AsyncGenerator<PeerInfo> {
+    const itr = this.libp2p.contentRouting.findProviders(this.manifest.address.cid, {
+      signal: AbortSignal.timeout(this.options.timeout)
+    })
 
-		try {
-			let i = 0;
+    try {
+      let i = 0
 
-			for await (const peer of itr) {
-				if (i >= this.options.peers) {
-					break;
-				}
+      for await (const peer of itr) {
+        if (i >= this.options.peers) {
+          break
+        }
 
-				yield peer;
+        yield peer
 
-				i++;
-			}
-		} catch (error) {
-			// Ignore errors.
-		}
-	}
+        i++
+      }
+    } catch (error) {
+      // Ignore errors.
+    }
+  }
 
-	private async parseHeads (message: Uint8Array) {
-		const heads = await decodeHeads(message);
+  private async parseHeads (message: Uint8Array): Promise<void> {
+    const heads = await decodeHeads(message)
 
-		await addHeads(heads, this.replica, this.components)
-	}
+    await addHeads(heads, this.replica, this.components)
+  }
 
-	private async encodeHeads () {
+  private async encodeHeads (): Promise<Uint8Array> {
     const heads = await getHeads(this.replica)
 
-		return await encodeHeads(heads);
-	}
+    return await encodeHeads(heads)
+  }
 
-	private async handle ({ stream }: { stream: Stream }) {
-		await pipe([await this.encodeHeads()], stream);
-	}
+  private async handle ({ stream }: { stream: Stream }): Promise<void> {
+    await pipe([await this.encodeHeads()], stream)
+  }
 
-	private async bootstrap () {
-		const promises: Promise<void>[] = [];
+  private async bootstrap (): Promise<void> {
+    const promises: Array<Promise<void>> = []
 
-		for await (const peer of this.getPeers()) {
-			if (peer.id.equals(this.libp2p.peerId)) {
-				continue
-			}
+    for await (const peer of this.getPeers()) {
+      if (peer.id.equals(this.libp2p.peerId)) {
+        continue
+      }
 
-			promises.push(Promise.resolve().then(async () => {
-				await this.libp2p.peerStore.save(peer.id, peer)
+      promises.push(Promise.resolve().then(async () => {
+        await this.libp2p.peerStore.save(peer.id, peer)
 
-				const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
-				const responses = await pipe(stream, itr => concat(itr, { type: "buffer" }))
+        const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
+        const responses = await pipe(stream, async itr => await concat(itr, { type: 'buffer' }))
 
-				await this.parseHeads(responses.subarray());
-			}))
-		}
+        await this.parseHeads(responses.subarray())
+      }))
+    }
 
-		// Don't really care if individual head syncs fail.
-		await Promise.allSettled(promises)
-	}
+    // Don't really care if individual head syncs fail.
+    await Promise.allSettled(promises)
+  }
 }
 
 export const bootstrapReplicator: (options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
