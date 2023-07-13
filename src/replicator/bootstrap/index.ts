@@ -127,7 +127,7 @@ export class BootstrapReplicator extends Playable {
 	}
 }
 
-export const bootstrapReplicator: (options: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
+export const bootstrapReplicator: (options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
   protocol,
   create: (config: Config) => new BootstrapReplicator(config, options)
 })
