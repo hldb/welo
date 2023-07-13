@@ -55,7 +55,7 @@ export class BootstrapReplicator extends Playable {
 
     this.options = {
       peers: options.peers ?? 5,
-      timeout: options.timeout ?? 3000
+      timeout: options.timeout ?? 10000
     }
   }
 
