@@ -31,10 +31,12 @@ export class BootstrapReplicator extends Playable {
   constructor ({ ipfs, replica, blocks }: Config, options: Partial<Options> = {}) {
     const starting = async () => {
 			// Handle direct head requests.
-			await this.libp2p.handle(this.protocol, data => this.handle(data));
+			await this.libp2p.handle(this.protocol, this.handle.bind(this));
 
 			// Bootstrap the heads
-			await this.bootstrap()
+			(async () => {
+				await this.bootstrap()
+			})()
     }
 
     const stopping = async () => {
