@@ -14,6 +14,11 @@ import type { Stream } from '@libp2p/interface-connection'
 
 export const protocol = `${prefix}bootstrap/1.0.0/` as const
 
+export interface Options {
+	peers: number
+	timeout: number
+}
+
 export class BootstrapReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly manifest: Manifest
@@ -21,12 +26,9 @@ export class BootstrapReplicator extends Playable {
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
+	private readonly options: Options;
 
-  constructor ({
-    ipfs,
-    replica,
-    blocks
-  }: Config) {
+  constructor ({ ipfs, replica, blocks }: Config, options: Partial<Options> = {}) {
     const starting = async () => {
 			// Handle direct head requests.
 			await this.libp2p.handle(this.protocol, data => this.handle(data));
@@ -47,6 +49,11 @@ export class BootstrapReplicator extends Playable {
     this.manifest = replica.manifest
     this.access = replica.access
     this.components = replica.components
+
+		this.options = {
+			peers: options.peers ?? 5,
+			timeout: options.timeout ?? 3000
+		}
   }
 
 	private get libp2p () {
@@ -59,12 +66,20 @@ export class BootstrapReplicator extends Playable {
 
 	private async * getPeers () {
 		const itr = this.libp2p.contentRouting.findProviders(this.manifest.address.cid, {
-			signal: AbortSignal.timeout(1000)
+			signal: AbortSignal.timeout(this.options.timeout)
 		});
 
 		try {
+			let i = 0;
+
 			for await (const peer of itr) {
+				if (i >= this.options.peers) {
+					break;
+				}
+
 				yield peer;
+
+				i++;
 			}
 		} catch (error) {
 			// Ignore errors.
@@ -110,7 +125,7 @@ export class BootstrapReplicator extends Playable {
 	}
 }
 
-export const bootstrapReplicator: () => ReplicatorModule<BootstrapReplicator, typeof protocol> = () => ({
+export const bootstrapReplicator: (options: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
   protocol,
-  create: (config: Config) => new BootstrapReplicator(config)
+  create: (config: Config) => new BootstrapReplicator(config, options)
 })
