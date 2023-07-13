@@ -29,7 +29,6 @@ export class PubsubReplicator extends Playable {
     blocks
   }: Config) {
     const starting = async (): Promise<void> => {
-      this.replica.events.addEventListener('update', this.onReplicaHeadsUpdate)
       this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
 
       this.pubsub.subscribe(this.protocol)
@@ -37,7 +36,6 @@ export class PubsubReplicator extends Playable {
     }
 
     const stopping = async (): Promise<void> => {
-      this.replica.events.removeEventListener('update', this.onReplicaHeadsUpdate)
       this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
 
       this.pubsub.unsubscribe(this.protocol)
