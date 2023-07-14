@@ -75,6 +75,9 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
   }
   const manifest = await getTestManifest(name, accessConfig)
 
+  await ipfs1.blockstore.put(manifest.block.cid, manifest.block.bytes)
+  await ipfs2.blockstore.put(manifest.block.cid, manifest.block.bytes)
+
   const access = new Access({ manifest })
   await start(access)
 
