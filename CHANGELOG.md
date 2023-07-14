@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.2](https://github.com/hldb/welo/compare/v2.2.1...v2.2.2) (2023-07-14)
+
+
+### Bug Fixes
+
+* zzzync also uses GET_PROVIDERS queries ([91b1b73](https://github.com/hldb/welo/commit/91b1b733e8c378ecb178527be339b20cbfe6d8f2))
+* zzzync upload checks if cid ([85b981b](https://github.com/hldb/welo/commit/85b981bf135460b540725986dc70c9da41398457))
+
 ## [2.2.1](https://github.com/hldb/welo/compare/v2.2.0...v2.2.1) (2023-07-11)
 
 
