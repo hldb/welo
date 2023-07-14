@@ -1,12 +1,13 @@
 import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
-import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
+import { addHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
+import { CID } from 'multiformats/cid'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
-import type { Replica } from '@/replica/index.js'
+import type { Replica, ReplicaEvents } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Message, PubSub } from '@libp2p/interface-pubsub'
 
@@ -20,7 +21,7 @@ export class PubsubReplicator extends Playable {
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
-  private readonly onReplicaHeadsUpdate: () => void
+  private readonly onReplicaHeadsUpdate: (evt: ReplicaEvents['write']) => void
   private readonly onPubsubMessage: (evt: CustomEvent<Message>) => void
 
   constructor ({
@@ -51,8 +52,8 @@ export class PubsubReplicator extends Playable {
     this.access = replica.access
     this.components = replica.components
 
-    this.onReplicaHeadsUpdate = this.broadcast.bind(this) as () => void
-    this.onPubsubMessage = this.parseHeads.bind(this) as (evt: CustomEvent<Message>) => void
+    this.onReplicaHeadsUpdate = this.broadcast.bind(this) as (evt: ReplicaEvents['write']) => void
+    this.onPubsubMessage = this.parseHead.bind(this) as (evt: CustomEvent<Message>) => void
   }
 
   get topic (): string {
@@ -67,20 +68,14 @@ export class PubsubReplicator extends Playable {
     return this.libp2p.services.pubsub
   }
 
-  private async parseHeads (evt: CustomEvent<Message>): Promise<void> {
-    const heads = await decodeHeads(evt.detail.data)
+  private async parseHead (evt: CustomEvent<Message>): Promise<void> {
+    const head = CID.decode(evt.detail.data)
 
-    await addHeads(heads, this.replica, this.components)
+    await addHeads([head], this.replica, this.components)
   }
 
-  private async encodeHeads (): Promise<Uint8Array> {
-    const heads = await getHeads(this.replica)
-
-    return await encodeHeads(heads)
-  }
-
-  private async broadcast (): Promise<void> {
-    await this.pubsub.publish(this.topic, await this.encodeHeads())
+  private async broadcast (evt: ReplicaEvents['write']): Promise<void> {
+    await this.pubsub.publish(this.topic, evt.detail.cid.bytes)
   }
 }
 

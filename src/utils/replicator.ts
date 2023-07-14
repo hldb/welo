@@ -6,37 +6,29 @@ import type { DbComponents } from '@/interface.js'
 import type { CID } from 'multiformats/cid'
 import type { Replica } from '@/replica/index.js'
 
-export interface Heads {
-  database: CID
-  heads: CID[]
-}
-
-export const getHeads = async (replica: Replica): Promise<Heads> => {
+export const getHeads = async (replica: Replica): Promise<CID[]> => {
   const keys = await all(replica.heads.queryKeys({}))
-  const heads: CID[] = keys.map(key => parsedcid(key.baseNamespace()))
 
-  return { database: replica.manifest.address.cid, heads }
+  return keys.map(key => parsedcid(key.baseNamespace()))
 }
 
-export const encodeHeads = async (heads: Heads): Promise<Uint8Array> => {
-  const block = await Blocks.encode({ value: heads })
+export const encodeHeads = async (cids: CID[]): Promise<Uint8Array> => {
+  const block = await Blocks.encode({ value: cids })
 
   return block.bytes
 }
 
-export const decodeHeads = async (bytes: Uint8Array): Promise<Heads> => {
-  const block = await Blocks.decode<Heads>({ bytes })
+export const decodeHeads = async (bytes: Uint8Array): Promise<CID[]> => {
+  const block = await Blocks.decode<CID[]>({ bytes })
 
   return block.value
 }
 
 export async function addHeads (
-  heads: Heads,
+  cids: CID[],
   replica: Replica,
   components: Pick<DbComponents, 'entry' | 'identity'>
 ): Promise<void> {
-  const cids = heads.heads
-
   const load = loadEntry({
     blocks: replica.blocks,
     entry: components.entry,
