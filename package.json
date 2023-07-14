@@ -20,6 +20,7 @@
   },
   "prettier": "prettier-config-standard",
   "scripts": {
+    "generate": "protons src/message/*.proto",
     "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
     "reset": "rm -rf node_modules package-lock.json && npm install",
@@ -33,7 +34,9 @@
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
     "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-replicator-pubsub*.js -- --exit && npm run clean",
+    "test:node2": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-replicator.js -- --exit && npm run clean",
+    "test:node3": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-replicator-bootstrap.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },
@@ -95,6 +98,7 @@
     "path-browserify": "^1.0.1",
     "prettier": "^2.7.1",
     "prettier-config-standard": "^5.0.0",
+    "protons": "^7.0.4",
     "ts-loader": "^9.4.2",
     "ts-patch": "^2.0.2",
     "typescript": "^4.8.4",
@@ -119,6 +123,7 @@
     "it-drain": "3.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.0",
+    "protons-runtime": "^5.0.1",
     "uint8arrays": "^4.0.3",
     "w3name": "^1.0.8",
     "web3.storage": "^4.5.4"

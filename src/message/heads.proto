@@ -1,0 +1,3 @@
+message Heads {
+  repeated bytes cids = 1;
+}
