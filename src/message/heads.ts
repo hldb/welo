@@ -10,6 +10,7 @@ import type { Uint8ArrayList } from 'uint8arraylist'
 
 export interface Heads {
   cids: Uint8Array[]
+  comprehensive?: boolean
 }
 
 export namespace Heads {
@@ -29,6 +30,11 @@ export namespace Heads {
           }
         }
 
+        if (obj.comprehensive != null) {
+          w.uint32(16)
+          w.bool(obj.comprehensive)
+        }
+
         if (opts.lengthDelimited !== false) {
           w.ldelim()
         }
@@ -45,6 +51,9 @@ export namespace Heads {
           switch (tag >>> 3) {
             case 1:
               obj.cids.push(reader.bytes())
+              break
+            case 2:
+              obj.comprehensive = reader.bool()
               break
             default:
               reader.skipType(tag & 7)
@@ -65,5 +74,82 @@ export namespace Heads {
 
   export const decode = (buf: Uint8Array | Uint8ArrayList): Heads => {
     return decodeMessage(buf, Heads.codec())
+  }
+}
+
+export interface RequestHeads {
+  filter: Uint8Array
+  hashes: number
+  hash?: Uint8Array
+}
+
+export namespace RequestHeads {
+  let _codec: Codec<RequestHeads>
+
+  export const codec = (): Codec<RequestHeads> => {
+    if (_codec == null) {
+      _codec = message<RequestHeads>((obj, w, opts = {}) => {
+        if (opts.lengthDelimited !== false) {
+          w.fork()
+        }
+
+        if ((obj.filter != null && obj.filter.byteLength > 0)) {
+          w.uint32(10)
+          w.bytes(obj.filter)
+        }
+
+        if ((obj.hashes != null && obj.hashes !== 0)) {
+          w.uint32(16)
+          w.uint32(obj.hashes)
+        }
+
+        if (obj.hash != null) {
+          w.uint32(26)
+          w.bytes(obj.hash)
+        }
+
+        if (opts.lengthDelimited !== false) {
+          w.ldelim()
+        }
+      }, (reader, length) => {
+        const obj: any = {
+          filter: new Uint8Array(0),
+          hashes: 0
+        }
+
+        const end = length == null ? reader.len : reader.pos + length
+
+        while (reader.pos < end) {
+          const tag = reader.uint32()
+
+          switch (tag >>> 3) {
+            case 1:
+              obj.filter = reader.bytes()
+              break
+            case 2:
+              obj.hashes = reader.uint32()
+              break
+            case 3:
+              obj.hash = reader.bytes()
+              break
+            default:
+              reader.skipType(tag & 7)
+              break
+          }
+        }
+
+        return obj
+      })
+    }
+
+    return _codec
+  }
+
+  export const encode = (obj: Partial<RequestHeads>): Uint8Array => {
+    return encodeMessage(obj, RequestHeads.codec())
+  }
+
+  export const decode = (buf: Uint8Array | Uint8ArrayList): RequestHeads => {
+    return decodeMessage(buf, RequestHeads.codec())
   }
 }
