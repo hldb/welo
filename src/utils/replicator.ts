@@ -4,6 +4,9 @@ import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { Heads } from '@/message/heads.js'
 import { CID } from 'multiformats/cid'
 import { BloomFilter } from 'fission-bloom-filters'
+import { sha256 } from 'multiformats/hashes/sha2'
+import * as raw from 'multiformats/codecs/raw'
+import { concat, compare } from 'uint8arrays'
 import type { DbComponents } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
 
@@ -33,6 +36,15 @@ export const getDifference = async (replica: Replica, filter: Uint8Array, hashes
   const heads = await getHeads(replica)
 
   return heads.filter(h => !filterObj.has(h.bytes))
+}
+
+export const hashHeads = async (cids: CID[]): Promise<CID> => {
+	const asBytes = cids.map(c => c.bytes).sort(compare)
+	const bytes = concat(asBytes)
+
+	const hash = await sha256.digest(bytes)
+
+	return CID.createV1(raw.code, hash)
 }
 
 export const encodeHeads = (cids: CID[]): Uint8Array => {
