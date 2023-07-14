@@ -31,14 +31,14 @@ export class PubsubReplicator extends Playable {
     const starting = async (): Promise<void> => {
       this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
 
-      this.pubsub.subscribe(this.protocol)
+      this.pubsub.subscribe(this.topic)
       this.pubsub.addEventListener('message', this.onPubsubMessage)
     }
 
     const stopping = async (): Promise<void> => {
       this.replica.events.removeEventListener('write', this.onReplicaHeadsUpdate)
 
-      this.pubsub.unsubscribe(this.protocol)
+      this.pubsub.unsubscribe(this.topic)
       this.pubsub.removeEventListener('message', this.onPubsubMessage)
     }
 
@@ -55,16 +55,16 @@ export class PubsubReplicator extends Playable {
     this.onPubsubMessage = this.parseHeads.bind(this) as (evt: CustomEvent<Message>) => void
   }
 
+  get topic (): string {
+    return `${protocol}${cidstring(this.manifest.address.cid)}`
+  }
+
   private get libp2p (): GossipLibp2p {
     return this.ipfs.libp2p
   }
 
   private get pubsub (): PubSub {
     return this.libp2p.services.pubsub
-  }
-
-  private get protocol (): string {
-    return `${protocol}${cidstring(this.manifest.address.cid)}`
   }
 
   private async parseHeads (evt: CustomEvent<Message>): Promise<void> {
@@ -80,7 +80,7 @@ export class PubsubReplicator extends Playable {
   }
 
   private async broadcast (): Promise<void> {
-    await this.pubsub.publish(this.protocol, await this.encodeHeads())
+    await this.pubsub.publish(this.topic, await this.encodeHeads())
   }
 }
 
