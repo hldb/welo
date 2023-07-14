@@ -1,5 +1,5 @@
 import { pubsubReplicator, PubsubReplicator } from '@/replicator/pubsub/index.js'
-import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest } from './utils/replicator.js'
+import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest, awaitPubsubJoin } from './utils/replicator.js'
 
 const testName = 'pubsub-replicator'
 
@@ -16,7 +16,10 @@ describe(testName, () => {
 
   describe('instance', () => {
     before(async () => {
-      await instanceSetup(components)
+      await Promise.all([
+        instanceSetup(components),
+        awaitPubsubJoin(components, components.replicator1.topic)
+      ])
     })
 
     it('replicates replica entries and identities', async () => {

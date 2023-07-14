@@ -155,7 +155,30 @@ export const instanceSetup = async <R extends Replicator>(components: SetupCompo
   ])
 }
 
-export const liveReplicationTest = async ({ replica1, replica2 }: Pick<SetupComponents, "replica1" | "replica2">): Promise<void> => {
+export const awaitPubsubJoin = async <R extends Replicator>(components: SetupComponents<R>, topic: string): Promise<void> => {
+  const awaitTopicJoin = async (libp2p1: GossipLibp2p, libp2p2: GossipLibp2p): Promise<void> => {
+    await new Promise<void>(resolve => {
+      libp2p1.services.pubsub.addEventListener('subscription-change', evt => {
+        if (!evt.detail.peerId.equals(libp2p2.peerId)) {
+          return
+        }
+
+        if (evt.detail.subscriptions.find(s => s.topic === topic && s.subscribe) == null) {
+          return
+        }
+
+        resolve()
+      })
+    })
+  }
+
+  await Promise.all([
+    awaitTopicJoin(components.libp2p1, components.libp2p2),
+    awaitTopicJoin(components.libp2p2, components.libp2p1)
+  ])
+}
+
+export const liveReplicationTest = async ({ replica1, replica2 }: Pick<SetupComponents, 'replica1' | 'replica2'>): Promise<void> => {
   const promise = replica1.write(new Uint8Array())
 
   await Promise.all([
