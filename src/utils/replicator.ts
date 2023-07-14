@@ -1,9 +1,9 @@
 import all from 'it-all'
 import { parsedcid } from '@/utils/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
+import { Heads } from '@/message/heads.js'
+import { CID } from 'multiformats/cid'
 import type { DbComponents } from '@/interface.js'
-import type { CID } from 'multiformats/cid'
 import type { Replica } from '@/replica/index.js'
 
 export const getHeads = async (replica: Replica): Promise<CID[]> => {
@@ -12,16 +12,16 @@ export const getHeads = async (replica: Replica): Promise<CID[]> => {
   return keys.map(key => parsedcid(key.baseNamespace()))
 }
 
-export const encodeHeads = async (cids: CID[]): Promise<Uint8Array> => {
-  const block = await Blocks.encode({ value: cids })
+export const encodeHeads = (cids: CID[]): Uint8Array => {
+  const rawCids = cids.map(cid => cid.bytes);
 
-  return block.bytes
+  return Heads.encode({ cids: rawCids })
 }
 
-export const decodeHeads = async (bytes: Uint8Array): Promise<CID[]> => {
-  const block = await Blocks.decode<CID[]>({ bytes })
+export const decodeHeads = (bytes: Uint8Array): CID[] => {
+  const heads = Heads.decode(bytes)
 
-  return block.value
+  return heads.cids.map(bytes => CID.decode(bytes))
 }
 
 export async function addHeads (
