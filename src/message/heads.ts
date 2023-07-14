@@ -80,6 +80,7 @@ export namespace Heads {
 export interface RequestHeads {
   filter: Uint8Array
   hashes: number
+  seed?: number
   hash?: Uint8Array
 }
 
@@ -103,8 +104,13 @@ export namespace RequestHeads {
           w.uint32(obj.hashes)
         }
 
+        if (obj.seed != null) {
+          w.uint32(24)
+          w.uint32(obj.seed)
+        }
+
         if (obj.hash != null) {
-          w.uint32(26)
+          w.uint32(34)
           w.bytes(obj.hash)
         }
 
@@ -130,6 +136,9 @@ export namespace RequestHeads {
               obj.hashes = reader.uint32()
               break
             case 3:
+              obj.seed = reader.uint32()
+              break
+            case 4:
               obj.hash = reader.bytes()
               break
             default:

@@ -8,5 +8,6 @@ message Heads {
 message RequestHeads {
   bytes filter = 1;
   uint32 hashes = 2;
-  optional bytes hash = 3;
+  optional uint32 seed = 3;
+  optional bytes hash = 4;
 }
