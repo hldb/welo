@@ -32,8 +32,8 @@ import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
 
-interface ReplicaEvents {
-  write: CustomEvent<undefined>
+export interface ReplicaEvents {
+  write: CustomEvent<EntryInstance<any>>
   update: CustomEvent<undefined>
 }
 
@@ -229,7 +229,7 @@ export class Replica extends Playable {
     await this.blocks.put(entry.block)
 
     return await this.add([entry]).then(() => {
-      this.events.dispatchEvent(new CustomEvent<undefined>('write'))
+      this.events.dispatchEvent(new CustomEvent<EntryInstance<any>>('write', { detail: entry }))
       return entry
     })
   }
