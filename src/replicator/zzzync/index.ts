@@ -132,18 +132,18 @@ export class ZzzyncReplicator extends Playable {
     await writer.put(rootBlock)
 
     for (const [k, [, after]] of diff.keys) {
-      const [entry, node] = await Promise.all([
-        this.replica.components.entry.fetch({
-          blocks: this.blocks,
-          identity: this.replica.components.identity,
-          cid: CID.parse(new Key(k).baseNamespace())
-        }),
-        // @ts-expect-error
-        this.replica.graph.nodes.blockFetcher.get(after)
-      ])
+      const entry = await this.replica.components.entry.fetch({
+        blocks: this.blocks,
+        identity: this.replica.components.identity,
+        cid: CID.parse(new Key(k).baseNamespace())
+      })
       await writer.put(entry.block)
       await writer.put(entry.identity.block)
-      await writer.put(node)
+
+      if (after != null) {
+        const node = await this.replica.graph.nodes.blockFetcher.get(after)
+        node != null && await writer.put({ cid: node.cid as CID, bytes: node.bytes })
+      }
     }
 
     for (const shard of diff.shards.additions) {
