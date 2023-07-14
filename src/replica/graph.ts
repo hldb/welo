@@ -12,14 +12,13 @@ import { cidstring } from '@/utils/index.js'
 import { Node } from './graph-node.js'
 import { empty as emptyBytes } from 'multiformats/bytes'
 import { Paily } from '@/utils/paily.js'
-import type { IpldDatastore } from '@/utils/paily.js'
 
 type StateKeys = 'nodes' | 'missing' | 'denied' | 'heads' | 'tails'
 
 const stateKeys: StateKeys[] = ['nodes', 'missing', 'denied', 'heads', 'tails']
 
 type GraphState = {
-  [K in StateKeys]: IpldDatastore<ShardLink>
+  [K in StateKeys]: Paily
 }
 
 export type GraphRoot = {
@@ -124,23 +123,23 @@ export class Graph extends Playable {
     return this._state
   }
 
-  get nodes (): IpldDatastore<ShardLink> {
+  get nodes (): Paily {
     return this.state.nodes
   }
 
-  get heads (): IpldDatastore<ShardLink> {
+  get heads (): Paily {
     return this.state.heads
   }
 
-  get tails (): IpldDatastore<ShardLink> {
+  get tails (): Paily {
     return this.state.tails
   }
 
-  get missing (): IpldDatastore<ShardLink> {
+  get missing (): Paily {
     return this.state.missing
   }
 
-  get denied (): IpldDatastore<ShardLink> {
+  get denied (): Paily {
     return this.state.denied
   }
 

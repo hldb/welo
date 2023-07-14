@@ -4,7 +4,7 @@ import { CodeError } from '@libp2p/interfaces/errors'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { Blockstore } from 'interface-blockstore'
 
-import { IpldDatastore, Paily } from '@/utils/paily.js'
+import { Paily } from '@/utils/paily.js'
 import type { EntryData, EntryInstance } from '@/entry/interface.js'
 
 const PUT: 'PUT' = 'PUT'
@@ -77,7 +77,7 @@ export const selectors = {
   }
 }
 
-export type StateMap = IpldDatastore<ShardLink>
+export type StateMap = Paily
 
 export const init = async (blockstore: Blockstore): Promise<StateMap> =>
   await Paily.create(blockstore)

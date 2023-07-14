@@ -8,21 +8,15 @@ import PQueue from 'p-queue'
 import { CodeError } from '@libp2p/interfaces/errors'
 import { difference, type CombinedDiff } from '@alanshaw/pail/diff'
 import { BaseDatastore } from 'datastore-core'
-import { Datastore, Key, Query, Pair as DatastorePair } from 'interface-datastore'
+import { Key, Query, Pair as DatastorePair } from 'interface-datastore'
 import type { ShardLink, ShardBlockView } from '@alanshaw/pail/shard'
 import type { AnyLink } from '@alanshaw/pail/link'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { Blockstore, Pair as BlockstorePair } from 'interface-blockstore'
-import type { Await } from '@helia/interface'
-
-export interface IpldDatastore<L extends AnyLink = AnyLink> extends Datastore {
-  root: L
-  diff: (link: L, options?: any) => Await<CombinedDiff>
-}
 
 type Code = typeof cborCode | typeof rawCode
 
-export class Paily extends BaseDatastore implements IpldDatastore<ShardLink> {
+export class Paily extends BaseDatastore {
   root: ShardLink
   readonly blockFetcher: BlockFetcher
   readonly code: Code

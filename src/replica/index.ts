@@ -12,6 +12,7 @@ import type { BlockView } from 'multiformats/interface'
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
 import { Blocks } from '@/blocks/index.js'
+import type { Paily } from '@/utils/paily.js'
 import type { DbComponents } from '@/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { EntryInstance } from '@/entry/interface.js'
@@ -27,8 +28,6 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
-import type { IpldDatastore } from '@/utils/paily.js'
-import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -117,19 +116,19 @@ export class Replica extends Playable {
     return this.#graph
   }
 
-  get heads (): IpldDatastore<ShardLink> {
+  get heads (): Paily {
     return this.graph.heads
   }
 
-  get tails (): IpldDatastore<ShardLink> {
+  get tails (): Paily {
     return this.graph.tails
   }
 
-  get missing (): IpldDatastore<ShardLink> {
+  get missing (): Paily {
     return this.graph.missing
   }
 
-  get denied (): IpldDatastore<ShardLink> {
+  get denied (): Paily {
     return this.graph.denied
   }
 
