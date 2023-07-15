@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.3](https://github.com/hldb/welo/compare/v2.2.2...v2.2.3) (2023-07-15)
+
+
+### Bug Fixes
+
+* zzzync replicator uploads everything ([2a961df](https://github.com/hldb/welo/commit/2a961df0cae9f6c84c6e2c0ba4ebefd9896ed09d))
+
 ## [2.2.2](https://github.com/hldb/welo/compare/v2.2.1...v2.2.2) (2023-07-14)
 
 
