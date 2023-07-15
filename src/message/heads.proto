@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-message Heads {
-  repeated bytes cids = 1;
-  optional bool comprehensive = 2;
-}
+message Message {
+  message Filter {
+    bytes data = 1;
+    uint32 hashes = 2;
+    optional uint32 seed = 3;
+  }
 
-message RequestHeads {
-  bytes filter = 1;
-  uint32 hashes = 2;
-  optional uint32 seed = 3;
-  optional bytes hash = 4;
+  repeated bytes heads = 1;
+  optional Filter filter = 2;
+  optional bytes hash = 3;
 }
