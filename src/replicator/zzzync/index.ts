@@ -18,7 +18,8 @@ import type { Config, ReplicatorModule } from '../interface.js'
 import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
 import { Paily } from '@/utils/paily.js'
 import type { Blockstore } from 'interface-blockstore'
-import type { ShardLink } from '@alanshaw/pail/src/shard'
+import { entries } from '@alanshaw/pail'
+import { ShardBlockView, ShardFetcher, ShardLink } from '@alanshaw/pail/shard'
 import { Datastore, Key } from 'interface-datastore'
 // import { CodeError } from '@libp2p/interfaces/errors'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
@@ -28,8 +29,6 @@ import type { EntryInstance } from '@/entry/interface'
 // import { parsedcid } from '@/utils/index.js'
 // import all from 'it-all'
 import drain from 'it-drain'
-import { parsedcid } from '@/utils/index.js'
-import all from 'it-all'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -106,6 +105,9 @@ export class ZzzyncReplicator extends Playable {
     if (this.dcid == null) {
       throw new Error('dcid required. is ZzzyncReplicator started?')
     }
+    if (this.replica.graph.nodes.root == null) {
+      throw new Error('replica not started')
+    }
 
     const revision = await this.#revisions.get(this.#provider)
 
@@ -122,16 +124,19 @@ export class ZzzyncReplicator extends Playable {
       oldRoot = CID.parse(revision.value.slice(ipfsNamespace.length))
     }
 
-    const diff = await this.replica.graph.nodes.diff(oldRoot)
-    const heads = (await all(this.replica.heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
-    const rootBlock = await Blocks.encode({ value: { nodes: root, heads } })
+    if (root.equals(oldRoot)) {
+      return
+    }
 
-    const { writer, out } = CarWriter.create(rootBlock.cid)
+    const { writer, out } = CarWriter.create(root as CID)
     const reader = CarReader.fromIterable(out)
 
-    await writer.put(rootBlock)
+    const shardFetcher = new ShardFetcher(this.replica.graph.nodes.blockFetcher)
+    for await (const shard of traverseShards(shardFetcher, await shardFetcher.get(root))) {
+      await writer.put(shard)
+    }
 
-    for (const [k, [, after]] of diff.keys) {
+    for await (const [k, v] of entries(this.replica.graph.nodes.blockFetcher, root)) {
       const entry = await this.replica.components.entry.fetch({
         blocks: this.blocks,
         identity: this.replica.components.identity,
@@ -140,14 +145,18 @@ export class ZzzyncReplicator extends Playable {
       await writer.put(entry.block)
       await writer.put(entry.identity.block)
 
-      if (after != null) {
-        const node = await this.replica.graph.nodes.blockFetcher.get(after)
-        node != null && await writer.put({ cid: node.cid as CID, bytes: node.bytes })
+      const block = await this.replica.graph.nodes.blockFetcher.get(v)
+      if (block != null) {
+        await writer.put({ cid: v as CID, bytes: block.bytes })
       }
-    }
 
-    for (const shard of diff.shards.additions) {
-      await writer.put({ cid: shard.cid, bytes: shard.bytes })
+      console.log({
+        root: root.toString(),
+        k: k.toString(),
+        v: v.toString(),
+        entry: entry.cid.toString(),
+        identity: entry.identity.auth.toString()
+      })
     }
 
     await writer.close()
@@ -275,3 +284,12 @@ export const zzzyncReplicator: (options: Options) => ReplicatorModule<ZzzyncRepl
   protocol,
   create: (config: Config) => new ZzzyncReplicator({ ...config, options })
 })
+
+async function * traverseShards (shards: ShardFetcher, shard: ShardBlockView): AsyncIterable<ShardBlockView> {
+  yield shard
+  for (const [k, v] of shard.value) {
+    if (Array.isArray(v)) {
+      yield * traverseShards(shards, await shards.get(v[0], shard.prefix + k))
+    }
+  }
+}
