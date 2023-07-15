@@ -1,7 +1,6 @@
 import all from 'it-all'
 import { parsedcid } from '@/utils/index.js'
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
-import { Heads } from '@/message/heads.js'
 import { CID } from 'multiformats/cid'
 import { BloomFilter } from 'fission-bloom-filters'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -45,18 +44,6 @@ export const hashHeads = async (cids: CID[]): Promise<CID> => {
 	const hash = await sha256.digest(bytes)
 
 	return CID.createV1(raw.code, hash)
-}
-
-export const encodeHeads = (cids: CID[]): Uint8Array => {
-  const rawCids = cids.map(cid => cid.bytes);
-
-  return Heads.encode({ cids: rawCids })
-}
-
-export const decodeHeads = (bytes: Uint8Array): CID[] => {
-  const heads = Heads.decode(bytes)
-
-  return heads.cids.map(bytes => CID.decode(bytes))
 }
 
 export async function addHeads (
