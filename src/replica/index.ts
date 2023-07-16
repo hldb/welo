@@ -233,6 +233,22 @@ export class Replica extends Playable {
     })
   }
 
+  async newEntry (payload: any): Promise<EntryInstance<any>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
+    const entry = await this.components.entry.create({
+      identity: this.identity,
+      tag: this.manifest.getTag(),
+      payload,
+      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.baseNamespace())),
+      refs: [] // refs are empty for now
+    })
+
+    return entry
+  }
+
   // useful when the access list is updated
   // async deny (entries) {
   //   for await (const entry of entries) {
