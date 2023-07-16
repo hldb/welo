@@ -44,6 +44,29 @@ const generateSeed = (peerId: PeerId, round: number = 0): number => {
 	)
 }
 
+enum MessageType {
+	HEADS_REQUEST = 1,
+	HEADS_RESPONSE = 2,
+	VERIFY_REQUEST = 3,
+	VERIFY_RESPONSE = 4
+}
+
+const getMessageType = (message: Partial<Message>): MessageType => {
+	if (message.filter != null) {
+		return MessageType.HEADS_REQUEST
+	}
+
+	if (message.hash != null) {
+		return MessageType.VERIFY_REQUEST
+	}
+
+	if (message.match != null) {
+		return MessageType.VERIFY_RESPONSE
+	}
+
+	return MessageType.HEADS_RESPONSE
+}
+
 const handleFilter = (
 	message: NonNullable<Message['filter']>,
 	localPeerId: PeerId,
