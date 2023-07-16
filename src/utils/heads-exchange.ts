@@ -1,4 +1,5 @@
 import { CID } from 'multiformats/cid'
+import { DeferredPromise } from '@open-draft/deferred-promise'
 import { BloomFilter } from 'fission-bloom-filters'
 import { getHeads, addHeads, hashHeads } from '@/utils/replicator.js'
 import { Message } from '@/message/heads.js'
@@ -8,8 +9,8 @@ import type { Stream } from '@libp2p/interface-connection'
 import type { DbComponents } from '@/interface.js'
 import { pipe } from 'it-pipe'
 import * as lp from 'it-length-prefixed'
+import { pushable, Pushable } from 'it-pushable'
 import type { Uint8ArrayList } from 'uint8arraylist'
-import Crypto from 'crypto'
 
 const calculateFilterParams = (length: number, rate: number): { size: number, hashes: number }  => {
 	const size = Math.ceil(-((length * Math.log(rate)) / Math.pow(Math.log(2), 2)))
@@ -44,6 +45,18 @@ const generateSeed = (peerId: PeerId, round: number = 0): number => {
 	)
 }
 
+const decodeMessage = async function * (source: Iterable<Uint8Array | Uint8ArrayList> | AsyncIterable<Uint8Array | Uint8ArrayList>): AsyncGenerator<Message> {
+	for await (const message of source) {
+		yield Message.decode(message)
+	}
+}
+
+const encodeMessage = async function * (source: Iterable<Partial<Message>> | AsyncIterable<Partial<Message>>): AsyncGenerator<Uint8Array> {
+	for await (const message of source) {
+		yield Message.encode(message)
+	}
+}
+
 enum MessageType {
 	HEADS_REQUEST = 1,
 	HEADS_RESPONSE = 2,
@@ -67,123 +80,140 @@ const getMessageType = (message: Partial<Message>): MessageType => {
 	return MessageType.HEADS_RESPONSE
 }
 
-const handleFilter = (
-	message: NonNullable<Message['filter']>,
-	localPeerId: PeerId,
-	heads: CID[]
-): Partial<Message> => {
-	const filter = BloomFilter.fromBytes(message.data, message.hashes)
+export class HeadsExchange {
+	private readonly stream: Stream
+	private readonly heads: CID[]
+	private readonly localPeerId: PeerId
+	private readonly remotePeerId: PeerId
+	private readonly writer: Pushable<Partial<Message>> = pushable({ objectMode: true })
+	private verifyPromise: DeferredPromise<boolean> | null = null
+	private headsPromise: DeferredPromise<CID[]> | null = null
 
-	filter.seed = message.seed ?? generateSeed(localPeerId)
-
-	const missing = heads.map(h => h.bytes).filter(b => !filter.has(b))
-
-	return { heads: missing }
-}
-
-const handleHeads = async (
-	message: NonNullable<Message['heads']>,
-	replica: Replica,
-	components: Pick<DbComponents, 'entry' | 'identity'>,
-	heads: CID[]
-): Promise<Partial<Message>> => {
-
-	const remoteHeads = message.map(h => CID.decode(h))
-
-	await addHeads(remoteHeads, replica, components)
-
-	for (const head of remoteHeads) {
-		heads.push(head)
+	constructor (stream: Stream, localPeerId: PeerId, remotePeerId: PeerId) {
+		this.stream = stream
+		this.heads = []
+		this.localPeerId = localPeerId
+		this.remotePeerId = remotePeerId
 	}
 
-	const localHash = await hashHeads(heads)
-
-	return { hash: localHash.bytes }
-}
-
-const handleHash = async (
-	message: NonNullable<Message['hash']>,
-	heads: CID[]
-): Promise<boolean> => {
-	const remoteHash = CID.decode(message)
-	const localHash = await hashHeads(heads)
-
-	return remoteHash.equals(localHash)
-}
-
-const decodeMessage = async function * (source: Iterable<Uint8Array | Uint8ArrayList> | AsyncIterable<Uint8Array | Uint8ArrayList>): AsyncGenerator<Message> {
-	for await (const message of source) {
-		yield Message.decode(message)
-	}
-}
-
-const encodeMessage = async function * (source: Iterable<Partial<Message>> | AsyncIterable<Partial<Message>>): AsyncGenerator<Uint8Array> {
-	for await (const message of source) {
-		yield Message.encode(message)
-	}
-}
-
-const performSyncRound = async function * (
-	source: Iterable<Message> | AsyncIterable<Message>,
-	replica: Replica,
-	localPeerId: PeerId,
-	components: Pick<DbComponents, 'entry' | 'identity'>,
-	seed: number
-): AsyncGenerator<Partial<Message> | boolean> {
-	const heads = await getHeads(replica)
-	const { filter, hashes } = createFilter(heads, { seed })
-
-	// Send the filter immediately.
-	yield {
-		filter: {
-			data: filter.toBytes(),
-			hashes
-		}
+	async start () {
+		pipe(
+			this.writer,
+			encodeMessage,
+			lp.encode,
+			this.stream,
+			lp.decode,
+			decodeMessage,
+			(source) => this.handleMessage(source),
+			encodeMessage,
+			lp.encode,
+			this.stream
+		)
 	}
 
-	for await (const message of source) {
-		if (message.filter != null) {
-			yield handleFilter(message.filter, localPeerId, heads)
-
-			continue
+	async verify (): Promise<boolean> {
+		if (this.verifyPromise != null) {
+			return await this.verifyPromise
 		}
 
-		if (message.hash != null) {
-			yield await handleHash(message.hash, heads)
-			return
-		}
+		const hash = await hashHeads(this.heads)
 
-		yield await handleHeads(message.heads, replica, components, heads)
+		this.verifyPromise = new DeferredPromise()
+
+		this.writer.push({
+			hash: hash.bytes
+		})
+
+		return await this.verifyPromise
 	}
 
-	throw new Error('aborted')
-}
+	async getHeads (): Promise<CID[]> {
+		if (this.headsPromise != null) {
+			return await this.headsPromise
+		}
 
-export const exchange = async (
-	stream: Stream,
-	replica: Replica,
-	remotePeerId: PeerId,
-	localPeerId: PeerId,
-	components: Pick<DbComponents, 'entry' | 'identity'>
-) => {
-	const ROUNDS = 5;
-	let seed = generateSeed(remotePeerId)
+		this.headsPromise = new DeferredPromise()
 
-	await pipe(stream, lp.decode, decodeMessage, async function * (source) {
-		for (let i = 0; i < ROUNDS; i ++) {
-			const syncItr = performSyncRound(source, replica, localPeerId, components, seed)
+		const seed = generateSeed(this.remotePeerId)
+		const { filter, hashes } = createFilter(this.heads, { seed })
 
-			for await (const message of syncItr) {
-				if (typeof message !== "boolean") {
-					yield message
-				} else if (message === true) {
-					return
-				} else {
-					break
-				}
+		this.writer.push({
+			filter: {
+				data: filter.toBytes(),
+				hashes
 			}
+		})
 
-			seed = Crypto.randomInt(0, Number.MAX_SAFE_INTEGER)
+		return await this.headsPromise
+	}
+
+	async close () {
+
+	}
+
+	private async * handleMessage (source: AsyncIterable<Message>): AsyncGenerator<Partial<Message>> {
+		for await (const message of source) {
+			const type = getMessageType(message)
+
+			switch (type) {
+				case MessageType.HEADS_REQUEST:
+					yield this.handleHeadsRequest(message)
+					break
+				case MessageType.HEADS_RESPONSE:
+					this.handleHeadsResponse(message)
+					break
+				case MessageType.VERIFY_REQUEST:
+					yield await this.handleVerifyRequest(message)
+					break
+				case MessageType.VERIFY_RESPONSE:
+					this.handleVerifyResponse(message)
+					break
+			}
 		}
-	}, encodeMessage, lp.encode, stream)
+	}
+
+	private handleHeadsRequest (message: Message): Partial<Message> {
+		if (message.filter == null) {
+			throw new Error('invalid message')
+		}
+
+		const filter = BloomFilter.fromBytes(message.filter.data, message.filter.hashes)
+
+		filter.seed = message.filter.seed ?? generateSeed(this.localPeerId)
+
+		const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(b))
+
+		return { heads: missing }
+	}
+
+	private handleHeadsResponse (message: Message): void {
+		if (message.heads == null) {
+			throw new Error('invalid message')
+		}
+
+		const heads = message.heads.map(h => CID.decode(h))
+
+		this.headsPromise?.resolve(heads)
+	}
+
+	private async handleVerifyRequest (message: Message): Promise<Partial<Message>> {
+		if (message.hash == null) {
+			throw new Error('invalid message')
+		}
+
+		const localHash = await hashHeads(this.heads)
+		const remoteHash = CID.decode(message.hash)
+
+		return {
+			match: localHash.equals(remoteHash)
+		}
+	}
+
+	private handleVerifyResponse (message: Message): void {
+		if (message.match == null) {
+			throw new Error('invalid message')
+		}
+
+		this.verifyPromise?.resolve(message.match)
+	}
 }
