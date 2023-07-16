@@ -10,4 +10,5 @@ message Message {
   repeated bytes heads = 1;
   optional Filter filter = 2;
   optional bytes hash = 3;
+  optional bool match = 4;
 }

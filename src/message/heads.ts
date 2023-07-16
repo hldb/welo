@@ -12,6 +12,7 @@ export interface Message {
   heads: Uint8Array[]
   filter?: Message.Filter
   hash?: Uint8Array
+  match?: boolean
 }
 
 export namespace Message {
@@ -118,6 +119,11 @@ export namespace Message {
           w.bytes(obj.hash)
         }
 
+        if (obj.match != null) {
+          w.uint32(32)
+          w.bool(obj.match)
+        }
+
         if (opts.lengthDelimited !== false) {
           w.ldelim()
         }
@@ -140,6 +146,9 @@ export namespace Message {
               break
             case 3:
               obj.hash = reader.bytes()
+              break
+            case 4:
+              obj.match = reader.bool()
               break
             default:
               reader.skipType(tag & 7)
