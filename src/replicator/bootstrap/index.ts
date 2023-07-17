@@ -1,8 +1,7 @@
-import { pipe } from 'it-pipe'
-import concat from 'it-concat'
 import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
-import { encodeHeads, decodeHeads, addHeads, getHeads } from '@/utils/replicator.js'
+import { HeadsExchange } from '@/utils/heads-exchange.js'
+import { getHeads, addHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
@@ -10,8 +9,9 @@ import type { Manifest } from '@/manifest/index.js'
 import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Stream } from '@libp2p/interface-connection'
+import type { Stream, Connection } from '@libp2p/interface-connection'
 import type { PeerInfo } from '@libp2p/interface-peer-info'
+import type { PeerId } from '@libp2p/interface-peer-id'
 
 export const protocol = `${prefix}bootstrap/1.0.0/` as const
 
@@ -34,7 +34,7 @@ export class BootstrapReplicator extends Playable {
       // Handle direct head requests.
       await this.libp2p.handle(
         this.protocol,
-        this.handle.bind(this) as ({ stream }: { stream: Stream }) => void
+        this.handle.bind(this) as (connectionInfo: { stream: Stream, connection: Connection }) => void
       );
 
       // Bootstrap the heads
@@ -92,20 +92,8 @@ export class BootstrapReplicator extends Playable {
     }
   }
 
-  private async parseHeads (message: Uint8Array): Promise<void> {
-    const heads = await decodeHeads(message)
-
-    await addHeads(heads, this.replica, this.components)
-  }
-
-  private async encodeHeads (): Promise<Uint8Array> {
-    const heads = await getHeads(this.replica)
-
-    return await encodeHeads(heads)
-  }
-
-  private async handle ({ stream }: { stream: Stream }): Promise<void> {
-    await pipe([await this.encodeHeads()], stream)
+  private async handle ({ stream, connection }: { stream: Stream, connection: Connection }): Promise<void> {
+    await this.exchange(stream, connection.remotePeer)
   }
 
   private async bootstrap (): Promise<void> {
@@ -125,15 +113,36 @@ export class BootstrapReplicator extends Playable {
         }
 
         const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
-        const responses = await pipe(stream, async itr => await concat(itr, { type: 'buffer' }))
-
-        await this.parseHeads(responses.subarray())
+        await this.exchange(stream, peer.id)
       }))
     }
 
     // Don't really care if individual head syncs fail.
-    await Promise.allSettled(promises)
+    await Promise.all(promises)
   }
+
+	private async exchange (stream: Stream, remotePeerId: PeerId) {
+		const heads = await getHeads(this.replica)
+		const he = new HeadsExchange(stream, heads, this.libp2p.peerId, remotePeerId)
+
+		he.pipe().catch(console.error)
+
+		for (let i = 0; i < 5; i++) {
+			const newHeads = await he.getHeads()
+
+			await addHeads(newHeads, this.replica, this.components);
+
+			const matches = await he.verify()
+
+			if (matches) {
+				break;
+			}
+		}
+
+		he.close()
+
+		stream.close()
+	}
 }
 
 export const bootstrapReplicator: (options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
