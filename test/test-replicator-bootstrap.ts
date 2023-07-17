@@ -9,7 +9,7 @@ describe(testName, () => {
   let components: SetupComponents<BootstrapReplicator>
 
   before(async () => {
-    components = await setup(testName, bootstrapReplicator())
+    components = await setup(testName, bootstrapReplicator({ reverseSync: false }))
   })
 
   after(async () => {
