@@ -7,12 +7,16 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Stream } from '@libp2p/interface-connection'
 import { pipe } from 'it-pipe'
 import * as lp from 'it-length-prefixed'
+import { consume } from 'streaming-iterables'
 import { pushable, Pushable } from 'it-pushable'
 import type { Uint8ArrayList } from 'uint8arraylist'
 
+const uint8ArrayToBuffer = (a: Uint8Array): ArrayBuffer => a.buffer.slice(a.byteOffset, a.byteLength + a.byteOffset)
+
 const calculateFilterParams = (length: number, rate: number): { size: number, hashes: number }  => {
-	const size = Math.ceil(-((length * Math.log(rate)) / Math.pow(Math.log(2), 2)))
-	const hashes = Math.ceil((size / length) * Math.log(2))
+	const safeLength = length <= 0 ? 1 : length
+	const size = Math.ceil(-((safeLength * Math.log(rate)) / Math.pow(Math.log(2), 2)))
+	const hashes = Math.ceil((size / safeLength) * Math.log(2))
 
 	return { size, hashes }
 }
@@ -26,7 +30,7 @@ const createFilter = (heads: CID[], options: Partial<{ errorRate: number, seed: 
 	}
 
 	for (const head of heads) {
-		filter.add(head.bytes)
+		filter.add(uint8ArrayToBuffer(head.bytes))
 	}
 
 	return { filter, hashes }
@@ -98,18 +102,22 @@ export class HeadsExchange {
 	}
 
 	async pipe (): Promise<void> {
-		await pipe(
-			this.writer,
-			encodeMessage,
-			lp.encode,
-			this.stream,
-			lp.decode,
-			decodeMessage,
-			(source) => this.handleMessage(source),
-			encodeMessage,
-			lp.encode,
-			this.stream
-		)
+		await Promise.all([
+			pipe(
+				this.writer,
+				encodeMessage,
+				lp.encode,
+				this.stream
+			),
+			pipe(
+				this.stream,
+				lp.decode,
+				decodeMessage,
+				(source) => this.handleMessage(source),
+				(source) => this.send(source),
+				consume
+			)
+		])
 	}
 
 	close (): void {
@@ -160,6 +168,13 @@ export class HeadsExchange {
 		return await this.headsPromise
 	}
 
+	private async * send (source: AsyncIterable<Partial<Message>>): AsyncGenerator<Partial<Message>> {
+		for await (const message of source) {
+			this.writer.push(message)
+			yield message
+		}
+	}
+
 	private async * handleMessage (source: AsyncIterable<Message>): AsyncGenerator<Partial<Message>> {
 		for await (const message of source) {
 			const type = getMessageType(message)
@@ -190,7 +205,7 @@ export class HeadsExchange {
 
 		filter.seed = message.filter.seed ?? this.remoteSeed
 
-		const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(b))
+		const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(uint8ArrayToBuffer(b)))
 
 		return { heads: missing }
 	}
