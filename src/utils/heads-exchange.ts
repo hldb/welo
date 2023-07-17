@@ -202,6 +202,10 @@ export class HeadsExchange {
 
 		const heads = message.heads.map(h => CID.decode(h))
 
+		for (const head of heads) {
+			this.heads.push(head)
+		}
+
 		this.headsPromise?.resolve(heads)
 	}
 
