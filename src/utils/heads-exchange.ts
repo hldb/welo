@@ -34,14 +34,17 @@ const createFilter = (heads: CID[], options: Partial<{ errorRate: number, seed: 
 	return { filter, hashes }
 }
 
-const generateSeed = (peerId: PeerId, round: number = 0): number => {
-	const bytes = peerId.toBytes().slice((round + 1) * -4).slice(4)
+const generateSeed = (peerId1: PeerId, peerId2: PeerId): number => {
+	const lastBytes1 = peerId1.toBytes().slice(-4).slice(2)
+	const lastBytes2 = peerId2.toBytes().slice(-2)
+
+	const seed = new Uint8Array([...lastBytes1, ...lastBytes2])
 
 	return (
-		bytes[0] * 2**24 +
-		bytes[1] * 2**16 +
-		bytes[2] * 2**8 +
-		bytes[3]
+		seed[0] * 2**24 +
+		seed[1] * 2**16 +
+		seed[2] * 2**8 +
+		seed[3]
 	)
 }
 
@@ -83,17 +86,17 @@ const getMessageType = (message: Partial<Message>): MessageType => {
 export class HeadsExchange {
 	private readonly stream: Stream
 	private readonly heads: CID[]
-	private readonly localPeerId: PeerId
-	private readonly remotePeerId: PeerId
+	private readonly localSeed: number
+	private readonly remoteSeed: number
 	private readonly writer: Pushable<Partial<Message>> = pushable({ objectMode: true })
 	private verifyPromise: DeferredPromise<boolean> | null = null
 	private headsPromise: DeferredPromise<CID[]> | null = null
 
-	constructor (stream: Stream, localPeerId: PeerId, remotePeerId: PeerId) {
+	constructor (stream: Stream, heads: CID[], localPeerId: PeerId, remotePeerId: PeerId) {
 		this.stream = stream
-		this.heads = []
-		this.localPeerId = localPeerId
-		this.remotePeerId = remotePeerId
+		this.heads = heads
+		this.localSeed = generateSeed(localPeerId, remotePeerId)
+		this.remoteSeed = generateSeed(remotePeerId, localPeerId)
 	}
 
 	async start () {
@@ -134,8 +137,7 @@ export class HeadsExchange {
 
 		this.headsPromise = new DeferredPromise()
 
-		const seed = generateSeed(this.remotePeerId)
-		const { filter, hashes } = createFilter(this.heads, { seed })
+		const { filter, hashes } = createFilter(this.heads, { seed: this.localSeed })
 
 		this.writer.push({
 			filter: {
@@ -145,10 +147,6 @@ export class HeadsExchange {
 		})
 
 		return await this.headsPromise
-	}
-
-	async close () {
-
 	}
 
 	private async * handleMessage (source: AsyncIterable<Message>): AsyncGenerator<Partial<Message>> {
@@ -179,7 +177,7 @@ export class HeadsExchange {
 
 		const filter = BloomFilter.fromBytes(message.filter.data, message.filter.hashes)
 
-		filter.seed = message.filter.seed ?? generateSeed(this.localPeerId)
+		filter.seed = message.filter.seed ?? this.remoteSeed
 
 		const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(b))
 
