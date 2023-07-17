@@ -15,12 +15,12 @@ export const getHeads = async (replica: Replica): Promise<CID[]> => {
 }
 
 export const hashHeads = async (cids: CID[]): Promise<CID> => {
-	const asBytes = cids.map(c => c.bytes).sort(compare)
-	const bytes = concat(asBytes)
+  const asBytes = cids.map(c => c.bytes).sort(compare)
+  const bytes = concat(asBytes)
 
-	const hash = await sha256.digest(bytes)
+  const hash = await sha256.digest(bytes)
 
-	return CID.createV1(raw.code, hash)
+  return CID.createV1(raw.code, hash)
 }
 
 export async function addHeads (

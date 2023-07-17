@@ -40,7 +40,7 @@ export class BootstrapReplicator extends Playable {
       await this.libp2p.handle(
         this.protocol,
         this.handle.bind(this) as (connectionInfo: { stream: Stream, connection: Connection }) => void
-      );
+      )
 
       // Bootstrap the heads
       if (!this.options.listenOnly) {
@@ -133,47 +133,47 @@ export class BootstrapReplicator extends Playable {
     await Promise.allSettled(promises)
   }
 
-	private async exchange (stream: Stream, remotePeerId: PeerId, reverseSync: boolean = true) {
-		const heads = await getHeads(this.replica)
-		const he = new HeadsExchange({
-			stream,
-			heads,
-			remotePeerId,
-			collisionRate: this.options.collisionRate,
-			localPeerId: this.libp2p.peerId
-		})
+  private async exchange (stream: Stream, remotePeerId: PeerId, reverseSync: boolean = true): Promise<void> {
+    const heads = await getHeads(this.replica)
+    const he = new HeadsExchange({
+      stream,
+      heads,
+      remotePeerId,
+      collisionRate: this.options.collisionRate,
+      localPeerId: this.libp2p.peerId
+    })
 
-		const pipePromise = he.pipe().catch(console.error)
+    const pipePromise = he.pipe().catch(console.error)
 
-		if (!reverseSync) {
-			await pipePromise;
-			he.close()
-			stream.close()
-			return
-		}
+    if (!reverseSync) {
+      await pipePromise
+      he.close()
+      stream.close()
+      return
+    }
 
-		try {
-			for (let i = 0; i < this.options.rounds; i++) {
-				const seed = i === 0 ? undefined : Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-				const newHeads = await he.getHeads(seed)
+    try {
+      for (let i = 0; i < this.options.rounds; i++) {
+        const seed = i === 0 ? undefined : Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+        const newHeads = await he.getHeads(seed)
 
-				await addHeads(newHeads, this.replica, this.components);
+        await addHeads(newHeads, this.replica, this.components)
 
-				if (this.options.validate) {
-					const matches = await he.verify()
+        if (this.options.validate) {
+          const matches = await he.verify()
 
-					if (matches) {
-						break;
-					}
-				}
-			}
-		} catch (error) {
-			// Ignore errors.
-		}
+          if (matches) {
+            break
+          }
+        }
+      }
+    } catch (error) {
+      // Ignore errors.
+    }
 
-		he.close()
-		stream.close()
-	}
+    he.close()
+    stream.close()
+  }
 }
 
 export const bootstrapReplicator: (options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
