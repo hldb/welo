@@ -13,7 +13,7 @@ import type { Stream, Connection } from '@libp2p/interface-connection'
 import type { PeerInfo } from '@libp2p/interface-peer-info'
 import type { PeerId } from '@libp2p/interface-peer-id'
 
-export const protocol = `${prefix}bootstrap/1.0.0/` as const
+export const protocol = `${prefix}he/1.0.0/` as const
 
 export interface Options {
   peers: number
