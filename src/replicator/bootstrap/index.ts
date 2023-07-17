@@ -118,7 +118,7 @@ export class BootstrapReplicator extends Playable {
     }
 
     // Don't really care if individual head syncs fail.
-    await Promise.all(promises)
+    await Promise.allSettled(promises)
   }
 
 	private async exchange (stream: Stream, remotePeerId: PeerId) {
@@ -127,20 +127,23 @@ export class BootstrapReplicator extends Playable {
 
 		he.pipe().catch(console.error)
 
-		for (let i = 0; i < 5; i++) {
-			const newHeads = await he.getHeads()
+		try {
+			for (let i = 0; i < 5; i++) {
+				const newHeads = await he.getHeads()
 
-			await addHeads(newHeads, this.replica, this.components);
+				await addHeads(newHeads, this.replica, this.components);
 
-			const matches = await he.verify()
+				const matches = await he.verify()
 
-			if (matches) {
-				break;
+				if (matches) {
+					break;
+				}
 			}
+		} catch (error) {
+			// Ignore errors.
 		}
 
 		he.close()
-
 		stream.close()
 	}
 }

@@ -123,6 +123,7 @@ export class HeadsExchange {
 	close (): void {
 		this.verifyPromise?.reject(new Error("exchange closed"))
 		this.headsPromise?.reject(new Error("exchange closed"))
+		this.writer.end()
 	}
 
 	async verify (): Promise<boolean> {
