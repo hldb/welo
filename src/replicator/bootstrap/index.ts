@@ -154,7 +154,8 @@ export class BootstrapReplicator extends Playable {
 
 		try {
 			for (let i = 0; i < this.options.rounds; i++) {
-				const newHeads = await he.getHeads()
+				const seed = i === 0 ? undefined : Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+				const newHeads = await he.getHeads(seed)
 
 				await addHeads(newHeads, this.replica, this.components);
 

@@ -154,7 +154,7 @@ export class HeadsExchange {
 		return await this.verifyPromise
 	}
 
-	async getHeads (): Promise<CID[]> {
+	async getHeads (seed?: number): Promise<CID[]> {
 		if (this.stream.stat.timeline.close != null) {
 			throw new Error("stream is closed")
 		}
@@ -170,12 +170,16 @@ export class HeadsExchange {
 			collisionRate: this.collisionRate
 		})
 
-		this.writer.push({
-			filter: {
-				data: filter.toBytes(),
-				hashes
-			}
-		})
+		const message: Message['filter'] = {
+			data: filter.toBytes(),
+			hashes
+		}
+
+		if (seed != null) {
+			message.seed = seed;
+		}
+
+		this.writer.push({ filter: message })
 
 		return await this.headsPromise
 	}
