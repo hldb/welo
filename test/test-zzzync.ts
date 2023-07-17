@@ -22,7 +22,7 @@ import { Web3Storage } from 'web3.storage'
 import type { Ed25519PeerId, PeerId } from '@libp2p/interface-peer-id'
 import { createLibp2p, Libp2pOptions } from 'libp2p'
 import { createLibp2pOptions } from './utils/libp2p-options.js'
-import type { Libp2pWithDHT } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
+import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 
@@ -140,10 +140,10 @@ _describe(testName, () => {
     await start(replica1, replica2)
 
     const client = new Web3Storage({ token })
-    const createEphemeralLibp2p = async (peerId: Ed25519PeerId): Promise<Libp2pWithDHT> => {
+    const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {
       const libp2p = await createLibp2p(await createLibp2pOptions({ peerId }))
 
-      return libp2p
+      return { libp2p }
     }
     const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })
 
