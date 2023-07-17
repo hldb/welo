@@ -18,6 +18,11 @@ export const protocol = `${prefix}bootstrap/1.0.0/` as const
 export interface Options {
   peers: number
   timeout: number
+  rounds: number
+  collisionRate: number
+  listenOnly: boolean
+  reverseSync: boolean
+  validate: boolean
 }
 
 export class BootstrapReplicator extends Playable {
@@ -38,9 +43,11 @@ export class BootstrapReplicator extends Playable {
       );
 
       // Bootstrap the heads
-      (async () => {
-        await this.bootstrap()
-      })().catch(() => {})
+      if (!this.options.listenOnly) {
+        (async () => {
+          await this.bootstrap()
+        })().catch(() => {})
+      }
     }
 
     const stopping = async (): Promise<void> => {
@@ -58,7 +65,12 @@ export class BootstrapReplicator extends Playable {
 
     this.options = {
       peers: options.peers ?? 5,
-      timeout: options.timeout ?? 10000
+      timeout: options.timeout ?? 10000,
+      rounds: options.rounds ?? 3,
+      collisionRate: options.collisionRate ?? 0.10,
+      listenOnly: options.listenOnly ?? false,
+      reverseSync: options.reverseSync ?? true,
+      validate: options.validate ?? true
     }
   }
 
@@ -93,7 +105,7 @@ export class BootstrapReplicator extends Playable {
   }
 
   private async handle ({ stream, connection }: { stream: Stream, connection: Connection }): Promise<void> {
-    await this.exchange(stream, connection.remotePeer)
+    await this.exchange(stream, connection.remotePeer, this.options.reverseSync)
   }
 
   private async bootstrap (): Promise<void> {
@@ -121,22 +133,37 @@ export class BootstrapReplicator extends Playable {
     await Promise.allSettled(promises)
   }
 
-	private async exchange (stream: Stream, remotePeerId: PeerId) {
+	private async exchange (stream: Stream, remotePeerId: PeerId, reverseSync: boolean = true) {
 		const heads = await getHeads(this.replica)
-		const he = new HeadsExchange(stream, heads, this.libp2p.peerId, remotePeerId)
+		const he = new HeadsExchange({
+			stream,
+			heads,
+			remotePeerId,
+			collisionRate: this.options.collisionRate,
+			localPeerId: this.libp2p.peerId
+		})
 
-		he.pipe().catch(console.error)
+		const pipePromise = he.pipe().catch(console.error)
+
+		if (!reverseSync) {
+			await pipePromise;
+			he.close()
+			stream.close()
+			return
+		}
 
 		try {
-			for (let i = 0; i < 5; i++) {
+			for (let i = 0; i < this.options.rounds; i++) {
 				const newHeads = await he.getHeads()
 
 				await addHeads(newHeads, this.replica, this.components);
 
-				const matches = await he.verify()
+				if (this.options.validate) {
+					const matches = await he.verify()
 
-				if (matches) {
-					break;
+					if (matches) {
+						break;
+					}
 				}
 			}
 		} catch (error) {

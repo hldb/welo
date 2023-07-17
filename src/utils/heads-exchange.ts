@@ -21,8 +21,8 @@ const calculateFilterParams = (length: number, rate: number): { size: number, ha
 	return { size, hashes }
 }
 
-const createFilter = (heads: CID[], options: Partial<{ errorRate: number, seed: number }> = {}): { filter: BloomFilter, hashes: number } => {
-	const { size, hashes } = calculateFilterParams(heads.length, options.errorRate ?? 0.1)
+const createFilter = (heads: CID[], options: Partial<{ collisionRate: number, seed: number }> = {}): { filter: BloomFilter, hashes: number } => {
+	const { size, hashes } = calculateFilterParams(heads.length, options.collisionRate ?? 0.1)
 	const filter = new BloomFilter(size, hashes)
 
 	if (options.seed != null) {
@@ -91,14 +91,22 @@ export class HeadsExchange {
 	private readonly localSeed: number
 	private readonly remoteSeed: number
 	private readonly writer: Pushable<Partial<Message>> = pushable({ objectMode: true })
+	private readonly collisionRate: number
 	private verifyPromise: DeferredPromise<boolean> | null = null
 	private headsPromise: DeferredPromise<CID[]> | null = null
 
-	constructor (stream: Stream, heads: CID[], localPeerId: PeerId, remotePeerId: PeerId) {
-		this.stream = stream
-		this.heads = heads
-		this.localSeed = generateSeed(localPeerId, remotePeerId)
-		this.remoteSeed = generateSeed(remotePeerId, localPeerId)
+	constructor (params: {
+		stream: Stream,
+		heads: CID[],
+		localPeerId: PeerId,
+		remotePeerId: PeerId,
+		collisionRate: number
+	}) {
+		this.stream = params.stream
+		this.heads = params.heads
+		this.localSeed = generateSeed(params.localPeerId, params.remotePeerId)
+		this.remoteSeed = generateSeed(params.remotePeerId, params.localPeerId)
+		this.collisionRate = params.collisionRate
 	}
 
 	async pipe (): Promise<void> {
@@ -157,7 +165,10 @@ export class HeadsExchange {
 
 		this.headsPromise = new DeferredPromise()
 
-		const { filter, hashes } = createFilter(this.heads, { seed: this.localSeed })
+		const { filter, hashes } = createFilter(this.heads, {
+			seed: this.localSeed,
+			collisionRate: this.collisionRate
+		})
 
 		this.writer.push({
 			filter: {
