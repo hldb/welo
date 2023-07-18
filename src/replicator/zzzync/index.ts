@@ -18,7 +18,7 @@ import type { Config, ReplicatorModule } from '../interface.js'
 import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
 import { Paily } from '@/utils/paily.js'
 import type { Blockstore } from 'interface-blockstore'
-import { entries } from '@alanshaw/pail'
+import { entries as pailEntries } from '@alanshaw/pail'
 import { ShardBlockView, ShardFetcher, ShardLink } from '@alanshaw/pail/shard'
 import { Datastore, Key } from 'interface-datastore'
 // import { CodeError } from '@libp2p/interfaces/errors'
@@ -128,26 +128,24 @@ export class ZzzyncReplicator extends Playable {
       return
     }
 
-    const { writer, out } = CarWriter.create(root as CID)
-    const reader = CarReader.fromIterable(out)
-
+    const replicaBlocks: Array<{ cid: CID, bytes: Uint8Array }> = []
     const shardFetcher = new ShardFetcher(this.replica.graph.nodes.blockFetcher)
     for await (const shard of traverseShards(shardFetcher, await shardFetcher.get(root))) {
-      await writer.put(shard)
+      replicaBlocks.push(shard)
     }
 
-    for await (const [k, v] of entries(this.replica.graph.nodes.blockFetcher, root)) {
+    for await (const [k, v] of pailEntries(this.replica.graph.nodes.blockFetcher, root)) {
       const entry = await this.replica.components.entry.fetch({
         blocks: this.blocks,
         identity: this.replica.components.identity,
         cid: CID.parse(new Key(k).baseNamespace())
       })
-      await writer.put(entry.block)
-      await writer.put(entry.identity.block)
+      replicaBlocks.push(entry.block)
+      replicaBlocks.push(entry.identity.block)
 
       const block = await this.replica.graph.nodes.blockFetcher.get(v)
       if (block != null) {
-        await writer.put({ cid: v as CID, bytes: block.bytes })
+        replicaBlocks.push({ cid: v as CID, bytes: block.bytes })
       }
 
       console.log({
@@ -157,6 +155,16 @@ export class ZzzyncReplicator extends Playable {
         entry: entry.cid.toString(),
         identity: entry.identity.auth.toString()
       })
+    }
+
+    const rootBlock = await Blocks.encode({ value: replicaBlocks.map(({ cid }) => cid) })
+
+    const { writer, out } = CarWriter.create(rootBlock.cid)
+    const reader = CarReader.fromIterable(out)
+
+    await writer.put(rootBlock)
+    for (const block of replicaBlocks) {
+      await writer.put(block)
     }
 
     await writer.close()
@@ -195,6 +203,7 @@ export class ZzzyncReplicator extends Playable {
         break
       }
     }
+    console.log(providers)
 
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
       const response = await this.w3.client.get(cid.toString())
@@ -216,10 +225,6 @@ export class ZzzyncReplicator extends Playable {
 
       const entry = await this.replica.components.entry.asEntry({ block, identity })
 
-      if (entry == null) {
-        throw new Error('entry was null')
-      }
-
       return entry as EntryInstance<SignedEntry>
     }
 
@@ -232,15 +237,25 @@ export class ZzzyncReplicator extends Playable {
         return
       }
 
-      const diff = await this.replica.graph.nodes.diff(value, { blockFetcher: w3storageBlockFetcher(this.w3.client) })
+      const response = await this.w3.client.get(value.toString())
+
+      if (response?.status !== 200) {
+        throw new Error(response?.statusText ?? 'bad response from w3')
+      }
+
+      const reader = await CarReader.fromBytes(new Uint8Array(await response.arrayBuffer()))
+      console.log(reader)
+
+      const diff = await this.replica.graph.nodes.diff(
+        value,
+        { blockFetchers: [w3storageBlockFetcher(this.w3.client), carBlockFetcher(reader)] }
+      )
 
       const promises: Array<Promise<EntryInstance<SignedEntry>>> = []
       for (const [k, v] of diff.keys) {
-        if (v[1] != null) {
-          continue
+        if (v[0] === null) {
+          promises.push(fetchEntry(CID.parse(new Key(k).baseNamespace())))
         }
-
-        promises.push(fetchEntry(CID.parse(new Key(k).baseNamespace())))
       }
       await Promise.all(promises).then(async entries => await this.replica.add(entries))
     }
@@ -265,6 +280,12 @@ export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
     }
 
     return undefined
+  }
+})
+
+export const carBlockFetcher = (car: CarReader): BlockFetcher => ({
+  get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
+    return await car.get(link as CID)
   }
 })
 

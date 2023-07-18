@@ -84,11 +84,11 @@ export class Paily extends BaseDatastore {
     }
   }
 
-  async diff (link: ShardLink, options?: { blockFetcher: BlockFetcher }): Promise<CombinedDiff> {
-    const blocks = options?.blockFetcher != null
-      ? hybridBlockFetcher(this.blockFetcher, options.blockFetcher)
+  async diff (link: ShardLink, options?: { blockFetchers: BlockFetcher[] }): Promise<CombinedDiff> {
+    const blocks = options?.blockFetchers != null
+      ? multiBlockFetcher(this.blockFetcher, ...options.blockFetchers)
       : this.blockFetcher
-    return await difference(blocks, link, this.root)
+    return await difference(blocks, this.root, link)
   }
 }
 
@@ -107,9 +107,17 @@ const blockFetcher = (blockstore: Blockstore): BlockFetcher => ({
   }
 })
 
-const hybridBlockFetcher = (...blockFetchers: BlockFetcher[]): BlockFetcher => ({
+const multiBlockFetcher = (...blockFetchers: BlockFetcher[]): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
-    return await Promise.race(blockFetchers.map(async (b) => await b.get(link)))
+    return await new Promise(resolve => {
+      let resolved = 0
+      blockFetchers.map(async (b) => await b.get(link)
+        .then(v => {
+          if ((v === undefined && resolved++ === blockFetchers.length) || v !== undefined) {
+            resolve(v)
+          }
+        }))
+    })
   }
 })
 
