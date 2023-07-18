@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.2.3](https://github.com/hldb/welo/compare/v2.2.2...v2.2.3) (2023-07-15)
+
+
+### Bug Fixes
+
+* zzzync replicator uploads everything ([2a961df](https://github.com/hldb/welo/commit/2a961df0cae9f6c84c6e2c0ba4ebefd9896ed09d))
+
+## [2.2.2](https://github.com/hldb/welo/compare/v2.2.1...v2.2.2) (2023-07-14)
+
+
+### Bug Fixes
+
+* zzzync also uses GET_PROVIDERS queries ([91b1b73](https://github.com/hldb/welo/commit/91b1b733e8c378ecb178527be339b20cbfe6d8f2))
+* zzzync upload checks if cid ([85b981b](https://github.com/hldb/welo/commit/85b981bf135460b540725986dc70c9da41398457))
+
+## [2.2.1](https://github.com/hldb/welo/compare/v2.2.0...v2.2.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* remove console.log(providers) artifact ([ce4b946](https://github.com/hldb/welo/commit/ce4b946474fb2e9c22f16a1fee3f7b42ae5d8ee8))
+* zzzync replicator impl and test success ([da6e9d3](https://github.com/hldb/welo/commit/da6e9d317cb024c5e21a3b62c97b0647b86e4380))
+
 ## [2.2.0](https://github.com/hldb/welo/compare/v2.1.1...v2.2.0) (2023-07-10)
 
 

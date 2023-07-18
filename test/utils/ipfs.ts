@@ -1,13 +1,12 @@
-import type { Multiaddr } from '@multiformats/multiaddr'
 import { createHelia } from 'helia'
-import type { Helia } from '@helia/interface'
-import type { TestPaths } from './constants'
-import { createLibp2p } from 'libp2p'
+import { Libp2pOptions, createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
-
-import type { GossipHelia } from '@/interface.js'
 import { createLibp2pOptions } from './libp2p-options.js'
+import type { Multiaddr } from '@multiformats/multiaddr'
+import type { Helia } from '@helia/interface'
+import type { TestPaths } from './constants'
+import type { GossipHelia } from '@/interface.js'
 
 interface IpfsOptions {
   repo: string
@@ -25,14 +24,18 @@ type Opts = typeof offlineIpfsOptions | typeof localIpfsOptions
 
 export const getTestIpfs = async (
   testPaths: TestPaths,
-  opts: Opts
+  opts: Opts,
+  libp2pOpts: Libp2pOptions = {}
 ): Promise<GossipHelia> => {
   const options = opts(testPaths.ipfs)
 
   const datastore = new LevelDatastore(options.repo + '/data')
   const blockstore = new LevelBlockstore(options.repo + '/blocks')
 
-  const libp2pOptions = createLibp2pOptions({ datastore })
+  const libp2pOptions = await createLibp2pOptions({
+    datastore,
+    ...libp2pOpts
+  })
 
   const libp2p = await createLibp2p(libp2pOptions)
 

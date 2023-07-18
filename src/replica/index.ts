@@ -12,6 +12,7 @@ import type { BlockView } from 'multiformats/interface'
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
 import { Blocks } from '@/blocks/index.js'
+import type { Paily } from '@/utils/paily.js'
 import type { DbComponents } from '@/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { EntryInstance } from '@/entry/interface.js'
@@ -27,8 +28,6 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
-import type { IpldDatastore } from '@/utils/paily.js'
-import type { ShardLink } from '@alanshaw/pail/src/shard.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -117,19 +116,19 @@ export class Replica extends Playable {
     return this.#graph
   }
 
-  get heads (): IpldDatastore<ShardLink> {
+  get heads (): Paily {
     return this.graph.heads
   }
 
-  get tails (): IpldDatastore<ShardLink> {
+  get tails (): Paily {
     return this.graph.tails
   }
 
-  get missing (): IpldDatastore<ShardLink> {
+  get missing (): Paily {
     return this.graph.missing
   }
 
-  get denied (): IpldDatastore<ShardLink> {
+  get denied (): Paily {
     return this.graph.denied
   }
 
@@ -232,6 +231,46 @@ export class Replica extends Playable {
       this.events.dispatchEvent(new CustomEvent<EntryInstance<any>>('write', { detail: entry }))
       return entry
     })
+  }
+
+  async writes (payloads: any[]): Promise<Array<EntryInstance<any>>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
+    const entries: Array<EntryInstance<any>> = []
+    let head: EntryInstance<any> | null = null
+    for (const payload of payloads) {
+      const entry: EntryInstance<any> = await this.components.entry.create({
+        identity: this.identity,
+        tag: this.manifest.getTag(),
+        payload,
+        next: head != null ? [head.cid] : [],
+        refs: [] // refs are empty for now
+      })
+      entries.push(entry)
+      head = entry
+    }
+
+    await this.add(entries)
+
+    return entries
+  }
+
+  async newEntry (payload: any): Promise<EntryInstance<any>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
+    const entry = await this.components.entry.create({
+      identity: this.identity,
+      tag: this.manifest.getTag(),
+      payload,
+      next: (await all(this.heads.queryKeys({}))).map((key) => CID.parse(key.baseNamespace())),
+      refs: [] // refs are empty for now
+    })
+
+    return entry
   }
 
   // useful when the access list is updated

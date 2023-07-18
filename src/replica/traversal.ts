@@ -1,7 +1,6 @@
 import { compare } from 'uint8arrays/compare'
 import { Key } from 'interface-datastore'
 import type { CID } from 'multiformats/cid'
-import type { ShardLink } from '@alanshaw/pail/shard'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
 
@@ -12,7 +11,7 @@ import type { IdentityComponent } from '@/identity/interface.js'
 
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
-import type { IpldDatastore } from '@/utils/paily.js'
+import type { Paily } from '@/utils/paily.js'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order
@@ -87,7 +86,7 @@ export function graphLinks ({
   edge
 }: {
   graph: Graph
-  tails: IpldDatastore<ShardLink>
+  tails: Paily
   edge: Edge
 }): LinksFunc {
   const seen: Set<string> = new Set()

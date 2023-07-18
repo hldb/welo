@@ -1,6 +1,6 @@
 {
   "name": "welo",
-  "version": "2.2.0",
+  "version": "2.2.3",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "license": "Apache-2.0 OR MIT",
   "engines": {
@@ -29,7 +29,7 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build": "aegir build",
+    "build": "aegir build && ln -sf ./dist/test/.aegir.js ./.aegir.js",
     "extract-api": "api-extractor run -c ./api-extractor.json -l -v",
     "document-api": "api-documenter markdown -i ./API -o ./API",
     "api-docs": "npm run build && npm run extract-api && npm run document-api",
@@ -113,7 +113,7 @@
     "@libp2p/peer-id": "^2.0.3",
     "@libp2p/peer-id-factory": "^2.0.3",
     "@open-draft/deferred-promise": "^2.1.0",
-    "@tabcat/zzzync": "^1.1.0",
+    "@tabcat/zzzync": "^2.0.0",
     "blockstore-core": "^4.1.0",
     "datastore-core": "^9.1.1",
     "fission-bloom-filters": "^1.7.1",

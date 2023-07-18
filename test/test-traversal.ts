@@ -4,7 +4,6 @@ import { Key } from 'interface-datastore'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import type { Blockstore } from 'interface-blockstore'
-import type { ShardLink } from '@alanshaw/pail/shard'
 
 import {
   sortCids,
@@ -31,7 +30,7 @@ import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { concurrentEntries, singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
-import { IpldDatastore, Paily } from '@/utils/paily.js'
+import { Paily } from '@/utils/paily.js'
 
 const testName = 'traversal'
 
@@ -212,7 +211,7 @@ describe('traversal', () => {
       const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      const tails: Paily = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[1]
 
@@ -228,7 +227,7 @@ describe('traversal', () => {
       const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      const tails: Paily = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[0]
 
@@ -244,7 +243,7 @@ describe('traversal', () => {
       const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      const tails: Paily = await Paily.create(blockstore)
       const edge = 'in'
       const entry = entries[0]
 
@@ -260,7 +259,7 @@ describe('traversal', () => {
       const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      const tails: Paily = await Paily.create(blockstore)
       await tails.put(new Key(cidstring(entries[1].cid)), new Uint8Array())
       const edge = 'out'
       const entry = entries[1]
@@ -277,7 +276,7 @@ describe('traversal', () => {
       const graph = new Graph(blockstore)
       await start(graph)
 
-      const tails: IpldDatastore<ShardLink> = await Paily.create(blockstore)
+      const tails: Paily = await Paily.create(blockstore)
       const edge = 'out'
       const entry = entries[1]
 
