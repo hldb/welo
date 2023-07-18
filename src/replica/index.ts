@@ -233,6 +233,30 @@ export class Replica extends Playable {
     })
   }
 
+  async writes (payloads: any[]): Promise<Array<EntryInstance<any>>> {
+    if (!this.isStarted()) {
+      throw new Error('replica not started')
+    }
+
+    const entries: Array<EntryInstance<any>> = []
+    let head: EntryInstance<any> | null = null
+    for (const payload of payloads) {
+      const entry = await this.components.entry.create({
+        identity: this.identity,
+        tag: this.manifest.getTag(),
+        payload,
+        next: head != null ? [head.cid] : [],
+        refs: [] // refs are empty for now
+      })
+      entries.push(entry)
+      head = entry
+    }
+
+    await this.add(entries)
+
+    return entries
+  }
+
   async newEntry (payload: any): Promise<EntryInstance<any>> {
     if (!this.isStarted()) {
       throw new Error('replica not started')
