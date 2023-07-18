@@ -241,7 +241,7 @@ export class Replica extends Playable {
     const entries: Array<EntryInstance<any>> = []
     let head: EntryInstance<any> | null = null
     for (const payload of payloads) {
-      const entry = await this.components.entry.create({
+      const entry: EntryInstance<any> = await this.components.entry.create({
         identity: this.identity,
         tag: this.manifest.getTag(),
         payload,
