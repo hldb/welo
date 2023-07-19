@@ -165,7 +165,6 @@ const asIdentity = (identity: AsIdentity<unknown>): Identity | null => {
   try {
     pubkey = keys.unmarshalPublicKey(asIdentity.value.pub)
   } catch (e) {
-    console.error(e)
     return null
   }
 

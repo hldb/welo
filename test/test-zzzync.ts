@@ -33,6 +33,7 @@ const noToken = token == null
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
+  // eslint-disable-next-line no-console
   console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
   _describe = describe.skip
 } else {

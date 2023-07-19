@@ -17,7 +17,6 @@ export { Address }
 /**
  * Database Manifest
  *
- * @remarks
  * Manifests contain setup configuration required to participate in a Database.
  *
  * @public
@@ -38,7 +37,6 @@ export class Manifest {
   /**
    * Get the Manifest Tag
    *
-   * @remarks
    * The manifest tag is a unique identifier for a database that is customizable.
    * It must be globally unique like the manifest address.
    * Since they may not exist in the encoded manifest this method can be used in any case.
@@ -63,7 +61,6 @@ export class Manifest {
   /**
    * Create a Manifest
    *
-   * @remarks
    * Create a manifest using the provided configuration.
    *
    * @param manifest - The manifest configuration to use
@@ -77,7 +74,6 @@ export class Manifest {
   /**
    * Fetch a Manifest
    *
-   * @remarks
    * Fetches the manifest for the address provided. The blocks api is used to fetch the data.
    *
    * @returns
@@ -100,7 +96,6 @@ export class Manifest {
   /**
    * Optimistically coerce values into a Manifest
    *
-   * @remarks
    * Similar to `CID.asCID`.
    *
    * @param manifest - Anything you want to check is a Manifest

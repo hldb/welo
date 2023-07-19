@@ -69,7 +69,7 @@ export class Paily extends BaseDatastore {
   }
 
   async delete (key: Key): Promise<void> {
-    return await this.#queue.add(async () => await unqueuedDelete.apply(this, [key]))
+    await this.#queue.add(async () => { await unqueuedDelete.apply(this, [key]) })
   }
 
   async * _all (query: Query): AsyncIterable<DatastorePair> {
@@ -111,12 +111,14 @@ const multiBlockFetcher = (...blockFetchers: BlockFetcher[]): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
     return await new Promise(resolve => {
       let resolved = 0
-      blockFetchers.map(async (b) => await b.get(link)
-        .then(v => {
-          if ((v === undefined && resolved++ === blockFetchers.length) || v !== undefined) {
-            resolve(v)
-          }
-        }))
+      blockFetchers.map(async (b) => {
+        await b.get(link)
+          .then(v => {
+            if ((v === undefined && resolved++ === blockFetchers.length) || v !== undefined) {
+              resolve(v)
+            }
+          })
+      })
     })
   }
 })

@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 import { assert } from './utils/chai.js'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'

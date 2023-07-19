@@ -107,7 +107,6 @@ export class Welo extends Playable {
   /**
    * Deterministically create a database manifest
    *
-   * @remarks
    * Options are shallow merged with {@link defaultManifest}.
    *
    * @param options - Override defaults used to create the manifest.
@@ -125,6 +124,7 @@ export class Welo extends Playable {
     try {
       this.getComponents(manifest)
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn('manifest configuration contains unregistered components')
     }
 
@@ -134,7 +134,6 @@ export class Welo extends Playable {
   /**
    * Fetch a Database Manifest
    *
-   * @remarks
    * Convenience method for using `Manifest.fetch`.
    *
    * @param address - the Address of the Manifest to fetch
@@ -147,7 +146,6 @@ export class Welo extends Playable {
   /**
    * Opens a database for a manifest.
    *
-   * @remarks
    * This method will throw an error if the database is already opened or being opened.
    * Use {@link Welo.opened} to get opened databases.
    *
@@ -215,6 +213,7 @@ export class Welo extends Playable {
         return database
       })
       .catch((e) => {
+        // eslint-disable-next-line no-console
         console.error(e)
         throw new Error(`failed opening database with address: ${addr}`)
       })
@@ -271,7 +270,6 @@ const getDefaultComponents = (): Components => ({
 /**
  * Create an Welo instance
  *
- * @param opts - options
  * @returns a promise which resolves to an Welo instance
  */
 export const createWelo = async (init: WeloInit): Promise<Welo> => {

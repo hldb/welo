@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 import { assert } from './utils/chai.js'
 import { CID } from 'multiformats/cid'
 

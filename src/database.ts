@@ -71,6 +71,7 @@ export class Database extends Playable {
     this.#onStoreUpdate = onStoreUpdate.bind(this)
 
     // expose actions as database write methods (e.g. database.put)
+    // eslint-disable-next-line no-warning-comments
     // todo: handle async action creators
 
     interface CreatorProps {
@@ -115,7 +116,6 @@ export class Database extends Playable {
   /**
    * Open a Database
    *
-   * @remarks
    * Welo Database factory uses this method, and provides the modules needed,
    * to return databases from its `open` instance method.
    *
@@ -190,7 +190,6 @@ export class Database extends Playable {
   /**
    * Close the Database
    *
-   * @remarks
    * Welo database factory listens for the closed method to be called
    * to manage lifecycles of databases it's managing.
    */

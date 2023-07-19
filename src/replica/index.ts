@@ -158,7 +158,6 @@ export class Replica extends Playable {
     } else {
       throw new Error('unknown direction given')
     }
-    // todo: less wordy way to assign heads and tails from direction
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
@@ -193,6 +192,7 @@ export class Replica extends Playable {
 
     for await (const entry of entries) {
       if (!equals(entry.tag, this.manifest.getTag())) {
+        // eslint-disable-next-line no-console
         console.warn('replica received entry with mismatched tag')
         continue
       }

@@ -142,7 +142,7 @@ describe(testName, () => {
       await start(replicator1, replicator2)
       await Promise.all([
         libp2p1.dial(addr2),
-        new Promise(resolve => libp2p2.addEventListener('peer:connect', resolve, { once: true }))
+        new Promise(resolve => { libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
       ])
     })
 
@@ -150,8 +150,7 @@ describe(testName, () => {
       const promise = replica1.write(new Uint8Array())
 
       await Promise.all([
-        new Promise((resolve) =>
-          replica2.events.addEventListener('update', resolve, { once: true })
+        new Promise((resolve) => { replica2.events.addEventListener('update', resolve, { once: true }) }
         ),
         promise
       ])

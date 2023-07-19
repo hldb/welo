@@ -4,7 +4,7 @@ import type { Blocks } from '@/blocks/index.js'
 
 import type { Address } from './address.js'
 
-export interface Protocol<T extends string = string, C extends unknown = unknown> {
+export interface Protocol<T extends string = string, C extends Record<string, unknown> = Record<string, unknown>> {
   readonly protocol: T
   readonly config?: C
 }

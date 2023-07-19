@@ -17,16 +17,16 @@ import type { Paily } from '@/utils/paily.js'
 // when reading entries we want the traverser to visit only known entries and in order
 // when replicating entries we want the traverser to visit only unknown entries in any order
 
-type SortCids = (c1: CID, c2: CID) => number
-type SortEntries = (e1: EntryInstance<any>, e2: EntryInstance<any>) => number
+interface SortCids { (c1: CID, c2: CID): number }
+interface SortEntries { (e1: EntryInstance<any>, e2: EntryInstance<any>): number }
 
 // thinking about keeping this as only sorting metric after causal links
 export const sortCids: SortCids = (c1, c2) => compare(c1.bytes, c2.bytes)
 export const sortEntries: SortEntries = (e1, e2) => sortCids(e1.cid, e2.cid)
 export const sortEntriesRev: SortEntries = (e1, e2) => sortCids(e2.cid, e1.cid)
 
-export type LoadFunc = (cid: CID) => Promise<EntryInstance<any> | null>
-export type LinksFunc = (entry: EntryInstance<any>) => Promise<CID[]>
+export interface LoadFunc { (cid: CID): Promise<EntryInstance<any> | null> }
+export interface LinksFunc { (entry: EntryInstance<any>): Promise<CID[]> }
 
 export function loadEntry ({
   blocks,
@@ -121,6 +121,7 @@ export function graphLinks ({
   return links
 }
 
+// eslint-disable-next-line no-warning-comments
 // todo: improve read ahead with entry.refs
 export async function traverser ({
   cids, // array of CID to start from
@@ -163,7 +164,7 @@ export async function traverser ({
 
     if (nexts.length > 0) {
       // order(nexts)
-      return await walk(nexts) // combine link arrays
+      await walk(nexts) // combine link arrays
     }
   }
 

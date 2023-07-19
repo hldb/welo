@@ -13,6 +13,16 @@
   "files": [
     "dist/src"
   ],
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "ignorePatterns": [
+      "!.aegir.js",
+      "*.d.ts"
+    ]
+  },
   "browser": {
     "path": "path-browserify",
     "make-dir": false,
@@ -23,7 +33,7 @@
     "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
     "reset": "rm -rf node_modules package-lock.json && npm install",
-    "lint": "eslint src test",
+    "lint": "aegir lint",
     "dep-check": "npx depcheck --ignores=~*,typescript-transform-paths",
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",

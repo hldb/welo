@@ -1,3 +1,6 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable guard-for-in */
+/* eslint-disable max-nested-callbacks */
 import { assert } from './utils/chai.js'
 import { start } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
@@ -302,7 +305,7 @@ describe('traversal', () => {
     const x: Entry[] = [] // 2 concurrent 1 consecutive
     const v: Entry[] = [] // 2 concurrent 1 consecutive
 
-    const topologies: { [string: string]: Entry[] } = {
+    const topologies: Record<string, Entry[]> = {
       stick,
       eleven,
       sticklegs,

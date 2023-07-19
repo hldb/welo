@@ -17,21 +17,17 @@ export interface Props {
   blockstore: Blockstore
 }
 
-export type Creator = (...args: any[]) => any
+export interface Creator { (...args: any[]): any }
 
-export type Selector = (state: any) => (...args: any[]) => any
+export interface Selector { (state: any): (...args: any[]) => any }
 
 export interface Events {
   update: CustomEvent<undefined>
 }
 
 export interface StoreInstance extends Startable {
-  creators: {
-    [key: string]: Creator
-  }
-  selectors: {
-    [key: string]: Selector
-  }
+  creators: Record<string, Creator>
+  selectors: Record<string, Selector>
   latest: () => Promise<any>
   events: EventEmitter<Events>
 }

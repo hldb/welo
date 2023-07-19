@@ -14,25 +14,19 @@ import type {
 // import type { PreloadOptions } from 'ipfs-core-types/src/utils'
 // import type { PutOptions } from 'ipfs-core-types/src/block'
 
-interface Codecs {
-  [code: number]: typeof cbor
-}
+type Codecs = Record<number, typeof cbor>
 
 const codecs: Codecs = {
   [cbor.code]: cbor
 }
 
-interface Names {
-  [code: number]: typeof cbor.name
-}
+type Names = Record<number, typeof cbor.name>
 
 const names: Names = {
   [cbor.code]: cbor.name
 }
 
-interface Hashers {
-  [code: number]: typeof sha256
-}
+type Hashers = Record<number, typeof sha256>
 
 const hashers: Hashers = {
   [sha256.code]: sha256

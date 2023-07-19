@@ -50,6 +50,7 @@ export const selectors = {
     }
     return decode(bytes) ?? undefined
   },
+  // eslint-disable-next-line no-warning-comments
   // todo: add tests for keys/values/entries
   keys: (state: StateMap) => async function * () {
     for await (const { key, value } of state.query({})) {
@@ -111,7 +112,9 @@ export async function reducer (
         break
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e)
+    // eslint-disable-next-line no-console
     console.error(new Error('failed to apply entry operation to state'))
   }
 
