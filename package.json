@@ -46,9 +46,7 @@
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
     "build": "aegir build && ln -sf ./dist/test/.aegir.js ./.aegir.js",
-    "extract-api": "api-extractor run -c ./api-extractor.json -l -v",
-    "document-api": "api-documenter markdown -i ./API -o ./API",
-    "api-docs": "npm run build && npm run extract-api && npm run document-api",
+    "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
     "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
     "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
@@ -82,8 +80,6 @@
     "@libp2p/kad-dht": "^9.3.6",
     "@libp2p/tcp": "^7.0.1",
     "@libp2p/webrtc-star": "^7.0.0",
-    "@microsoft/api-documenter": "^7.19.25",
-    "@microsoft/api-extractor": "^7.33.6",
     "@multiformats/multiaddr": "^12.1.3",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
@@ -166,5 +162,8 @@
       "eslint-plugin-n",
       "eslint-plugin-promise"
     ]
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts"
   }
 }
