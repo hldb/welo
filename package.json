@@ -34,6 +34,7 @@
     "prepublishOnly": "npm run build",
     "reset": "rm -rf node_modules package-lock.json && npm install",
     "lint": "aegir lint",
+    "lint-fix": "aegir lint --fix",
     "dep-check": "npx depcheck --ignores=~*,typescript-transform-paths",
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
