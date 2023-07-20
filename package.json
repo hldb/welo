@@ -36,7 +36,6 @@
   },
   "prettier": "prettier-config-standard",
   "scripts": {
-    "prepare": "ts-patch install -s",
     "prepublishOnly": "npm run build",
     "reset": "rm -rf node_modules package-lock.json && npm install",
     "lint": "aegir lint",
@@ -45,7 +44,7 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build": "aegir build && ln -sf ./dist/test/.aegir.js ./.aegir.js",
+    "build": "aegir build && tsc-alias && ln -sf ./dist/test/.aegir.js ./.aegir.js",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
     "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
     "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
@@ -108,9 +107,8 @@
     "path-browserify": "^1.0.1",
     "prettier": "^2.7.1",
     "prettier-config-standard": "^5.0.0",
-    "ts-patch": "^2.0.2",
+    "tsc-alias": "^1.8.7",
     "typescript": "^5.1.6",
-    "typescript-transform-paths": "^3.4.4",
     "wherearewe": "^2.0.1"
   },
   "dependencies": {
