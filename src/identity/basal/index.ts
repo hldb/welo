@@ -1,10 +1,11 @@
 import { keys } from '@libp2p/crypto'
+import * as Block from 'multiformats/block'
+import * as codec from '@ipld/dag-cbor'
+import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import type { PrivateKey, PublicKey } from '@libp2p/interface-keys'
 import { Key } from 'interface-datastore'
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
-
-import { Blocks } from '@/blocks/index.js'
 
 import protocol from './protocol.js'
 import type {
@@ -16,6 +17,7 @@ import type {
   Get,
   Import
 } from '../interface.js'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const secp256k1 = 'secp256k1'
 const empty = ''
@@ -92,7 +94,7 @@ export class Identity implements IdentityInstance<IdentityValue> {
 const gen = async (name: string): Promise<Identity> => {
   const keypair = await keys.generateKeyPair(secp256k1, 256)
   const value = await signIdentity(keypair, keypair.public)
-  const block = await Blocks.encode({ value })
+  const block = await Block.encode({ value, codec, hasher })
 
   return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
 }
@@ -118,7 +120,7 @@ const get = async ({ name, identities, keychain }: Get): Promise<Identity> => {
     return identity
   } else {
     const bytes = await identities.get(key)
-    const block = await Blocks.decode<IdentityValue>({ bytes })
+    const block = await decodeCbor<IdentityValue>(bytes)
     const pem = await keychain.exportKey(name, empty)
     const keypair = await keys.importKey(pem, empty)
 
@@ -131,8 +133,9 @@ const get = async ({ name, identities, keychain }: Get): Promise<Identity> => {
   }
 }
 
-const fetch = async ({ blocks, auth: cid }: Fetch): Promise<Identity> => {
-  const block = await blocks.get<IdentityValue>(cid)
+const fetch = async ({ blockstore, auth: cid }: Fetch): Promise<Identity> => {
+  const bytes = await blockstore.get(cid)
+  const block = await decodeCbor<IdentityValue>(bytes)
 
   const identity = asIdentity({ block })
   if (identity === null) {
@@ -179,7 +182,7 @@ const importFunc = async ({
 }: Import): Promise<Identity> => {
   const persist = identities !== undefined && keychain !== undefined
 
-  const block: BlockView<KpiValue> = await Blocks.decode({ bytes: kpi })
+  const block = await decodeCbor<KpiValue>(kpi)
 
   let pem: string, identity: Uint8Array
   try {
@@ -203,9 +206,7 @@ const importFunc = async ({
     await identities.put(key, identity)
   }
 
-  const identityBlock = await Blocks.decode<IdentityValue>({
-    bytes: identity
-  })
+  const identityBlock = await decodeCbor<IdentityValue>(identity)
 
   return new Identity({
     name,
@@ -230,8 +231,7 @@ const exportFunc = async ({
   const pem = await keychain.exportKey(name, empty)
   const bytes = await identities.get(key)
 
-  const value = { pem, identity: bytes }
-  const block: BlockView<KpiValue> = await Blocks.encode({ value })
+  const block = await encodeCbor<KpiValue>({ pem, identity: bytes })
   return block.bytes
 }
 

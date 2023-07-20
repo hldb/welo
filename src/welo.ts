@@ -7,7 +7,6 @@ import type { Datastore } from 'interface-datastore'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Manifest, Address } from '@/manifest/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { Playable } from '@/utils/playable.js'
 import { cidstring } from '@/utils/index.js'
 import type { ReplicatorModule } from '@/replicator/interface.js'
@@ -33,6 +32,7 @@ import { staticAccess } from './access/static/index.js'
 import { keyvalueStore } from './store/keyvalue/index.js'
 import { basalEntry } from './entry/basal/index.js'
 import type { DbComponents } from './interface'
+import type { Blockstore } from 'interface-blockstore'
 
 export { Manifest, Address }
 export type {
@@ -53,10 +53,10 @@ export type {
 export class Welo extends Playable {
   private readonly replicators: ReplicatorModule[]
   private readonly datastore: Datastore
+  private readonly blockstore: Blockstore
   private readonly components: Config['components']
 
   readonly ipfs: GossipHelia
-  readonly blocks: Blocks
 
   readonly keychain: KeyChain
 
@@ -69,11 +69,11 @@ export class Welo extends Playable {
 
   constructor ({
     identity,
-    blocks,
     keychain,
     ipfs,
     components,
     datastore,
+    blockstore,
     replicators
   }: Config) {
     const starting = async (): Promise<void> => {
@@ -86,7 +86,6 @@ export class Welo extends Playable {
     super({ starting, stopping })
 
     this.identity = identity
-    this.blocks = blocks
 
     this.keychain = keychain
 
@@ -99,6 +98,7 @@ export class Welo extends Playable {
 
     this.components = components
     this.datastore = datastore
+    this.blockstore = blockstore
     this.replicators = replicators
   }
 
@@ -119,7 +119,7 @@ export class Welo extends Playable {
     }
 
     const manifest = await Manifest.create(manifestObj)
-    await this.blocks.put(manifest.block)
+    await this.blockstore.put(manifest.block.cid, manifest.block.bytes)
 
     try {
       this.getComponents(manifest)
@@ -140,7 +140,7 @@ export class Welo extends Playable {
    * @returns
    */
   async fetch (address: Address): Promise<Manifest> {
-    return await Manifest.fetch({ blocks: this.blocks, address })
+    return await Manifest.fetch({ blockstore: this.blockstore, address })
   }
 
   /**
@@ -185,8 +185,8 @@ export class Welo extends Playable {
       manifest,
       identity,
       ipfs: this.ipfs,
-      blocks: this.blocks,
       datastore: new NamespaceDatastore(datastore, dbKey),
+      blockstore: this.blockstore,
       replicators,
       provider: options.provider,
       components
@@ -301,7 +301,7 @@ export const createWelo = async (init: WeloInit): Promise<Welo> => {
     keychain: ipfs.libp2p.keychain,
     datastore,
     identity,
-    blocks: new Blocks(ipfs),
+    blockstore: ipfs.blockstore,
     replicators,
     components
   }

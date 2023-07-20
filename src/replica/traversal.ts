@@ -4,7 +4,6 @@ import type { CID } from 'multiformats/cid'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
 
-import type { Blocks } from '@/blocks/index.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
 import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
 import type { IdentityComponent } from '@/identity/interface.js'
@@ -12,6 +11,7 @@ import type { IdentityComponent } from '@/identity/interface.js'
 import type { Graph } from './graph.js'
 import type { Edge } from './graph-node.js'
 import type { Paily } from '@/utils/paily.js'
+import type { Blockstore } from 'interface-blockstore'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order
@@ -29,16 +29,16 @@ export interface LoadFunc { (cid: CID): Promise<EntryInstance<any> | null> }
 export interface LinksFunc { (entry: EntryInstance<any>): Promise<CID[]> }
 
 export function loadEntry ({
-  blocks,
+  blockstore,
   entry,
   identity
 }: {
-  blocks: Blocks
+  blockstore: Blockstore
   entry: EntryComponent
   identity: IdentityComponent
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await entry.fetch({ blocks, cid, identity }).catch(() => null)
+    return await entry.fetch({ blockstore, cid, identity }).catch(() => null)
   }
   return load
 }

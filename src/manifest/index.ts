@@ -1,6 +1,6 @@
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '@/blocks/index.js'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 // import type { FetchOptions } from '@/utils/types.js'
 
 import { Address } from './address.js'
@@ -67,7 +67,7 @@ export class Manifest {
    * @returns
    */
   static async create (manifest: Create): Promise<Manifest> {
-    const block = await Blocks.encode({ value: manifest })
+    const block = await encodeCbor(manifest)
     return new Manifest(block)
   }
 
@@ -79,11 +79,10 @@ export class Manifest {
    * @returns
    */
   static async fetch (
-    { blocks, address }: Fetch
+    { blockstore, address }: Fetch
   ): Promise<Manifest> {
-    const block: BlockView<ManifestData> = await blocks.get<ManifestData>(
-      address.cid
-    )
+    const bytes = await blockstore.get(address.cid)
+    const block = await decodeCbor<ManifestData>(bytes)
     const manifest = this.asManifest({ block })
 
     if (manifest === null) {

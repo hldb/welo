@@ -6,7 +6,6 @@ import { NamespaceDatastore } from 'datastore-core'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -55,9 +54,6 @@ describe(testName, () => {
 
     addr2 = await getMultiaddr(ipfs2)
 
-    const blocks1 = new Blocks(ipfs1)
-    const blocks2 = new Blocks(ipfs2)
-
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
 
@@ -85,7 +81,6 @@ describe(testName, () => {
       manifest,
       datastore: datastore1,
       blockstore: ipfs1.blockstore,
-      blocks: blocks1,
       access,
       identity: identity1,
       components: {
@@ -97,7 +92,6 @@ describe(testName, () => {
       manifest,
       datastore: datastore2,
       blockstore: ipfs2.blockstore,
-      blocks: blocks2,
       access,
       identity: identity2,
       components: {
@@ -109,14 +103,12 @@ describe(testName, () => {
 
     replicator1 = new Replicator({
       ipfs: ipfs1,
-      blocks: blocks1,
       replica: replica1,
       datastore: datastore1,
       blockstore: ipfs1.blockstore
     })
     replicator2 = new Replicator({
       ipfs: ipfs2,
-      blocks: blocks2,
       replica: replica2,
       datastore: datastore2,
       blockstore: ipfs2.blockstore

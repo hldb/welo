@@ -40,7 +40,6 @@ export class Keyvalue extends Playable implements StoreInstance {
 
   constructor ({
     manifest,
-    blocks,
     replica,
     datastore,
     blockstore

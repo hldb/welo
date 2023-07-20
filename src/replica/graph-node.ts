@@ -1,6 +1,5 @@
+import { encodeCbor, decodeCbor } from '@/utils/block.js'
 import type { BlockView } from 'multiformats/interface'
-
-import { Blocks } from '@/blocks/index.js'
 
 export type Edge = 'out' | 'in'
 
@@ -48,7 +47,7 @@ export class Node implements NodeObj {
   }
 
   static async decode (bytes: Uint8Array): Promise<Node> {
-    const { value: nodeValue } = await Blocks.decode<NodeValue>({ bytes })
+    const { value: nodeValue } = await decodeCbor<NodeValue>(bytes)
     return new Node(nodeValue)
   }
 
@@ -67,6 +66,6 @@ export class Node implements NodeObj {
       missing: this.missing,
       denied: this.denied
     }
-    return await Blocks.encode<NodeValue>({ value: simple })
+    return await encodeCbor<NodeValue>(simple)
   }
 }

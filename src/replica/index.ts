@@ -11,7 +11,6 @@ import type { BlockView } from 'multiformats/interface'
 
 import { Playable } from '@/utils/playable.js'
 import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import { Blocks } from '@/blocks/index.js'
 import type { Paily } from '@/utils/paily.js'
 import type { DbComponents } from '@/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
@@ -28,6 +27,7 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -38,7 +38,6 @@ interface ReplicaEvents {
 
 export class Replica extends Playable {
   readonly manifest: Manifest
-  readonly blocks: Blocks
   readonly identity: IdentityInstance<any>
   readonly access: AccessInstance
   readonly events: EventEmitter<ReplicaEvents>
@@ -56,7 +55,6 @@ export class Replica extends Playable {
     manifest,
     datastore,
     blockstore,
-    blocks,
     access,
     identity,
     components
@@ -64,7 +62,6 @@ export class Replica extends Playable {
     manifest: Manifest
     datastore: Datastore
     blockstore: Blockstore
-    blocks: Blocks
     identity: IdentityInstance<any>
     access: AccessInstance
     components: Pick<DbComponents, 'entry' | 'identity'>
@@ -93,7 +90,6 @@ export class Replica extends Playable {
     super({ starting, stopping })
 
     this.manifest = manifest
-    this.blocks = blocks
     this.access = access
     this.identity = identity
     this.components = components
@@ -137,7 +133,7 @@ export class Replica extends Playable {
       direction: 'descend'
     }
   ): Promise<Array<EntryInstance<any>>> {
-    const blocks = this.blocks
+    const blockstore = this.#blockstore
     const entry = this.components.entry
     const identity = this.components.identity
 
@@ -161,7 +157,7 @@ export class Replica extends Playable {
     const [heads, tails] = headsAndTails
 
     const cids = (await all(heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace()))
-    const load = loadEntry({ blocks, entry, identity })
+    const load = loadEntry({ blockstore, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
     return await traverser({ cids, load, links, orderFn })
@@ -197,8 +193,8 @@ export class Replica extends Playable {
         continue
       }
 
-      await this.blocks.put(entry.block)
-      await this.blocks.put(entry.identity.block)
+      await this.#blockstore.put(entry.cid, entry.block.bytes)
+      await this.#blockstore.put(entry.identity.auth, entry.identity.block.bytes)
 
       if (await this.access.canAppend(entry)) {
         await this.graph.add(entry.cid, entry.next)
@@ -225,7 +221,7 @@ export class Replica extends Playable {
       refs: [] // refs are empty for now
     })
 
-    await this.blocks.put(entry.block)
+    await this.#blockstore.put(entry.cid, entry.block.bytes)
 
     return await this.add([entry]).then(() => {
       this.events.dispatchEvent(new CustomEvent<undefined>('write'))
@@ -288,7 +284,7 @@ export class Replica extends Playable {
   }
 }
 
-const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await Blocks.encode({ value: root })
+const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await encodeCbor<GraphRoot>(root)
 
 const getRoot = async (
   datastore: Datastore,
@@ -297,7 +293,7 @@ const getRoot = async (
   try {
     const rootHash = await datastore.get(rootHashKey)
     const bytes = await blockstore.get(decodedcid(rootHash))
-    return await Blocks.decode<GraphRoot>({ bytes })
+    return await decodeCbor<GraphRoot>(bytes)
   } catch (e) {
     throw new Error('failed to get root')
   }

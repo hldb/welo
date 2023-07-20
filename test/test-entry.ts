@@ -5,7 +5,6 @@ import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
-import { Blocks } from '@/blocks/index.js'
 import { Entry, basalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -14,12 +13,14 @@ import { fixtPath, getTestPaths, names } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Blockstore } from 'interface-blockstore'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const testName = 'basal entry'
 
 describe(testName, () => {
   let ipfs: Helia,
-    blocks: Blocks,
+    blockstore: Blockstore,
     identity: Identity,
     entry: Entry,
     invalidEntry: Entry,
@@ -40,7 +41,7 @@ describe(testName, () => {
     const testPaths = getTestPaths(fixtPath, testName)
 
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
 
     identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
@@ -84,9 +85,9 @@ describe(testName, () => {
     })
 
     it('.fetch grabs an existing entry', async () => {
-      await blocks.put(entry.block)
-      await blocks.put(identity.block)
-      const _entry = await entryModule.fetch({ blocks, identity: identityModule, cid: entry.cid })
+      await blockstore.put(entry.block.cid, entry.block.bytes)
+      await blockstore.put(identity.block.cid, identity.block.bytes)
+      const _entry = await entryModule.fetch({ blockstore, identity: identityModule, cid: entry.cid })
       assert.notStrictEqual(_entry, entry)
       assert.deepEqual(_entry.block, entry.block)
       assert.deepEqual(_entry.identity.auth, entry.identity.auth)
@@ -94,11 +95,11 @@ describe(testName, () => {
 
     it('.fetch rejects if signature is invalid', async () => {
       const value = { ...entry.block.value, sig: new Uint8Array() }
-      const block = await Blocks.encode({ value })
-      await blocks.put(block)
+      const block = await encodeCbor(value)
+      await blockstore.put(block.cid, block.bytes)
       invalidEntry = (await entryModule.asEntry({ block, identity })) as Entry
 
-      const promise = entryModule.fetch({ blocks, identity: identityModule, cid: invalidEntry.cid })
+      const promise = entryModule.fetch({ blockstore, identity: identityModule, cid: invalidEntry.cid })
       await assert.isRejected(promise)
     })
 
@@ -161,9 +162,7 @@ describe(testName, () => {
       assert.strictEqual(entry.cid, entry.block.cid)
       assert.strictEqual(entry.auth, entry.block.value.auth)
       assert.strictEqual(entry.sig, entry.block.value.sig)
-      const data = await Blocks.decode<EntryData>({
-        bytes: entry.block.value.data
-      })
+      const data = await decodeCbor<EntryData>(entry.block.value.data)
       assert.deepEqual(entry.tag, data.value.tag)
       assert.deepEqual(entry.payload, data.value.payload)
       assert.deepEqual(entry.next, data.value.next)

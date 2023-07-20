@@ -17,7 +17,6 @@ import {
   graphLinks,
   traverser
 } from '@/replica/traversal.js'
-import { Blocks } from '@/blocks/index.js'
 import type { EntryInstance } from '@/entry/interface.js'
 import { Entry, basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -39,7 +38,6 @@ const testName = 'traversal'
 
 describe('traversal', () => {
   let ipfs: Helia,
-    blocks: Blocks,
     blockstore: Blockstore,
     identity: Identity,
     identity1: Identity,
@@ -60,7 +58,6 @@ describe('traversal', () => {
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
     blockstore = ipfs.blockstore
 
     const identities = await getTestIdentities(testPaths)
@@ -112,10 +109,10 @@ describe('traversal', () => {
       payload
     })
 
-    await blocks.put(identity.block)
-    await blocks.put(entries[0].block)
-    await blocks.put(entries[1].block)
-    await blocks.put(entries[2].block)
+    await blockstore.put(identity.block.cid, identity.block.bytes)
+    await blockstore.put(entries[0].block.cid, entries[0].block.bytes)
+    await blockstore.put(entries[1].block.cid, entries[1].block.bytes)
+    await blockstore.put(entries[2].block.cid, entries[2].block.bytes)
   })
 
   after(async () => {
@@ -142,7 +139,7 @@ describe('traversal', () => {
 
   describe('load', () => {
     it('returns an entry by cid', async () => {
-      const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
+      const load = loadEntry({ blockstore, entry: entryModule, identity: identityModule })
       const entry = entries[0]
       const cid = entry.cid
 
@@ -326,7 +323,7 @@ describe('traversal', () => {
     before(async () => {
       const id0 = identity
       const id1 = identity1
-      await blocks.put(id1.block)
+      await blockstore.put(id1.block.cid, id1.block.bytes)
 
       const manifest = await Manifest.create({
         ...defaultManifest(name, identity),
@@ -402,14 +399,14 @@ describe('traversal', () => {
             const promises = []
             for (const entry of topology) {
               // promises.push(blocks.put(entry.block.bytes, { format: 'dag-cbor' }))
-              promises.push(blocks.put(entry.block))
+              promises.push(blockstore.put(entry.block.cid, entry.block.bytes))
             }
             await Promise.all(promises)
 
             const graph = new Graph(blockstore)
             await start(graph)
 
-            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
+            const load = loadEntry({ blockstore, entry: entryModule, identity: identityModule })
             const links = dagLinks({ graph, access: sharedAccess })
 
             const cids = heads.get(topology)
@@ -448,7 +445,7 @@ describe('traversal', () => {
 
             const tails = graph.tails
             const edge = 'out'
-            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
+            const load = loadEntry({ blockstore, entry: entryModule, identity: identityModule })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntries
 
@@ -485,7 +482,7 @@ describe('traversal', () => {
 
             const tails = graph.heads
             const edge = 'in'
-            const load = loadEntry({ blocks, entry: entryModule, identity: identityModule })
+            const load = loadEntry({ blockstore, entry: entryModule, identity: identityModule })
             const links = graphLinks({ graph, tails, edge })
             const orderFn = sortEntriesRev
 

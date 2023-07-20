@@ -5,12 +5,12 @@ import type { CID } from 'multiformats/cid.js'
 
 import { Graph } from '@/replica/graph.js'
 import { Node } from '@/replica/graph-node.js'
-import { Blocks } from '@/blocks/index.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { LevelBlockstore } from 'blockstore-level'
 import { ShardBlock, ShardBlockView } from '@alanshaw/pail/shard'
 import { cidstring } from '@/utils/index.js'
+import { encodeCbor } from '@/utils/block.js'
 
 const testName = 'graph'
 
@@ -46,9 +46,9 @@ describe(testName, () => {
     missing = []
     denied = []
     for (let i = 0; i < 8; i++) {
-      const { cid: node } = await Blocks.encode({ value: { node: true, i } })
-      const { cid: miss } = await Blocks.encode({ value: { miss: true, i } })
-      const { cid: deny } = await Blocks.encode({ value: { deny: true, i } })
+      const { cid: node } = await encodeCbor({ node: true, i })
+      const { cid: miss } = await encodeCbor({ miss: true, i })
+      const { cid: deny } = await encodeCbor({ deny: true, i })
       nodes.push(node)
       missing.push(miss)
       denied.push(deny)

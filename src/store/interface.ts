@@ -5,13 +5,11 @@ import type { Blockstore } from 'interface-blockstore'
 
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { ComponentProtocol } from '@/interface.js'
 
 export interface Props {
   manifest: Manifest
-  blocks: Blocks
   replica: Replica
   datastore: Datastore
   blockstore: Blockstore

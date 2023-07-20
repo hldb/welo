@@ -1,6 +1,5 @@
 import type { GossipHelia, ComponentProtocol } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Playable } from '@/utils/playable.js'
 import type { Datastore } from 'interface-datastore'
@@ -10,7 +9,6 @@ import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
 export interface Config {
   ipfs: GossipHelia
   replica: Replica
-  blocks: Blocks
   datastore: Datastore
   blockstore: Blockstore
   provider?: Ed25519PeerId
