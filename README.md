@@ -50,7 +50,7 @@ Check out the [tests](./test) for more usage examples for now.
 
 ## API
 
-Check out the [API Docs](./API/index.md)
+Check out the [API Docs](https://hldb.github.io/welo)
 
 ## License
 
