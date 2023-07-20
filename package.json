@@ -25,7 +25,7 @@
       "sourceType": "module"
     },
     "ignorePatterns": [
-      "!.aegir.js",
+      ".aegir.js",
       "*.d.ts",
       "benchmark/*"
     ]
