@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
@@ -169,7 +169,7 @@ describe(testName, () => {
           kpi
         })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
 
       it('exports an encoded identity/keypair', async () => {
@@ -191,7 +191,7 @@ describe(testName, () => {
           keychain: tempKeychain
         })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 
@@ -228,7 +228,7 @@ describe(testName, () => {
         const data = new Uint8Array([1])
         const sig = signedEmpty
         const promise = identityModule.verify(_identity, data, sig)
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
   })
@@ -268,7 +268,7 @@ describe(testName, () => {
         })) as Identity
         const data = dataEmpty
         const promise = _identity.sign(data)
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 

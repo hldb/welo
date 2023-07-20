@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import type { Components, GossipHelia, GossipLibp2p } from '@/interface'
 
 import createWelo from './utils/default-welo.js'
@@ -96,7 +96,7 @@ describe(testName, () => {
 
       it('rejects when opening a database already open', async () => {
         const promise = welo.open(manifest)
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
 
       it('handles database.close events', async () => {

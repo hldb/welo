@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
 import type { GossipHelia, GossipLibp2p } from '@/interface'

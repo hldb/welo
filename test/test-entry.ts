@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
@@ -99,8 +99,7 @@ describe(testName, () => {
       await blockstore.put(block.cid, block.bytes)
       invalidEntry = (await entryModule.asEntry({ block, identity })) as Entry
 
-      const promise = entryModule.fetch({ blockstore, identity: identityModule, cid: invalidEntry.cid })
-      await assert.isRejected(promise)
+      await expect(entryModule.fetch({ blockstore, identity: identityModule, cid: invalidEntry.cid })).to.be.rejected()
     })
 
     describe('.asEntry', () => {

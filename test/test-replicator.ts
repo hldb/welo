@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'

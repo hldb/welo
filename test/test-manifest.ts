@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
 import type { BlockView } from 'multiformats/interface'
 

@@ -1,5 +1,5 @@
 import path from 'path'
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 

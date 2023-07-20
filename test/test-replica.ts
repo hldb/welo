@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
@@ -262,7 +262,7 @@ describe(testName, () => {
         // @ts-expect-error
         const promise = replica.traverse({ direction })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 

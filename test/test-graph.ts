@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import type { CID } from 'multiformats/cid.js'

@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { CID } from 'multiformats/cid'
 
 import { Address } from '@/manifest/address.js'

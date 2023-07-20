@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { base32 } from 'multiformats/bases/base32'
 import type { BlockView } from 'multiformats/interface'
 

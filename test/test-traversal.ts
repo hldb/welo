@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable guard-for-in */
 /* eslint-disable max-nested-callbacks */
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import type { Helia } from '@helia/interface'
@@ -282,7 +282,7 @@ describe('traversal', () => {
 
       const links = graphLinks({ graph, tails, edge })
 
-      await assert.isRejected(links(entry))
+      await expect(links(entry)).to.eventually.be.rejected()
     })
   })
 
