@@ -26,7 +26,7 @@ import { Graph } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import defaultManifest from './utils/default-manifest.js'
+import { getDefaultManifest } from './utils/manifest.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -69,7 +69,7 @@ describe('traversal', () => {
 
     access = new StaticAccess({
       manifest: await Manifest.create({
-        ...defaultManifest(name, identity),
+        ...getDefaultManifest(name, identity),
         access: {
           protocol: staticAccessProtocol,
           config: { write: [identity.id] }
@@ -78,7 +78,7 @@ describe('traversal', () => {
     })
     noaccess = new StaticAccess({
       manifest: await Manifest.create({
-        ...defaultManifest(name, identity),
+        ...getDefaultManifest(name, identity),
         access: {
           protocol: staticAccessProtocol,
           config: { write: ['nobody'] }
@@ -326,7 +326,7 @@ describe('traversal', () => {
       await blockstore.put(id1.block.cid, id1.block.bytes)
 
       const manifest = await Manifest.create({
-        ...defaultManifest(name, identity),
+        ...getDefaultManifest(name, identity),
         access: {
           protocol: staticAccessProtocol,
           config: { write: [id0.id, id1.id] }

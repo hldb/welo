@@ -9,7 +9,7 @@ import { staticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
 import { wildcard } from '@/access/interface.js'
 
-import defaultManifest from './utils/default-manifest.js'
+import { getDefaultManifest } from './utils/manifest.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -56,7 +56,7 @@ describe(testName, () => {
     describe('.open', () => {
       it('returns an instance of Static Access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: yesaccess
         })
         const access = Access.create({ manifest })
@@ -67,7 +67,7 @@ describe(testName, () => {
 
       it('returns an instance with a wildcard write', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: anyaccess
         })
         const access = Access.create({ manifest })
@@ -78,7 +78,7 @@ describe(testName, () => {
 
       it('rejects when write access is empty', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: emptyaccess
         })
         const access = Access.create({ manifest })
@@ -90,7 +90,7 @@ describe(testName, () => {
   describe('Instance', () => {
     it('exposes instance properties', async () => {
       const manifest = await Manifest.create({
-        ...defaultManifest(name, identity),
+        ...getDefaultManifest(name, identity),
         access: yesaccess
       })
       const access = Access.create({ manifest })
@@ -102,7 +102,7 @@ describe(testName, () => {
     describe('.canAppend', () => {
       it('returns true if identity has write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: yesaccess
         })
         const access = Access.create({ manifest })
@@ -112,7 +112,7 @@ describe(testName, () => {
 
       it('returns true if wildcard has write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: anyaccess
         })
         const access = Access.create({ manifest })
@@ -122,7 +122,7 @@ describe(testName, () => {
 
       it('returns false if identity has no write access', async () => {
         const manifest = await Manifest.create({
-          ...defaultManifest(name, identity),
+          ...getDefaultManifest(name, identity),
           access: noaccess
         })
         const access = Access.create({ manifest })

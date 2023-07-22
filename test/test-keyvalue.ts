@@ -15,7 +15,7 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
 import getDatastore from './utils/level-datastore.js'
-import defaultManifest from './utils/default-manifest.js'
+import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -67,7 +67,7 @@ describe(testName, () => {
 
     before(async () => {
       manifest = await Manifest.create({
-        ...defaultManifest('name', identity),
+        ...getDefaultManifest('name', identity),
         access: {
           protocol: staticAccessProtocol,
           config: { write: [identity.id] }
