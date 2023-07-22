@@ -14,6 +14,8 @@ export interface AllServices extends ServiceMap {
   dht: DualKadDHT
 }
 
+export type UsedServices<K extends keyof AllServices> = Pick<AllServices, K>
+
 export interface IdentifyService {
   (components: IdentifyServiceComponents): DefaultIdentifyService
 }
