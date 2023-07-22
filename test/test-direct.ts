@@ -4,49 +4,61 @@ import { stop } from '@libp2p/interfaces/startable'
 import type { PeerId } from '@libp2p/interface-peer-id'
 import type { Message } from '@libp2p/interface-pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import type { GossipLibp2p, GossipHelia } from '@/interface'
 
 import { Direct } from '@/pubsub/direct.js'
 
-import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { UsedServices, getIdentifyService, getPubsubService } from './utils/libp2p/services.js'
+import { Libp2p, Libp2pOptions, createLibp2p } from 'libp2p'
+import type { Helia } from '@helia/interface'
+import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
+import { createHelia } from 'helia'
 
 const testName = 'pubsub/direct'
 
+// can be removed after type changes to welo
+type TestServices = UsedServices<'identify' | 'pubsub'>
+
 describe(testName, () => {
-  let ipfs1: GossipHelia,
-    ipfs2: GossipHelia,
-    ipfs3: GossipHelia,
-    libp2p1: GossipLibp2p,
-    libp2p2: GossipLibp2p,
-    libp2p3: GossipLibp2p,
+  let
+    helia1: Helia<Libp2p<TestServices>>,
+    helia2: Helia<Libp2p<TestServices>>,
+    helia3: Helia<Libp2p<TestServices>>,
+    libp2p1: Libp2p<TestServices>,
+    libp2p2: Libp2p<TestServices>,
+    libp2p3: Libp2p<TestServices>,
     id1: PeerId,
     id2: PeerId,
     // id3: PeerId,
-    addr1: Multiaddr,
-    addr2: Multiaddr,
-    addr3: Multiaddr
+    addr1: Multiaddr[],
+    addr2: Multiaddr[],
+    addr3: Multiaddr[]
 
   const prefix = '/dps/1.0.0/'
 
   before(async () => {
-    const testPaths1 = getTestPaths(tempPath, testName + '/1')
-    const testPaths2 = getTestPaths(tempPath, testName + '/2')
-    const testPaths3 = getTestPaths(tempPath, testName + '/3')
+    const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
+      ...(await getLibp2pDefaults()),
+      peerDiscovery: await getPeerDiscovery(),
+      services: {
+        identify: getIdentifyService(),
+        pubsub: getPubsubService()
+      }
+    })
 
-    ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
-    ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
-    ipfs3 = await getTestIpfs(testPaths3, localIpfsOptions)
-    libp2p1 = ipfs1.libp2p
-    libp2p2 = ipfs2.libp2p
-    libp2p3 = ipfs3.libp2p
+    libp2p1 = await createLibp2p(await createLibp2pOptions())
+    libp2p2 = await createLibp2p(await createLibp2pOptions())
+    libp2p3 = await createLibp2p(await createLibp2pOptions())
+    helia1 = await createHelia({ libp2p: libp2p1 })
+    helia2 = await createHelia({ libp2p: libp2p2 })
+    helia3 = await createHelia({ libp2p: libp2p3 })
 
     id1 = libp2p1.peerId
     id2 = libp2p2.peerId
 
-    addr1 = await getMultiaddr(ipfs1)
-    addr2 = await getMultiaddr(ipfs2)
-    addr3 = await getMultiaddr(ipfs3)
+    addr1 = libp2p1.getMultiaddrs()
+    addr2 = libp2p2.getMultiaddrs()
+    addr3 = libp2p3.getMultiaddrs()
 
     await Promise.all([
       libp2p1.dial(addr2),
@@ -56,9 +68,9 @@ describe(testName, () => {
   })
 
   after(async () => {
-    await stop(ipfs1)
-    await stop(ipfs2)
-    await stop(ipfs3)
+    await stop(helia1)
+    await stop(helia2)
+    await stop(helia3)
   })
 
   describe('instance', () => {
