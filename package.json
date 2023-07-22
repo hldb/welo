@@ -33,7 +33,9 @@
   "browser": {
     "path": "path-browserify",
     "make-dir": false,
-    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js"
+    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js",
+    "./dist/test/utils/libp2p/addresses.js": "./dist/test/utils/libp2p/addresses.browser.js",
+    "./dist/test/utils/libp2p/transports.js": "./dist/test/utils/libp2p/transports.browser.js"
   },
   "prettier": "prettier-config-standard",
   "scripts": {
