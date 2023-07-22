@@ -1,5 +1,4 @@
 import { assert, expect } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
@@ -10,16 +9,17 @@ import type { EntryData } from '@/entry/interface.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
+import { createLibp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getLevelDatastore, getMemoryBlockstore } from './utils/storage.js'
 
 const testName = 'basal entry'
 
 describe(testName, () => {
-  let ipfs: Helia,
+  let
     blockstore: Blockstore,
     identity: Identity,
     entry: Entry,
@@ -40,23 +40,22 @@ describe(testName, () => {
   before(async () => {
     const testPaths = getTestPaths(fixtPath, testName)
 
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
+    const datastore = await getLevelDatastore(testPaths.ipfs + '/data')
+    blockstore = getMemoryBlockstore()
 
-    identities = await getTestIdentities(testPaths)
-    const libp2p = await getTestLibp2p(ipfs)
+    const libp2p = await createLibp2p({
+      ...(await getLibp2pDefaults()),
+      datastore
+    })
     keychain = libp2p.keychain
 
+    identities = await getTestIdentities(testPaths)
     identity = await identityModule.import({
       name,
       identities,
       keychain,
       kpi
     }).catch(async () => await identityModule.get({ name, identities, keychain }))
-  })
-
-  after(async () => {
-    await ipfs.stop()
   })
 
   describe('Class', () => {
