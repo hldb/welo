@@ -6,6 +6,13 @@ import { ipnsSelector } from 'ipns/selector'
 import { ipnsValidator } from 'ipns/validator'
 import type { DefaultIdentifyService } from 'libp2p/identify/identify'
 import type { PubSub } from '@libp2p/interface-pubsub'
+import type { ServiceMap } from '@libp2p/interface-libp2p'
+
+export interface AllServices extends ServiceMap {
+  identify: DefaultIdentifyService
+  pubsub: PubSub<GossipsubEvents>
+  dht: DualKadDHT
+}
 
 export interface IdentifyService {
   (components: IdentifyServiceComponents): DefaultIdentifyService
