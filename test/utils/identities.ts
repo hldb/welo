@@ -4,13 +4,13 @@ import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
-import getDatastore from './level-datastore.js'
+import { getLevelDatastore } from './storage.js'
 import type { TestPaths } from './constants.js'
 
 export const getTestIdentities = async (
   testPaths: TestPaths
 ): Promise<LevelDatastore> =>
-  await getDatastore(testPaths.identities)
+  await getLevelDatastore(testPaths.identities)
 
 export const getTestIdentity = async (
   testIdentities: LevelDatastore,

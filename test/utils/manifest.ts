@@ -4,6 +4,7 @@ import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
 import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
+import type { IdentityInstance } from '@/identity/interface.js'
 
 export const getTestManifestConfig = (
   name: string
@@ -32,3 +33,23 @@ export const getTestManifest = async (
     ...getTestManifestConfig(name),
     ...overrides
   })
+
+export const getDefaultManifest = (
+  name: string,
+  identity: IdentityInstance<any>
+): ManifestData => ({
+  name,
+  store: {
+    protocol: keyvalueStoreProtocol
+  },
+  access: {
+    protocol: staticAccessProtocol,
+    config: { write: [identity.id] }
+  },
+  entry: {
+    protocol: basalEntryProtocol
+  },
+  identity: {
+    protocol: basalIdentityProtocol
+  }
+})
