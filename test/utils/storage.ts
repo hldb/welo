@@ -36,3 +36,18 @@ const getLevelStore = <S>(LevelStore: LevelStoreConstructor<S>) => async (
 
 export const getLevelDatastore = getLevelStore(LevelDatastore)
 export const getLevelBlockstore = getLevelStore(LevelBlockstore)
+
+interface Storage {
+  datastore: Datastore
+  blockstore: Blockstore
+}
+
+export const getVolatileStorage = async (): Promise<Storage> => ({
+  datastore: getMemoryDatastore(),
+  blockstore: getMemoryBlockstore()
+})
+
+export const getPersistentStorage = async (path: string): Promise<Storage> => ({
+  datastore: await getLevelDatastore(path + '/data'),
+  blockstore: await getLevelBlockstore(path + '/blocks')
+})
