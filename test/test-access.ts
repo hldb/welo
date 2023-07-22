@@ -1,4 +1,5 @@
 import { assert, expect } from 'aegir/chai'
+import { createLibp2p } from 'libp2p'
 import { base32 } from 'multiformats/bases/base32'
 import { start } from '@libp2p/interfaces/startable'
 
@@ -13,8 +14,7 @@ import { getDefaultManifest } from './utils/manifest.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestLibp2p } from './utils/libp2p.js'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
 
 const testName = 'static access'
 
@@ -34,17 +34,14 @@ describe(testName, () => {
   const emptyaccess: AccessProtocol = makeaccess([])
 
   before(async () => {
+    const libp2p = await createLibp2p(await getLibp2pDefaults())
     const testPaths = getTestPaths(tempPath, testName)
 
-    const ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    const libp2p = await getTestLibp2p(ipfs)
     const identities = await getTestIdentities(testPaths)
 
     identity = await getTestIdentity(identities, libp2p.keychain, name)
     entry = await singleEntry(identity)()
     yesaccess = makeaccess([identity.id])
-
-    await ipfs.stop()
   })
 
   describe('Class', () => {
