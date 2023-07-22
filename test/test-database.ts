@@ -11,7 +11,7 @@ import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import getDatastore from './utils/level-datastore.js'
+import { getLevelDatastore } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -51,7 +51,7 @@ describe(testName, () => {
 
     directory = path.join(testPaths.test, manifest.address.toString())
 
-    datastore = await getDatastore(directory)
+    datastore = await getLevelDatastore(directory)
   })
 
   after(async () => {

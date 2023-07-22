@@ -14,7 +14,7 @@ import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import getDatastore from './utils/level-datastore.js'
+import { getLevelDatastore } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -31,7 +31,7 @@ describe(testName, () => {
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getDatastore(tempPath)
+    datastore = await getLevelDatastore(tempPath)
     await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blockstore = ipfs.blockstore

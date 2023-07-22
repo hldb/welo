@@ -15,7 +15,7 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import getDatastore from './utils/level-datastore.js'
+import { getLevelDatastore } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
@@ -45,7 +45,7 @@ describe(testName, () => {
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getDatastore(testPaths.replica)
+    datastore = await getLevelDatastore(testPaths.replica)
     await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
     blockstore = ipfs.blockstore
@@ -274,7 +274,7 @@ describe(testName, () => {
         await datastore.close()
         await stop(replica)
 
-        const newDatastore = await getDatastore(testPaths.replica)
+        const newDatastore = await getLevelDatastore(testPaths.replica)
         await newDatastore.open()
         const storage = new NamespaceDatastore(newDatastore, new Key(testPaths.replica))
 
@@ -288,7 +288,7 @@ describe(testName, () => {
         const entry = await singleEntry(identity)()
         const cid = entry.cid
 
-        const newDatastore = await getDatastore(testPaths.replica)
+        const newDatastore = await getLevelDatastore(testPaths.replica)
         await newDatastore.open()
 
         const replica = new Replica({

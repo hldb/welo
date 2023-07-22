@@ -10,7 +10,7 @@ import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 
-import getDatastore from './utils/level-datastore.js'
+import { getLevelDatastore } from './utils/storage.js'
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
@@ -42,7 +42,7 @@ describe(testName, () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
-    datastore = await getDatastore(testPaths1.replica)
+    datastore = await getLevelDatastore(testPaths1.replica)
     await datastore.open()
     datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
     datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
