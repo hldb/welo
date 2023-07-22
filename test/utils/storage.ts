@@ -42,7 +42,7 @@ interface Storage {
   blockstore: Blockstore
 }
 
-export const getVolatileStorage = async (): Promise<Storage> => ({
+export const getVolatileStorage = (): Storage => ({
   datastore: getMemoryDatastore(),
   blockstore: getMemoryBlockstore()
 })
