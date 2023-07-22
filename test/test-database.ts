@@ -1,7 +1,4 @@
-import path from 'path'
 import { assert } from 'aegir/chai'
-import type { LevelDatastore } from 'datastore-level'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { Database } from '@/database.js'
 import { keyvalueStore } from '@/store/keyvalue/index.js'
@@ -11,33 +8,47 @@ import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getLevelDatastore } from './utils/storage.js'
+import { getVolatileStorage } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { Datastore } from 'interface-datastore'
+import { Libp2p, createLibp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { createHelia } from 'helia'
+import type { UsedServices } from './utils/libp2p/services.js'
+import type { Helia } from '@helia/interface'
 
 const testName = 'database'
 
+// can be removed after type changes to welo
+type TestServices = UsedServices<'identify' | 'pubsub'>
+
 describe(testName, () => {
-  let ipfs: GossipHelia,
-    libp2p: GossipLibp2p,
+  let
+    helia: Helia<Libp2p<TestServices>>,
+    libp2p: Libp2p<TestServices>,
     database: Database,
     manifest: Manifest,
     identity: Identity,
-    directory: string,
-    datastore: LevelDatastore,
+    datastore: Datastore,
     blockstore: Blockstore
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
+    const storage = getVolatileStorage()
+    datastore = storage.datastore
+    blockstore = storage.blockstore
+
+    libp2p = await createLibp2p<TestServices>(await getLibp2pDefaults())
+    helia = await createHelia({
+      datastore,
+      blockstore,
+      libp2p
+    })
 
     const identities = await getTestIdentities(testPaths)
-    libp2p = await getTestLibp2p(ipfs)
 
     identity = await getTestIdentity(identities, libp2p.keychain, testName)
 
@@ -48,15 +59,10 @@ describe(testName, () => {
         config: { write: [identity.id] }
       }
     })
-
-    directory = path.join(testPaths.test, manifest.address.toString())
-
-    datastore = await getLevelDatastore(directory)
   })
 
   after(async () => {
-    await datastore.close()
-    await ipfs.stop()
+    await helia.stop()
   })
 
   describe('class', () => {
@@ -70,7 +76,7 @@ describe(testName, () => {
           datastore,
           manifest,
           identity,
-          ipfs,
+          ipfs: helia,
           blockstore,
           replicators: [], // empty replicator
           components: {
