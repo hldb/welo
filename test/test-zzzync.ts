@@ -9,7 +9,7 @@ import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 
-import { getLevelDatastore, getNonVolatileStorage } from './utils/storage.js'
+import { getLevelDatastore, getVolatileStorage } from './utils/storage.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -81,8 +81,8 @@ _describe(testName, () => {
       }
     })
 
-    const storage1 = await getNonVolatileStorage(testPaths1.ipfs)
-    const storage2 = await getNonVolatileStorage(testPaths1.ipfs)
+    const storage1 = getVolatileStorage()
+    const storage2 = getVolatileStorage()
 
     libp2p1 = await createLibp2p({
       ...(await createLibp2pOptions()),
@@ -100,7 +100,7 @@ _describe(testName, () => {
     })
     helia2 = await createHelia({
       ...storage2,
-      libp2p: libp2p1
+      libp2p: libp2p2
     })
 
     const identities1 = await getTestIdentities(testPaths1)
