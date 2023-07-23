@@ -11,7 +11,7 @@ import { keyvalueStore } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import type { UsedServices } from './utils/libp2p/services.js'
+import { getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
 import type { Helia } from '@helia/interface'
 import { createLibp2p, type Libp2p } from 'libp2p'
 import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
@@ -32,7 +32,13 @@ describe(testName, () => {
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
 
-    libp2p = await createLibp2p<TestServices>(await getLibp2pDefaults())
+    libp2p = await createLibp2p<TestServices>({
+      ...(await getLibp2pDefaults()),
+      services: {
+        identify: getIdentifyService(),
+        pubsub: getPubsubService()
+      }
+    })
     helia = await createHelia({ libp2p })
 
     const identities = await getTestIdentities(testPaths)
