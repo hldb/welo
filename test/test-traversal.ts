@@ -4,7 +4,6 @@
 import { assert, expect } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import type { Blockstore } from 'interface-blockstore'
 
@@ -27,17 +26,18 @@ import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
 import { getDefaultManifest } from './utils/manifest.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { concurrentEntries, singleEntry } from './utils/entries.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import { Paily } from '@/utils/paily.js'
+import { getMemoryBlockstore } from './utils/storage.js'
+import { createLibp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
 
 const testName = 'traversal'
 
 describe('traversal', () => {
-  let ipfs: Helia,
+  let
     blockstore: Blockstore,
     identity: Identity,
     identity1: Identity,
@@ -57,11 +57,11 @@ describe('traversal', () => {
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
+
+    blockstore = getMemoryBlockstore()
 
     const identities = await getTestIdentities(testPaths)
-    const libp2p = await getTestLibp2p(ipfs)
+    const libp2p = await createLibp2p(await getLibp2pDefaults())
     const keychain = libp2p.keychain
 
     identity = await getTestIdentity(identities, keychain, names.name0)
@@ -113,10 +113,6 @@ describe('traversal', () => {
     await blockstore.put(entries[0].block.cid, entries[0].block.bytes)
     await blockstore.put(entries[1].block.cid, entries[1].block.bytes)
     await blockstore.put(entries[2].block.cid, entries[2].block.bytes)
-  })
-
-  after(async () => {
-    await ipfs.stop()
   })
 
   describe('sortCids', () => {
