@@ -1,10 +1,14 @@
-
-import { tcp } from '@libp2p/tcp'
 import { webSockets } from '@libp2p/websockets'
-import * as filters from '@libp2p/websockets/filters'
 import type { Libp2pOptions } from 'libp2p'
+import * as filters from '@libp2p/websockets/filters'
+import { webRTC, webRTCDirect } from '@libp2p/webrtc'
+import { circuitRelayTransport } from 'libp2p/circuit-relay'
 
 export const getTransports = (): Libp2pOptions['transports'] => [
-  tcp(),
-  webSockets({ filter: filters.all })
+  webSockets({ filter: filters.all }),
+  circuitRelayTransport({
+    discoverRelays: 1
+  }),
+  webRTC(),
+  webRTCDirect()
 ]
