@@ -5,7 +5,6 @@ import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
 import { NamespaceDatastore } from 'datastore-core'
 import type { LevelDatastore } from 'datastore-level'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Replica } from '@/replica/index.js'
@@ -15,21 +14,20 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getLevelDatastore } from './utils/storage.js'
+import { getLevelDatastore, getNonVolatileStorage } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
 import { encodeCbor } from '@/utils/block.js'
+import { createLibp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
 
 const testName = 'replica'
 
 describe(testName, () => {
-  let ipfs: Helia,
-    tempIpfs: Helia,
+  let
     blockstore: Blockstore,
     replica: Replica,
     manifest: Manifest,
@@ -45,13 +43,15 @@ describe(testName, () => {
 
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
-    datastore = await getLevelDatastore(testPaths.replica)
+
+    const storage = await getNonVolatileStorage(testPaths.replica)
+    datastore = storage.datastore
     await datastore.open()
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
+    blockstore = storage.blockstore
 
     const identities = await getTestIdentities(testPaths)
-    const libp2p = await getTestLibp2p(ipfs)
+
+    const libp2p = await createLibp2p(await getLibp2pDefaults())
     const keychain = libp2p.keychain
 
     identity = await getTestIdentity(identities, keychain, names.name0)
@@ -66,9 +66,8 @@ describe(testName, () => {
     await start(access)
 
     const testPaths1 = getTestPaths(tempPath, testName + '1')
-    tempIpfs = await getTestIpfs(testPaths1, offlineIpfsOptions)
-    const tempLibp2p = await getTestLibp2p(tempIpfs)
     const tempIdentities = await getTestIdentities(testPaths1)
+    const tempLibp2p = await createLibp2p(await getLibp2pDefaults())
     tempIdentity = await getTestIdentity(
       tempIdentities,
       tempLibp2p.keychain,
@@ -80,8 +79,6 @@ describe(testName, () => {
 
   after(async () => {
     await datastore.close()
-    await stop(ipfs)
-    await stop(tempIpfs)
   })
 
   describe('class', () => {
