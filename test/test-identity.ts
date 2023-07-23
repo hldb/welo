@@ -10,7 +10,7 @@ import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIdentities, kpi } from './utils/identities.js'
 import type { Blockstore } from 'interface-blockstore'
 import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import { getLevelDatastore } from './utils/storage.js'
+import { getNonVolatileStorage } from './utils/storage.js'
 import { createLibp2p } from 'libp2p'
 
 const testName = 'basal identity'
@@ -39,7 +39,9 @@ describe(testName, () => {
   before(async () => {
     const fixtTestPaths = getTestPaths(fixtPath, testName)
 
-    const datastore = await getLevelDatastore(fixtTestPaths.ipfs + '/data')
+    const storage = await getNonVolatileStorage(fixtTestPaths.ipfs)
+    const datastore = storage.datastore
+    blockstore = storage.blockstore
 
     const libp2p = await createLibp2p({
       ...(await getLibp2pDefaults()),
