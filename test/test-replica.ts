@@ -14,7 +14,7 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getLevelDatastore, getNonVolatileStorage } from './utils/storage.js'
+import { getLevelDatastore, getMemoryBlockstore } from './utils/storage.js'
 import { getDefaultManifest } from './utils/manifest.js'
 import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
@@ -44,10 +44,9 @@ describe(testName, () => {
   before(async () => {
     testPaths = getTestPaths(tempPath, testName)
 
-    const storage = await getNonVolatileStorage(testPaths.replica)
-    datastore = storage.datastore
+    datastore = await getLevelDatastore(testPaths.replica)
     await datastore.open()
-    blockstore = storage.blockstore
+    blockstore = getMemoryBlockstore()
 
     const identities = await getTestIdentities(testPaths)
 
