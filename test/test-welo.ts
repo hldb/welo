@@ -1,8 +1,7 @@
 import { assert, expect } from 'aegir/chai'
-import type { Components, GossipHelia, GossipLibp2p } from '@/interface'
+import type { Components } from '@/interface'
 
-import createWelo from './utils/default-welo.js'
-import type { Welo } from '@/welo.js'
+import { createWelo, type Welo } from '@/welo.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { Database } from '@/database.js'
 import { staticAccess } from '@/access/static/index.js'
@@ -11,25 +10,32 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { keyvalueStore } from '@/store/keyvalue/index.js'
 
 import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
+import type { UsedServices } from './utils/libp2p/services.js'
+import type { Helia } from '@helia/interface'
+import { createLibp2p, type Libp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { createHelia } from 'helia'
 
 const testName = 'welo'
 
+type TestServices = UsedServices<'identify' | 'pubsub'>
+
 describe(testName, () => {
-  let ipfs: GossipHelia,
-    libp2p: GossipLibp2p,
+  let
+    helia: Helia<Libp2p<TestServices>>,
+    libp2p: Libp2p<TestServices>,
     welo: Welo,
     identity: Identity,
     components: Components
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
+
+    libp2p = await createLibp2p<TestServices>(await getLibp2pDefaults())
+    helia = await createHelia({ libp2p })
 
     const identities = await getTestIdentities(testPaths)
-    libp2p = await getTestLibp2p(ipfs)
     const keychain = libp2p.keychain
 
     components = {
@@ -44,16 +50,16 @@ describe(testName, () => {
 
   after(async () => {
     await welo.stop()
-    await ipfs.stop()
+    await helia.stop()
   })
 
   describe('createWelo', () => {
     it('returns an instance of Welo', async () => {
-      welo = await createWelo({ ipfs, components })
+      welo = await createWelo({ ipfs: helia, components })
     })
 
     it('returns an instance of Welo with an identity option', async () => {
-      const welo = await createWelo({ ipfs, identity })
+      const welo = await createWelo({ ipfs: helia, identity })
       assert.strictEqual(welo.identity, identity)
       await welo.stop()
     })
