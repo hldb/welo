@@ -1,5 +1,4 @@
 import { assert } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
 import type { BlockView } from 'multiformats/interface'
 
 import { Manifest, Address } from '@/manifest/index.js'
@@ -8,14 +7,15 @@ import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
 import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
 import type { Blockstore } from 'interface-blockstore'
+import { getMemoryBlockstore } from './utils/storage.js'
 
 const testName = 'manifest'
 
 describe(testName, () => {
-  let ipfs: Helia, blockstore: Blockstore, manifest: Manifest
+  let
+    blockstore: Blockstore,
+    manifest: Manifest
 
   const config = {
     name: 'test',
@@ -35,13 +35,7 @@ describe(testName, () => {
   }
 
   before(async () => {
-    const testPaths = getTestPaths(tempPath, testName)
-    ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
-  })
-
-  after(async () => {
-    await ipfs.stop()
+    blockstore = getMemoryBlockstore()
   })
 
   describe('Class', () => {
