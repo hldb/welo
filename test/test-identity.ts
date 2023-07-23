@@ -1,5 +1,4 @@
 import { assert, expect } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
@@ -8,20 +7,23 @@ import type { KeyChain } from '@libp2p/interface-keychain'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, kpi } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getLevelDatastore } from './utils/storage.js'
+import { createLibp2p } from 'libp2p'
 
 const testName = 'basal identity'
 
 describe(testName, () => {
-  let ipfs: Helia,
+  let
     blockstore: Blockstore,
     identities: Datastore,
     keychain: KeyChain,
-    identity: Identity
-  let tempIpfs: Helia, tempIdentities: Datastore, tempKeychain: KeyChain
+    identity: Identity,
+    tempIdentities: Datastore,
+    tempKeychain: KeyChain
+
   const expectedProtocol = '/hldb/identity/basal'
   const name = names.name0
   const password = ''
@@ -36,13 +38,16 @@ describe(testName, () => {
 
   before(async () => {
     const fixtTestPaths = getTestPaths(fixtPath, testName)
-    ipfs = await getTestIpfs(fixtTestPaths, offlineIpfsOptions)
-    blockstore = ipfs.blockstore
 
-    identities = await getTestIdentities(fixtTestPaths)
-    const libp2p = await getTestLibp2p(ipfs)
+    const datastore = await getLevelDatastore(fixtTestPaths.ipfs + '/data')
+
+    const libp2p = await createLibp2p({
+      ...(await getLibp2pDefaults()),
+      datastore
+    })
     keychain = libp2p.keychain
 
+    identities = await getTestIdentities(fixtTestPaths)
     identity = await identityModule.import({
       name,
       identities,
@@ -51,16 +56,10 @@ describe(testName, () => {
     }).catch(async () => await identityModule.get({ name, identities, keychain }))
 
     const tempTestPaths = getTestPaths(tempPath, testName)
-    tempIpfs = await getTestIpfs(tempTestPaths, offlineIpfsOptions)
+    const tempLibp2p = await createLibp2p(await getLibp2pDefaults())
 
     tempIdentities = await getTestIdentities(tempTestPaths)
-    const tempLibp2p = await getTestLibp2p(ipfs)
     tempKeychain = tempLibp2p.keychain
-  })
-
-  after(async () => {
-    await ipfs.stop()
-    await tempIpfs.stop()
   })
 
   describe('Class', () => {
