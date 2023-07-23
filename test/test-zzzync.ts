@@ -3,27 +3,29 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'
 import { NamespaceDatastore } from 'datastore-core'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { zzzyncReplicator, type ZzzyncReplicator } from '@/replicator/zzzync/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 
-import getDatastore from './utils/level-datastore.js'
-import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getLevelDatastore, getNonVolatileStorage } from './utils/storage.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import { Web3Storage } from 'web3.storage'
-import type { Ed25519PeerId, PeerId } from '@libp2p/interface-peer-id'
-import { createLibp2p, Libp2pOptions } from 'libp2p'
-import { createLibp2pOptions } from './utils/libp2p-options.js'
+import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
+import { createLibp2p, Libp2p, Libp2pOptions } from 'libp2p'
 import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getBlockPeerConnectionGater } from './utils/libp2p/connectionGater.js'
+import { getIdentifyService, type AllServices, getPubsubService, getDhtService } from './utils/libp2p/services.js'
+import type { Helia } from '@helia/interface'
+import { createHelia } from 'helia'
 
 const testName = 'zzzync-replicator'
 const token = process.env.W3_TOKEN as string
@@ -39,12 +41,14 @@ if (noToken) {
   _describe = describe
 }
 
+type Services = Pick<AllServices, 'identify' | 'pubsub' | 'dht'>
+
 _describe(testName, () => {
   let
-    ipfs1: GossipHelia,
-    ipfs2: GossipHelia,
-    libp2p1: GossipLibp2p,
-    libp2p2: GossipLibp2p,
+    helia1: Helia<Libp2p<Services>>,
+    helia2: Helia<Libp2p<Services>>,
+    libp2p1: Libp2p<Services>,
+    libp2p2: Libp2p<Services>,
     replica1: Replica,
     replica2: Replica,
     replicator1: ZzzyncReplicator,
@@ -60,7 +64,7 @@ _describe(testName, () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
-    datastore = await getDatastore(testPaths1.replica)
+    datastore = await getLevelDatastore(testPaths1.replica)
     await datastore.open()
     datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
     datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
@@ -68,24 +72,36 @@ _describe(testName, () => {
     const peerId1 = await createEd25519PeerId()
     const peerId2 = await createEd25519PeerId()
     // blocks peering so block fetching happens over web3.storage
-    const getLibp2pOptions = (peerId: Ed25519PeerId, neighbor: Ed25519PeerId): Libp2pOptions => ({
-      peerId,
-      connectionGater: {
-        denyDialPeer: async () => false,
-        denyDialMultiaddr: async () => false,
-        denyInboundConnection: async () => false,
-        denyOutboundConnection: async () => false,
-        denyInboundEncryptedConnection: async () => false,
-        denyOutboundEncryptedConnection: async () => false,
-        denyInboundUpgradedConnection: async () => false,
-        denyOutboundUpgradedConnection: async () => false,
-        filterMultiaddrForPeer: async (peerId: PeerId) => !peerId.equals(neighbor)
+    const createLibp2pOptions = async (): Promise<Libp2pOptions<Services>> => ({
+      ...(await getLibp2pDefaults()),
+      services: {
+        identify: getIdentifyService(),
+        pubsub: getPubsubService(),
+        dht: getDhtService(true)
       }
     })
-    ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions, getLibp2pOptions(peerId1, peerId2))
-    ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions, getLibp2pOptions(peerId2, peerId1))
-    libp2p1 = ipfs1.libp2p
-    libp2p2 = ipfs2.libp2p
+
+    const storage1 = await getNonVolatileStorage(testPaths1.ipfs)
+    const storage2 = await getNonVolatileStorage(testPaths1.ipfs)
+
+    libp2p1 = await createLibp2p({
+      ...(await createLibp2pOptions()),
+      connectionGater: getBlockPeerConnectionGater(peerId2),
+      datastore: storage1.datastore
+    })
+    libp2p2 = await createLibp2p({
+      ...(await createLibp2pOptions()),
+      connectionGater: getBlockPeerConnectionGater(peerId1),
+      datastore: storage2.datastore
+    })
+    helia1 = await createHelia({
+      ...storage1,
+      libp2p: libp2p1
+    })
+    helia2 = await createHelia({
+      ...storage2,
+      libp2p: libp2p1
+    })
 
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
@@ -113,7 +129,7 @@ _describe(testName, () => {
     replica1 = new Replica({
       manifest,
       datastore: datastore1,
-      blockstore: ipfs1.blockstore,
+      blockstore: helia1.blockstore,
       access,
       identity: identity1,
       components: {
@@ -124,7 +140,7 @@ _describe(testName, () => {
     replica2 = new Replica({
       manifest,
       datastore: datastore2,
-      blockstore: ipfs2.blockstore,
+      blockstore: helia2.blockstore,
       access,
       identity: identity2,
       components: {
@@ -136,23 +152,26 @@ _describe(testName, () => {
 
     const client = new Web3Storage({ token })
     const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {
-      const libp2p = await createLibp2p(await createLibp2pOptions({ peerId }))
+      const libp2p = await createLibp2p({
+        ...(await createLibp2pOptions()),
+        peerId
+      })
 
       return { libp2p }
     }
     const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })
 
     replicator1 = replicator.create({
-      ipfs: ipfs1,
+      ipfs: helia1,
       replica: replica1,
       datastore: datastore1,
-      blockstore: ipfs1.blockstore
+      blockstore: helia1.blockstore
     })
     replicator2 = replicator.create({
-      ipfs: ipfs2,
+      ipfs: helia2,
       replica: replica2,
       datastore: datastore2,
-      blockstore: ipfs2.blockstore
+      blockstore: helia2.blockstore
     })
   })
 
@@ -160,8 +179,8 @@ _describe(testName, () => {
     await stop(access)
     await stop(replicator1, replicator2)
     await stop(replica1, replica2)
-    await stop(ipfs1)
-    await stop(ipfs2)
+    await stop(helia1)
+    await stop(helia2)
     await datastore.close()
   })
 
