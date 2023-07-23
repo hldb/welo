@@ -4,13 +4,11 @@ import { MemoryDatastore } from 'datastore-core'
 import { MemoryBlockstore } from 'blockstore-core'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
-import type { Datastore } from 'interface-datastore'
-import type { Blockstore } from 'interface-blockstore'
 import type { DatabaseOptions, OpenOptions } from 'level'
 
-export const getMemoryDatastore = (): Datastore => new MemoryDatastore()
+export const getMemoryDatastore = (): MemoryDatastore => new MemoryDatastore()
 
-export const getMemoryBlockstore = (): Blockstore => new MemoryBlockstore()
+export const getMemoryBlockstore = (): MemoryBlockstore => new MemoryBlockstore()
 
 interface LevelStoreConstructor <S> {
   new (
@@ -37,17 +35,22 @@ const getLevelStore = <S>(LevelStore: LevelStoreConstructor<S>) => async (
 export const getLevelDatastore = getLevelStore(LevelDatastore)
 export const getLevelBlockstore = getLevelStore(LevelBlockstore)
 
-interface Storage {
-  datastore: Datastore
-  blockstore: Blockstore
+interface VolatileStorage {
+  datastore: MemoryDatastore
+  blockstore: MemoryBlockstore
 }
 
-export const getVolatileStorage = (): Storage => ({
+export const getVolatileStorage = (): VolatileStorage => ({
   datastore: getMemoryDatastore(),
   blockstore: getMemoryBlockstore()
 })
 
-export const getPersistentStorage = async (path: string): Promise<Storage> => ({
+interface NonVolatileStorage {
+  datastore: LevelDatastore
+  blockstore: LevelBlockstore
+}
+
+export const getNonVolatileStorage = async (path: string): Promise<NonVolatileStorage> => ({
   datastore: await getLevelDatastore(path + '/data'),
   blockstore: await getLevelBlockstore(path + '/blocks')
 })
