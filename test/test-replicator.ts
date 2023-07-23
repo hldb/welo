@@ -1,32 +1,38 @@
 import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
-import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'
-import { NamespaceDatastore } from 'datastore-core'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import { MemoryDatastore, NamespaceDatastore } from 'datastore-core'
 
 import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 
-import { getLevelDatastore } from './utils/storage.js'
-import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import { getMemoryDatastore } from './utils/storage.js'
 import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
+import { getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
+import type { Helia } from '@helia/interface'
+import { createLibp2p, Libp2pOptions, type Libp2p } from 'libp2p'
+import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
+import { createHelia } from 'helia'
 
 const testName = 'live-replicator'
 
+type TestServices = UsedServices<'identify' | 'pubsub'>
+
 describe(testName, () => {
-  let ipfs1: GossipHelia,
-    ipfs2: GossipHelia,
-    libp2p1: GossipLibp2p,
-    libp2p2: GossipLibp2p,
-    addr2: Multiaddr,
+  let
+    helia1: Helia<Libp2p<TestServices>>,
+    helia2: Helia<Libp2p<TestServices>>,
+    libp2p1: Libp2p<TestServices>,
+    libp2p2: Libp2p<TestServices>,
+    addr2: Multiaddr[],
     replica1: Replica,
     replica2: Replica,
     replicator1: Replicator,
@@ -34,7 +40,7 @@ describe(testName, () => {
     testPaths1: TestPaths,
     testPaths2: TestPaths,
     access: Access,
-    datastore: LevelDatastore,
+    datastore: MemoryDatastore,
     datastore1: NamespaceDatastore,
     datastore2: NamespaceDatastore
 
@@ -42,17 +48,26 @@ describe(testName, () => {
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
-    datastore = await getLevelDatastore(testPaths1.replica)
-    await datastore.open()
+    datastore = getMemoryDatastore()
     datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
     datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
 
-    ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
-    ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
-    libp2p1 = ipfs1.libp2p
-    libp2p2 = ipfs2.libp2p
+    const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
+      ...(await getLibp2pDefaults()),
+      peerDiscovery: await getPeerDiscovery(),
+      services: {
+        identify: getIdentifyService(),
+        pubsub: getPubsubService()
+      }
+    })
 
-    addr2 = await getMultiaddr(ipfs2)
+    libp2p1 = await createLibp2p(await createLibp2pOptions())
+    libp2p2 = await createLibp2p(await createLibp2pOptions())
+
+    helia1 = await createHelia({ libp2p: libp2p1 })
+    helia2 = await createHelia({ libp2p: libp2p2 })
+
+    addr2 = libp2p2.getMultiaddrs()
 
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
@@ -80,7 +95,7 @@ describe(testName, () => {
     replica1 = new Replica({
       manifest,
       datastore: datastore1,
-      blockstore: ipfs1.blockstore,
+      blockstore: helia1.blockstore,
       access,
       identity: identity1,
       components: {
@@ -91,7 +106,7 @@ describe(testName, () => {
     replica2 = new Replica({
       manifest,
       datastore: datastore2,
-      blockstore: ipfs2.blockstore,
+      blockstore: helia2.blockstore,
       access,
       identity: identity2,
       components: {
@@ -102,16 +117,16 @@ describe(testName, () => {
     await start(replica1, replica2)
 
     replicator1 = new Replicator({
-      ipfs: ipfs1,
+      ipfs: helia1,
       replica: replica1,
       datastore: datastore1,
-      blockstore: ipfs1.blockstore
+      blockstore: helia1.blockstore
     })
     replicator2 = new Replicator({
-      ipfs: ipfs2,
+      ipfs: helia2,
       replica: replica2,
       datastore: datastore2,
-      blockstore: ipfs2.blockstore
+      blockstore: helia2.blockstore
     })
   })
 
@@ -119,9 +134,8 @@ describe(testName, () => {
     await stop(access)
     await stop(replicator1, replicator2)
     await stop(replica1, replica2)
-    await stop(ipfs1)
-    await stop(ipfs2)
-    await datastore.close()
+    await stop(helia1)
+    await stop(helia2)
   })
 
   describe('instance', () => {
