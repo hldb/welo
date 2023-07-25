@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { Libp2p, createLibp2p } from 'libp2p'
 import { getConfig } from './utils/circuit-relay.js'
+// @ts-expect-error
+import log from 'why-is-node-running'
 
 interface Before {
   env: {
@@ -34,6 +36,8 @@ export default {
     },
     after: async (_: any, before: Before): Promise<void> => {
       await before.libp2p.stop()
+      // was unable to get process to close on its own; fine for now
+      process.exit(0)
     }
   }
 }
