@@ -22,10 +22,12 @@
   "eslintConfig": {
     "extends": "ipfs",
     "parserOptions": {
-      "sourceType": "module"
+      "sourceType": "module",
+      "project": ["./tsconfig.json", "./aegir/tsconfig.json"]
     },
     "ignorePatterns": [
       ".aegir.js",
+      "!aegir/.aegir.ts",
       "dist/*",
       "benchmark/*"
     ]
@@ -47,10 +49,11 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build": "aegir build && tsc-alias && ln -sf ./dist/test/.aegir.js ./.aegir.js",
+    "build:meta": "tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
+    "build": "npm run build:meta && aegir build && tsc-alias",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
-    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
+    "test:chrome": "npm run build && aegir test -t browser -f ./dist/test/**/test-*.js",
+    "test:node": "npm run build && npm run clean && aegir test -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
   },
