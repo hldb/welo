@@ -8,16 +8,16 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 import { Direct } from '@/pubsub/direct.js'
 
 import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import { UsedServices, getIdentifyService, getPubsubService } from './utils/libp2p/services.js'
+import { UsedServices, getDhtService, getIdentifyService, getPubsubService } from './utils/libp2p/services.js'
 import { Libp2p, Libp2pOptions, createLibp2p } from 'libp2p'
 import type { Helia } from '@helia/interface'
 import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
 import { createHelia } from 'helia'
+import { waitForMultiaddrs } from './utils/network.js'
 
 const testName = 'pubsub/direct'
 
-// can be removed after type changes to welo
-type TestServices = UsedServices<'identify' | 'pubsub'>
+type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
 
 describe(testName, () => {
   let
@@ -42,13 +42,21 @@ describe(testName, () => {
       peerDiscovery: await getPeerDiscovery(),
       services: {
         identify: getIdentifyService(),
-        pubsub: getPubsubService()
+        pubsub: getPubsubService(),
+        dht: getDhtService(true)
       }
     })
 
     libp2p1 = await createLibp2p(await createLibp2pOptions())
     libp2p2 = await createLibp2p(await createLibp2pOptions())
     libp2p3 = await createLibp2p(await createLibp2pOptions())
+
+    await Promise.all([
+      waitForMultiaddrs(libp2p1),
+      waitForMultiaddrs(libp2p2),
+      waitForMultiaddrs(libp2p3)
+    ])
+
     helia1 = await createHelia({ libp2p: libp2p1 })
     helia2 = await createHelia({ libp2p: libp2p2 })
     helia3 = await createHelia({ libp2p: libp2p3 })

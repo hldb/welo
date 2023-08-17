@@ -23,7 +23,10 @@
     "extends": "ipfs",
     "parserOptions": {
       "sourceType": "module",
-      "project": ["./tsconfig.json", "./aegir/tsconfig.json"]
+      "project": [
+        "./tsconfig.json",
+        "./aegir/tsconfig.json"
+      ]
     },
     "ignorePatterns": [
       ".aegir.js",
@@ -49,7 +52,7 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build:meta": "tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
+    "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
     "build": "npm run build:meta && aegir build && tsc-alias",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
     "test:chrome": "npm run build && aegir test -t browser -f ./dist/test/**/test-*.js",
@@ -104,7 +107,7 @@
     "interface-datastore": "^8.2.0",
     "ipns": "^6.0.0",
     "level": "^8.0.0",
-    "libp2p": "^0.45.3",
+    "libp2p": "^0.45.9",
     "make-dir": "^3.1.0",
     "path-browserify": "^1.0.1",
     "prettier": "^2.7.1",

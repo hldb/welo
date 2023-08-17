@@ -70,11 +70,7 @@ export default {
               ipns: ipnsSelector
             }
           }),
-          relay: circuitRelayServer({
-            reservations: {
-              maxReservations: Infinity
-            }
-          })
+          relay: circuitRelayServer()
         }
       })
 

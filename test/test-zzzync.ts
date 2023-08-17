@@ -26,6 +26,8 @@ import { getBlockPeerConnectionGater } from './utils/libp2p/connectionGater.js'
 import { getIdentifyService, type AllServices, getPubsubService, getDhtService } from './utils/libp2p/services.js'
 import type { Helia } from '@helia/interface'
 import { createHelia } from 'helia'
+import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
+import { waitForMultiaddrs } from './utils/network.js'
 
 const testName = 'zzzync-replicator'
 const token = process.env.W3_TOKEN as string
@@ -74,6 +76,7 @@ _describe(testName, () => {
     // blocks peering so block fetching happens over web3.storage
     const createLibp2pOptions = async (): Promise<Libp2pOptions<Services>> => ({
       ...(await getLibp2pDefaults()),
+      peerDiscovery: await getPeerDiscovery(),
       services: {
         identify: getIdentifyService(),
         pubsub: getPubsubService(),
@@ -94,6 +97,12 @@ _describe(testName, () => {
       connectionGater: getBlockPeerConnectionGater(peerId1),
       datastore: storage2.datastore
     })
+
+    await Promise.all([
+      waitForMultiaddrs(libp2p1),
+      waitForMultiaddrs(libp2p2)
+    ])
+
     helia1 = await createHelia({
       ...storage1,
       libp2p: libp2p1
@@ -157,6 +166,8 @@ _describe(testName, () => {
         peerId
       })
 
+      await waitForMultiaddrs(libp2p)
+
       return { libp2p }
     }
     const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })
@@ -195,14 +206,13 @@ _describe(testName, () => {
       assert.isOk(replicator.upload)
     })
 
-    it.skip('uploads and advertises replica data', async () => {
+    it('uploads and advertises replica data', async () => {
       await replica1.write(new Uint8Array())
 
       await replicator1.upload()
     })
 
-    it.skip('downloads and merges replica data', async () => {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    it('downloads and merges replica data', async () => {
       await replicator2.download()
 
       if (!(replica1.root instanceof CID) || !(replica2.root instanceof CID)) {

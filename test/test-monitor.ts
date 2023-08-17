@@ -9,14 +9,16 @@ import { peerIdString } from '@/utils/index.js'
 
 import type { Multiaddr } from '@multiformats/multiaddr'
 import { Libp2p, Libp2pOptions, createLibp2p } from 'libp2p'
-import { getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
+import { getDhtService, getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
 import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
 import type { Helia } from '@helia/interface'
 import { createHelia } from 'helia'
+import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
+import { waitForMultiaddrs } from './utils/network.js'
 
 const testName = 'pubsub/monitor'
 
-type TestServices = UsedServices<'identify' | 'pubsub'>
+type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
 
 describe(testName, () => {
   let
@@ -33,9 +35,11 @@ describe(testName, () => {
   before(async () => {
     const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
       ...(await getLibp2pDefaults()),
+      peerDiscovery: await getPeerDiscovery(),
       services: {
         identify: getIdentifyService(),
-        pubsub: getPubsubService()
+        pubsub: getPubsubService(),
+        dht: getDhtService(true)
       }
     })
 
@@ -44,6 +48,11 @@ describe(testName, () => {
 
     helia1 = await createHelia({ libp2p: libp2p1 })
     helia2 = await createHelia({ libp2p: libp2p2 })
+
+    await Promise.all([
+      waitForMultiaddrs(libp2p1),
+      waitForMultiaddrs(libp2p2)
+    ])
 
     id1 = libp2p1.peerId
     id2 = libp2p2.peerId

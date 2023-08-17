@@ -15,16 +15,17 @@ import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import { getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
+import { getDhtService, getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
 import type { Helia } from '@helia/interface'
 import { createLibp2p, Libp2pOptions, type Libp2p } from 'libp2p'
 import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
 import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
 import { createHelia } from 'helia'
+import { waitForMultiaddrs } from './utils/network.js'
 
 const testName = 'live-replicator'
 
-type TestServices = UsedServices<'identify' | 'pubsub'>
+type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
 
 describe(testName, () => {
   let
@@ -45,6 +46,8 @@ describe(testName, () => {
     datastore2: NamespaceDatastore
 
   before(async () => {
+    // debug.enable('libp2p:*')
+
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
 
@@ -57,12 +60,18 @@ describe(testName, () => {
       peerDiscovery: await getPeerDiscovery(),
       services: {
         identify: getIdentifyService(),
-        pubsub: getPubsubService()
+        pubsub: getPubsubService(),
+        dht: getDhtService(true)
       }
     })
 
     libp2p1 = await createLibp2p(await createLibp2pOptions())
     libp2p2 = await createLibp2p(await createLibp2pOptions())
+
+    await Promise.all([
+      waitForMultiaddrs(libp2p1),
+      waitForMultiaddrs(libp2p2)
+    ])
 
     helia1 = await createHelia({ libp2p: libp2p1 })
     helia2 = await createHelia({ libp2p: libp2p2 })
@@ -139,17 +148,17 @@ describe(testName, () => {
   })
 
   describe('instance', () => {
-    it('exposes instance properties', () => {
-      const replicator = replicator1
-      assert.isOk(replicator.broadcast)
-    })
-
     before(async () => {
       await start(replicator1, replicator2)
       await Promise.all([
         libp2p1.dial(addr2),
         new Promise(resolve => { libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
       ])
+    })
+
+    it('exposes instance properties', () => {
+      const replicator = replicator1
+      assert.isOk(replicator.broadcast)
     })
 
     it('replicates replica entries and identities', async () => {
