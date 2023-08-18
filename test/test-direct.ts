@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message } from '@libp2p/interface-pubsub'
+import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Message } from '@libp2p/interface/pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
 
 import { Direct } from '@/pubsub/direct.js'
@@ -142,7 +143,12 @@ describe(testName, () => {
         assert.strictEqual(peer1.isOpen(), false)
         assert.strictEqual(peer2.isOpen(), false)
 
+        console.log('here')
+        console.log(libp2p1)
+        console.log(libp2p2)
+        console.log(libp2p3)
         await promise
+        console.log('not here')
         libp2p1.services.pubsub.removeEventListener('subscription-change', listener1)
         libp2p2.services.pubsub.removeEventListener('subscription-change', listener2)
         libp2p3.services.pubsub.removeEventListener('subscription-change', listener3)

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
@@ -16,7 +17,7 @@ import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import { Web3Storage } from 'web3.storage'
-import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
+import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 import { createLibp2p, Libp2p, Libp2pOptions } from 'libp2p'
 import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
@@ -168,6 +169,7 @@ _describe(testName, () => {
 
       await waitForMultiaddrs(libp2p)
 
+      // @ts-expect-error due to libp2p interface change
       return { libp2p }
     }
     const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })

@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import { peerIdFromString } from '@libp2p/peer-id'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface/peer-id'
 
 export const cidstring = (cid: CID | string): string => cid.toString(base32)
 export const parsedcid = (string: string): CID => CID.parse(string, base32)

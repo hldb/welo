@@ -1,4 +1,4 @@
-import type { Libp2p } from '@libp2p/interface-libp2p'
+import type { Libp2p } from '@libp2p/interface'
 
 export const hasMultiaddrs = (libp2p: Libp2p): boolean => libp2p.getMultiaddrs().length > 0
 

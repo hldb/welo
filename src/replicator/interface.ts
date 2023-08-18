@@ -4,7 +4,7 @@ import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Playable } from '@/utils/playable.js'
 import type { Datastore } from 'interface-datastore'
 import type { Blockstore } from 'interface-blockstore'
-import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
+import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 
 export interface Config {
   ipfs: GossipHelia
