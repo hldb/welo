@@ -1,4 +1,4 @@
-import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
+import { EventEmitter, CustomEvent } from '@libp2p/interface/events'
 import type { GossipLibp2p } from '@/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type {
@@ -7,7 +7,7 @@ import type {
   SubscriptionChangeData,
   SignedMessage
 } from '@libp2p/interface/pubsub'
-import type { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interface/startable'
 
 import { peerIdString } from '@/utils/index.js'
 

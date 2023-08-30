@@ -1,4 +1,4 @@
-import type { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interface/startable'
 
 /**
  * Implements {@link https://github.com/libp2p/js-libp2p-interfaces/tree/master/packages/interfaces#startable

@@ -1,6 +1,6 @@
 import { Key } from 'interface-datastore'
 import { encode, decode } from '@ipld/dag-cbor'
-import { CodeError } from '@libp2p/interfaces/errors'
+import { CodeError } from '@libp2p/interface/errors'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { Blockstore } from 'interface-blockstore'
 

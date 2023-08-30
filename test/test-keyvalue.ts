@@ -1,5 +1,5 @@
 import { assert } from 'aegir/chai'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { start, stop } from '@libp2p/interface/startable'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { LevelDatastore } from 'datastore-level'

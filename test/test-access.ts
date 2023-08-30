@@ -1,7 +1,7 @@
 import { assert, expect } from 'aegir/chai'
 import { createLibp2p } from 'libp2p'
 import { base32 } from 'multiformats/bases/base32'
-import { start } from '@libp2p/interfaces/startable'
+import { start } from '@libp2p/interface/startable'
 
 import type { Entry } from '@/entry/basal/index.js'
 import type { Identity } from '@/identity/basal/index.js'

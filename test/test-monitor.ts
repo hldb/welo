@@ -1,7 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 import { assert } from 'aegir/chai'
-import { EventEmitter } from '@libp2p/interfaces/events'
-import { stop } from '@libp2p/interfaces/startable'
+import { EventEmitter } from '@libp2p/interface/events'
+import { stop } from '@libp2p/interface/startable'
 import type { PeerId } from '@libp2p/interface/peer-id'
 
 import { Monitor } from '@/pubsub/monitor.js'

@@ -1,4 +1,4 @@
-import type { Startable } from '@libp2p/interfaces/startable'
+import type { Startable } from '@libp2p/interface/startable'
 
 import type { EntryInstance } from '@/entry/interface.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'

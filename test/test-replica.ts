@@ -1,6 +1,6 @@
 /* eslint-disable max-nested-callbacks */
 import { assert, expect } from 'aegir/chai'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { start, stop } from '@libp2p/interface/startable'
 import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
 import { NamespaceDatastore } from 'datastore-core'

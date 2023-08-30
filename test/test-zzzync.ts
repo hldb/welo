@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { assert } from 'aegir/chai'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { start, stop } from '@libp2p/interface/startable'
 import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'
 import { NamespaceDatastore } from 'datastore-core'

@@ -1,5 +1,5 @@
 import all from 'it-all'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { start, stop } from '@libp2p/interface/startable'
 import { base32 } from 'multiformats/bases/base32'
 import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'

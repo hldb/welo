@@ -1,5 +1,5 @@
-import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { EventEmitter, CustomEvent } from '@libp2p/interface/events'
+import { start, stop } from '@libp2p/interface/startable'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { Components, GossipHelia } from '@/interface'

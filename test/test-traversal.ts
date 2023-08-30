@@ -2,7 +2,7 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable max-nested-callbacks */
 import { assert, expect } from 'aegir/chai'
-import { start } from '@libp2p/interfaces/startable'
+import { start } from '@libp2p/interface/startable'
 import { Key } from 'interface-datastore'
 import type { CID } from 'multiformats/cid'
 import type { Blockstore } from 'interface-blockstore'
