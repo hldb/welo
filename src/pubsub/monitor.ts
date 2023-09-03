@@ -1,6 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interface/events'
-import type { GossipLibp2p } from '@/interface'
-import type { SubscriptionChangeData } from '@libp2p/interface/pubsub'
+import type { PubSub, SubscriptionChangeData } from '@libp2p/interface/pubsub'
 import type { Startable } from '@libp2p/interface/startable'
 import type { PeerId } from '@libp2p/interface/peer-id'
 
@@ -19,16 +18,21 @@ export interface MonitorEvents {
 }
 
 export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
-  private _isStarted: boolean
-  peers: Set<string>
+  readonly pubsub: PubSub
+  readonly topic: string
   readonly #refreshPeers: typeof refreshPeers
+  private _isStarted: boolean
+
+  peers: Set<string>
 
   isStarted (): boolean {
     return this._isStarted
   }
 
-  constructor (readonly libp2p: GossipLibp2p, readonly topic: string) {
+  constructor (pubsub: PubSub, topic: string) {
     super()
+    this.pubsub = pubsub
+    this.topic = topic
     this._isStarted = false
     this.peers = new Set()
     this.#refreshPeers = refreshPeers.bind(this)
@@ -43,13 +47,13 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
 
   start (): void {
     if (!this.isStarted()) {
-      this.libp2p.services.pubsub.addEventListener(
+      this.pubsub.addEventListener(
         'subscription-change',
         this.#refreshPeers
       )
-      this.libp2p.services.pubsub.subscribe(this.topic)
+      this.pubsub.subscribe(this.topic)
       this.peers = new Set(
-        getPeers(this.libp2p.services.pubsub, this.topic).map(peerIdString)
+        getPeers(this.pubsub, this.topic).map(peerIdString)
       )
       this._isStarted = true
     }
@@ -57,11 +61,11 @@ export class Monitor extends EventEmitter<MonitorEvents> implements Startable {
 
   stop (): void {
     if (this.isStarted()) {
-      this.libp2p.services.pubsub.removeEventListener(
+      this.pubsub.removeEventListener(
         'subscription-change',
         this.#refreshPeers
       )
-      this.libp2p.services.pubsub.unsubscribe(this.topic)
+      this.pubsub.unsubscribe(this.topic)
       this.peers = new Set()
       this._isStarted = false
     }
@@ -85,7 +89,7 @@ function refreshPeers (
 
   const _peers = this.peers
   this.peers = new Set(
-    getPeers(this.libp2p.services.pubsub, this.topic).map(peerIdString)
+    getPeers(this.pubsub, this.topic).map(peerIdString)
   )
 
   const joins: Set<string> = new Set()
