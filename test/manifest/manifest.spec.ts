@@ -8,7 +8,7 @@ import basalIdentityProtocol from '@/identity/basal/protocol.js'
 import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
 import type { Blockstore } from 'interface-blockstore'
-import { getMemoryBlockstore } from './utils/storage.js'
+import { getMemoryBlockstore } from '../test-utils/storage.js'
 
 const testName = 'manifest'
 

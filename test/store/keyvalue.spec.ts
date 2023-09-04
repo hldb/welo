@@ -13,13 +13,12 @@ import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getNonVolatileStorage } from './utils/storage.js'
-import { getDefaultManifest } from './utils/manifest.js'
-import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getNonVolatileStorage } from '../test-utils/storage.js'
+import { getDefaultManifest } from '../test-utils/manifest.js'
+import { getTestPaths, names, tempPath, TestPaths } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
 import type { Blockstore } from 'interface-blockstore'
-import { createLibp2p } from 'libp2p'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'keyvalue'
 
@@ -42,8 +41,7 @@ describe(testName, () => {
     blockstore = storage.blockstore
 
     const identities = await getTestIdentities(testPaths)
-    const libp2p = await createLibp2p(await getLibp2pDefaults())
-    const keychain = libp2p.keychain
+    const keychain = getTestKeyChain()
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 

@@ -6,12 +6,11 @@ import type { KeyChain } from '@libp2p/interface/keychain'
 
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
-import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIdentities, kpi } from './utils/identities.js'
+import { fixtPath, getTestPaths, names, tempPath } from '../test-utils/constants.js'
+import { getTestIdentities, kpi } from '../test-utils/identities.js'
 import type { Blockstore } from 'interface-blockstore'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import { getNonVolatileStorage } from './utils/storage.js'
-import { createLibp2p } from 'libp2p'
+import { getNonVolatileStorage } from '../test-utils/storage.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'basal identity'
 
@@ -40,14 +39,8 @@ describe(testName, () => {
     const fixtTestPaths = getTestPaths(fixtPath, testName)
 
     const storage = await getNonVolatileStorage(fixtTestPaths.ipfs)
-    const datastore = storage.datastore
     blockstore = storage.blockstore
-
-    const libp2p = await createLibp2p({
-      ...(await getLibp2pDefaults()),
-      datastore
-    })
-    keychain = libp2p.keychain
+    keychain = getTestKeyChain()
 
     identities = await getTestIdentities(fixtTestPaths)
     identity = await identityModule.import({
@@ -58,10 +51,9 @@ describe(testName, () => {
     }).catch(async () => await identityModule.get({ name, identities, keychain }))
 
     const tempTestPaths = getTestPaths(tempPath, testName)
-    const tempLibp2p = await createLibp2p(await getLibp2pDefaults())
 
     tempIdentities = await getTestIdentities(tempTestPaths)
-    tempKeychain = tempLibp2p.keychain
+    tempKeychain = getTestKeyChain()
   })
 
   describe('Class', () => {

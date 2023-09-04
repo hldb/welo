@@ -6,7 +6,7 @@ import type { CID } from 'multiformats/cid.js'
 import { Graph } from '@/replica/graph.js'
 import { Node } from '@/replica/graph-node.js'
 
-import { getTestPaths, tempPath } from './utils/constants.js'
+import { getTestPaths, tempPath } from '../test-utils/constants.js'
 import { LevelBlockstore } from 'blockstore-level'
 import { ShardBlock, ShardBlockView } from '@alanshaw/pail/shard'
 import { cidstring } from '@/utils/index.js'

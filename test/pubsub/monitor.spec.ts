@@ -1,77 +1,39 @@
 /* eslint-disable max-nested-callbacks */
 import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interface/events'
-import { stop } from '@libp2p/interface/startable'
 import type { PeerId } from '@libp2p/interface/peer-id'
 
 import { Monitor } from '@/pubsub/monitor.js'
 import { peerIdString } from '@/utils/index.js'
 
-import type { Multiaddr } from '@multiformats/multiaddr'
-import { Libp2p, Libp2pOptions, createLibp2p } from 'libp2p'
-import { getDhtService, getIdentifyService, getPubsubService, type UsedServices } from './utils/libp2p/services.js'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import type { Helia } from '@helia/interface'
-import { createHelia } from 'helia'
-import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
-import { waitForMultiaddrs } from './utils/network.js'
+import type { PubSub } from '@libp2p/interface/dist/src/pubsub/index.js'
+import { getTestPubSubNetwork } from '../test-mocks/pubsub'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 
 const testName = 'pubsub/monitor'
 
-type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
-
 describe(testName, () => {
   let
-    helia1: Helia<Libp2p<TestServices>>,
-    helia2: Helia<Libp2p<TestServices>>,
-    libp2p1: Libp2p<TestServices>,
-    libp2p2: Libp2p<TestServices>,
+    pubsub1: PubSub,
+    pubsub2: PubSub,
     id1: PeerId,
-    id2: PeerId,
-    addr2: Multiaddr[]
+    id2: PeerId
 
   const sharedTopic = 'shared-topic'
 
   before(async () => {
-    const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
-      ...(await getLibp2pDefaults()),
-      peerDiscovery: await getPeerDiscovery(),
-      services: {
-        identify: getIdentifyService(),
-        pubsub: getPubsubService(),
-        dht: getDhtService(true)
-      }
-    })
+    id1 = await createEd25519PeerId()
+    id2 = await createEd25519PeerId()
 
-    libp2p1 = await createLibp2p(await createLibp2pOptions())
-    libp2p2 = await createLibp2p(await createLibp2pOptions())
-
-    helia1 = await createHelia({ libp2p: libp2p1 })
-    helia2 = await createHelia({ libp2p: libp2p2 })
-
-    await Promise.all([
-      waitForMultiaddrs(libp2p1),
-      waitForMultiaddrs(libp2p2)
-    ])
-
-    id1 = libp2p1.peerId
-    id2 = libp2p2.peerId
-
-    addr2 = libp2p2.getMultiaddrs()
-
-    await libp2p1.dial(addr2)
-  })
-
-  after(async () => {
-    await stop(helia1)
-    await stop(helia2)
+    const { createPubSubPeer } = getTestPubSubNetwork()
+    pubsub1 = createPubSubPeer(id1)
+    pubsub2 = createPubSubPeer(id2)
   })
 
   describe('instance', () => {
     it('exposes instance properties', () => {
       const topic = 'topic'
-      const monitor = new Monitor(libp2p1, topic)
-      assert.strictEqual(monitor.libp2p, libp2p1)
+      const monitor = new Monitor(pubsub1, topic)
       assert.strictEqual(monitor.topic, topic)
       assert.deepEqual(monitor.peers, new Set())
       assert.isOk(monitor instanceof Monitor)
@@ -89,8 +51,8 @@ describe(testName, () => {
       let updates2 = 0
 
       before(() => {
-        peer1 = new Monitor(libp2p1, sharedTopic)
-        peer2 = new Monitor(libp2p2, sharedTopic)
+        peer1 = new Monitor(pubsub1, sharedTopic)
+        peer2 = new Monitor(pubsub2, sharedTopic)
 
         peer1.addEventListener('peer-join', () => joins1++)
         peer2.addEventListener('peer-join', () => joins2++)

@@ -14,15 +14,14 @@ import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { cidstring, decodedcid } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getLevelDatastore, getMemoryBlockstore } from './utils/storage.js'
-import { getDefaultManifest } from './utils/manifest.js'
-import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { singleEntry } from './utils/entries.js'
+import { getLevelDatastore, getMemoryBlockstore } from '../test-utils/storage.js'
+import { getDefaultManifest } from '../test-utils/manifest.js'
+import { getTestPaths, names, tempPath, TestPaths } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
+import { singleEntry } from '../test-utils/entries.js'
 import type { Blockstore } from 'interface-blockstore'
 import { encodeCbor } from '@/utils/block.js'
-import { createLibp2p } from 'libp2p'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'replica'
 
@@ -49,9 +48,7 @@ describe(testName, () => {
     blockstore = getMemoryBlockstore()
 
     const identities = await getTestIdentities(testPaths)
-
-    const libp2p = await createLibp2p(await getLibp2pDefaults())
-    const keychain = libp2p.keychain
+    const keychain = getTestKeyChain()
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 
@@ -66,10 +63,10 @@ describe(testName, () => {
 
     const testPaths1 = getTestPaths(tempPath, testName + '1')
     const tempIdentities = await getTestIdentities(testPaths1)
-    const tempLibp2p = await createLibp2p(await getLibp2pDefaults())
+    const tempKeyChain = getTestKeyChain()
     tempIdentity = await getTestIdentity(
       tempIdentities,
-      tempLibp2p.keychain,
+      tempKeyChain,
       names.name1
     )
 

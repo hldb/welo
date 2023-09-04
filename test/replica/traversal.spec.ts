@@ -25,14 +25,13 @@ import { Graph } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
 import { Manifest } from '@/manifest/index.js'
 
-import { getDefaultManifest } from './utils/manifest.js'
-import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { concurrentEntries, singleEntry } from './utils/entries.js'
+import { getDefaultManifest } from '../test-utils/manifest.js'
+import { getTestPaths, names, tempPath } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
+import { concurrentEntries, singleEntry } from '../test-utils/entries.js'
 import { Paily } from '@/utils/paily.js'
-import { getMemoryBlockstore } from './utils/storage.js'
-import { createLibp2p } from 'libp2p'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getMemoryBlockstore } from '../test-utils/storage.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'traversal'
 
@@ -61,8 +60,7 @@ describe('traversal', () => {
     blockstore = getMemoryBlockstore()
 
     const identities = await getTestIdentities(testPaths)
-    const libp2p = await createLibp2p(await getLibp2pDefaults())
-    const keychain = libp2p.keychain
+    const keychain = getTestKeyChain()
 
     identity = await getTestIdentity(identities, keychain, names.name0)
     identity1 = await getTestIdentity(identities, keychain, names.name1)

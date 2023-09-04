@@ -1,5 +1,4 @@
 import { assert, expect } from 'aegir/chai'
-import { createLibp2p } from 'libp2p'
 import { base32 } from 'multiformats/bases/base32'
 import { start } from '@libp2p/interface/startable'
 
@@ -10,11 +9,11 @@ import { staticAccess } from '@/access/static/index.js'
 import protocol, { AccessProtocol } from '@/access/static/protocol.js'
 import { wildcard } from '@/access/interface.js'
 
-import { getDefaultManifest } from './utils/manifest.js'
-import { singleEntry } from './utils/entries.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
+import { getDefaultManifest } from '../test-utils/manifest.js'
+import { singleEntry } from '../test-utils/entries.js'
+import { getTestPaths, tempPath } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'static access'
 
@@ -34,12 +33,12 @@ describe(testName, () => {
   const emptyaccess: AccessProtocol = makeaccess([])
 
   before(async () => {
-    const libp2p = await createLibp2p(await getLibp2pDefaults())
     const testPaths = getTestPaths(tempPath, testName)
 
     const identities = await getTestIdentities(testPaths)
+    const keychain = getTestKeyChain()
 
-    identity = await getTestIdentity(identities, libp2p.keychain, name)
+    identity = await getTestIdentity(identities, keychain, name)
     entry = await singleEntry(identity)()
     yesaccess = makeaccess([identity.id])
   })

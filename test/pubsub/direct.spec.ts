@@ -1,91 +1,41 @@
 /* eslint-disable no-console */
 import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interface/events'
-import { stop } from '@libp2p/interface/startable'
 import type { PeerId } from '@libp2p/interface/peer-id'
-import type { Message } from '@libp2p/interface/pubsub'
-import type { Multiaddr } from '@multiformats/multiaddr'
+import type { Message, PubSub } from '@libp2p/interface/pubsub'
 
 import { Direct } from '@/pubsub/direct.js'
 
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import { UsedServices, getDhtService, getIdentifyService, getPubsubService } from './utils/libp2p/services.js'
-import { Libp2p, Libp2pOptions, createLibp2p } from 'libp2p'
-import type { Helia } from '@helia/interface'
-import { getPeerDiscovery } from './utils/libp2p/peerDiscovery.js'
-import { createHelia } from 'helia'
-import { waitForMultiaddrs } from './utils/network.js'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { getTestPubSubNetwork } from 'test/test-mocks/pubsub.js'
 
 const testName = 'pubsub/direct'
 
-type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
-
 describe(testName, () => {
   let
-    helia1: Helia<Libp2p<TestServices>>,
-    helia2: Helia<Libp2p<TestServices>>,
-    helia3: Helia<Libp2p<TestServices>>,
-    libp2p1: Libp2p<TestServices>,
-    libp2p2: Libp2p<TestServices>,
-    libp2p3: Libp2p<TestServices>,
+    pubsub1: PubSub,
+    pubsub2: PubSub,
+    pubsub3: PubSub,
     id1: PeerId,
     id2: PeerId,
-    // id3: PeerId,
-    addr1: Multiaddr[],
-    addr2: Multiaddr[],
-    addr3: Multiaddr[]
+    id3: PeerId
 
   const prefix = '/dps/1.0.0/'
 
   before(async () => {
-    const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
-      ...(await getLibp2pDefaults()),
-      peerDiscovery: await getPeerDiscovery(),
-      services: {
-        identify: getIdentifyService(),
-        pubsub: getPubsubService(),
-        dht: getDhtService(true)
-      }
-    })
+    id1 = await createEd25519PeerId()
+    id2 = await createEd25519PeerId()
+    id3 = await createEd25519PeerId()
 
-    libp2p1 = await createLibp2p(await createLibp2pOptions())
-    libp2p2 = await createLibp2p(await createLibp2pOptions())
-    libp2p3 = await createLibp2p(await createLibp2pOptions())
-
-    await Promise.all([
-      waitForMultiaddrs(libp2p1),
-      waitForMultiaddrs(libp2p2),
-      waitForMultiaddrs(libp2p3)
-    ])
-
-    helia1 = await createHelia({ libp2p: libp2p1 })
-    helia2 = await createHelia({ libp2p: libp2p2 })
-    helia3 = await createHelia({ libp2p: libp2p3 })
-
-    id1 = libp2p1.peerId
-    id2 = libp2p2.peerId
-
-    addr1 = libp2p1.getMultiaddrs()
-    addr2 = libp2p2.getMultiaddrs()
-    addr3 = libp2p3.getMultiaddrs()
-
-    await Promise.all([
-      libp2p1.dial(addr2),
-      libp2p2.dial(addr3),
-      libp2p3.dial(addr1)
-    ])
-  })
-
-  after(async () => {
-    await stop(helia1)
-    await stop(helia2)
-    await stop(helia3)
+    const { createPubSubPeer } = getTestPubSubNetwork()
+    pubsub1 = createPubSubPeer(id1)
+    pubsub2 = createPubSubPeer(id2)
+    pubsub3 = createPubSubPeer(id3)
   })
 
   describe('instance', () => {
     it('exposes instance properties', () => {
-      const direct = new Direct(libp2p1, id2)
-      assert.strictEqual(direct.libp2p, libp2p1)
+      const direct = new Direct(pubsub1, id1, id2)
       assert.isOk(direct.topic.startsWith(prefix))
       assert.isOk(direct.isOpen)
       assert.isOk(direct instanceof EventEmitter)
@@ -103,19 +53,19 @@ describe(testName, () => {
       const onMessage3 = messages3.push.bind(messages3)
 
       before(() => {
-        peer1 = new Direct(libp2p1, id2)
-        peer2 = new Direct(libp2p2, id1)
+        peer1 = new Direct(pubsub1, id1, id2)
+        peer2 = new Direct(pubsub2, id2, id1)
         topic = peer1.topic
 
         peer1.addEventListener('message', onMessage1)
         peer2.addEventListener('message', onMessage2)
-        libp2p3.services.pubsub.addEventListener('message', onMessage3)
+        pubsub3.addEventListener('message', onMessage3)
       })
 
       it('emits peered when pubsub peered with remote peer', async () => {
         peer1.start()
         peer2.start()
-        libp2p3.services.pubsub.subscribe(topic)
+        pubsub3.subscribe(topic)
 
         let listener1, listener2, listener3
         const promise = Promise.all([
@@ -126,32 +76,24 @@ describe(testName, () => {
           new Promise<void>((resolve) => {
             let i: number = 0
             listener1 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
-            libp2p1.services.pubsub.addEventListener('subscription-change', listener1)
+            pubsub1.addEventListener('subscription-change', listener1)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener2 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
-            libp2p2.services.pubsub.addEventListener('subscription-change', listener2)
+            pubsub2.addEventListener('subscription-change', listener2)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
             listener3 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
-            libp2p3.services.pubsub.addEventListener('subscription-change', listener3)
+            pubsub3.addEventListener('subscription-change', listener3)
           })
         ])
 
         assert.strictEqual(peer1.isOpen(), false)
         assert.strictEqual(peer2.isOpen(), false)
 
-        console.log('here')
-        console.log(libp2p1)
-        console.log(libp2p2)
-        console.log(libp2p3)
         await promise
-        console.log('not here')
-        libp2p1.services.pubsub.removeEventListener('subscription-change', listener1)
-        libp2p2.services.pubsub.removeEventListener('subscription-change', listener2)
-        libp2p3.services.pubsub.removeEventListener('subscription-change', listener3)
 
         assert.strictEqual(peer1.isOpen(), true)
         assert.strictEqual(peer2.isOpen(), true)
@@ -168,17 +110,17 @@ describe(testName, () => {
             listener = (): void => {
               messages3.length === 3 && resolve(true)
             }
-            libp2p3.services.pubsub.addEventListener('message', listener)
+            pubsub3.addEventListener('message', listener)
           })
         ])
         void (await Promise.all([
           peer1.publish(new Uint8Array([1])),
           peer2.publish(new Uint8Array([2])),
-          libp2p3.services.pubsub.publish(topic, new Uint8Array([3]))
+          pubsub3.publish(topic, new Uint8Array([3]))
         ]))
 
         await promise
-        libp2p1.services.pubsub.removeEventListener('message', listener)
+        pubsub1.removeEventListener('message', listener)
 
         assert.strictEqual(messages1.length, 1)
         assert.strictEqual(messages2.length, 1)
@@ -186,7 +128,7 @@ describe(testName, () => {
 
         peer1.removeEventListener('message', onMessage1)
         peer2.removeEventListener('message', onMessage2)
-        libp2p3.services.pubsub.removeEventListener('message', onMessage3)
+        pubsub3.removeEventListener('message', onMessage3)
       })
 
       it('emits unpeered when remote peer is no longer pubsub peered', async () => {
@@ -215,7 +157,7 @@ describe(testName, () => {
 
         peer1.stop()
         peer2.stop()
-        libp2p3.services.pubsub.unsubscribe(topic)
+        pubsub3.unsubscribe(topic)
       })
     })
   })

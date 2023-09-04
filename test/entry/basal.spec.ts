@@ -8,13 +8,12 @@ import { Entry, basalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
-import { fixtPath, getTestPaths, names } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
+import { fixtPath, getTestPaths, names } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity, kpi } from '../test-utils/identities.js'
 import type { Blockstore } from 'interface-blockstore'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
-import { createLibp2p } from 'libp2p'
-import { getLibp2pDefaults } from './utils/libp2p/defaults.js'
-import { getLevelDatastore, getMemoryBlockstore } from './utils/storage.js'
+import { getMemoryBlockstore } from '../test-utils/storage.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
 
 const testName = 'basal entry'
 
@@ -40,14 +39,8 @@ describe(testName, () => {
   before(async () => {
     const testPaths = getTestPaths(fixtPath, testName)
 
-    const datastore = await getLevelDatastore(testPaths.ipfs + '/data')
     blockstore = getMemoryBlockstore()
-
-    const libp2p = await createLibp2p({
-      ...(await getLibp2pDefaults()),
-      datastore
-    })
-    keychain = libp2p.keychain
+    keychain = getTestKeyChain()
 
     identities = await getTestIdentities(testPaths)
     identity = await identityModule.import({
