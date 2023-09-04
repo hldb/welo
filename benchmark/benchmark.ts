@@ -4,8 +4,8 @@ import { parsedcid } from '@/utils/index.js'
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createWelo } from '@/welo.js'
-import { getLibp2pDefaults } from '../test/utils/libp2p/defaults.js'
-import type { AllServices } from '../test/utils/libp2p/services.js'
+import { getLibp2pDefaults } from '../test/test-utils/libp2p/defaults.js'
+import type { AllServices } from '../test/test-utils/libp2p/services.js'
 
 const num = 1000
 /**
