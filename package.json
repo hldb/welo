@@ -58,7 +58,7 @@
     "test:chrome": "npm run build && aegir test -t browser -f ./dist/test/**/test-direct.js --timeout 1111111",
     "test:node": "npm run build && npm run clean && aegir test -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
-    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
+    "clean": "git clean -fq test/test-fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/test-fixtures"
   },
   "repository": {
     "type": "git",
