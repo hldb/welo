@@ -1,4 +1,4 @@
-import type { GossipHelia, ComponentProtocol } from '@/interface.js'
+import type { ComponentProtocol } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { Playable } from '@/utils/playable.js'
@@ -7,11 +7,10 @@ import type { Blockstore } from 'interface-blockstore'
 import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 
 export interface Config {
-  ipfs: GossipHelia
+  peerId: Ed25519PeerId
   replica: Replica
   datastore: Datastore
   blockstore: Blockstore
-  provider?: Ed25519PeerId
 }
 
 export interface Replicator extends Playable {}
