@@ -3,7 +3,7 @@ import { start, stop } from '@libp2p/interface/startable'
 import { Key } from 'interface-datastore'
 import { MemoryDatastore, NamespaceDatastore } from 'datastore-core'
 
-import { LiveReplicator as Replicator } from '@/replicator/live/index.js'
+import { PheReplicator } from '@/replicator/phe/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -14,39 +14,40 @@ import { getTestManifest } from '../test-utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
-import type { Multiaddr } from '@multiformats/multiaddr'
-import { getDhtService, getIdentifyService, getPubsubService, type UsedServices } from '../test-utils/libp2p/services.js'
-import type { Helia } from '@helia/interface'
-import { createLibp2p, Libp2pOptions, type Libp2p } from 'libp2p'
-import { getLibp2pDefaults } from '../test-utils/libp2p/defaults.js'
-import { getPeerDiscovery } from '../test-utils/libp2p/peerDiscovery.js'
-import { createHelia } from 'helia'
-import { waitForMultiaddrs } from '../test-utils/network.js'
+import { getTestKeyChain } from 'test/test-utils/keychain.js'
+import { MemoryBlockstore } from 'blockstore-core'
+import type { Ed25519PeerId } from '@libp2p/interface/dist/src/peer-id/index.js'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { getTestPubSubNetwork } from 'test/test-mocks/pubsub.js'
+import type { PubSub } from '@libp2p/interface/pubsub'
 
-const testName = 'live-replicator'
-
-type TestServices = UsedServices<'identify' | 'pubsub' | 'dht'>
+const testName = 'replicator/phe'
 
 describe(testName, () => {
   let
-    helia1: Helia<Libp2p<TestServices>>,
-    helia2: Helia<Libp2p<TestServices>>,
-    libp2p1: Libp2p<TestServices>,
-    libp2p2: Libp2p<TestServices>,
-    addr2: Multiaddr[],
+    id1: Ed25519PeerId,
+    id2: Ed25519PeerId,
+    pubsub1: PubSub,
+    pubsub2: PubSub,
     replica1: Replica,
     replica2: Replica,
-    replicator1: Replicator,
-    replicator2: Replicator,
+    replicator1: PheReplicator,
+    replicator2: PheReplicator,
     testPaths1: TestPaths,
     testPaths2: TestPaths,
     access: Access,
     datastore: MemoryDatastore,
     datastore1: NamespaceDatastore,
-    datastore2: NamespaceDatastore
+    datastore2: NamespaceDatastore,
+    blockstore: MemoryBlockstore
 
   before(async () => {
-    // debug.enable('libp2p:*')
+    id1 = await createEd25519PeerId()
+    id2 = await createEd25519PeerId()
+
+    const { createPubSubPeer } = getTestPubSubNetwork()
+    pubsub1 = createPubSubPeer(id1)
+    pubsub2 = createPubSubPeer(id2)
 
     testPaths1 = getTestPaths(tempPath, testName + '/1')
     testPaths2 = getTestPaths(tempPath, testName + '/2')
@@ -55,42 +56,23 @@ describe(testName, () => {
     datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
     datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
 
-    const createLibp2pOptions = async (): Promise<Libp2pOptions<TestServices>> => ({
-      ...(await getLibp2pDefaults()),
-      peerDiscovery: await getPeerDiscovery(),
-      services: {
-        identify: getIdentifyService(),
-        pubsub: getPubsubService(),
-        dht: getDhtService(true)
-      }
-    })
-
-    libp2p1 = await createLibp2p(await createLibp2pOptions())
-    libp2p2 = await createLibp2p(await createLibp2pOptions())
-
-    await Promise.all([
-      waitForMultiaddrs(libp2p1),
-      waitForMultiaddrs(libp2p2)
-    ])
-
-    helia1 = await createHelia({ libp2p: libp2p1 })
-    helia2 = await createHelia({ libp2p: libp2p2 })
-
-    addr2 = libp2p2.getMultiaddrs()
-
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
+    const keychain1 = getTestKeyChain()
+    const keychain2 = getTestKeyChain()
 
     const identity1 = await getTestIdentity(
       identities1,
-      libp2p1.keychain,
+      keychain1,
       testName
     )
     const identity2 = await getTestIdentity(
       identities2,
-      libp2p2.keychain,
+      keychain2,
       testName
     )
+
+    blockstore = new MemoryBlockstore()
 
     const write = [identity1.id, identity2.id]
     const accessConfig = {
@@ -104,7 +86,7 @@ describe(testName, () => {
     replica1 = new Replica({
       manifest,
       datastore: datastore1,
-      blockstore: helia1.blockstore,
+      blockstore,
       access,
       identity: identity1,
       components: {
@@ -115,7 +97,7 @@ describe(testName, () => {
     replica2 = new Replica({
       manifest,
       datastore: datastore2,
-      blockstore: helia2.blockstore,
+      blockstore,
       access,
       identity: identity2,
       components: {
@@ -125,17 +107,19 @@ describe(testName, () => {
     })
     await start(replica1, replica2)
 
-    replicator1 = new Replicator({
-      ipfs: helia1,
+    replicator1 = new PheReplicator({
+      peerId: id1,
+      pubsub: pubsub1,
       replica: replica1,
       datastore: datastore1,
-      blockstore: helia1.blockstore
+      blockstore
     })
-    replicator2 = new Replicator({
-      ipfs: helia2,
+    replicator2 = new PheReplicator({
+      peerId: id2,
+      pubsub: pubsub2,
       replica: replica2,
       datastore: datastore2,
-      blockstore: helia2.blockstore
+      blockstore
     })
   })
 
@@ -143,17 +127,11 @@ describe(testName, () => {
     await stop(access)
     await stop(replicator1, replicator2)
     await stop(replica1, replica2)
-    await stop(helia1)
-    await stop(helia2)
   })
 
   describe('instance', () => {
     before(async () => {
       await start(replicator1, replicator2)
-      await Promise.all([
-        libp2p1.dial(addr2),
-        new Promise(resolve => { libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
-      ])
     })
 
     it('exposes instance properties', () => {

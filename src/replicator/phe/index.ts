@@ -22,7 +22,7 @@ import type { Ed25519PeerId } from '@libp2p/interface/dist/src/peer-id/index.js'
 
 const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
-export class LiveReplicator extends Playable {
+export class PheReplicator extends Playable {
   readonly localPeerId: Ed25519PeerId
   readonly pubsub: PubSub
   readonly blockstore: Blockstore
@@ -112,12 +112,12 @@ export class LiveReplicator extends Playable {
   }
 }
 
-function onReplicaHeadsUpdate (this: LiveReplicator): void {
+function onReplicaHeadsUpdate (this: PheReplicator): void {
   void this.broadcast()
 }
 
 function onHeadsMessage (
-  this: LiveReplicator,
+  this: PheReplicator,
   evt: CustomEvent<SignedMessage>
 ): void {
   void (async () => {
@@ -141,7 +141,7 @@ function onHeadsMessage (
 }
 
 function onPeerJoin (
-  this: LiveReplicator,
+  this: PheReplicator,
   evt: CustomEvent<PeerStatusChangeData>
 ): void {
   const { peerId: remotePeerId } = evt.detail
@@ -159,7 +159,7 @@ function onPeerJoin (
 }
 
 function onPeersLeave (
-  this: LiveReplicator,
+  this: PheReplicator,
   evt: CustomEvent<PeerStatusChangeData>
 ): void {
   const { peerId: remotePeerId } = evt.detail
@@ -173,7 +173,7 @@ function onPeersLeave (
   }
 }
 
-export const liveReplicator: (pubsub: PubSub) => ReplicatorModule<LiveReplicator, typeof protocol> = (pubsub: PubSub) => ({
+export const pheReplicator: (pubsub: PubSub) => ReplicatorModule<PheReplicator, typeof protocol> = (pubsub: PubSub) => ({
   protocol,
-  create: (config: Config) => new LiveReplicator({ ...config, pubsub })
+  create: (config: Config) => new PheReplicator({ ...config, pubsub })
 })
