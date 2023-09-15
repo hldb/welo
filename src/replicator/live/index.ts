@@ -1,9 +1,8 @@
 import all from 'it-all'
 import { start, stop } from '@libp2p/interface/startable'
 import { base32 } from 'multiformats/bases/base32'
-import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
-import type { SignedMessage, PublishResult } from '@libp2p/interface/pubsub'
+import type { SignedMessage, PublishResult, PubSub } from '@libp2p/interface/pubsub'
 
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'
@@ -19,11 +18,13 @@ import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
 import protocol from './protocol.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { Ed25519PeerId } from '@libp2p/interface/dist/src/peer-id/index.js'
 
 const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
 export class LiveReplicator extends Playable {
-  readonly ipfs: GossipHelia
+  readonly localPeerId: Ed25519PeerId
+  readonly pubsub: PubSub
   readonly blockstore: Blockstore
   readonly manifest: Manifest
   readonly replica: Replica
@@ -40,10 +41,11 @@ export class LiveReplicator extends Playable {
   readonly _onHeadsMessage: typeof onHeadsMessage
 
   constructor ({
-    ipfs,
+    pubsub,
+    peerId,
     replica,
     blockstore
-  }: Config) {
+  }: Config & { pubsub: PubSub }) {
     const starting = async (): Promise<void> => {
       this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
       this.shared.addEventListener('peer-leave', this.#onPeersLeave) // if a peer leaves and the direct connection is closed then delete the direct
@@ -72,7 +74,8 @@ export class LiveReplicator extends Playable {
     }
     super({ starting, stopping })
 
-    this.ipfs = ipfs
+    this.localPeerId = peerId
+    this.pubsub = pubsub
     this.blockstore = blockstore
     this.replica = replica
     this.manifest = replica.manifest
@@ -85,7 +88,7 @@ export class LiveReplicator extends Playable {
     this.#onReplicaHeadsUpdate = onReplicaHeadsUpdate.bind(this)
     this._onHeadsMessage = onHeadsMessage.bind(this)
 
-    this.shared = new Monitor(this.ipfs.libp2p, getSharedChannelTopic(this.manifest))
+    this.shared = new Monitor(this.pubsub, getSharedChannelTopic(this.manifest))
     this.directs = new Map()
   }
 
@@ -142,7 +145,7 @@ function onPeerJoin (
   evt: CustomEvent<PeerStatusChangeData>
 ): void {
   const { peerId: remotePeerId } = evt.detail
-  const direct = new Direct(this.ipfs.libp2p, remotePeerId)
+  const direct = new Direct(this.pubsub, this.localPeerId, remotePeerId)
   direct.addEventListener(
     'peered',
     () => {
@@ -170,7 +173,7 @@ function onPeersLeave (
   }
 }
 
-export const liveReplicator: () => ReplicatorModule<LiveReplicator, typeof protocol> = () => ({
+export const liveReplicator: (pubsub: PubSub) => ReplicatorModule<LiveReplicator, typeof protocol> = (pubsub: PubSub) => ({
   protocol,
-  create: (config: Config) => new LiveReplicator(config)
+  create: (config: Config) => new LiveReplicator({ ...config, pubsub })
 })
