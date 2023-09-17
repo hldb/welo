@@ -147,14 +147,6 @@ export class ZzzyncReplicator extends Playable {
       if (block != null) {
         replicaBlocks.push({ cid: v as CID, bytes: block.bytes })
       }
-
-      console.log({
-        root: root.toString(),
-        k: k.toString(),
-        v: v.toString(),
-        entry: entry.cid.toString(),
-        identity: entry.identity.auth.toString()
-      })
     }
 
     const rootBlock = await Blocks.encode({ value: replicaBlocks.map(({ cid }) => cid) })
@@ -203,7 +195,6 @@ export class ZzzyncReplicator extends Playable {
         break
       }
     }
-    console.log(providers)
 
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
       const response = await this.w3.client.get(cid.toString())
@@ -244,7 +235,6 @@ export class ZzzyncReplicator extends Playable {
       }
 
       const reader = await CarReader.fromBytes(new Uint8Array(await response.arrayBuffer()))
-      console.log(reader)
 
       const diff = await this.replica.graph.nodes.diff(
         value,
