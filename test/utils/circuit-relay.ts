@@ -27,7 +27,7 @@ export const getConfig = async (): Promise<Libp2pOptions> => ({
   services: {
     identify: identifyService(),
     pubsub: gossipsub(),
-    circuitRelayServer: circuitRelayServer({ advertise: true }),
+    circuitRelayServer: circuitRelayServer(),
     dht: kadDHT({
       clientMode: false,
       validators: { ipns: ipnsValidator },
