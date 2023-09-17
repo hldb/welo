@@ -2,10 +2,19 @@ import { assert } from './utils/chai.js'
 import { start } from '@libp2p/interfaces/startable'
 import { bootstrapReplicator, BootstrapReplicator } from '@/replicator/bootstrap/index.js'
 import { SetupComponents, setup, teardown } from './utils/replicator.js'
+import { isBrowser } from 'wherearewe'
 
 const testName = 'bootstrap-replicator'
 
-describe(testName, () => {
+let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
+if (isBrowser) {
+  console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
+  _describe = describe.skip
+} else {
+  _describe = describe
+}
+
+_describe(testName, () => {
   let components: SetupComponents<BootstrapReplicator>
 
   before(async () => {
