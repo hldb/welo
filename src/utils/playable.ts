@@ -33,7 +33,7 @@ export class Playable implements Startable {
     }
 
     if (this._starting != null) {
-      return await this._starting
+      await this._starting; return
     }
 
     if (this._stopping != null) {
@@ -42,7 +42,7 @@ export class Playable implements Startable {
 
     this._starting = this.lifecycle.starting()
 
-    return await this._starting
+    await this._starting
       .then(() => {
         this._isStarted = true
       })
@@ -57,7 +57,7 @@ export class Playable implements Startable {
     }
 
     if (this._stopping != null) {
-      return await this._stopping
+      await this._stopping; return
     }
 
     if (this._starting != null) {
@@ -66,7 +66,7 @@ export class Playable implements Startable {
 
     this._stopping = this.lifecycle.stopping()
 
-    return await this._stopping
+    await this._stopping
       .then(() => {
         this._isStarted = false
       })

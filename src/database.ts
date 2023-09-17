@@ -7,7 +7,6 @@ import type { Datastore } from 'interface-datastore'
 
 import { Playable } from '@/utils/playable.js'
 import { Replica } from '@/replica/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
@@ -24,7 +23,6 @@ import type { DbConfig, DbOpen, DbEvents, ClosedEmit, DbComponents } from './int
  * @public
  */
 export class Database extends Playable {
-  readonly blocks: Blocks
   readonly manifest: Manifest
   readonly identity: IdentityInstance<any>
   readonly replicators: Replicator[]
@@ -58,7 +56,6 @@ export class Database extends Playable {
 
     this.datastore = config.datastore
     this.manifest = config.manifest
-    this.blocks = config.blocks
     this.identity = config.identity
     this.replicators = config.replicators
     this.replica = config.replica
@@ -71,6 +68,7 @@ export class Database extends Playable {
     this.#onStoreUpdate = onStoreUpdate.bind(this)
 
     // expose actions as database write methods (e.g. database.put)
+    // eslint-disable-next-line no-warning-comments
     // todo: handle async action creators
 
     interface CreatorProps {
@@ -115,7 +113,6 @@ export class Database extends Playable {
   /**
    * Open a Database
    *
-   * @remarks
    * Welo Database factory uses this method, and provides the modules needed,
    * to return databases from its `open` instance method.
    *
@@ -125,11 +122,11 @@ export class Database extends Playable {
   static async open (options: DbOpen): Promise<Database> {
     const {
       datastore,
+      blockstore,
       manifest,
       replicators,
       ipfs,
       identity,
-      blocks,
       components,
       provider
     } = options
@@ -138,7 +135,7 @@ export class Database extends Playable {
       throw new Error('identity instance type does not match identity protocol')
     }
 
-    const common = { manifest, blocks, components }
+    const common = { manifest, blockstore, components }
 
     const access = components.access.create(common)
 
@@ -153,7 +150,6 @@ export class Database extends Playable {
     const store = components.store.create({
       ...common,
       datastore: new NamespaceDatastore(datastore, new Key(STORE_NAMESPACE)),
-      blockstore: ipfs.blockstore,
       replica
     })
 
@@ -162,13 +158,12 @@ export class Database extends Playable {
       ipfs,
       replica,
       datastore,
-      blockstore: ipfs.blockstore,
       provider
     }))
 
     const config: DbConfig = {
       datastore,
-      blocks,
+      blockstore,
       replicators: replicatorInstances,
       identity,
       manifest,
@@ -190,7 +185,6 @@ export class Database extends Playable {
   /**
    * Close the Database
    *
-   * @remarks
    * Welo database factory listens for the closed method to be called
    * to manage lifecycles of databases it's managing.
    */

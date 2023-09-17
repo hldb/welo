@@ -4,7 +4,7 @@ import { prefix } from '../interface.js'
 
 const protocol = `${prefix}static` as const
 
-export interface Config {
+export interface Config extends Record<string, unknown> {
   write: Array<string | Uint8Array>
 }
 

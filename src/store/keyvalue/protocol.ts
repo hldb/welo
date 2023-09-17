@@ -6,7 +6,7 @@ import { prefix } from '../interface.js'
 
 const protocol = `${prefix}keyvalue` as const
 
-export interface Config {
+export interface Config extends Record<string, unknown> {
   snap?: CID
 }
 

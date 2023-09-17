@@ -1,6 +1,6 @@
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '@/blocks/index.js'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 // import type { FetchOptions } from '@/utils/types.js'
 
 import { Address } from './address.js'
@@ -17,7 +17,6 @@ export { Address }
 /**
  * Database Manifest
  *
- * @remarks
  * Manifests contain setup configuration required to participate in a Database.
  *
  * @public
@@ -38,7 +37,6 @@ export class Manifest {
   /**
    * Get the Manifest Tag
    *
-   * @remarks
    * The manifest tag is a unique identifier for a database that is customizable.
    * It must be globally unique like the manifest address.
    * Since they may not exist in the encoded manifest this method can be used in any case.
@@ -63,31 +61,28 @@ export class Manifest {
   /**
    * Create a Manifest
    *
-   * @remarks
    * Create a manifest using the provided configuration.
    *
    * @param manifest - The manifest configuration to use
    * @returns
    */
   static async create (manifest: Create): Promise<Manifest> {
-    const block = await Blocks.encode({ value: manifest })
+    const block = await encodeCbor(manifest)
     return new Manifest(block)
   }
 
   /**
    * Fetch a Manifest
    *
-   * @remarks
    * Fetches the manifest for the address provided. The blocks api is used to fetch the data.
    *
    * @returns
    */
   static async fetch (
-    { blocks, address }: Fetch
+    { blockstore, address }: Fetch
   ): Promise<Manifest> {
-    const block: BlockView<ManifestData> = await blocks.get<ManifestData>(
-      address.cid
-    )
+    const bytes = await blockstore.get(address.cid)
+    const block = await decodeCbor<ManifestData>(bytes)
     const manifest = this.asManifest({ block })
 
     if (manifest === null) {
@@ -100,7 +95,6 @@ export class Manifest {
   /**
    * Optimistically coerce values into a Manifest
    *
-   * @remarks
    * Similar to `CID.asCID`.
    *
    * @param manifest - Anything you want to check is a Manifest

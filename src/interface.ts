@@ -8,7 +8,6 @@ import type { AccessProtocol } from '@/access/static/protocol.js'
 import type { EntryProtocol } from '@/entry/basal/protocol.js'
 import type { IdentityProtocol } from '@/identity/basal/protocol.js'
 import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { StoreProtocol } from '@/store/keyvalue/protocol.js'
 import type { Address, Manifest } from '@/manifest/index.js'
 import type { AccessInstance, AccessComponent } from '@/access/interface.js'
@@ -17,6 +16,7 @@ import type { StoreInstance, StoreComponent } from '@/store/interface'
 import type { Replica } from '@/replica/index.js'
 import type { Replicator, ReplicatorModule } from '@/replicator/interface'
 import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
+import type { Blockstore } from 'interface-blockstore'
 
 export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
@@ -46,8 +46,8 @@ export interface Components {
 export interface Config {
   replicators: ReplicatorModule[]
   datastore: Datastore
+  blockstore: Blockstore
   identity: IdentityInstance<any>
-  blocks: Blocks
   keychain: KeyChain
   ipfs: GossipHelia
   components: Components
@@ -97,8 +97,8 @@ export interface DbComponents {
 
 export interface DbOpen {
   datastore: Datastore
+  blockstore: Blockstore
   start?: boolean
-  blocks: Blocks
   replicators: ReplicatorModule[]
   ipfs: GossipHelia
   identity: IdentityInstance<any>

@@ -1,5 +1,5 @@
 import path from 'path'
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
@@ -10,7 +10,6 @@ import staticAccessProtocol from '@/access/static/protocol.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-import { Blocks } from '@/blocks/index.js'
 
 import getDatastore from './utils/level-datastore.js'
 import defaultManifest from './utils/default-manifest.js'
@@ -18,23 +17,24 @@ import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Blockstore } from 'interface-blockstore'
 
 const testName = 'database'
 
 describe(testName, () => {
   let ipfs: GossipHelia,
     libp2p: GossipLibp2p,
-    blocks: Blocks,
     database: Database,
     manifest: Manifest,
     identity: Identity,
     directory: string,
-    datastore: LevelDatastore
+    datastore: LevelDatastore,
+    blockstore: Blockstore
 
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
 
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
@@ -71,7 +71,7 @@ describe(testName, () => {
           manifest,
           identity,
           ipfs,
-          blocks,
+          blockstore,
           replicators: [], // empty replicator
           components: {
             store: keyvalueStore(),
@@ -86,7 +86,6 @@ describe(testName, () => {
 
   describe('instance', () => {
     it('exposes instance properties', () => {
-      assert.isOk(database.blocks)
       assert.isOk(database.identity)
       assert.isOk(database.replica)
       assert.isOk(database.manifest)

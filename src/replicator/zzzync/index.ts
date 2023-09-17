@@ -11,7 +11,6 @@ import { peerIdFromBytes } from '@libp2p/peer-id'
 
 import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
-import { Blocks } from '@/blocks/index.js'
 
 import protocol from './protocol.js'
 import type { Config, ReplicatorModule } from '../interface.js'
@@ -29,6 +28,7 @@ import type { EntryInstance } from '@/entry/interface'
 // import { parsedcid } from '@/utils/index.js'
 // import all from 'it-all'
 import drain from 'it-drain'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -38,7 +38,6 @@ export class ZzzyncReplicator extends Playable {
   readonly replica: Replica
   readonly datastore: Datastore
   readonly blockstore: Blockstore
-  readonly blocks: Blocks
   dcid: CID | null
 
   readonly w3: Required<W3>
@@ -47,7 +46,7 @@ export class ZzzyncReplicator extends Playable {
   #revisions: RevisionState
   #lastAdvertised: number
 
-  constructor ({ replica, blocks, ipfs, datastore, blockstore, provider, options }: Config & { options: Options }) {
+  constructor ({ replica, ipfs, datastore, blockstore, provider, options }: Config & { options: Options }) {
     if (options.createEphemeralLibp2p == null) {
       throw new Error('need createEphemeralLibp2p function to be supplied')
     }
@@ -78,7 +77,6 @@ export class ZzzyncReplicator extends Playable {
     super({ starting, stopping })
 
     this.replica = replica
-    this.blocks = blocks
     this.datastore = datastore
     this.blockstore = blockstore
     this.dcid = null
@@ -136,7 +134,7 @@ export class ZzzyncReplicator extends Playable {
 
     for await (const [k, v] of pailEntries(this.replica.graph.nodes.blockFetcher, root)) {
       const entry = await this.replica.components.entry.fetch({
-        blocks: this.blocks,
+        blockstore: this.blockstore,
         identity: this.replica.components.identity,
         cid: CID.parse(new Key(k).baseNamespace())
       })
@@ -149,7 +147,7 @@ export class ZzzyncReplicator extends Playable {
       }
     }
 
-    const rootBlock = await Blocks.encode({ value: replicaBlocks.map(({ cid }) => cid) })
+    const rootBlock = await encodeCbor(replicaBlocks.map(({ cid }) => cid))
 
     const { writer, out } = CarWriter.create(rootBlock.cid)
     const reader = CarReader.fromIterable(out)
@@ -205,9 +203,9 @@ export class ZzzyncReplicator extends Playable {
 
       const arrayBuffer = await response.arrayBuffer()
       const reader = await CarReader.fromBytes(new Uint8Array(arrayBuffer))
-      const block = await Blocks.decode<SignedEntry>({ bytes: reader._blocks[0].bytes })
+      const block = await decodeCbor<SignedEntry>(reader._blocks[0].bytes)
       const identity = this.replica.components.identity.asIdentity({
-        block: await Blocks.decode({ bytes: reader._blocks[1].bytes })
+        block: await decodeCbor(reader._blocks[1].bytes)
       })
 
       if (identity == null) {
@@ -224,6 +222,7 @@ export class ZzzyncReplicator extends Playable {
       try {
         value = await this.#zync.namer.resolve(peerId) as ShardLink
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e)
         return
       }
@@ -247,7 +246,7 @@ export class ZzzyncReplicator extends Playable {
           promises.push(fetchEntry(CID.parse(new Key(k).baseNamespace())))
         }
       }
-      await Promise.all(promises).then(async entries => await this.replica.add(entries))
+      await Promise.all(promises).then(async entries => { await this.replica.add(entries) })
     }
 
     const promises: Array<Promise<unknown>> = []

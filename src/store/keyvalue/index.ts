@@ -40,7 +40,6 @@ export class Keyvalue extends Playable implements StoreInstance {
 
   constructor ({
     manifest,
-    blocks,
     replica,
     datastore,
     blockstore
@@ -55,7 +54,7 @@ export class Keyvalue extends Playable implements StoreInstance {
 
       if (bytes != null) {
         const persistedRoot: PersistedRoot = decode(bytes)
-        this._index = await load(this.blockstore, persistedRoot.index)
+        this._index = load(this.blockstore, persistedRoot.index)
       } else {
         await this.latest()
       }

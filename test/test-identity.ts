@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
 import type { PublicKey } from '@libp2p/interface-keys'
 import { base32 } from 'multiformats/bases/base32'
@@ -6,18 +6,18 @@ import type { Datastore } from 'interface-datastore'
 import type { KeyChain } from '@libp2p/interface-keychain'
 
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
-import { Blocks } from '@/blocks/index.js'
 
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, kpi } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Blockstore } from 'interface-blockstore'
 
 const testName = 'basal identity'
 
 describe(testName, () => {
   let ipfs: Helia,
-    blocks: Blocks,
+    blockstore: Blockstore,
     identities: Datastore,
     keychain: KeyChain,
     identity: Identity
@@ -37,7 +37,7 @@ describe(testName, () => {
   before(async () => {
     const fixtTestPaths = getTestPaths(fixtPath, testName)
     ipfs = await getTestIpfs(fixtTestPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
 
     identities = await getTestIdentities(fixtTestPaths)
     const libp2p = await getTestLibp2p(ipfs)
@@ -102,8 +102,8 @@ describe(testName, () => {
 
     describe('.fetch', () => {
       it('fetches valid identity', async () => {
-        await blocks.put(identity.block)
-        const _identity = await identityModule.fetch({ blocks, auth: identity.auth })
+        await blockstore.put(identity.block.cid, identity.block.bytes)
+        const _identity = await identityModule.fetch({ blockstore, auth: identity.auth })
         assert.notStrictEqual(_identity, identity)
         assert.strictEqual(
           _identity.block.cid.toString(base32),
@@ -169,7 +169,7 @@ describe(testName, () => {
           kpi
         })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
 
       it('exports an encoded identity/keypair', async () => {
@@ -191,7 +191,7 @@ describe(testName, () => {
           keychain: tempKeychain
         })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 
@@ -228,7 +228,7 @@ describe(testName, () => {
         const data = new Uint8Array([1])
         const sig = signedEmpty
         const promise = identityModule.verify(_identity, data, sig)
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
   })
@@ -268,7 +268,7 @@ describe(testName, () => {
         })) as Identity
         const data = dataEmpty
         const promise = _identity.sign(data)
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 

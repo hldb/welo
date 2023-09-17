@@ -1,4 +1,5 @@
-import { assert } from './utils/chai.js'
+/* eslint-disable max-nested-callbacks */
+import { assert, expect } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
@@ -8,7 +9,6 @@ import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Replica } from '@/replica/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
@@ -22,13 +22,15 @@ import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Blockstore } from 'interface-blockstore'
+import { encodeCbor } from '@/utils/block.js'
 
 const testName = 'replica'
 
 describe(testName, () => {
   let ipfs: Helia,
     tempIpfs: Helia,
-    blocks: Blocks,
+    blockstore: Blockstore,
     replica: Replica,
     manifest: Manifest,
     access: StaticAccess,
@@ -46,7 +48,7 @@ describe(testName, () => {
     datastore = await getDatastore(testPaths.replica)
     await datastore.open()
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
 
     const identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
@@ -54,7 +56,7 @@ describe(testName, () => {
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 
-    await blocks.put(identity.block)
+    await blockstore.put(identity.block.cid, identity.block.bytes)
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity),
@@ -87,9 +89,8 @@ describe(testName, () => {
       it('returns a new instance of a replica', async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(`${testPaths.replica}/temp`)),
-          blockstore: ipfs.blockstore,
+          blockstore,
           manifest,
-          blocks,
           access,
           identity,
           components: {
@@ -108,7 +109,6 @@ describe(testName, () => {
 
     it('exposes instance properties', () => {
       assert.isOk(replica.manifest)
-      assert.isOk(replica.blocks)
       assert.isOk(replica.access)
       assert.isOk(replica.identity)
       assert.isOk(replica.components.entry)
@@ -206,9 +206,8 @@ describe(testName, () => {
       before(async () => {
         replica = new Replica({
           datastore: new NamespaceDatastore(datastore, new Key(testPaths.replica)),
-          blockstore: ipfs.blockstore,
+          blockstore,
           manifest,
-          blocks,
           access,
           identity,
           components: {
@@ -263,14 +262,14 @@ describe(testName, () => {
         // @ts-expect-error
         const promise = replica.traverse({ direction })
 
-        await assert.isRejected(promise)
+        await expect(promise).to.eventually.be.rejected()
       })
     })
 
     describe('data persistence', () => {
       it('writes the graph root to disk on update', async () => {
         const rootHashKey = new Key('rootHash')
-        const block = await blocks.encode({ value: replica.graph.root })
+        const block = await encodeCbor(replica.graph.root)
 
         await datastore.close()
         await stop(replica)
@@ -294,9 +293,8 @@ describe(testName, () => {
 
         const replica = new Replica({
           datastore: new NamespaceDatastore(newDatastore, new Key(testPaths.replica)),
-          blockstore: ipfs.blockstore,
+          blockstore,
           manifest,
-          blocks,
           access,
           identity,
           components: {

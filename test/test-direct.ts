@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
 import type { PeerId } from '@libp2p/interface-peer-id'
@@ -6,7 +6,7 @@ import type { Message } from '@libp2p/interface-pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { GossipLibp2p, GossipHelia } from '@/interface'
 
-import { Direct, DirectEvents } from '@/pubsub/direct.js'
+import { Direct } from '@/pubsub/direct.js'
 
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
@@ -67,7 +67,7 @@ describe(testName, () => {
       assert.strictEqual(direct.libp2p, libp2p1)
       assert.isOk(direct.topic.startsWith(prefix))
       assert.isOk(direct.isOpen)
-      assert.isOk(direct instanceof EventEmitter<DirectEvents>)
+      assert.isOk(direct instanceof EventEmitter)
     })
 
     describe('events', () => {
@@ -98,25 +98,23 @@ describe(testName, () => {
 
         let listener1, listener2, listener3
         const promise = Promise.all([
-          new Promise((resolve) =>
-            peer1.addEventListener('peered', resolve, { once: true })
+          new Promise((resolve) => { peer1.addEventListener('peered', resolve, { once: true }) }
           ),
-          new Promise((resolve) =>
-            peer2.addEventListener('peered', resolve, { once: true })
+          new Promise((resolve) => { peer2.addEventListener('peered', resolve, { once: true }) }
           ),
           new Promise<void>((resolve) => {
             let i: number = 0
-            listener1 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            listener1 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
             libp2p1.services.pubsub.addEventListener('subscription-change', listener1)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
-            listener2 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            listener2 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
             libp2p2.services.pubsub.addEventListener('subscription-change', listener2)
           }),
           new Promise<void>((resolve) => {
             let i: number = 0
-            listener3 = () => !Number.isNaN(i++) && i === 2 && resolve()
+            listener3 = () => { !Number.isNaN(i++) && i === 2 && resolve() }
             libp2p3.services.pubsub.addEventListener('subscription-change', listener3)
           })
         ])
@@ -136,11 +134,9 @@ describe(testName, () => {
       it('emits message when receiving messages from remote peer', async () => {
         let listener
         const promise = Promise.all([
-          new Promise((resolve) =>
-            peer1.addEventListener('message', resolve, { once: true })
+          new Promise((resolve) => { peer1.addEventListener('message', resolve, { once: true }) }
           ),
-          new Promise((resolve) =>
-            peer2.addEventListener('message', resolve, { once: true })
+          new Promise((resolve) => { peer2.addEventListener('message', resolve, { once: true }) }
           ),
           new Promise((resolve) => {
             listener = (): void => {
@@ -172,9 +168,9 @@ describe(testName, () => {
         assert.strictEqual(peer2.isOpen(), true)
 
         await Promise.all([
-          new Promise((resolve) =>
-            peer2.addEventListener('unpeered', resolve, { once: true })
+          new Promise((resolve) => { peer2.addEventListener('unpeered', resolve, { once: true }) }
           ),
+          // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
           peer1.stop()
         ])
 
@@ -182,9 +178,9 @@ describe(testName, () => {
         assert.strictEqual(peer2.isOpen(), false)
 
         await Promise.all([
-          new Promise((resolve) =>
-            peer2.addEventListener('peered', resolve, { once: true })
+          new Promise((resolve) => { peer2.addEventListener('peered', resolve, { once: true }) }
           ),
+          // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
           peer1.start()
         ])
 

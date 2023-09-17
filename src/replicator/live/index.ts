@@ -12,20 +12,20 @@ import { Monitor, PeerStatusChangeData } from '@/pubsub/monitor.js'
 import { Direct } from '@/pubsub/direct.js'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
 import type { Config, ReplicatorModule } from '../interface.js'
 import * as Advert from './message.js'
 import protocol from './protocol.js'
+import type { Blockstore } from 'interface-blockstore'
 
 const getSharedChannelTopic = (manifest: Manifest): string => `${protocol}${cidstring(manifest.address.cid)}`
 
 export class LiveReplicator extends Playable {
   readonly ipfs: GossipHelia
+  readonly blockstore: Blockstore
   readonly manifest: Manifest
-  readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
@@ -42,7 +42,7 @@ export class LiveReplicator extends Playable {
   constructor ({
     ipfs,
     replica,
-    blocks
+    blockstore
   }: Config) {
     const starting = async (): Promise<void> => {
       this.shared.addEventListener('peer-join', this.#onPeerJoin) // join the direct channel topic for that peer and wait for them to join
@@ -73,7 +73,7 @@ export class LiveReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
-    this.blocks = blocks
+    this.blockstore = blockstore
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
@@ -123,7 +123,7 @@ function onHeadsMessage (
     const cids = message.value.heads
 
     const load = loadEntry({
-      blocks: this.blocks,
+      blockstore: this.blockstore,
       entry: this.components.entry,
       identity: this.components.identity
     })

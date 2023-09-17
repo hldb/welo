@@ -20,7 +20,6 @@ const parse = function (address: Address | string): CID {
 /**
  * Manifest Address
  *
- * @remarks
  * May also be referred to as the database address.
  * It is a CID with a prefix that says it's an hldb manifest.
  *
@@ -32,7 +31,6 @@ export class Address {
   /**
    * Optimistically coerce values into an Address
    *
-   * @remarks
    * Similar to `CID.asCID`.
    *
    * @param address - Anything you want to check is an Address
@@ -83,7 +81,6 @@ export class Address {
   /**
    * Checks if two addresses are equal
    *
-   * @remarks
    * Similar to `CID.equals`.
    *
    * @param address - another Address

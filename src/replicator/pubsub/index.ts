@@ -6,7 +6,6 @@ import { CID } from 'multiformats/cid'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { Replica, ReplicaEvents } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Message, PubSub } from '@libp2p/interface-pubsub'
@@ -16,7 +15,6 @@ export const protocol = `${prefix}pubsub/1.0.0/` as const
 export class PubsubReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly manifest: Manifest
-  readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
@@ -26,8 +24,7 @@ export class PubsubReplicator extends Playable {
 
   constructor ({
     ipfs,
-    replica,
-    blocks
+    replica
   }: Config) {
     const starting = async (): Promise<void> => {
       this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
@@ -46,7 +43,6 @@ export class PubsubReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
-    this.blocks = blocks
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access

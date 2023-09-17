@@ -56,8 +56,9 @@ async function main (): Promise<void> {
    */
   console.log('traversing unordered entries')
   console.time('unordered traversal')
-  const { blocks, access, components: { entry, identity } } = db.replica
-  const load = loadEntry({ blocks, entry, identity })
+  const blockstore = ipfs.blockstore
+  const { access, components: { entry, identity } } = db.replica
+  const load = loadEntry({ blockstore, entry, identity })
   const links = dagLinks({ graph: { has: (): boolean => false }, access })
   await traverser({ cids: (await all(db.replica.heads.queryKeys({}))).map(key => parsedcid(key.baseNamespace())), load, links })
   console.timeEnd('unordered traversal')

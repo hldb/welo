@@ -1,10 +1,10 @@
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
-import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { ComponentProtocol } from '@/interface.js'
 import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
+import type { Blockstore } from 'interface-blockstore'
 
 export interface EntryData {
   tag: Uint8Array
@@ -24,7 +24,7 @@ export interface Create extends EntryData {
 }
 
 export interface Fetch {
-  blocks: Blocks
+  blockstore: Blockstore
   identity: IdentityComponent<any>
   cid: CID
   timeout?: number

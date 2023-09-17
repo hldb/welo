@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
 import { Key } from 'interface-datastore'
@@ -6,7 +6,6 @@ import { NamespaceDatastore } from 'datastore-core'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 
 import { zzzyncReplicator, type ZzzyncReplicator } from '@/replicator/zzzync/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { Replica } from '@/replica/index.js'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -34,6 +33,7 @@ const noToken = token == null
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
+  // eslint-disable-next-line no-console
   console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
   _describe = describe.skip
 } else {
@@ -92,9 +92,6 @@ _describe(testName, () => {
     libp2p1 = ipfs1.libp2p
     libp2p2 = ipfs2.libp2p
 
-    const blocks1 = new Blocks(ipfs1)
-    const blocks2 = new Blocks(ipfs2)
-
     const identities1 = await getTestIdentities(testPaths1)
     const identities2 = await getTestIdentities(testPaths2)
 
@@ -122,7 +119,6 @@ _describe(testName, () => {
       manifest,
       datastore: datastore1,
       blockstore: ipfs1.blockstore,
-      blocks: blocks1,
       access,
       identity: identity1,
       components: {
@@ -134,7 +130,6 @@ _describe(testName, () => {
       manifest,
       datastore: datastore2,
       blockstore: ipfs2.blockstore,
-      blocks: blocks2,
       access,
       identity: identity2,
       components: {
@@ -154,14 +149,12 @@ _describe(testName, () => {
 
     replicator1 = replicator.create({
       ipfs: ipfs1,
-      blocks: blocks1,
       replica: replica1,
       datastore: datastore1,
       blockstore: ipfs1.blockstore
     })
     replicator2 = replicator.create({
       ipfs: ipfs2,
-      blocks: blocks2,
       replica: replica2,
       datastore: datastore2,
       blockstore: ipfs2.blockstore

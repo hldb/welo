@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert, expect } from 'aegir/chai'
 import { base32 } from 'multiformats/bases/base32'
 import { start } from '@libp2p/interfaces/startable'
 
@@ -82,8 +82,7 @@ describe(testName, () => {
           access: emptyaccess
         })
         const access = Access.create({ manifest })
-        const promise = access.start()
-        await assert.isRejected(promise)
+        await expect(access.start()).to.eventually.be.rejected()
       })
     })
   })

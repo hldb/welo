@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0](https://github.com/hldb/welo/compare/v2.2.3...v2.3.0) (2023-07-18)
+
+
+### Features
+
+* add writes method to replica ([c2a474f](https://github.com/hldb/welo/commit/c2a474f6617da42d9b6dac43f7b45c28a6eff2b6))
+* newEntry method added to replica ([4e5f918](https://github.com/hldb/welo/commit/4e5f918f274980435120ce5a384d465d56dcef38))
+
+
+### Bug Fixes
+
+* type error in replica.writes ([1ddd31c](https://github.com/hldb/welo/commit/1ddd31cdb9ddfed9712f7e8240defd75f982d756))
+* zzzync replicator improvements ([a20c2ed](https://github.com/hldb/welo/commit/a20c2edf2d5cf804a3d9e350d36445267ffc7148))
+
 ## [2.2.3](https://github.com/hldb/welo/compare/v2.2.2...v2.2.3) (2023-07-15)
 
 

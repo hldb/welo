@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { liveReplicator, LiveReplicator } from '@/replicator/live/index.js'
 import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest } from './utils/replicator.js'
 

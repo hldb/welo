@@ -6,7 +6,6 @@ import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
-import type { Blocks } from '@/blocks/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Stream, Connection } from '@libp2p/interface-connection'
@@ -28,13 +27,12 @@ export interface Options {
 export class BootstrapReplicator extends Playable {
   readonly ipfs: GossipHelia
   readonly manifest: Manifest
-  readonly blocks: Blocks
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
   private readonly options: Options
 
-  constructor ({ ipfs, replica, blocks }: Config, options: Partial<Options> = {}) {
+  constructor ({ ipfs, replica }: Config, options: Partial<Options> = {}) {
     const starting = async (): Promise<void> => {
       // Handle direct head requests.
       await this.libp2p.handle(
@@ -57,7 +55,6 @@ export class BootstrapReplicator extends Playable {
     super({ starting, stopping })
 
     this.ipfs = ipfs
-    this.blocks = blocks
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
@@ -143,6 +140,7 @@ export class BootstrapReplicator extends Playable {
       localPeerId: this.libp2p.peerId
     })
 
+    // eslint-disable-next-line no-console
     const pipePromise = he.pipe().catch(console.error)
 
     if (!reverseSync) {

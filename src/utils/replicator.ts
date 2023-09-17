@@ -29,7 +29,7 @@ export async function addHeads (
   components: Pick<DbComponents, 'entry' | 'identity'>
 ): Promise<void> {
   const load = loadEntry({
-    blocks: replica.blocks,
+    blockstore: replica.blockstore,
     entry: components.entry,
     identity: components.identity
   })

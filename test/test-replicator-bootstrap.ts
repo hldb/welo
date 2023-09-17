@@ -1,4 +1,4 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { bootstrapReplicator, BootstrapReplicator } from '@/replicator/bootstrap/index.js'
 import { SetupComponents, setup, teardown } from './utils/replicator.js'

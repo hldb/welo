@@ -1,8 +1,7 @@
-import { assert } from './chai.js'
+import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
 import { StaticAccess as Access } from '@/access/static/index.js'
-import { Blocks } from '@/blocks/index.js'
 import { NamespaceDatastore } from 'datastore-core'
 import { Replica } from '@/replica/index.js'
 import getDatastore from './level-datastore.js'
@@ -52,9 +51,6 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
 
   const addr2 = await getMultiaddr(ipfs2)
 
-  const blocks1 = new Blocks(ipfs1)
-  const blocks2 = new Blocks(ipfs2)
-
   const identities1 = await getTestIdentities(testPaths1)
   const identities2 = await getTestIdentities(testPaths2)
 
@@ -85,7 +81,6 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
     manifest,
     datastore: datastore1,
     blockstore: ipfs1.blockstore,
-    blocks: blocks1,
     access,
     identity: identity1,
     components: {
@@ -97,7 +92,6 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
     manifest,
     datastore: datastore2,
     blockstore: ipfs2.blockstore,
-    blocks: blocks2,
     access,
     identity: identity2,
     components: {
@@ -109,14 +103,12 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
 
   const replicator1 = replicatorModule.create({
     ipfs: ipfs1,
-    blocks: blocks1,
     replica: replica1,
     datastore: datastore1,
     blockstore: ipfs1.blockstore
   })
   const replicator2 = replicatorModule.create({
     ipfs: ipfs2,
-    blocks: blocks2,
     replica: replica2,
     datastore: datastore2,
     blockstore: ipfs2.blockstore
@@ -154,7 +146,7 @@ export const instanceSetup = async <R extends Replicator>(components: SetupCompo
   await start(components.replicator1, components.replicator2)
   await Promise.all([
     components.libp2p1.dial(components.addr2),
-    new Promise(resolve => components.libp2p2.addEventListener('peer:connect', resolve, { once: true }))
+    new Promise(resolve => { components.libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
   ])
 }
 
@@ -185,8 +177,7 @@ export const liveReplicationTest = async ({ replica1, replica2 }: Pick<SetupComp
   const promise = replica1.write(new Uint8Array())
 
   await Promise.all([
-    new Promise((resolve) =>
-      replica2.events.addEventListener('update', resolve, { once: true })
+    new Promise((resolve) => { replica2.events.addEventListener('update', resolve, { once: true }) }
     ),
     promise
   ])

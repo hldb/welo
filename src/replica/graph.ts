@@ -321,6 +321,7 @@ const denied = 'denied'
 
 type Reason = typeof missing | typeof denied
 
+// eslint-disable-next-line complexity
 export async function remove (
   state: GraphState,
   cid: CID | string,

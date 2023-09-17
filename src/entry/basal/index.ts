@@ -1,7 +1,7 @@
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 
-import { Blocks } from '@/blocks/index.js'
+import { encodeCbor, decodeCbor } from '@/utils/block.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 
 import protocol from './protocol.js'
@@ -88,17 +88,16 @@ const asEntry = async (entry: AsEntry<unknown>): Promise<Entry | null> => {
 
   const asSigned = block as BlockView<SignedEntry>
 
-  const data: BlockView<EntryData> = await Blocks.decode({
-    bytes: asSigned.value.data
-  })
+  const data = await decodeCbor<EntryData>(asSigned.value.data)
 
   return new Entry({ block: asSigned, data, identity })
 }
 
-const fetch = async ({ blocks, identity, cid }: Fetch): Promise<Entry> => {
-  const block: BlockView<SignedEntry> = await blocks.get<SignedEntry>(cid)
+const fetch = async ({ blockstore, identity, cid }: Fetch): Promise<Entry> => {
+  const bytes = await blockstore.get(cid)
+  const block = await decodeCbor<SignedEntry>(bytes)
   const { auth } = block.value
-  const identityInstance = await identity.fetch({ blocks, auth })
+  const identityInstance = await identity.fetch({ blockstore, auth })
 
   const entry = await asEntry({ block, identity: identityInstance })
 
@@ -120,16 +119,12 @@ const create = async ({
   next,
   refs
 }: Create): Promise<Entry> => {
-  const data: BlockView<EntryData> = await Blocks.encode({
-    value: { tag, payload, next, refs }
-  })
+  const data = await encodeCbor({ tag, payload, next, refs })
 
   const auth = identity.auth
   const sig = await identity.sign(data.bytes)
 
-  const block: BlockView<SignedEntry> = await Blocks.encode({
-    value: { auth, data: data.bytes, sig }
-  })
+  const block = await encodeCbor({ auth, data: data.bytes, sig })
 
   return new Entry({ block, data, identity })
 }

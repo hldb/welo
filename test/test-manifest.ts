@@ -1,8 +1,7 @@
-import { assert } from './utils/chai.js'
+import { assert } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
 import type { BlockView } from 'multiformats/interface'
 
-import { Blocks } from '@/blocks/index.js'
 import { Manifest, Address } from '@/manifest/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
@@ -11,11 +10,12 @@ import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
+import type { Blockstore } from 'interface-blockstore'
 
 const testName = 'manifest'
 
 describe(testName, () => {
-  let ipfs: Helia, blocks: Blocks, manifest: Manifest
+  let ipfs: Helia, blockstore: Blockstore, manifest: Manifest
 
   const config = {
     name: 'test',
@@ -37,7 +37,7 @@ describe(testName, () => {
   before(async () => {
     const testPaths = getTestPaths(tempPath, testName)
     ipfs = await getTestIpfs(testPaths, offlineIpfsOptions)
-    blocks = new Blocks(ipfs)
+    blockstore = ipfs.blockstore
   })
 
   after(async () => {
@@ -82,9 +82,9 @@ describe(testName, () => {
 
     describe('.fetch', () => {
       it('returns a manifest from an address', async () => {
-        await blocks.put(manifest.block)
+        await blockstore.put(manifest.block.cid, manifest.block.bytes)
         const _manifest = await Manifest.fetch({
-          blocks,
+          blockstore,
           address: manifest.address
         })
         // ipfs block api returns Buffers in nodejs which become block.bytes

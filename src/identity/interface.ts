@@ -3,9 +3,9 @@ import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'
 
-import type { Blocks } from '@/blocks/index.js'
 import { HLDB_PREFIX } from '@/utils/constants.js'
 import type { ComponentProtocol } from '@/interface.js'
+import type { Blockstore } from 'interface-blockstore'
 
 export type Gen = string
 
@@ -16,7 +16,7 @@ export interface Get {
 }
 
 export interface Fetch {
-  blocks: Blocks
+  blockstore: Blockstore
   auth: CID
 }
 
