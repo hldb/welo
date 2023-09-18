@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
@@ -24,11 +25,12 @@ import { createLibp2pOptions } from './utils/libp2p-options.js'
 import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { isBrowser } from 'wherearewe'
 
 const testName = 'zzzync-replicator'
-const token = process.env.W3_TOKEN as string
+const token = process.env.W3_TOKEN
 
-const noToken = token == null
+const noToken = typeof token === 'string' && token.length === 0
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
@@ -37,6 +39,10 @@ if (noToken) {
   _describe = describe.skip
 } else {
   _describe = describe
+}
+
+if (isBrowser) {
+  _describe = describe.skip
 }
 
 _describe(testName, () => {
@@ -134,6 +140,10 @@ _describe(testName, () => {
     })
     await start(replica1, replica2)
 
+    if (token == null) {
+      throw new Error('w3 token is undefined')
+    }
+
     const client = new Web3Storage({ token })
     const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {
       const libp2p = await createLibp2p(await createLibp2pOptions({ peerId }))
@@ -176,13 +186,13 @@ _describe(testName, () => {
       assert.isOk(replicator.upload)
     })
 
-    it.skip('uploads and advertises replica data', async () => {
+    it('uploads and advertises replica data', async () => {
       await replica1.write(new Uint8Array())
 
       await replicator1.upload()
     })
 
-    it.skip('downloads and merges replica data', async () => {
+    it('downloads and merges replica data', async () => {
       await new Promise(resolve => setTimeout(resolve, 2000))
       await replicator2.download()
 
