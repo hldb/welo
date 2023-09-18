@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/hldb/welo/compare/v2.3.0...v3.0.0) (2023-09-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove Blocks api
+
+### Code Refactoring
+
+* remove Blocks api ([ec67ea4](https://github.com/hldb/welo/commit/ec67ea4a1be8fb5cf937d2a718717131ecf257f8)), closes [#79](https://github.com/hldb/welo/issues/79)
+
 ## [2.3.0](https://github.com/hldb/welo/compare/v2.2.3...v2.3.0) (2023-07-18)
 
 

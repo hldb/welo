@@ -1,6 +1,6 @@
 {
   "name": "welo",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "peer-to-peer, collaborative states using merkle-crdts",
   "license": "Apache-2.0 OR MIT",
   "engines": {
