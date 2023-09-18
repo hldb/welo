@@ -208,6 +208,8 @@ export class HeadsExchange {
         case MessageType.VERIFY_RESPONSE:
           this.handleVerifyResponse(message)
           break
+        default:
+          throw new Error('unexpected default case match')
       }
     }
   }

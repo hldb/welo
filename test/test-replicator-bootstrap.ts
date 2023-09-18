@@ -8,6 +8,7 @@ const testName = 'bootstrap-replicator'
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (isBrowser) {
+  // eslint-disable-next-line no-console
   console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
   _describe = describe.skip
 } else {
@@ -37,7 +38,7 @@ _describe(testName, () => {
 
       await Promise.all([
         components.libp2p1.dial(components.addr2),
-        new Promise(resolve => components.libp2p2.addEventListener('peer:connect', resolve, { once: true }))
+        new Promise(resolve => { components.libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
       ])
 
       await start(components.replicator2)
