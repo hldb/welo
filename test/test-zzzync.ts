@@ -30,7 +30,7 @@ import { isBrowser } from 'wherearewe'
 const testName = 'zzzync-replicator'
 const token = process.env.W3_TOKEN
 
-const noToken = typeof token === 'string' && Boolean(token.length)
+const noToken = typeof token === 'string' && token.length === 0
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
