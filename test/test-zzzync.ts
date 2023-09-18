@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
 import type { LevelDatastore } from 'datastore-level'
@@ -27,9 +28,9 @@ import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { isBrowser } from 'wherearewe'
 
 const testName = 'zzzync-replicator'
-const token = process.env.W3_TOKEN as string
+const token = process.env.W3_TOKEN
 
-const noToken = token == null
+const noToken = typeof token === 'string' && Boolean(token.length)
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
@@ -138,6 +139,10 @@ _describe(testName, () => {
       }
     })
     await start(replica1, replica2)
+
+    if (token == null) {
+      throw new Error('w3 token is undefined')
+    }
 
     const client = new Web3Storage({ token })
     const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {

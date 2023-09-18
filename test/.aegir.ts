@@ -4,7 +4,7 @@ import { getConfig } from './utils/circuit-relay.js'
 
 interface BeforeResult {
   env: {
-    W3_TOKEN: string | null
+    W3_TOKEN: string
   },
   libp2p: Libp2p
 }
@@ -27,7 +27,7 @@ export default {
 
       return {
         env: {
-          W3_TOKEN: null ?? token
+          W3_TOKEN: token || ''
         },
         libp2p
       }
