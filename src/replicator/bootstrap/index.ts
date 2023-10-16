@@ -116,14 +116,14 @@ export class BootstrapReplicator extends Playable {
       promises.push(Promise.resolve().then(async () => {
         if (!await this.libp2p.peerStore.has(peer.id)) {
           await this.libp2p.peerStore.save(peer.id, peer)
-
-          // We need to dial so that libp2p can update multiaddrs.
-          await this.libp2p.dial(peer.id)
         }
+
+        // We need to dial so that libp2p can update multiaddrs.
+        await this.libp2p.dial(peer.id)
 
         const stream = await this.libp2p.dialProtocol(peer.id, this.protocol)
         await this.exchange(stream, peer.id)
-      }))
+      }).catch(() => {}))
     }
 
     // Don't really care if individual head syncs fail.
