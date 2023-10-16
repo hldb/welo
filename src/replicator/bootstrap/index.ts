@@ -102,7 +102,11 @@ export class BootstrapReplicator extends Playable {
   }
 
   private async handle ({ stream, connection }: { stream: Stream, connection: Connection }): Promise<void> {
-    await this.exchange(stream, connection.remotePeer, this.options.reverseSync)
+    try {
+      await this.exchange(stream, connection.remotePeer, this.options.reverseSync)
+    } catch (error) {
+      // Ignore
+    }
   }
 
   private async bootstrap (): Promise<void> {
