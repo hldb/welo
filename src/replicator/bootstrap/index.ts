@@ -150,7 +150,7 @@ export class BootstrapReplicator extends Playable {
     if (!reverseSync) {
       await pipePromise
       he.close()
-      stream.close()
+      await stream.close()
       return
     }
 
@@ -174,7 +174,7 @@ export class BootstrapReplicator extends Playable {
     }
 
     he.close()
-    stream.close()
+    await stream.close()
   }
 }
 
