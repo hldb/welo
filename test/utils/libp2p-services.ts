@@ -1,5 +1,5 @@
-
-import { gossipsub, type GossipSub } from '@chainsafe/libp2p-gossipsub'
+import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import type { PubSub } from '@libp2p/interface-pubsub'
 import { kadDHT, type DualKadDHT } from '@libp2p/kad-dht'
 import { identifyService } from 'libp2p/identify'
 import { ipnsSelector } from 'ipns/selector'
@@ -9,7 +9,7 @@ import type { DefaultIdentifyService } from 'libp2p/identify/identify'
 
 export interface Services extends ServiceMap {
   identify: DefaultIdentifyService
-  pubsub: GossipSub
+  pubsub: PubSub
   dht: DualKadDHT
 }
 
