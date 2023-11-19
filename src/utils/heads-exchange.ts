@@ -9,7 +9,7 @@ import { consume } from 'streaming-iterables'
 import { pushable, Pushable } from 'it-pushable'
 import type { Uint8ArrayList } from 'uint8arraylist'
 import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Stream } from '@libp2p/interface-connection'
+import type { Stream } from '@libp2p/interface/connection'
 
 const uint8ArrayToBuffer = (a: Uint8Array): ArrayBuffer => a.buffer.slice(a.byteOffset, a.byteLength + a.byteOffset)
 
@@ -135,7 +135,7 @@ export class HeadsExchange {
   }
 
   async verify (): Promise<boolean> {
-    if (this.stream.stat.timeline.close != null) {
+    if (this.stream.timeline.close != null) {
       throw new Error('stream is closed')
     }
 
@@ -155,7 +155,7 @@ export class HeadsExchange {
   }
 
   async getHeads (seed?: number): Promise<CID[]> {
-    if (this.stream.stat.timeline.close != null) {
+    if (this.stream.timeline.close != null) {
       throw new Error('stream is closed')
     }
 
