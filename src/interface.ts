@@ -1,5 +1,5 @@
 import type { Helia } from '@helia/interface'
-import type { Libp2p, ServiceMap } from '@libp2p/interface-libp2p'
+import type { Libp2p, ServiceMap } from '@libp2p/interface'
 import type { PubSub } from '@libp2p/interface-pubsub'
 import type { Datastore } from 'interface-datastore'
 import type { KeyChain } from '@libp2p/interface-keychain'

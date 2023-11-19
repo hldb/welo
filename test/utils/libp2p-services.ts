@@ -4,7 +4,7 @@ import { kadDHT, type DualKadDHT } from '@libp2p/kad-dht'
 import { identifyService } from 'libp2p/identify'
 import { ipnsSelector } from 'ipns/selector'
 import { ipnsValidator } from 'ipns/validator'
-import type { ServiceMap } from '@libp2p/interface-libp2p'
+import type { ServiceMap } from '@libp2p/interface'
 import type { DefaultIdentifyService } from 'libp2p/identify/identify'
 
 export interface Services extends ServiceMap {
