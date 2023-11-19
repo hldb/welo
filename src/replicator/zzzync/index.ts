@@ -1,8 +1,9 @@
 import type { Web3Storage } from 'web3.storage'
+import type { Libp2p } from '@libp2p/interface'
 import W3NameService from 'w3name/service'
 import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
-import { w3name as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3name'
-import { dht as advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers/dht'
+import { w3Namer as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3'
+import { dhtAdvertiser as advertiser, CreateEphemeralKadDHT } from '@tabcat/zzzync/advertisers/dht'
 import { CID } from 'multiformats/cid'
 import { CarReader } from '@ipld/car/reader'
 import { CarWriter } from '@ipld/car/writer'
@@ -20,14 +21,10 @@ import type { Blockstore } from 'interface-blockstore'
 import { entries as pailEntries } from '@alanshaw/pail'
 import { ShardBlockView, ShardFetcher, ShardLink } from '@alanshaw/pail/shard'
 import { Datastore, Key } from 'interface-datastore'
-// import { CodeError } from '@libp2p/interfaces/errors'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { AnyLink } from '@alanshaw/pail/link'
 import type { SignedEntry } from '@/entry/basal'
 import type { EntryInstance } from '@/entry/interface'
-// import { parsedcid } from '@/utils/index.js'
-// import all from 'it-all'
-import drain from 'it-drain'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const ipfsNamespace = '/ipfs/'
@@ -86,11 +83,12 @@ export class ZzzyncReplicator extends Playable {
     this.#revisions = options.revisions ?? revisionState(datastore)
     this.#lastAdvertised = 0
 
-    const libp2p = ipfs.libp2p as unknown as Libp2pWithDHT
+    const libp2p = ipfs.libp2p as unknown as Libp2p<Awaited<ReturnType<CreateEphemeralKadDHT>>>
 
     this.#zync = zzzync(
       namer(this.w3.name, this.#revisions),
-      advertiser(libp2p, options.createEphemeralLibp2p, { scope: options.scope })
+      advertiser(libp2p.services.dht, options.createEphemeralLibp2p),
+      ipfs.blockstore
     )
 
     this.#provider = null
@@ -166,7 +164,7 @@ export class ZzzyncReplicator extends Playable {
 
     const now = Date.now()
     if (now > (this.#lastAdvertised + republishInterval)) {
-      await drain(this.#zync.advertiser.collaborate(this.dcid, this.#provider))
+      await this.#zync.advertiser.collaborate(this.dcid, this.#provider)
       this.#lastAdvertised = now
     }
   }
@@ -177,21 +175,14 @@ export class ZzzyncReplicator extends Playable {
     }
 
     const providers: Map<string, Ed25519PeerId> = new Map()
-    for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
-      if (
-        event.name === 'PROVIDER' ||
-        (event.name === 'PEER_RESPONSE' && event.messageName === 'GET_PROVIDERS')
-      ) {
-        for (const provider of event.providers) {
-          if (provider.id.type !== 'Ed25519') {
-            continue
-          }
-          const peerIdString = provider.id.toString()
-          !providers.has(peerIdString) && providers.set(peerIdString, provider.id)
-        }
-        // findProviders hangs
-        break
+    for await (const provider of this.#zync.advertiser.findCollaborators(this.dcid)) {
+      if (provider.type !== 'Ed25519') {
+        continue
       }
+      const peerIdString = provider.toString()
+      !providers.has(peerIdString) && providers.set(peerIdString, provider)
+      // findProviders hangs
+      break
     }
 
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
@@ -285,7 +276,7 @@ interface W3 {
 interface Options {
   w3: W3
   revisions?: RevisionState
-  createEphemeralLibp2p: CreateEphemeralLibp2p
+  createEphemeralLibp2p: CreateEphemeralKadDHT
   scope?: 'lan' | 'wan'
 }
 

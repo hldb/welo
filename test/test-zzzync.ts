@@ -19,10 +19,10 @@ import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import { Web3Storage } from 'web3.storage'
+import type { CreateEphemeralKadDHT } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import type { Ed25519PeerId, PeerId } from '@libp2p/interface-peer-id'
 import { createLibp2p, Libp2pOptions } from 'libp2p'
 import { createLibp2pOptions } from './utils/libp2p-options.js'
-import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { isBrowser } from 'wherearewe'
@@ -145,10 +145,10 @@ _describe(testName, () => {
     }
 
     const client = new Web3Storage({ token })
-    const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {
+    const createEphemeralLibp2p: CreateEphemeralKadDHT = async (peerId: PeerId) => {
       const libp2p = await createLibp2p(await createLibp2pOptions({ peerId }))
 
-      return { libp2p }
+      return libp2p.services
     }
     const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })
 
