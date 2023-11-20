@@ -1,4 +1,4 @@
-import type { KeyChain } from '@libp2p/interface-keychain'
+import type { KeyChain } from '@libp2p/interface/keychain'
 import type { BlockView } from 'multiformats/interface'
 import type { CID } from 'multiformats/cid'
 import type { Datastore } from 'interface-datastore'

@@ -9,8 +9,8 @@ import type { Manifest } from '@/manifest/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 import type { Stream, Connection } from '@libp2p/interface/connection'
-import type { PeerInfo } from '@libp2p/interface-peer-info'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerInfo } from '@libp2p/interface/peer-info'
+import type { PeerId } from '@libp2p/interface/peer-id'
 
 export const protocol = `${prefix}he/1.0.0/` as const
 

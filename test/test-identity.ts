@@ -1,9 +1,9 @@
 import { assert, expect } from 'aegir/chai'
 import type { Helia } from '@helia/interface'
-import type { PublicKey } from '@libp2p/interface-keys'
+import type { PublicKey } from '@libp2p/interface/keys'
 import { base32 } from 'multiformats/bases/base32'
 import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface-keychain'
+import type { KeyChain } from '@libp2p/interface/keychain'
 
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 

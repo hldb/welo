@@ -4,7 +4,7 @@ import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { Components, GossipHelia } from '@/interface'
 import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface-keychain'
+import type { KeyChain } from '@libp2p/interface/keychain'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Playable } from '@/utils/playable.js'

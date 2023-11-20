@@ -15,7 +15,7 @@ import type { Replica } from '@/replica/index.js'
 
 import protocol from './protocol.js'
 import type { Config, ReplicatorModule } from '../interface.js'
-import type { Ed25519PeerId } from '@libp2p/interface-peer-id'
+import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 import { Paily } from '@/utils/paily.js'
 import type { Blockstore } from 'interface-blockstore'
 import { entries as pailEntries } from '@alanshaw/pail'

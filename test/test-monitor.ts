@@ -3,7 +3,7 @@ import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface/peer-id'
 
 import { Monitor } from '@/pubsub/monitor.js'
 import { peerIdString } from '@/utils/index.js'

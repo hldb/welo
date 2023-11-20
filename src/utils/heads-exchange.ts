@@ -8,7 +8,7 @@ import * as lp from 'it-length-prefixed'
 import { consume } from 'streaming-iterables'
 import { pushable, Pushable } from 'it-pushable'
 import type { Uint8ArrayList } from 'uint8arraylist'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface/peer-id'
 import type { Stream } from '@libp2p/interface/connection'
 
 const uint8ArrayToBuffer = (a: Uint8Array): ArrayBuffer => a.buffer.slice(a.byteOffset, a.byteLength + a.byteOffset)
