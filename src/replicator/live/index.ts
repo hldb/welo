@@ -3,7 +3,7 @@ import { start, stop } from '@libp2p/interfaces/startable'
 import { base32 } from 'multiformats/bases/base32'
 import type { GossipHelia } from '@/interface'
 import type { CID } from 'multiformats/cid'
-import type { SignedMessage, PublishResult } from '@libp2p/interface-pubsub'
+import type { SignedMessage, PublishResult } from '@libp2p/interface/pubsub'
 
 import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { cidstring, parsedcid } from '@/utils/index.js'

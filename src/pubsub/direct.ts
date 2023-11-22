@@ -1,12 +1,12 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import type { GossipLibp2p } from '@/interface'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { PeerId } from '@libp2p/interface/peer-id'
 import type {
   Message,
   PublishResult,
   SubscriptionChangeData,
   SignedMessage
-} from '@libp2p/interface-pubsub'
+} from '@libp2p/interface/pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
 
 import { peerIdString } from '@/utils/index.js'

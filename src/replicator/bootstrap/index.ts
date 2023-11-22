@@ -8,9 +8,9 @@ import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Stream, Connection } from '@libp2p/interface-connection'
-import type { PeerInfo } from '@libp2p/interface-peer-info'
-import type { PeerId } from '@libp2p/interface-peer-id'
+import type { Stream, Connection } from '@libp2p/interface/connection'
+import type { PeerInfo } from '@libp2p/interface/peer-info'
+import type { PeerId } from '@libp2p/interface/peer-id'
 
 export const protocol = `${prefix}he/1.0.0/` as const
 
@@ -37,7 +37,7 @@ export class BootstrapReplicator extends Playable {
       // Handle direct head requests.
       await this.libp2p.handle(
         this.protocol,
-        this.handle.bind(this) as (connectionInfo: { stream: Stream, connection: Connection }) => void
+        this.handle.bind(this) as (data: { stream: Stream, connection: Connection }) => void
       )
 
       // Bootstrap the heads
@@ -150,7 +150,7 @@ export class BootstrapReplicator extends Playable {
     if (!reverseSync) {
       await pipePromise
       he.close()
-      stream.close()
+      await stream.close()
       return
     }
 
@@ -174,7 +174,7 @@ export class BootstrapReplicator extends Playable {
     }
 
     he.close()
-    stream.close()
+    await stream.close()
   }
 }
 

@@ -8,7 +8,7 @@ import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica, ReplicaEvents } from '@/replica/index.js'
 import type { AccessInstance } from '@/access/interface.js'
-import type { Message, PubSub } from '@libp2p/interface-pubsub'
+import type { Message, PubSub } from '@libp2p/interface/pubsub'
 
 export const protocol = `${prefix}pubsub/1.0.0/` as const
 

@@ -144,10 +144,13 @@ export const teardown = async <R extends Replicator>(components: SetupComponents
 
 export const instanceSetup = async <R extends Replicator>(components: SetupComponents<R>): Promise<void> => {
   await start(components.replicator1, components.replicator2)
-  await Promise.all([
-    components.libp2p1.dial(components.addr2),
-    new Promise(resolve => { components.libp2p2.addEventListener('peer:connect', resolve, { once: true }) })
-  ])
+
+  const connectPromise = new Promise(resolve => {
+    components.libp2p2.addEventListener('peer:connect', resolve, { once: true })
+  })
+
+  await components.libp2p1.dial(components.addr2)
+  await connectPromise
 }
 
 export const awaitPubsubJoin = async <R extends Replicator>(components: SetupComponents<R>, topic: string): Promise<void> => {

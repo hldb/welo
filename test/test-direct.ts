@@ -1,8 +1,8 @@
 import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
-import type { PeerId } from '@libp2p/interface-peer-id'
-import type { Message } from '@libp2p/interface-pubsub'
+import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Message } from '@libp2p/interface/pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { GossipLibp2p, GossipHelia } from '@/interface'
 
