@@ -30,7 +30,7 @@ import { createHelia } from 'helia'
 import { getPeerDiscovery } from '../test-utils/libp2p/peerDiscovery.js'
 import { waitForMultiaddrs } from '../test-utils/network.js'
 
-const testName = 'zzzync-replicator'
+const testName = 'replicator/zzzync'
 const token = process.env.W3_TOKEN as string
 
 const noToken = token == null

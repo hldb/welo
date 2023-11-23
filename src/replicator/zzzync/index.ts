@@ -1,13 +1,8 @@
 import type { Web3Storage } from 'web3.storage'
-import W3NameService from 'w3name/service'
-import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
-import { w3name as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3name'
-import { dht as advertiser, CreateEphemeralLibp2p, Libp2pWithDHT } from '@tabcat/zzzync/advertisers/dht'
+import { type Zzzync, toDcid } from '@tabcat/zzzync'
 import { CID } from 'multiformats/cid'
 import { CarReader } from '@ipld/car/reader'
 import { CarWriter } from '@ipld/car/writer'
-import { createEd25519PeerId } from '@libp2p/peer-id-factory'
-import { peerIdFromBytes } from '@libp2p/peer-id'
 
 import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
@@ -32,7 +27,6 @@ import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
-const providerKey = new Key('provider')
 
 export class ZzzyncReplicator extends Playable {
   readonly replica: Replica
@@ -40,38 +34,13 @@ export class ZzzyncReplicator extends Playable {
   readonly blockstore: Blockstore
   dcid: CID | null
 
-  readonly w3: Required<W3>
-  #zync: Zzzync
-  #provider: Ed25519PeerId | null
-  #revisions: RevisionState
+  #zzzync: Zzzync
+  #provider: Ed25519PeerId
   #lastAdvertised: number
 
-  constructor ({ replica, ipfs, datastore, blockstore, provider, options }: Config & { options: Options }) {
-    if (options.createEphemeralLibp2p == null) {
-      throw new Error('need createEphemeralLibp2p function to be supplied')
-    }
-
-    if (ipfs.libp2p.services.dht == null) {
-      throw new Error('zzzync replicator needs the dht')
-    }
-
+  constructor ({ replica, peerId, datastore, blockstore, zzzync }: Config & { zzzync: Zzzync }) {
     const starting = async (): Promise<void> => {
       this.dcid = await toDcid(replica.manifest.block.cid)
-      try {
-        if (provider != null) {
-          this.#provider = provider
-        } else {
-          const bytes = await datastore.get(providerKey)
-          this.#provider = peerIdFromBytes(bytes) as Ed25519PeerId
-        }
-      } catch (e: any) {
-        if (e.code === 'ERR_NOT_FOUND') {
-          this.#provider = await createEd25519PeerId()
-          await datastore.put(providerKey, this.#provider.toBytes())
-        } else {
-          throw e
-        }
-      }
     }
     const stopping = async (): Promise<void> => {}
     super({ starting, stopping })
@@ -81,31 +50,21 @@ export class ZzzyncReplicator extends Playable {
     this.blockstore = blockstore
     this.dcid = null
 
-    this.w3 = { name: new W3NameService(), ...options.w3 }
-
-    this.#revisions = options.revisions ?? revisionState(datastore)
     this.#lastAdvertised = 0
 
-    const libp2p = ipfs.libp2p as unknown as Libp2pWithDHT
-
-    this.#zync = zzzync(
-      namer(this.w3.name, this.#revisions),
-      advertiser(libp2p, options.createEphemeralLibp2p, { scope: options.scope })
-    )
-
-    this.#provider = null
+    this.#zzzync = zzzync
+    this.#provider = peerId
   }
 
   async upload (): Promise<void> {
-    if (this.#provider == null) {
-      throw new Error('provider required. is ZzzyncReplicator started?')
-    }
     if (this.dcid == null) {
       throw new Error('dcid required. is ZzzyncReplicator started?')
     }
     if (this.replica.graph.nodes.root == null) {
       throw new Error('replica not started')
     }
+
+    const cid = await this.#zzzync.namer.resolve(this.#provider)
 
     const revision = await this.#revisions.get(this.#provider)
 
@@ -162,11 +121,11 @@ export class ZzzyncReplicator extends Playable {
     // @ts-expect-error - w3client uses old @ipld/car and CID versions
     await this.w3.client.putCar(await reader)
 
-    await this.#zync.namer.publish(this.#provider, root as CID)
+    await this.#zzzync.namer.publish(this.#provider, root as CID)
 
     const now = Date.now()
     if (now > (this.#lastAdvertised + republishInterval)) {
-      await drain(this.#zync.advertiser.collaborate(this.dcid, this.#provider))
+      await drain(this.#zzzync.advertiser.collaborate(this.dcid, this.#provider))
       this.#lastAdvertised = now
     }
   }
@@ -177,7 +136,7 @@ export class ZzzyncReplicator extends Playable {
     }
 
     const providers: Map<string, Ed25519PeerId> = new Map()
-    for await (const event of this.#zync.advertiser.findCollaborators(this.dcid)) {
+    for await (const event of this.#zzzync.advertiser.findCollaborators(this.dcid)) {
       if (
         event.name === 'PROVIDER' ||
         (event.name === 'PEER_RESPONSE' && event.messageName === 'GET_PROVIDERS')
@@ -220,7 +179,7 @@ export class ZzzyncReplicator extends Playable {
     const resolveAndFetch = async (peerId: Ed25519PeerId): Promise<void> => {
       let value: ShardLink
       try {
-        value = await this.#zync.namer.resolve(peerId) as ShardLink
+        value = await this.#zzzync.namer.resolve(peerId) as ShardLink
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error(e)
@@ -278,21 +237,10 @@ export const carBlockFetcher = (car: CarReader): BlockFetcher => ({
   }
 })
 
-interface W3 {
-  client: Web3Storage
-  name?: W3NameService
-}
-interface Options {
-  w3: W3
-  revisions?: RevisionState
-  createEphemeralLibp2p: CreateEphemeralLibp2p
-  scope?: 'lan' | 'wan'
-}
-
-export const zzzyncReplicator: (options: Options) => ReplicatorModule<ZzzyncReplicator, typeof protocol> =
-(options) => ({
+export const zzzyncReplicator: (zzzync: Zzzync) => ReplicatorModule<ZzzyncReplicator, typeof protocol> =
+(zzzync) => ({
   protocol,
-  create: (config: Config) => new ZzzyncReplicator({ ...config, options })
+  create: (config: Config) => new ZzzyncReplicator({ ...config, zzzync })
 })
 
 async function * traverseShards (shards: ShardFetcher, shard: ShardBlockView): AsyncIterable<ShardBlockView> {
