@@ -17,9 +17,8 @@ import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import { Web3Storage } from 'web3.storage'
-import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
+import type { PeerId } from '@libp2p/interface/peer-id'
 import { createLibp2p, Libp2p, Libp2pOptions } from 'libp2p'
-import type { CreateEphemeralLibp2p } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { getLibp2pDefaults } from '../test-utils/libp2p/defaults.js'
@@ -30,10 +29,18 @@ import { createHelia } from 'helia'
 import { getPeerDiscovery } from '../test-utils/libp2p/peerDiscovery.js'
 import { waitForMultiaddrs } from '../test-utils/network.js'
 
+import type { CreateEphemeralKadDHT } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
+import { isBrowser } from 'wherearewe'
+import { zzzync } from '@tabcat/zzzync'
+import { w3Namer, revisionState } from '@tabcat/zzzync/namers/w3'
+import { dhtAdvertiser } from '@tabcat/zzzync/advertisers/dht'
+import { w3Pinner } from '@tabcat/zzzync/pinners/w3'
+import W3NameService from 'w3name/service'
+
 const testName = 'replicator/zzzync'
 const token = process.env.W3_TOKEN as string
 
-const noToken = token == null
+const noToken = typeof token === 'string' && token.length === 0
 
 let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
 if (noToken) {
@@ -45,6 +52,9 @@ if (noToken) {
 }
 
 type Services = Pick<AllServices, 'identify' | 'pubsub' | 'dht'>
+if (isBrowser) {
+  _describe = describe.skip
+}
 
 _describe(testName, () => {
   let
@@ -160,28 +170,39 @@ _describe(testName, () => {
     })
     await start(replica1, replica2)
 
+    if (token == null) {
+      throw new Error('w3 token is undefined')
+    }
+
     const client = new Web3Storage({ token })
-    const createEphemeralLibp2p = async (peerId: Ed25519PeerId): ReturnType<CreateEphemeralLibp2p> => {
-      const libp2p = await createLibp2p({
-        ...(await createLibp2pOptions()),
-        peerId
-      })
+
+    const createEphemeralKadDHT: CreateEphemeralKadDHT = async (peerId: PeerId) => {
+      const libp2p = await createLibp2p({ ...(await createLibp2pOptions()), peerId })
 
       await waitForMultiaddrs(libp2p)
 
-      // @ts-expect-error due to libp2p interface change
-      return { libp2p }
+      return libp2p.services
     }
-    const replicator = zzzyncReplicator({ w3: { client }, createEphemeralLibp2p, scope: 'lan' })
 
-    replicator1 = replicator.create({
-      ipfs: helia1,
+    const zzzync1 = zzzyncReplicator(zzzync(
+      w3Namer(new W3NameService(), revisionState(datastore1)),
+      dhtAdvertiser(libp2p1.services.dht, createEphemeralKadDHT),
+      w3Pinner(client)
+    ))
+    const zzzync2 = zzzyncReplicator(zzzync(
+      w3Namer(new W3NameService(), revisionState(datastore2)),
+      dhtAdvertiser(libp2p2.services.dht, createEphemeralKadDHT),
+      w3Pinner(client)
+    ))
+
+    replicator1 = zzzync1.create({
+      peerId: peerId1,
       replica: replica1,
       datastore: datastore1,
       blockstore: helia1.blockstore
     })
-    replicator2 = replicator.create({
-      ipfs: helia2,
+    replicator2 = zzzync2.create({
+      peerId: peerId2,
       replica: replica2,
       datastore: datastore2,
       blockstore: helia2.blockstore

@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.0.1](https://github.com/hldb/welo/compare/v3.0.0...v3.0.1) (2023-10-16)
+
+
+### Bug Fixes
+
+* ignore errors on heads exchange failures ([f532862](https://github.com/hldb/welo/commit/f53286287d4725b06250028088ea7fa216e5e78b))
+* unhandled error in heads exchange ([91536e8](https://github.com/hldb/welo/commit/91536e821a4e8162ab8a28a887f637f1bfa1c34a))
+
+## [3.0.0](https://github.com/hldb/welo/compare/v2.3.0...v3.0.0) (2023-09-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove Blocks api
+
+### Code Refactoring
+
+* remove Blocks api ([ec67ea4](https://github.com/hldb/welo/commit/ec67ea4a1be8fb5cf937d2a718717131ecf257f8)), closes [#79](https://github.com/hldb/welo/issues/79)
+
 ## [2.3.0](https://github.com/hldb/welo/compare/v2.2.3...v2.3.0) (2023-07-18)
 
 

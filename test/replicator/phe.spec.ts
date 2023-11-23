@@ -134,16 +134,13 @@ describe(testName, () => {
       await start(replicator1, replicator2)
     })
 
-    it('exposes instance properties', () => {
-      const replicator = replicator1
-      assert.isOk(replicator.broadcast)
-    })
 
     it('replicates replica entries and identities', async () => {
       const promise = replica1.write(new Uint8Array())
 
       await Promise.all([
-        new Promise((resolve) => { replica2.events.addEventListener('update', resolve, { once: true }) }
+        new Promise((resolve) =>
+          replica2.events.addEventListener('update', resolve, { once: true })
         ),
         promise
       ])

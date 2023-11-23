@@ -1,5 +1,4 @@
-import type { Web3Storage } from 'web3.storage'
-import { type Zzzync, toDcid } from '@tabcat/zzzync'
+import { type Zzzync, toDcid, Pinner } from '@tabcat/zzzync'
 import { CID } from 'multiformats/cid'
 import { CarReader } from '@ipld/car/reader'
 import { CarWriter } from '@ipld/car/writer'
@@ -15,17 +14,12 @@ import type { Blockstore } from 'interface-blockstore'
 import { entries as pailEntries } from '@alanshaw/pail'
 import { ShardBlockView, ShardFetcher, ShardLink } from '@alanshaw/pail/shard'
 import { Datastore, Key } from 'interface-datastore'
-// import { CodeError } from '@libp2p/interface/errors'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
 import type { AnyLink } from '@alanshaw/pail/link'
 import type { SignedEntry } from '@/entry/basal'
 import type { EntryInstance } from '@/entry/interface'
-// import { parsedcid } from '@/utils/index.js'
-// import all from 'it-all'
-import drain from 'it-drain'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
-const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
 
 export class ZzzyncReplicator extends Playable {
@@ -64,21 +58,21 @@ export class ZzzyncReplicator extends Playable {
       throw new Error('replica not started')
     }
 
-    const cid = await this.#zzzync.namer.resolve(this.#provider)
-
-    const revision = await this.#revisions.get(this.#provider)
+    let cid: ShardLink | null
+    try {
+      cid = await this.#zzzync.namer.resolve(this.#provider) as ShardLink
+    } catch (e) {
+      console.error(e)
+      cid = null
+    }
 
     const root = this.replica.graph.nodes.root
 
     let oldRoot: ShardLink
-    if (revision == null) {
+    if (cid == null) {
       oldRoot = await Paily.create(this.blockstore).then(paily => paily.root)
     } else {
-      if (!revision.value.startsWith(ipfsNamespace)) {
-        throw new Error('invalid revision value, value does not start with "/ipfs/"')
-      }
-
-      oldRoot = CID.parse(revision.value.slice(ipfsNamespace.length))
+      oldRoot = cid
     }
 
     if (root.equals(oldRoot)) {
@@ -125,7 +119,7 @@ export class ZzzyncReplicator extends Playable {
 
     const now = Date.now()
     if (now > (this.#lastAdvertised + republishInterval)) {
-      await drain(this.#zzzync.advertiser.collaborate(this.dcid, this.#provider))
+      await this.#zzzync.advertiser.collaborate(this.dcid, this.#provider)
       this.#lastAdvertised = now
     }
   }
@@ -136,36 +130,25 @@ export class ZzzyncReplicator extends Playable {
     }
 
     const providers: Map<string, Ed25519PeerId> = new Map()
-    for await (const event of this.#zzzync.advertiser.findCollaborators(this.dcid)) {
-      if (
-        event.name === 'PROVIDER' ||
-        (event.name === 'PEER_RESPONSE' && event.messageName === 'GET_PROVIDERS')
-      ) {
-        for (const provider of event.providers) {
-          if (provider.id.type !== 'Ed25519') {
-            continue
-          }
-          const peerIdString = provider.id.toString()
-          !providers.has(peerIdString) && providers.set(peerIdString, provider.id)
-        }
-        // findProviders hangs
-        break
+    for await (const provider of this.#zzzync.advertiser.findCollaborators(this.dcid)) {
+      if (provider.type !== 'Ed25519') {
+        continue
       }
+      const peerIdString = provider.toString()
+      !providers.has(peerIdString) && providers.set(peerIdString, provider)
+      // findProviders hangs
+      break
     }
 
+
     const fetchEntry = async (cid: CID): Promise<EntryInstance<SignedEntry>> => {
-      const response = await this.w3.client.get(cid.toString())
+      const bytes = await this.#zzzync.pinner.get(cid)  
+      const block = await decodeCbor<SignedEntry>(bytes)
 
-      if (response?.status !== 200) {
-        throw new Error('base response fetching entry')
-      }
-
-      const arrayBuffer = await response.arrayBuffer()
-      const reader = await CarReader.fromBytes(new Uint8Array(arrayBuffer))
-      const block = await decodeCbor<SignedEntry>(reader._blocks[0].bytes)
       const identity = this.replica.components.identity.asIdentity({
-        block: await decodeCbor(reader._blocks[1].bytes)
+        block: await decodeCbor(await this.#zzzync.pinner.get(block.value.auth))
       })
+
 
       if (identity == null) {
         throw new Error('identity was null')
@@ -186,17 +169,9 @@ export class ZzzyncReplicator extends Playable {
         return
       }
 
-      const response = await this.w3.client.get(value.toString())
-
-      if (response?.status !== 200) {
-        throw new Error(response?.statusText ?? 'bad response from w3')
-      }
-
-      const reader = await CarReader.fromBytes(new Uint8Array(await response.arrayBuffer()))
-
       const diff = await this.replica.graph.nodes.diff(
         value,
-        { blockFetchers: [w3storageBlockFetcher(this.w3.client), carBlockFetcher(reader)] }
+        { blockFetchers: [w3storageBlockFetcher(this.#zzzync.pinner)] }
       )
 
       const promises: Array<Promise<EntryInstance<SignedEntry>>> = []
@@ -216,18 +191,13 @@ export class ZzzyncReplicator extends Playable {
   }
 }
 
-export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
+export const w3storageBlockFetcher = (pinner: Pinner): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
-    const response = await client.get(link.toString())
-
-    if (response?.status === 200) {
-      const carBytes = new Uint8Array(await response.arrayBuffer())
-      const reader = await CarReader.fromBytes(carBytes)
-
-      return await reader.get(link as CID)
+    try {
+      return { cid: link, bytes: await pinner.get(link as CID) }
+    } catch (e) {
+      return undefined
     }
-
-    return undefined
   }
 })
 

@@ -31,8 +31,8 @@ import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const rootHashKey = new Key('rootHash')
 
-interface ReplicaEvents {
-  write: CustomEvent<undefined>
+export interface ReplicaEvents {
+  write: CustomEvent<EntryInstance<any>>
   update: CustomEvent<undefined>
 }
 
@@ -44,7 +44,7 @@ export class Replica extends Playable {
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
 
   #datastore: Datastore
-  #blockstore: Blockstore
+  blockstore: Blockstore
   #graph: Graph | null
 
   _queue: PQueue
@@ -69,10 +69,10 @@ export class Replica extends Playable {
     const starting = async (): Promise<void> => {
       const root: BlockView<GraphRoot> | null = await getRoot(
         this.#datastore,
-        this.#blockstore
+        this.blockstore
       ).catch(() => null)
 
-      this.#graph = new Graph(this.#blockstore, root?.value)
+      this.#graph = new Graph(this.blockstore, root?.value)
       await start(this.#graph)
 
       if (root?.cid == null) {
@@ -95,7 +95,7 @@ export class Replica extends Playable {
     this.components = components
 
     this.#datastore = datastore
-    this.#blockstore = blockstore
+    this.blockstore = blockstore
     this.#graph = null
     this._queue = new PQueue({})
 
@@ -133,7 +133,7 @@ export class Replica extends Playable {
       direction: 'descend'
     }
   ): Promise<Array<EntryInstance<any>>> {
-    const blockstore = this.#blockstore
+    const blockstore = this.blockstore
     const entry = this.components.entry
     const identity = this.components.identity
 
@@ -180,7 +180,7 @@ export class Replica extends Playable {
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
-    if (this.#datastore == null || this.#blockstore == null) {
+    if (this.#datastore == null || this.blockstore == null) {
       throw new Error('replica not started')
     }
 
@@ -193,8 +193,8 @@ export class Replica extends Playable {
         continue
       }
 
-      await this.#blockstore.put(entry.cid, entry.block.bytes)
-      await this.#blockstore.put(entry.identity.auth, entry.identity.block.bytes)
+      await this.blockstore.put(entry.cid, entry.block.bytes)
+      await this.blockstore.put(entry.identity.auth, entry.identity.block.bytes)
 
       if (await this.access.canAppend(entry)) {
         await this.graph.add(entry.cid, entry.next)
@@ -221,10 +221,10 @@ export class Replica extends Playable {
       refs: [] // refs are empty for now
     })
 
-    await this.#blockstore.put(entry.cid, entry.block.bytes)
+    await this.blockstore.put(entry.cid, entry.block.bytes)
 
     return await this.add([entry]).then(() => {
-      this.events.dispatchEvent(new CustomEvent<undefined>('write'))
+      this.events.dispatchEvent(new CustomEvent<EntryInstance<any>>('write', { detail: entry }))
       return entry
     })
   }
@@ -278,7 +278,7 @@ export class Replica extends Playable {
 
   async #updateRoot (): Promise<void> {
     const block = await encodeRoot(this.graph.root)
-    await setRoot(this.#datastore, this.#blockstore, block)
+    await setRoot(this.#datastore, this.blockstore, block)
     this.root = block.cid
     this.events.dispatchEvent(new CustomEvent<undefined>('update'))
   }
