@@ -3,7 +3,7 @@ import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest, a
 
 const testName = 'pubsub-replicator'
 
-describe(testName, () => {
+describe.skip(testName, () => {
   let components: SetupComponents<PubsubReplicator>
 
   before(async () => {

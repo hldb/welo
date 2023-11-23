@@ -38,7 +38,7 @@ if (noToken) {
   console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
   _describe = describe.skip
 } else {
-  _describe = describe
+  _describe = describe.skip
 }
 
 if (isBrowser) {

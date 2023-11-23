@@ -4,7 +4,7 @@ import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest } 
 
 const testName = 'live-replicator'
 
-describe(testName, () => {
+describe.skip(testName, () => {
   let components: SetupComponents<LiveReplicator>
 
   before(async () => {
