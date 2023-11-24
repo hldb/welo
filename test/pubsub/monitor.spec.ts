@@ -7,7 +7,7 @@ import { Monitor } from '@/pubsub/monitor.js'
 import { peerIdString } from '@/utils/index.js'
 
 import type { PubSub } from '@libp2p/interface/dist/src/pubsub/index.js'
-import { getTestPubSubNetwork } from '../test-mocks/pubsub'
+import { getTestPubSubNetwork } from '../test-mocks/pubsub.js'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 
 const testName = 'pubsub/monitor'
