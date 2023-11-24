@@ -50,7 +50,6 @@
     "lint": "aegir lint",
     "lint-fix": "aegir lint --fix",
     "dep-check": "aegir dep-check --ignore path-browserify",
-    "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
     "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
@@ -95,7 +94,6 @@
     "aegir": "^38.1.5",
     "blockstore-core": "^4.3.3",
     "blockstore-level": "^1.1.0",
-    "copy-deps": "^1.1.2",
     "datastore-level": "^10.1.1",
     "eslint": "^8.23.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
@@ -143,34 +141,6 @@
     "uint8arrays": "^4.0.6",
     "w3name": "^1.0.8",
     "web3.storage": "^4.5.4"
-  },
-  "copyDependencies": {
-    "ipfs-core": [
-      "multiformats",
-      "@libp2p/interfaces",
-      "ipfs-core-types",
-      "@ipld/dag-cbor",
-      "interface-datastore",
-      "@libp2p/interface-keys",
-      "libp2p",
-      "@libp2p/interface-peer-id",
-      "@libp2p/peer-id",
-      "uint8arrays",
-      "@libp2p/crypto"
-    ],
-    "datastore-level": [
-      "level",
-      "abstract-level"
-    ],
-    "libp2p": [
-      "@libp2p/interface-pubsub"
-    ],
-    "eslint-config-standard-with-typescript": [
-      "eslint-plugin-import",
-      "@typescript-eslint/eslint-plugin",
-      "eslint-plugin-n",
-      "eslint-plugin-promise"
-    ]
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"
