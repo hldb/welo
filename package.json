@@ -56,8 +56,8 @@
     "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
     "build": "npm run build:meta && aegir build && tsc-alias",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
-    "test:chrome": "npm run build && aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run build && npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
+    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/*.spec.js",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/*.spec.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
     "clean": "git clean -fq test/test-fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/test-fixtures"
   },
