@@ -16,6 +16,7 @@ import type { Replicator } from '@/replicator/interface.js'
 import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
 
 import type { DbConfig, DbOpen, DbEvents, ClosedEmit, DbComponents } from './interface.js'
+import type { Ed25519PeerId } from '@libp2p/interface/dist/src/peer-id/index.js'
 
 /**
  * Database Class
@@ -128,7 +129,6 @@ export class Database extends Playable {
       ipfs,
       identity,
       components,
-      provider
     } = options
 
     if (manifest.identity.protocol !== components.identity.protocol) {
@@ -155,10 +155,9 @@ export class Database extends Playable {
 
     const replicatorInstances = replicators.map(replicator => replicator.create({
       ...common,
-      ipfs,
+      peerId: ipfs.libp2p.peerId as Ed25519PeerId,
       replica,
-      datastore,
-      provider
+      datastore
     }))
 
     const config: DbConfig = {

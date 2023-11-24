@@ -4,11 +4,10 @@ import { Key } from 'interface-datastore'
 import { StaticAccess as Access } from '@/access/static/index.js'
 import { NamespaceDatastore } from 'datastore-core'
 import { Replica } from '@/replica/index.js'
-import getDatastore from './level-datastore.js'
-import { getTestPaths, tempPath, TestPaths } from './constants.js'
-import { getMultiaddr, getTestIpfs, localIpfsOptions } from './ipfs.js'
-import { getTestIdentities, getTestIdentity } from './identities.js'
-import { getTestManifest } from './manifest.js'
+import { getLevelBlockstore, getLevelDatastore } from '../test-utils/storage.js'
+import { getTestPaths, tempPath, TestPaths } from '../test-utils/constants.js'
+import { getTestIdentities, getTestIdentity } from '../test-utils/identities.js'
+import { getTestManifest } from '../test-utils/manifest.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
@@ -16,6 +15,13 @@ import type { Replicator, ReplicatorModule } from '@/replicator/interface.js'
 import type { LevelDatastore } from 'datastore-level'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
+import { waitForMultiaddrs } from 'test/test-utils/network.js'
+import { Libp2pOptions, createLibp2p } from 'libp2p'
+import { getLibp2pDefaults } from 'test/test-utils/libp2p/defaults.js'
+import { getPeerDiscovery } from 'test/test-utils/libp2p/peerDiscovery.js'
+import { getDhtService, getIdentifyService, getPubsubService, AllServices } from 'test/test-utils/libp2p/services.js'
+import { createHelia } from 'helia'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 
 export interface SetupComponents<R extends Replicator = Replicator> {
   ipfs1: GossipHelia
@@ -39,17 +45,55 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
   const testPaths1 = getTestPaths(tempPath, name + '/1')
   const testPaths2 = getTestPaths(tempPath, name + '/2')
 
-  const datastore = await getDatastore(testPaths1.replica)
+  const createLibp2pOptions = async (): Promise<Libp2pOptions<AllServices>> => ({
+    ...(await getLibp2pDefaults()),
+    peerDiscovery: await getPeerDiscovery(),
+    services: {
+      identify: getIdentifyService(),
+      pubsub: getPubsubService(),
+      dht: getDhtService(true)
+    }
+  })
+
+  const datastore = await getLevelDatastore(testPaths1.replica + '/data')
   await datastore.open()
   const datastore1 = new NamespaceDatastore(datastore, new Key(testPaths1.replica))
   const datastore2 = new NamespaceDatastore(datastore, new Key(testPaths2.replica))
 
-  const ipfs1 = await getTestIpfs(testPaths1, localIpfsOptions)
-  const ipfs2 = await getTestIpfs(testPaths2, localIpfsOptions)
-  const libp2p1 = ipfs1.libp2p
-  const libp2p2 = ipfs2.libp2p
+  const blockstore1 = await getLevelBlockstore(testPaths1.replica + '/blocks')
+  const blockstore2 = await getLevelBlockstore(testPaths2.replica + '/blocks')
 
-  const addr2 = await getMultiaddr(ipfs2)
+  const peerId1 = await createEd25519PeerId()
+  const peerId2 = await createEd25519PeerId()
+
+  const libp2p1 = await createLibp2p({
+    ...(await createLibp2pOptions()),
+    peerId: peerId1,
+    datastore: datastore1
+  })
+  const libp2p2 = await createLibp2p({
+    ...(await createLibp2pOptions()),
+    peerId: peerId2,
+    datastore: datastore2
+  })
+
+  await Promise.all([
+    waitForMultiaddrs(libp2p1),
+    waitForMultiaddrs(libp2p2)
+  ])
+
+  const ipfs1 = await createHelia({
+    datastore: datastore1,
+    blockstore: blockstore1,
+    libp2p: libp2p1
+  })
+  const ipfs2 = await createHelia({
+    datastore: datastore2,
+    blockstore: blockstore2,
+    libp2p: libp2p2
+  })
+
+  const addr2 = ipfs2.libp2p.getMultiaddrs()[0]
 
   const identities1 = await getTestIdentities(testPaths1)
   const identities2 = await getTestIdentities(testPaths2)
@@ -102,15 +146,15 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
   await start(replica1, replica2)
 
   const replicator1 = replicatorModule.create({
-    ipfs: ipfs1,
+    peerId: peerId1,
     replica: replica1,
     datastore: datastore1,
     blockstore: ipfs1.blockstore
   })
   const replicator2 = replicatorModule.create({
-    ipfs: ipfs2,
+    peerId: peerId2,
     replica: replica2,
-    datastore: datastore2,
+    datastore: datastore1,
     blockstore: ipfs2.blockstore
   })
 

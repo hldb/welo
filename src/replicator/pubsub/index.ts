@@ -3,7 +3,6 @@ import { Playable } from '@/utils/playable.js'
 import { addHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
 import { CID } from 'multiformats/cid'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica, ReplicaEvents } from '@/replica/index.js'
@@ -13,7 +12,7 @@ import type { Message, PubSub } from '@libp2p/interface/pubsub'
 export const protocol = `${prefix}pubsub/1.0.0/` as const
 
 export class PubsubReplicator extends Playable {
-  readonly ipfs: GossipHelia
+  readonly pubsub: PubSub
   readonly manifest: Manifest
   readonly replica: Replica
   readonly access: AccessInstance
@@ -23,9 +22,9 @@ export class PubsubReplicator extends Playable {
   private readonly onPubsubMessage: (evt: CustomEvent<Message>) => void
 
   constructor ({
-    ipfs,
+    pubsub,
     replica
-  }: Config) {
+  }: Config & { pubsub: PubSub }) {
     const starting = async (): Promise<void> => {
       this.replica.events.addEventListener('write', this.onReplicaHeadsUpdate)
 
@@ -42,7 +41,7 @@ export class PubsubReplicator extends Playable {
 
     super({ starting, stopping })
 
-    this.ipfs = ipfs
+    this.pubsub = pubsub
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
@@ -56,14 +55,6 @@ export class PubsubReplicator extends Playable {
     return `${protocol}${cidstring(this.manifest.address.cid)}`
   }
 
-  private get libp2p (): GossipLibp2p {
-    return this.ipfs.libp2p
-  }
-
-  private get pubsub (): PubSub {
-    return this.libp2p.services.pubsub
-  }
-
   private async parseHead (evt: CustomEvent<Message>): Promise<void> {
     const head = CID.decode(evt.detail.data)
 
@@ -75,7 +66,7 @@ export class PubsubReplicator extends Playable {
   }
 }
 
-export const pubsubReplicator: () => ReplicatorModule<PubsubReplicator, typeof protocol> = () => ({
+export const pubsubReplicator: (pubsub: PubSub) => ReplicatorModule<PubsubReplicator, typeof protocol> = (pubsub) => ({
   protocol,
-  create: (config: Config) => new PubsubReplicator(config)
+  create: (config: Config) => new PubsubReplicator({ ...config, pubsub })
 })
