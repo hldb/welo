@@ -51,7 +51,6 @@
     "lint-fix": "aegir lint --fix",
     "dep-check": "aegir dep-check --ignore path-browserify",
     "format": "prettier -w src test && eslint --fix src test",
-    "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
     "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
     "build": "npm run build:meta && aegir build && tsc-alias",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
