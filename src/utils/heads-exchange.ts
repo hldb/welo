@@ -249,10 +249,15 @@ export class HeadsExchange {
 
     const localHash = await hashHeads(this.heads)
     const remoteHash = CID.decode(message.hash)
+    const match = localHash.equals(remoteHash)
 
-    return {
-      match: localHash.equals(remoteHash)
+    if (this.verifyPromise == null) {
+      this.verifyPromise = new DeferredPromise(resolve => { resolve(match) })
+    } else {
+      this.verifyPromise?.resolve(match)
     }
+
+    return { match }
   }
 
   private handleVerifyResponse (message: Message): void {
