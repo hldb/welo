@@ -1,10 +1,9 @@
-import type { BlockView } from 'multiformats/interface'
-import type { CID } from 'multiformats/cid'
-
-import { HLDB_PREFIX } from '@/utils/constants.js'
-import type { ComponentProtocol } from '@/interface.js'
 import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
+import type { ComponentProtocol } from '@/interface.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { CID } from 'multiformats/cid'
+import type { BlockView } from 'multiformats/interface'
+import { HLDB_PREFIX } from '@/utils/constants.js'
 
 export interface EntryData {
   tag: Uint8Array
@@ -33,10 +32,10 @@ export interface Fetch {
 export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
 export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends ComponentProtocol<P> {
-  create: (create: Create) => Promise<T>
-  fetch: (fetch: Fetch) => Promise<T>
-  asEntry: (entry: AsEntry<unknown>) => Promise<T | null>
-  verify: (entry: AsEntry<unknown>) => Promise<boolean>
+  create(create: Create): Promise<T>
+  fetch(fetch: Fetch): Promise<T>
+  asEntry(entry: AsEntry<unknown>): Promise<T | null>
+  verify(entry: AsEntry<unknown>): Promise<boolean>
 }
 
 export const prefix = `${HLDB_PREFIX}entry/` as const

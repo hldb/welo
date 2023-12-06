@@ -1,20 +1,18 @@
+import { start } from '@libp2p/interfaces/startable'
 import { assert, expect } from 'aegir/chai'
 import { base32 } from 'multiformats/bases/base32'
-import { start } from '@libp2p/interfaces/startable'
-
-import type { Entry } from '@/entry/basal/index.js'
-import type { Identity } from '@/identity/basal/index.js'
-import { Manifest } from '@/manifest/index.js'
-import { staticAccess } from '@/access/static/index.js'
-import protocol, { type AccessProtocol } from '@/access/static/protocol.js'
-import { wildcard } from '@/access/interface.js'
-
+import { getTestPaths, tempPath } from './utils/constants.js'
 import defaultManifest from './utils/default-manifest.js'
 import { singleEntry } from './utils/entries.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { Entry } from '@/entry/basal/index.js'
+import type { Identity } from '@/identity/basal/index.js'
+import { wildcard } from '@/access/interface.js'
+import { staticAccess } from '@/access/static/index.js'
+import protocol, { type AccessProtocol } from '@/access/static/protocol.js'
+import { Manifest } from '@/manifest/index.js'
 
 const testName = 'static access'
 

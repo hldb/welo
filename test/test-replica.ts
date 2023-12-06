@@ -1,29 +1,27 @@
 /* eslint-disable max-nested-callbacks */
-import { assert, expect } from 'aegir/chai'
-import { start, stop } from '@libp2p/interfaces/startable'
-import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
+import { start, stop } from '@libp2p/interfaces/startable'
+import { assert, expect } from 'aegir/chai'
 import { NamespaceDatastore } from 'datastore-core'
+import { Key } from 'interface-datastore'
+import { type TestPaths, getTestPaths, names, tempPath } from './utils/constants.js'
+import defaultManifest from './utils/default-manifest.js'
+import { singleEntry } from './utils/entries.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import getDatastore from './utils/level-datastore.js'
+import { getTestLibp2p } from './utils/libp2p.js'
+import type { GossipHelia } from '@/interface.js'
 import type { LevelDatastore } from 'datastore-level'
+import type { Blockstore } from 'interface-blockstore'
 import type { CID } from 'multiformats/cid'
-
-import { Replica } from '@/replica/index.js'
 import { StaticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
-import { cidstring, decodedcid } from '@/utils/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-
-import getDatastore from './utils/level-datastore.js'
-import defaultManifest from './utils/default-manifest.js'
-import { type TestPaths, getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { singleEntry } from './utils/entries.js'
-import { getTestLibp2p } from './utils/libp2p.js'
-import type { Blockstore } from 'interface-blockstore'
+import { Replica } from '@/replica/index.js'
 import { encodeCbor } from '@/utils/block.js'
-import type { GossipHelia } from '@/interface.js'
+import { cidstring, decodedcid } from '@/utils/index.js'
 
 const testName = 'replica'
 
@@ -259,7 +257,7 @@ describe(testName, () => {
 
       it('rejects when invalid direction is given', async () => {
         const direction = 'not a real direction'
-        // @ts-expect-error
+        // @ts-expect-error Ignore error to test an invalid direction.
         const promise = replica.traverse({ direction })
 
         await expect(promise).to.eventually.be.rejected()

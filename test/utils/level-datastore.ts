@@ -1,6 +1,6 @@
-import * as where from 'wherearewe'
 import { LevelDatastore } from 'datastore-level'
 import makedir from 'make-dir'
+import * as where from 'wherearewe'
 import type { DatabaseOptions, OpenOptions } from 'level'
 
 export default async (

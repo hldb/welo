@@ -1,12 +1,8 @@
-import { keys } from '@libp2p/crypto'
-import * as Block from 'multiformats/block'
 import * as codec from '@ipld/dag-cbor'
-import { sha256 as hasher } from 'multiformats/hashes/sha2'
-import type { PrivateKey, PublicKey } from '@libp2p/interface/keys'
+import { keys } from '@libp2p/crypto'
 import { Key } from 'interface-datastore'
-import type { BlockView } from 'multiformats/interface'
-import type { CID } from 'multiformats/cid'
-
+import * as Block from 'multiformats/block'
+import { sha256 as hasher } from 'multiformats/hashes/sha2'
 import protocol from './protocol.js'
 import type {
   IdentityInstance,
@@ -17,6 +13,9 @@ import type {
   Get,
   Import
 } from '../interface.js'
+import type { PrivateKey, PublicKey } from '@libp2p/interface/keys'
+import type { CID } from 'multiformats/cid'
+import type { BlockView } from 'multiformats/interface'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const secp256k1 = 'secp256k1'
@@ -83,11 +82,11 @@ export class Identity implements IdentityInstance<IdentityValue> {
   }
 
   async sign (data: Uint8Array): Promise<Uint8Array> {
-    return await sign(this, data)
+    return sign(this, data)
   }
 
   async verify (data: Uint8Array, sig: Uint8Array): Promise<boolean> {
-    return await verify(this, data, sig)
+    return verify(this, data, sig)
   }
 }
 
@@ -264,7 +263,7 @@ const verify = async (
     throw new Error('invalid identity used')
   }
 
-  return await _identity.pubkey.verify(data, sig)
+  return _identity.pubkey.verify(data, sig)
 }
 
 export const basalIdentity: () => IdentityComponent<Identity, typeof protocol> = () => ({

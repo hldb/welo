@@ -1,12 +1,12 @@
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import type { PubSub } from '@libp2p/interface/pubsub'
-import { kadDHT, type DualKadDHT } from '@libp2p/kad-dht'
 import { identify } from '@libp2p/identify'
+import { kadDHT, type DualKadDHT } from '@libp2p/kad-dht'
+import { keychain } from '@libp2p/keychain'
 import { ipnsSelector } from 'ipns/selector'
 import { ipnsValidator } from 'ipns/validator'
-import { keychain } from '@libp2p/keychain'
-import type { ServiceMap } from '@libp2p/interface'
 import type { Identify } from '@libp2p/identify'
+import type { ServiceMap } from '@libp2p/interface'
+import type { PubSub } from '@libp2p/interface/pubsub'
 
 export interface Services extends ServiceMap {
   identify: Identify

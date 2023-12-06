@@ -1,12 +1,25 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable guard-for-in */
 /* eslint-disable max-nested-callbacks */
-import { assert, expect } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
+import { assert, expect } from 'aegir/chai'
 import { Key } from 'interface-datastore'
-import type { CID } from 'multiformats/cid'
+import { getTestPaths, names, tempPath } from './utils/constants.js'
+import defaultManifest from './utils/default-manifest.js'
+import { concurrentEntries, singleEntry } from './utils/entries.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestLibp2p } from './utils/libp2p.js'
+import type { EntryInstance } from '@/entry/interface.js'
+import type { GossipHelia } from '@/interface.js'
 import type { Blockstore } from 'interface-blockstore'
-
+import type { CID } from 'multiformats/cid'
+import { StaticAccess } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
+import { type Entry, basalEntry } from '@/entry/basal/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
+import { Manifest } from '@/manifest/index.js'
+import { Graph } from '@/replica/graph.js'
 import {
   sortCids,
   sortEntries,
@@ -16,23 +29,8 @@ import {
   graphLinks,
   traverser
 } from '@/replica/traversal.js'
-import type { EntryInstance } from '@/entry/interface.js'
-import { Entry, basalEntry } from '@/entry/basal/index.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
-import { StaticAccess } from '@/access/static/index.js'
-import staticAccessProtocol from '@/access/static/protocol.js'
-import { Graph } from '@/replica/graph.js'
 import { cidstring } from '@/utils/index.js'
-import { Manifest } from '@/manifest/index.js'
-
-import defaultManifest from './utils/default-manifest.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { concurrentEntries, singleEntry } from './utils/entries.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 import { Paily } from '@/utils/paily.js'
-import type { GossipHelia } from '@/interface.js'
 
 const testName = 'traversal'
 

@@ -1,7 +1,6 @@
-import type { BlockView } from 'multiformats/interface'
-
 import type { Address } from './address.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { BlockView } from 'multiformats/interface'
 
 export interface Protocol<T extends string = string, C extends Record<string, unknown> = Record<string, unknown>> {
   readonly protocol: T

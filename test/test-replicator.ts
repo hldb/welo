@@ -1,6 +1,6 @@
 import { assert } from 'aegir/chai'
-import { liveReplicator, LiveReplicator } from '@/replicator/live/index.js'
 import { type SetupComponents, setup, teardown, instanceSetup, liveReplicationTest } from './utils/replicator.js'
+import { liveReplicator, type LiveReplicator } from '@/replicator/live/index.js'
 
 const testName = 'live-replicator'
 

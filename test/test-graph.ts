@@ -1,16 +1,14 @@
-import { assert } from 'aegir/chai'
-import { start } from '@libp2p/interfaces/startable'
-import { Key } from 'interface-datastore'
-import type { CID } from 'multiformats/cid.js'
-
-import { Graph } from '@/replica/graph.js'
-import { Node } from '@/replica/graph-node.js'
-
-import { getTestPaths, tempPath } from './utils/constants.js'
-import { LevelBlockstore } from 'blockstore-level'
 import { type ShardBlockView, ShardBlock } from '@alanshaw/pail/shard'
-import { cidstring } from '@/utils/index.js'
+import { start } from '@libp2p/interfaces/startable'
+import { assert } from 'aegir/chai'
+import { LevelBlockstore } from 'blockstore-level'
+import { Key } from 'interface-datastore'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import type { CID } from 'multiformats/cid.js'
+import { Node } from '@/replica/graph-node.js'
+import { Graph } from '@/replica/graph.js'
 import { encodeCbor } from '@/utils/block.js'
+import { cidstring } from '@/utils/index.js'
 
 const testName = 'graph'
 

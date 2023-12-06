@@ -1,4 +1,5 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
+import { getPeers, getTopics } from './util.js'
 import type { GossipLibp2p } from '@/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type {
@@ -8,10 +9,7 @@ import type {
   SignedMessage
 } from '@libp2p/interface/pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
-
 import { peerIdString } from '@/utils/index.js'
-
-import { getPeers, getTopics } from './util.js'
 
 const prefix = '/dps/1.0.0/'
 
@@ -121,7 +119,7 @@ export class Direct extends EventEmitter<DirectEvents> implements Startable {
       throw new Error('direct pubsub not open')
     }
 
-    return await this.libp2p.services.pubsub.publish(this.topic, bytes)
+    return this.libp2p.services.pubsub.publish(this.topic, bytes)
   }
 }
 

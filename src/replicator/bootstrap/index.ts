@@ -1,16 +1,16 @@
-import { cidstring } from '@/utils/index.js'
-import { Playable } from '@/utils/playable.js'
-import { HeadsExchange } from '@/utils/heads-exchange.js'
-import { getHeads, addHeads } from '@/utils/replicator.js'
-import { type Config, type ReplicatorModule, prefix } from '@/replicator/interface.js'
+import type { AccessInstance } from '@/access/interface.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica } from '@/replica/index.js'
-import type { AccessInstance } from '@/access/interface.js'
 import type { Stream, Connection } from '@libp2p/interface/connection'
-import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { PeerId } from '@libp2p/interface/peer-id'
+import type { PeerInfo } from '@libp2p/interface/peer-info'
+import { type Config, type ReplicatorModule, prefix } from '@/replicator/interface.js'
+import { HeadsExchange } from '@/utils/heads-exchange.js'
+import { cidstring } from '@/utils/index.js'
+import { Playable } from '@/utils/playable.js'
+import { getHeads, addHeads } from '@/utils/replicator.js'
 
 export const protocol = `${prefix}he/1.0.0/` as const
 

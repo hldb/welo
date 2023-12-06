@@ -1,7 +1,7 @@
-import { assert } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
-import { bootstrapReplicator, BootstrapReplicator } from '@/replicator/bootstrap/index.js'
+import { assert } from 'aegir/chai'
 import { type SetupComponents, setup, teardown } from './utils/replicator.js'
+import { bootstrapReplicator, type BootstrapReplicator } from '@/replicator/bootstrap/index.js'
 // import { isBrowser } from 'wherearewe'
 
 const testName = 'bootstrap-replicator'

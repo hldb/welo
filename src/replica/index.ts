@@ -1,23 +1,10 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import { CID } from 'multiformats/cid'
-import { Key } from 'interface-datastore'
-import { equals } from 'uint8arrays/equals'
 import { start, stop } from '@libp2p/interfaces/startable'
+import { Key } from 'interface-datastore'
 import all from 'it-all'
+import { CID } from 'multiformats/cid'
 import PQueue from 'p-queue'
-import type { Datastore } from 'interface-datastore'
-import type { Blockstore } from 'interface-blockstore'
-import type { BlockView } from 'multiformats/interface'
-
-import { Playable } from '@/utils/playable.js'
-import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
-import type { Paily } from '@/utils/paily.js'
-import type { DbComponents } from '@/interface.js'
-import type { IdentityInstance } from '@/identity/interface.js'
-import type { EntryInstance } from '@/entry/interface.js'
-import type { Manifest } from '@/manifest/index.js'
-import type { AccessInstance } from '@/access/interface.js'
-
+import { equals } from 'uint8arrays/equals'
 import { type GraphRoot, Graph } from './graph.js'
 import {
   loadEntry,
@@ -27,7 +14,18 @@ import {
   traverser
 } from './traversal.js'
 import type { Edge } from './graph-node.js'
+import type { AccessInstance } from '@/access/interface.js'
+import type { EntryInstance } from '@/entry/interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { DbComponents } from '@/interface.js'
+import type { Manifest } from '@/manifest/index.js'
+import type { Paily } from '@/utils/paily.js'
+import type { Blockstore } from 'interface-blockstore'
+import type { Datastore } from 'interface-datastore'
+import type { BlockView } from 'multiformats/interface'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
+import { decodedcid, encodedcid, parsedcid } from '@/utils/index.js'
+import { Playable } from '@/utils/playable.js'
 
 const rootHashKey = new Key('rootHash')
 
@@ -160,7 +158,7 @@ export class Replica extends Playable {
     const load = loadEntry({ blockstore, entry, identity })
     const links = graphLinks({ graph, tails, edge })
 
-    return await traverser({ cids, load, links, orderFn })
+    return traverser({ cids, load, links, orderFn })
   }
 
   async has (cid: CID | string): Promise<boolean> {
@@ -168,7 +166,7 @@ export class Replica extends Playable {
       throw new Error('replica not started')
     }
 
-    return await this.graph.has(cid)
+    return this.graph.has(cid)
   }
 
   async known (cid: CID | string): Promise<boolean> {
@@ -176,7 +174,7 @@ export class Replica extends Playable {
       throw new Error('replica not started')
     }
 
-    return await this.graph.known(cid)
+    return this.graph.known(cid)
   }
 
   async add (entries: Array<EntryInstance<any>>): Promise<void> {
@@ -223,7 +221,7 @@ export class Replica extends Playable {
 
     await this.blockstore.put(entry.cid, entry.block.bytes)
 
-    return await this.add([entry]).then(() => {
+    return this.add([entry]).then(() => {
       this.events.dispatchEvent(new CustomEvent<EntryInstance<any>>('write', { detail: entry }))
       return entry
     })
@@ -284,7 +282,7 @@ export class Replica extends Playable {
   }
 }
 
-const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => await encodeCbor<GraphRoot>(root)
+const encodeRoot = async (root: GraphRoot): Promise<BlockView<GraphRoot>> => encodeCbor<GraphRoot>(root)
 
 const getRoot = async (
   datastore: Datastore,

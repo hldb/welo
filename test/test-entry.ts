@@ -1,20 +1,18 @@
 import { assert, expect } from 'aegir/chai'
-import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import type { LevelDatastore } from 'datastore-level'
-import type { Keychain } from '@libp2p/keychain'
-
-import { Entry, basalEntry } from '@/entry/basal/index.js'
-import type { EntryData } from '@/entry/interface.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
-
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestLibp2p } from './utils/libp2p.js'
-import type { Blockstore } from 'interface-blockstore'
-import { decodeCbor, encodeCbor } from '@/utils/block.js'
+import type { EntryData } from '@/entry/interface.js'
 import type { GossipHelia } from '@/interface.js'
+import type { Keychain } from '@libp2p/keychain'
+import type { LevelDatastore } from 'datastore-level'
+import type { Blockstore } from 'interface-blockstore'
+import type { CID } from 'multiformats/cid'
+import { type Entry, basalEntry } from '@/entry/basal/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const testName = 'basal entry'
 
@@ -52,7 +50,7 @@ describe(testName, () => {
       identities,
       keychain,
       kpi
-    }).catch(async () => await identityModule.get({ name, identities, keychain }))
+    }).catch(async () => identityModule.get({ name, identities, keychain }))
   })
 
   after(async () => {

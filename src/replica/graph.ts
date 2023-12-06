@@ -1,17 +1,15 @@
-import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import PQueue from 'p-queue'
-import { Key } from 'interface-datastore'
 import { CodeError } from '@libp2p/interfaces/errors'
-import type { CID } from 'multiformats/cid'
+import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
+import { Key } from 'interface-datastore'
+import { empty as emptyBytes } from 'multiformats/bytes'
+import PQueue from 'p-queue'
+import { Node } from './graph-node.js'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { Blockstore } from 'interface-blockstore'
-
-import { Playable } from '@/utils/playable.js'
+import type { CID } from 'multiformats/cid'
 import { cidstring } from '@/utils/index.js'
-
-import { Node } from './graph-node.js'
-import { empty as emptyBytes } from 'multiformats/bytes'
 import { Paily } from '@/utils/paily.js'
+import { Playable } from '@/utils/playable.js'
 
 type StateKeys = 'nodes' | 'missing' | 'denied' | 'heads' | 'tails'
 
@@ -144,11 +142,11 @@ export class Graph extends Playable {
   }
 
   async known (cid: CID | string): Promise<boolean> {
-    return await this.nodes.has(new Key(cidstring(cid)))
+    return this.nodes.has(new Key(cidstring(cid)))
   }
 
   async get (cid: CID | string): Promise<Node | undefined> {
-    return await get(this.state, cidstring(cid))
+    return get(this.state, cidstring(cid))
   }
 
   async has (cid: CID | string): Promise<boolean> {
@@ -245,8 +243,8 @@ export async function add (state: GraphState, cid: CID, out: CID[]): Promise<Gra
     node = Node.init()
   }
 
-  const seen: Set<string> = new Set([string]) // handle self references
-  const existing: Set<string> = new Set() // set of references with existing nodes
+  const seen = new Set<string>([string]) // handle self references
+  const existing = new Set<string>() // set of references with existing nodes
 
   // add node cid to the node of each cid in out
   for (const _cid of out) {
@@ -270,7 +268,7 @@ export async function add (state: GraphState, cid: CID, out: CID[]): Promise<Gra
       existing.add(_string)
     }
 
-    if (_node.missing === true) {
+    if (_node.missing) {
       await state.missing.put(new Key(_string), emptyBytes)
     }
 
@@ -280,12 +278,12 @@ export async function add (state: GraphState, cid: CID, out: CID[]): Promise<Gra
     await state.nodes.put(new Key(_string), block.bytes)
   }
 
-  if (node.missing === true) {
+  if (node.missing) {
     node.missing = false
     await state.missing.delete(new Key(string))
   }
 
-  if (node.denied === true) {
+  if (node.denied) {
     node.denied = false
     await state.denied.delete(new Key(string))
   }
@@ -337,7 +335,7 @@ export async function remove (
   }
 
   const node = await get(state, string)
-  if (node === undefined || node[reason] === true) {
+  if (node === undefined || node[reason]) {
     return state
   }
   const exists = Node.exists(node)
@@ -362,8 +360,8 @@ export async function remove (
       } else {
         // remove referenced orphaned node
         await state.nodes.delete(new Key(_string))
-        _node.missing === true && (await state.missing.delete(new Key(_string)))
-        _node.denied === true && (await state.denied.delete(new Key(_string)))
+        _node.missing && (await state.missing.delete(new Key(_string)))
+        _node.denied && (await state.denied.delete(new Key(_string)))
       }
     }
   }
@@ -399,7 +397,7 @@ export async function remove (
   // update or remove node
 
   // miss -> deny | deny -> miss
-  if (node[unreason] === true) {
+  if (node[unreason]) {
     node[unreason] = false
     await state[unreason].delete(new Key(string))
   }

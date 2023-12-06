@@ -1,18 +1,18 @@
 import { ShardBlock, put, get, del, entries } from '@alanshaw/pail'
-import { CID } from 'multiformats'
-import type { code as rawCode } from 'multiformats/codecs/raw'
-import { code as cborCode } from '@ipld/dag-cbor'
-import { sha256 } from 'multiformats/hashes/sha2'
-import drain from 'it-drain'
-import PQueue from 'p-queue'
-import { CodeError } from '@libp2p/interfaces/errors'
 import { difference, type CombinedDiff } from '@alanshaw/pail/diff'
+import { code as cborCode } from '@ipld/dag-cbor'
+import { CodeError } from '@libp2p/interfaces/errors'
 import { BaseDatastore } from 'datastore-core'
 import { type Query, type Pair as DatastorePair, Key } from 'interface-datastore'
-import type { ShardLink, ShardBlockView } from '@alanshaw/pail/shard'
-import type { AnyLink } from '@alanshaw/pail/link'
+import drain from 'it-drain'
+import { CID } from 'multiformats'
+import { sha256 } from 'multiformats/hashes/sha2'
+import PQueue from 'p-queue'
 import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
+import type { AnyLink } from '@alanshaw/pail/link'
+import type { ShardLink, ShardBlockView } from '@alanshaw/pail/shard'
 import type { Blockstore, Pair as BlockstorePair } from 'interface-blockstore'
+import type { code as rawCode } from 'multiformats/codecs/raw'
 
 type Code = typeof cborCode | typeof rawCode
 
@@ -51,7 +51,7 @@ export class Paily extends BaseDatastore {
       throw new CodeError('Not Found', 'ERR_NOT_FOUND')
     }
 
-    return await this.blockstore.get(linkToCid(link))
+    return this.blockstore.get(linkToCid(link))
   }
 
   async has (key: Key): Promise<boolean> {
@@ -59,7 +59,7 @@ export class Paily extends BaseDatastore {
   }
 
   async put (key: Key, val: Uint8Array): Promise<Key> {
-    const resolved = await this.#queue.add(async () => await unqueuedPut.apply(this, [key, val, this.code]))
+    const resolved = await this.#queue.add(async () => unqueuedPut.apply(this, [key, val, this.code]))
 
     if (resolved == null) {
       throw new CodeError('why tf this undefined', 'UNDEFINED')
@@ -88,7 +88,7 @@ export class Paily extends BaseDatastore {
     const blocks = options?.blockFetchers != null
       ? multiBlockFetcher(this.blockFetcher, ...options.blockFetchers)
       : this.blockFetcher
-    return await difference(blocks, this.root, link)
+    return difference(blocks, this.root, link)
   }
 }
 
@@ -109,7 +109,7 @@ const blockFetcher = (blockstore: Blockstore): BlockFetcher => ({
 
 const multiBlockFetcher = (...blockFetchers: BlockFetcher[]): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
-    return await new Promise(resolve => {
+    return new Promise(resolve => {
       let resolved = 0
       blockFetchers.map(async (b) => {
         await b.get(link)

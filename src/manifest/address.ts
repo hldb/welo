@@ -1,6 +1,5 @@
-import { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-
+import { CID } from 'multiformats/cid'
 import { HLDB_PREFIX as prefix } from '@/utils/constants.js'
 
 const parse = function (address: Address | string): CID {
