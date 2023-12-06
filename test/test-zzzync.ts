@@ -13,7 +13,7 @@ import staticAccessProtocol from '@/access/static/protocol.js'
 
 import getDatastore from './utils/level-datastore.js'
 import { getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, tempPath, TestPaths } from './utils/constants.js'
+import { type TestPaths, getTestPaths, tempPath } from './utils/constants.js'
 import { getTestManifest } from './utils/manifest.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { basalEntry } from '@/entry/basal/index.js'
@@ -21,7 +21,7 @@ import { basalIdentity } from '@/identity/basal/index.js'
 import { Web3Storage } from 'web3.storage'
 import type { CreateEphemeralKadDHT } from '@tabcat/zzzync/dist/src/advertisers/dht.js'
 import type { Ed25519PeerId, PeerId } from '@libp2p/interface/peer-id'
-import { createLibp2p, Libp2pOptions } from 'libp2p'
+import { type Libp2pOptions, createLibp2p } from 'libp2p'
 import { createLibp2pOptions } from './utils/libp2p-options.js'
 import { CID } from 'multiformats'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
@@ -98,12 +98,12 @@ _describe(testName, () => {
 
     const identity1 = await getTestIdentity(
       identities1,
-      libp2p1.keychain,
+      libp2p1.services.keychain,
       testName
     )
     const identity2 = await getTestIdentity(
       identities2,
-      libp2p2.keychain,
+      libp2p2.services.keychain,
       testName
     )
 

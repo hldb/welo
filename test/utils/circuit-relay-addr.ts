@@ -1,5 +1,5 @@
 import { peerIdFromKeys } from '@libp2p/peer-id'
-import { Multiaddr, multiaddr } from '@multiformats/multiaddr'
+import { type Multiaddr, multiaddr } from '@multiformats/multiaddr'
 import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 
 const publicKey = new Uint8Array([8, 1, 18, 32, 59, 59, 118, 163, 48, 43, 45, 125, 112, 49, 65, 51, 243, 119, 220, 67, 206, 11, 217, 202, 42, 208, 11, 106, 113, 216, 41, 159, 52, 165, 253, 42])

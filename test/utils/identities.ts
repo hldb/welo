@@ -1,6 +1,6 @@
 import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
-import type { KeyChain } from '@libp2p/interface/keychain'
+import type { Keychain } from '@libp2p/keychain'
 
 import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
@@ -14,7 +14,7 @@ export const getTestIdentities = async (
 
 export const getTestIdentity = async (
   testIdentities: LevelDatastore,
-  testKeychain: KeyChain,
+  testKeychain: Keychain,
   name: string
 ): Promise<Identity> => {
   await testIdentities.open()

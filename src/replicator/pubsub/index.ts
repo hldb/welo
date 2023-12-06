@@ -1,7 +1,7 @@
 import { cidstring } from '@/utils/index.js'
 import { Playable } from '@/utils/playable.js'
 import { addHeads } from '@/utils/replicator.js'
-import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
+import { type Config, type ReplicatorModule, prefix } from '@/replicator/interface.js'
 import { CID } from 'multiformats/cid'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'

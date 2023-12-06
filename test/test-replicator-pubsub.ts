@@ -1,5 +1,5 @@
 import { pubsubReplicator, PubsubReplicator } from '@/replicator/pubsub/index.js'
-import { SetupComponents, setup, teardown, instanceSetup, liveReplicationTest, awaitPubsubJoin } from './utils/replicator.js'
+import { type SetupComponents, setup, teardown, instanceSetup, liveReplicationTest, awaitPubsubJoin } from './utils/replicator.js'
 
 const testName = 'pubsub-replicator'
 

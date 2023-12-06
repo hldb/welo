@@ -5,7 +5,7 @@ import { StaticAccess as Access } from '@/access/static/index.js'
 import { NamespaceDatastore } from 'datastore-core'
 import { Replica } from '@/replica/index.js'
 import getDatastore from './level-datastore.js'
-import { getTestPaths, tempPath, TestPaths } from './constants.js'
+import { type TestPaths, getTestPaths, tempPath } from './constants.js'
 import { getMultiaddr, getTestIpfs, localIpfsOptions } from './ipfs.js'
 import { getTestIdentities, getTestIdentity } from './identities.js'
 import { getTestManifest } from './manifest.js'
@@ -56,12 +56,12 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
 
   const identity1 = await getTestIdentity(
     identities1,
-    libp2p1.keychain,
+    libp2p1.services.keychain,
     name
   )
   const identity2 = await getTestIdentity(
     identities2,
-    libp2p2.keychain,
+		libp2p2.services.keychain,
     name
   )
 

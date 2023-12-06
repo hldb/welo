@@ -1,11 +1,11 @@
 import { mplex } from '@libp2p/mplex'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { noise } from '@chainsafe/libp2p-noise'
-import { circuitRelayServer } from 'libp2p/circuit-relay'
+import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
 import { tcp } from '@libp2p/tcp'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { kadDHT } from '@libp2p/kad-dht'
 import { ipnsSelector } from 'ipns/selector'
@@ -25,7 +25,7 @@ export const getConfig = async (): Promise<Libp2pOptions> => ({
   connectionEncryption: [noise()],
   streamMuxers: [yamux(), mplex()],
   services: {
-    identify: identifyService(),
+    identify: identify(),
     pubsub: gossipsub(),
     circuitRelayServer: circuitRelayServer(),
     dht: kadDHT({

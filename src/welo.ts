@@ -4,7 +4,7 @@ import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { Components, GossipHelia } from '@/interface'
 import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface/keychain'
+import type { Keychain } from '@libp2p/keychain'
 
 import { Manifest, Address } from '@/manifest/index.js'
 import { Playable } from '@/utils/playable.js'
@@ -58,7 +58,7 @@ export class Welo extends Playable {
 
   readonly ipfs: GossipHelia
 
-  readonly keychain: KeyChain
+  readonly keychain: Keychain
 
   readonly identity: IdentityInstance<any>
 
@@ -292,13 +292,13 @@ export const createWelo = async (init: WeloInit): Promise<Welo> => {
     identity = await components.identity[0].get({
       name: 'default',
       identities,
-      keychain: ipfs.libp2p.keychain
+      keychain: ipfs.libp2p.services.keychain
     })
   }
 
   const config: Config = {
     ipfs,
-    keychain: ipfs.libp2p.keychain,
+    keychain: ipfs.libp2p.services.keychain,
     datastore,
     identity,
     blockstore: ipfs.blockstore,

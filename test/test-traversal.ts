@@ -4,7 +4,6 @@
 import { assert, expect } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { Key } from 'interface-datastore'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import type { Blockstore } from 'interface-blockstore'
 
@@ -33,11 +32,12 @@ import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { concurrentEntries, singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
 import { Paily } from '@/utils/paily.js'
+import type { GossipHelia } from '@/interface.js'
 
 const testName = 'traversal'
 
 describe('traversal', () => {
-  let ipfs: Helia,
+  let ipfs: GossipHelia,
     blockstore: Blockstore,
     identity: Identity,
     identity1: Identity,
@@ -62,7 +62,7 @@ describe('traversal', () => {
 
     const identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
-    const keychain = libp2p.keychain
+    const keychain = libp2p.services.keychain
 
     identity = await getTestIdentity(identities, keychain, names.name0)
     identity1 = await getTestIdentity(identities, keychain, names.name1)

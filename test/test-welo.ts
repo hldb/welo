@@ -30,7 +30,7 @@ describe(testName, () => {
 
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
-    const keychain = libp2p.keychain
+    const keychain = libp2p.services.keychain
 
     components = {
       store: [keyvalueStore()],

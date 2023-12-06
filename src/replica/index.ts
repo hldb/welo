@@ -18,7 +18,7 @@ import type { EntryInstance } from '@/entry/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { AccessInstance } from '@/access/interface.js'
 
-import { Graph, GraphRoot } from './graph.js'
+import { type GraphRoot, Graph } from './graph.js'
 import {
   loadEntry,
   graphLinks,

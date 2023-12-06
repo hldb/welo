@@ -9,8 +9,8 @@ import { Playable } from '@/utils/playable.js'
 import type { Replica } from '@/replica/index.js'
 import type { Manifest } from '@/manifest/index.js'
 
-import protocol, { Config } from './protocol.js'
-import { creators, selectors, reducer, StateMap, init, load } from './model.js'
+import protocol, { type Config } from './protocol.js'
+import { type StateMap, creators, selectors, reducer, init, load } from './model.js'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { StoreComponent, StoreInstance, Events, Props } from '../interface.js'
 

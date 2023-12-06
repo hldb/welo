@@ -6,7 +6,7 @@ import type { Entry } from '@/entry/basal/index.js'
 import type { Identity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
 import { staticAccess } from '@/access/static/index.js'
-import protocol, { AccessProtocol } from '@/access/static/protocol.js'
+import protocol, { type AccessProtocol } from '@/access/static/protocol.js'
 import { wildcard } from '@/access/interface.js'
 
 import defaultManifest from './utils/default-manifest.js'
@@ -40,7 +40,7 @@ describe(testName, () => {
     const libp2p = await getTestLibp2p(ipfs)
     const identities = await getTestIdentities(testPaths)
 
-    identity = await getTestIdentity(identities, libp2p.keychain, name)
+    identity = await getTestIdentity(identities, libp2p.services.keychain, name)
     entry = await singleEntry(identity)()
     yesaccess = makeaccess([identity.id])
 

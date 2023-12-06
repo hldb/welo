@@ -1,10 +1,9 @@
 import { createHelia } from 'helia'
-import { Libp2pOptions, createLibp2p } from 'libp2p'
+import { type Libp2pOptions, createLibp2p } from 'libp2p'
 import { LevelDatastore } from 'datastore-level'
 import { LevelBlockstore } from 'blockstore-level'
 import { createLibp2pOptions } from './libp2p-options.js'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import type { Helia } from '@helia/interface'
 import type { TestPaths } from './constants'
 import type { GossipHelia } from '@/interface.js'
 
@@ -46,7 +45,7 @@ export const getTestIpfs = async (
   })
 }
 
-export const getMultiaddr = async (ipfs: Helia): Promise<Multiaddr> => {
+export const getMultiaddr = async (ipfs: GossipHelia): Promise<Multiaddr> => {
   const addresses = ipfs.libp2p.getMultiaddrs()
   if (addresses.length === 0) {
     throw new Error('no addresses available')

@@ -8,7 +8,7 @@ import * as filters from '@libp2p/websockets/filters'
 import { bootstrap } from '@libp2p/bootstrap'
 import { mplex } from '@libp2p/mplex'
 import { webRTC, webRTCDirect } from '@libp2p/webrtc'
-import { circuitRelayTransport } from 'libp2p/circuit-relay'
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { getAddrs } from './circuit-relay-addr'
 
 export async function createLibp2pOptions (opts: Libp2pOptions): Promise<Libp2pOptions<Services>> {

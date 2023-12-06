@@ -8,7 +8,7 @@ import { Node } from '@/replica/graph-node.js'
 
 import { getTestPaths, tempPath } from './utils/constants.js'
 import { LevelBlockstore } from 'blockstore-level'
-import { ShardBlock, ShardBlockView } from '@alanshaw/pail/shard'
+import { type ShardBlockView, ShardBlock } from '@alanshaw/pail/shard'
 import { cidstring } from '@/utils/index.js'
 import { encodeCbor } from '@/utils/block.js'
 

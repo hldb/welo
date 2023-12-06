@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { Libp2p, createLibp2p } from 'libp2p'
+import { type Libp2p, createLibp2p } from 'libp2p'
 import { getConfig } from './utils/circuit-relay.js'
 
 interface BeforeResult {

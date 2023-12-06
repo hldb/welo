@@ -1,5 +1,4 @@
 import { assert } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
 import type { BlockView } from 'multiformats/interface'
 
 import { Manifest, Address } from '@/manifest/index.js'
@@ -11,11 +10,12 @@ import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestPaths, tempPath } from './utils/constants.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { GossipHelia } from '@/interface.js'
 
 const testName = 'manifest'
 
 describe(testName, () => {
-  let ipfs: Helia, blockstore: Blockstore, manifest: Manifest
+  let ipfs: GossipHelia, blockstore: Blockstore, manifest: Manifest
 
   const config = {
     name: 'test',

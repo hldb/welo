@@ -94,7 +94,7 @@ export class Identity implements IdentityInstance<IdentityValue> {
 const gen = async (name: string): Promise<Identity> => {
   const keypair = await keys.generateKeyPair(secp256k1, 256)
   const value = await signIdentity(keypair, keypair.public)
-  const block = await Block.encode({ value, codec, hasher })
+  const block = await Block.encode<IdentityValue, number, number>({ value, codec, hasher })
 
   return new Identity({ name, priv: keypair, pubkey: keypair.public, block })
 }

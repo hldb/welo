@@ -2,7 +2,7 @@ import type { Helia } from '@helia/interface'
 import type { Libp2p, ServiceMap } from '@libp2p/interface'
 import type { PubSub } from '@libp2p/interface/pubsub'
 import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface/keychain'
+import type { Keychain } from '@libp2p/keychain'
 
 import type { AccessProtocol } from '@/access/static/protocol.js'
 import type { EntryProtocol } from '@/entry/basal/protocol.js'
@@ -18,7 +18,7 @@ import type { Replicator, ReplicatorModule } from '@/replicator/interface'
 import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
 import type { Blockstore } from 'interface-blockstore'
 
-export type GossipServiceMap = ServiceMap & { pubsub: PubSub }
+export type GossipServiceMap = ServiceMap & { pubsub: PubSub, keychain: Keychain }
 export type GossipLibp2p<T extends GossipServiceMap = GossipServiceMap> = Libp2p<T>
 export type GossipHelia<T extends GossipLibp2p<GossipServiceMap> = GossipLibp2p<GossipServiceMap>> = Helia<T>
 
@@ -48,7 +48,7 @@ export interface Config {
   datastore: Datastore
   blockstore: Blockstore
   identity: IdentityInstance<any>
-  keychain: KeyChain
+  keychain: Keychain
   ipfs: GossipHelia
   components: Components
 }

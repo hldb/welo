@@ -1,9 +1,8 @@
 import { assert, expect } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
 import type { LevelDatastore } from 'datastore-level'
-import type { KeyChain } from '@libp2p/interface/keychain'
+import type { Keychain } from '@libp2p/keychain'
 
 import { Entry, basalEntry } from '@/entry/basal/index.js'
 import type { EntryData } from '@/entry/interface.js'
@@ -15,17 +14,18 @@ import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
 import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
+import type { GossipHelia } from '@/interface.js'
 
 const testName = 'basal entry'
 
 describe(testName, () => {
-  let ipfs: Helia,
+  let ipfs: GossipHelia,
     blockstore: Blockstore,
     identity: Identity,
     entry: Entry,
     invalidEntry: Entry,
     identities: LevelDatastore,
-    keychain: KeyChain
+    keychain: Keychain
 
   const expectedProtocol = '/hldb/entry/basal'
   const name = names.name0
@@ -45,7 +45,7 @@ describe(testName, () => {
 
     identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
-    keychain = libp2p.keychain
+    keychain = libp2p.services.keychain
 
     identity = await identityModule.import({
       name,

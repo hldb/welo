@@ -5,7 +5,6 @@ import { Key } from 'interface-datastore'
 import { ShardBlock, type ShardBlockView } from '@alanshaw/pail/shard'
 import { NamespaceDatastore } from 'datastore-core'
 import type { LevelDatastore } from 'datastore-level'
-import type { Helia } from '@helia/interface'
 import type { CID } from 'multiformats/cid'
 
 import { Replica } from '@/replica/index.js'
@@ -17,19 +16,20 @@ import { Manifest } from '@/manifest/index.js'
 
 import getDatastore from './utils/level-datastore.js'
 import defaultManifest from './utils/default-manifest.js'
-import { getTestPaths, names, tempPath, TestPaths } from './utils/constants.js'
+import { type TestPaths, getTestPaths, names, tempPath } from './utils/constants.js'
 import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity } from './utils/identities.js'
 import { singleEntry } from './utils/entries.js'
 import { getTestLibp2p } from './utils/libp2p.js'
 import type { Blockstore } from 'interface-blockstore'
 import { encodeCbor } from '@/utils/block.js'
+import type { GossipHelia } from '@/interface.js'
 
 const testName = 'replica'
 
 describe(testName, () => {
-  let ipfs: Helia,
-    tempIpfs: Helia,
+  let ipfs: GossipHelia,
+    tempIpfs: GossipHelia,
     blockstore: Blockstore,
     replica: Replica,
     manifest: Manifest,
@@ -52,7 +52,7 @@ describe(testName, () => {
 
     const identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
-    const keychain = libp2p.keychain
+    const keychain = libp2p.services.keychain
 
     identity = await getTestIdentity(identities, keychain, names.name0)
 
@@ -71,7 +71,7 @@ describe(testName, () => {
     const tempIdentities = await getTestIdentities(testPaths1)
     tempIdentity = await getTestIdentity(
       tempIdentities,
-      tempLibp2p.keychain,
+      tempLibp2p.services.keychain,
       names.name1
     )
 

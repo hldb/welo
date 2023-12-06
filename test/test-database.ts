@@ -39,7 +39,7 @@ describe(testName, () => {
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
 
-    identity = await getTestIdentity(identities, libp2p.keychain, testName)
+    identity = await getTestIdentity(identities, libp2p.services.keychain, testName)
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity),
