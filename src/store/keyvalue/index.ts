@@ -1,4 +1,4 @@
-import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
+import { EventEmitter, CustomEvent } from '@libp2p/interface/events'
 import { Key } from 'interface-datastore'
 import { encode, decode } from '@ipld/dag-cbor'
 import type { Datastore } from 'interface-datastore'

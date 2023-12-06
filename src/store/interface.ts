@@ -1,5 +1,5 @@
-import type { Startable } from '@libp2p/interfaces/startable'
-import type { EventEmitter } from '@libp2p/interfaces/events'
+import type { Startable } from '@libp2p/interface/startable'
+import type { EventEmitter } from '@libp2p/interface/events'
 import type { Datastore } from 'interface-datastore'
 import type { Blockstore } from 'interface-blockstore'
 

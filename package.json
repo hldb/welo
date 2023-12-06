@@ -22,10 +22,15 @@
   "eslintConfig": {
     "extends": "ipfs",
     "parserOptions": {
-      "sourceType": "module"
+      "sourceType": "module",
+      "project": [
+        "./tsconfig.json",
+        "./aegir/tsconfig.json"
+      ]
     },
     "ignorePatterns": [
       ".aegir.js",
+      "!aegir/.aegir.ts",
       "dist/*",
       "benchmark/*"
     ]
@@ -33,7 +38,9 @@
   "browser": {
     "path": "path-browserify",
     "make-dir": false,
-    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js"
+    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js",
+    "./dist/test/utils/libp2p/addresses.js": "./dist/test/utils/libp2p/addresses.browser.js",
+    "./dist/test/utils/libp2p/transports.js": "./dist/test/utils/libp2p/transports.browser.js"
   },
   "prettier": "prettier-config-standard",
   "scripts": {
@@ -46,12 +53,13 @@
     "copy-deps": "npx copy-deps",
     "format": "prettier -w src test && eslint --fix src test",
     "benchmark": "npm run clean && npm run build && node dist/benchmark/benchmark.js && npm run clean",
-    "build": "aegir build && tsc-alias && ln -sf ./dist/test/.aegir.js ./.aegir.js",
+    "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
+    "build": "npm run build:meta && aegir build && tsc-alias",
     "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
-    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/test-*.js",
-    "test:node": "npm run build && npm run clean && aegir test -b -t node -f ./dist/test/**/test-*.js -- --exit && npm run clean",
+    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/*.spec.js",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/*.spec.js -- --exit && npm run clean",
     "test": "npm run test:node && npm run test:chrome",
-    "clean": "git clean -fq test/fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/fixtures"
+    "clean": "git clean -fq test/test-fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/test-fixtures"
   },
   "repository": {
     "type": "git",
@@ -81,9 +89,11 @@
     "@libp2p/webrtc": "^3.2.11",
     "@libp2p/webrtc-star": "^7.0.0",
     "@libp2p/websockets": "^7.0.13",
+    "@multiformats/mafmt": "^12.1.6",
     "@multiformats/multiaddr": "^12.1.10",
     "@types/mocha": "^10.0.0",
     "aegir": "^38.1.5",
+    "blockstore-core": "^4.3.3",
     "blockstore-level": "^1.1.0",
     "copy-deps": "^1.1.2",
     "datastore-level": "^10.1.1",
@@ -108,10 +118,10 @@
   },
   "dependencies": {
     "@alanshaw/pail": "^0.3.3",
+    "@libp2p/interface": "^0.1.2",
     "@ipld/car": "^5.2.4",
     "@ipld/dag-cbor": "^9.0.6",
     "@libp2p/crypto": "^2.0.8",
-    "@libp2p/interfaces": "^3.3.2",
     "@libp2p/peer-id": "^3.0.6",
     "@libp2p/peer-id-factory": "^3.0.8",
     "@open-draft/deferred-promise": "^2.1.0",

@@ -3,7 +3,7 @@ import { Playable } from '@/utils/playable.js'
 import { HeadsExchange } from '@/utils/heads-exchange.js'
 import { getHeads, addHeads } from '@/utils/replicator.js'
 import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica } from '@/replica/index.js'
@@ -25,14 +25,14 @@ export interface Options {
 }
 
 export class BootstrapReplicator extends Playable {
-  readonly ipfs: GossipHelia
+  readonly libp2p: GossipLibp2p
   readonly manifest: Manifest
   readonly replica: Replica
   readonly access: AccessInstance
   readonly components: Pick<DbComponents, 'entry' | 'identity'>
   private readonly options: Options
 
-  constructor ({ ipfs, replica }: Config, options: Partial<Options> = {}) {
+  constructor ({ libp2p, replica }: Config & { libp2p: GossipLibp2p }, options: Partial<Options> = {}) {
     const starting = async (): Promise<void> => {
       // Handle direct head requests.
       await this.libp2p.handle(
@@ -54,7 +54,7 @@ export class BootstrapReplicator extends Playable {
 
     super({ starting, stopping })
 
-    this.ipfs = ipfs
+    this.libp2p = libp2p 
     this.replica = replica
     this.manifest = replica.manifest
     this.access = replica.access
@@ -69,10 +69,6 @@ export class BootstrapReplicator extends Playable {
       reverseSync: options.reverseSync ?? true,
       validate: options.validate ?? true
     }
-  }
-
-  private get libp2p (): GossipLibp2p {
-    return this.ipfs.libp2p
   }
 
   private get protocol (): string {
@@ -178,7 +174,7 @@ export class BootstrapReplicator extends Playable {
   }
 }
 
-export const bootstrapReplicator: (options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (options: Partial<Options> = {}) => ({
+export const bootstrapReplicator: (libp2p: GossipLibp2p, options?: Partial<Options>) => ReplicatorModule<BootstrapReplicator, typeof protocol> = (libp2p, options: Partial<Options> = {}) => ({
   protocol,
-  create: (config: Config) => new BootstrapReplicator(config, options)
+  create: (config: Config) => new BootstrapReplicator({ ...config, libp2p }, options)
 })

@@ -2,24 +2,26 @@ import { assert } from 'aegir/chai'
 import { start } from '@libp2p/interfaces/startable'
 import { bootstrapReplicator, BootstrapReplicator } from '@/replicator/bootstrap/index.js'
 import { SetupComponents, setup, teardown } from './utils/replicator.js'
-// import { isBrowser } from 'wherearewe'
+import { isBrowser } from 'wherearewe'
+import type { GossipLibp2p } from '@/interface.js'
 
 const testName = 'bootstrap-replicator'
 
-// let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
-// if (isBrowser) {
-//   // eslint-disable-next-line no-console
-//   console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
-//   _describe = describe.skip
-// } else {
-//   _describe = describe
-// }
+let _describe: Mocha.SuiteFunction | Mocha.PendingSuiteFunction
+if (isBrowser) {
+  // eslint-disable-next-line no-console
+  console.log('no web3.storage token found at .w3_token. skipping zzzync replicator tests')
+  _describe = describe.skip
+} else {
+  _describe = describe.skip
+}
 
-describe.skip(testName, () => {
-  let components: SetupComponents<BootstrapReplicator>
+_describe(testName, () => {
+  let
+    components: SetupComponents<BootstrapReplicator>
 
   before(async () => {
-    components = await setup(testName, bootstrapReplicator({ reverseSync: false }))
+    components = await setup(testName, bootstrapReplicator(undefined as unknown as GossipLibp2p, { reverseSync: false }))
   })
 
   after(async () => {

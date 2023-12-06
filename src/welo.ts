@@ -1,5 +1,5 @@
-import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
-import { start, stop } from '@libp2p/interfaces/startable'
+import { EventEmitter, CustomEvent } from '@libp2p/interface/events'
+import { start, stop } from '@libp2p/interface/startable'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
 import type { Components, GossipHelia } from '@/interface'
@@ -26,7 +26,6 @@ import type {
   OpenedEmit,
   OpenOptions
 } from './interface.js'
-import { liveReplicator } from './replicator/live/index.js'
 import { basalIdentity } from './identity/basal/index.js'
 import { staticAccess } from './access/static/index.js'
 import { keyvalueStore } from './store/keyvalue/index.js'
@@ -259,7 +258,6 @@ export class Welo extends Playable {
   }
 }
 
-const getDefaultReplicators = (): ReplicatorModule[] => [liveReplicator()]
 const getDefaultComponents = (): Components => ({
   identity: [basalIdentity()],
   access: [staticAccess()],
@@ -279,7 +277,7 @@ export const createWelo = async (init: WeloInit): Promise<Welo> => {
 
   const ipfs = init.ipfs
   const datastore = init.datastore ?? ipfs.datastore
-  const replicators = init.replicators ?? getDefaultReplicators()
+  const replicators = init.replicators ?? []
   const components = init.components ?? getDefaultComponents()
 
   let identity: IdentityInstance<any>
