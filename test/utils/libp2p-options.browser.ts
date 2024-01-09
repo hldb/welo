@@ -1,4 +1,3 @@
-import { webRTCStar } from '@libp2p/webrtc-star'
 import { webSockets } from '@libp2p/websockets'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
@@ -12,13 +11,10 @@ import { circuitRelayTransport } from 'libp2p/circuit-relay'
 import { getAddrs } from './circuit-relay-addr'
 
 export async function createLibp2pOptions (opts: Libp2pOptions): Promise<Libp2pOptions<Services>> {
-  const webRtcStar = webRTCStar()
-
   const options: Libp2pOptions = {
     addresses: {
       listen: [
-        '/webrtc',
-        '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/'
+        '/webrtc'
       ]
     },
     transports: [
@@ -27,11 +23,9 @@ export async function createLibp2pOptions (opts: Libp2pOptions): Promise<Libp2pO
         discoverRelays: 1
       }),
       webRTC(),
-      webRTCDirect(),
-      webRtcStar.transport
+      webRTCDirect()
     ],
     peerDiscovery: [
-      webRtcStar.discovery,
       bootstrap({ list: [...(await getAddrs()).map(String), '/ip4/127.0.0.1/tcp/8001/ws/p2p/12D3KooWDoap6J1qAP17dvR8KgaknSZSFSamxFeggEc5Qzecqto3'] })
     ],
     connectionEncryption: [
