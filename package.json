@@ -82,7 +82,6 @@
     "@libp2p/mplex": "^10.0.10",
     "@libp2p/tcp": "^9.0.10",
     "@libp2p/webrtc": "^4.0.14",
-    "@libp2p/webrtc-star": "^7.0.0",
     "@libp2p/websockets": "^8.0.10",
     "@multiformats/multiaddr": "^12.1.12",
     "@types/mocha": "^10.0.6",
