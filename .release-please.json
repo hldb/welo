@@ -1,0 +1,6 @@
+{
+  "plugins": ["node-workspace"],
+  "packages": {
+    "packages/welo": {}
+  }
+}

@@ -1,11 +1,11 @@
-node_modules
-test/temp/
+build
 dist
-.vscode
-coverage
-API/welo.api.json
-.polendina
-.w3_token
-.aegir.js
-aegir/dist
 .docs
+.coverage
+node_modules
+package-lock.json
+yarn.lock
+
+# IDE
+.DS_Store
+.vscode

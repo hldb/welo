@@ -1,0 +1,147 @@
+{
+  "name": "welo",
+  "version": "3.0.1",
+  "description": "peer-to-peer, collaborative states using merkle-crdts",
+  "license": "Apache-2.0 OR MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=7.0.0"
+  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "sourceType": "module",
+      "project": [
+        "./tsconfig.json",
+        "./aegir/tsconfig.json"
+      ]
+    },
+    "ignorePatterns": [
+      ".aegir.js",
+      "!aegir/.aegir.ts",
+      "dist/*",
+      "benchmark/*"
+    ]
+  },
+  "browser": {
+    "path": "path-browserify",
+    "make-dir": false,
+    "./dist/test/utils/libp2p-options.js": "./dist/test/utils/libp2p-options.browser.js",
+    "./dist/test/utils/libp2p/addresses.js": "./dist/test/utils/libp2p/addresses.browser.js",
+    "./dist/test/utils/libp2p/transports.js": "./dist/test/utils/libp2p/transports.browser.js"
+  },
+  "prettier": "prettier-config-standard",
+  "scripts": {
+    "generate": "protons src/message/*.proto",
+    "prepublishOnly": "npm run build",
+    "reset": "rm -rf node_modules package-lock.json && npm install",
+    "lint": "aegir lint",
+    "lint-fix": "aegir lint --fix",
+    "dep-check": "aegir dep-check --ignore path-browserify",
+    "format": "prettier -w src test && eslint --fix src test",
+    "build:meta": "rm -rf dist aegir/dist && tsc -p aegir && ln -sf ./aegir/dist/.aegir.js ./.aegir.js",
+    "build": "npm run build:meta && aegir build && tsc-alias",
+    "docs": "NODE_OPTIONS=--max_old_space_size=4096 aegir docs",
+    "test:chrome": "aegir test -b -t browser -f ./dist/test/**/*.spec.js",
+    "test:node": "npm run clean && aegir test -b -t node -f ./dist/test/**/*.spec.js -- --exit && npm run clean",
+    "test": "npm run test:node && npm run test:chrome",
+    "clean": "git clean -fq test/test-fixtures && git clean -fqX test/temp .polendina/ && git checkout -- test/test-fixtures"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hldb/welo.git"
+  },
+  "keywords": [
+    "peer-to-peer",
+    "ipfs",
+    "ipld",
+    "merkle-crdt"
+  ],
+  "author": "tabcat <tabcat00@proton.me>",
+  "bugs": {
+    "url": "https://github.com/hldb/welo/issues"
+  },
+  "homepage": "https://github.com/hldb/welo#readme",
+  "devDependencies": {
+    "@chainsafe/libp2p-gossipsub": "^10.1.0",
+    "@chainsafe/libp2p-noise": "^13.0.3",
+    "@chainsafe/libp2p-yamux": "^5.0.3",
+    "@helia/interface": "^2.1.0",
+    "@libp2p/bootstrap": "^9.0.12",
+    "@libp2p/interface": "^0.1.6",
+    "@libp2p/kad-dht": "^10.0.15",
+    "@libp2p/mplex": "^9.0.12",
+    "@libp2p/tcp": "^8.0.13",
+    "@libp2p/webrtc": "^3.2.11",
+    "@libp2p/webrtc-star": "^7.0.0",
+    "@libp2p/websockets": "^7.0.13",
+    "@multiformats/mafmt": "^12.1.6",
+    "@multiformats/multiaddr": "^12.1.10",
+    "@types/mocha": "^10.0.0",
+    "aegir": "^38.1.5",
+    "blockstore-core": "^4.3.3",
+    "blockstore-level": "^1.1.0",
+    "datastore-level": "^10.1.1",
+    "eslint": "^8.23.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-tsdoc": "^0.2.17",
+    "interface-datastore": "^8.2.0",
+    "ipns": "^6.0.0",
+    "level": "^8.0.0",
+    "libp2p": "^0.46.21",
+    "make-dir": "^3.1.0",
+    "path-browserify": "^1.0.1",
+    "prettier": "^2.7.1",
+    "prettier-config-standard": "^5.0.0",
+    "protons": "^7.0.4",
+    "tsc-alias": "^1.8.7",
+    "typescript": "^5.1.6",
+    "wherearewe": "^2.0.1"
+  },
+  "dependencies": {
+    "@alanshaw/pail": "^0.3.3",
+    "@libp2p/interface": "^0.1.2",
+    "@ipld/car": "^5.2.4",
+    "@ipld/dag-cbor": "^9.0.6",
+    "@libp2p/crypto": "^2.0.8",
+    "@libp2p/peer-id": "^3.0.6",
+    "@libp2p/peer-id-factory": "^3.0.8",
+    "@open-draft/deferred-promise": "^2.1.0",
+    "@tabcat/zzzync": "^4.2.0",
+    "datastore-core": "^9.2.3",
+    "fission-bloom-filters": "^1.7.1",
+    "helia": "^2.1.0",
+    "interface-blockstore": "^5.2.6",
+    "it-all": "^3.0.4",
+    "it-concat": "^3.0.1",
+    "it-drain": "^3.0.5",
+    "it-length-prefixed": "^9.0.3",
+    "it-pushable": "^3.2.3",
+    "multiformats": "^11.0.1",
+    "p-queue": "^7.3.0",
+    "protons-runtime": "^5.0.1",
+    "remove": "^0.1.5",
+    "streaming-iterables": "^8.0.1",
+    "uint8arrays": "^4.0.6",
+    "w3name": "^1.0.8",
+    "web3.storage": "^4.5.4"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts"
+  }
+}
