@@ -1,8 +1,7 @@
 import { assert } from 'aegir/chai'
 import { base32 } from 'multiformats/bases/base32'
 import type { BlockView } from 'multiformats/interface'
-
-import { initialNode, Node, NodeValue, NodeObj } from '@/replica/graph-node.js'
+import { type NodeValue, type NodeObj, initialNode, Node } from '@/replica/graph-node.js'
 
 describe('Graph Node', () => {
   const initNode: NodeObj = {

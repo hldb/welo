@@ -1,15 +1,13 @@
-import { assert } from 'aegir/chai'
 import { EventEmitter } from '@libp2p/interfaces/events'
 import { stop } from '@libp2p/interfaces/startable'
+import { assert } from 'aegir/chai'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
+import type { GossipLibp2p, GossipHelia } from '@/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { Message } from '@libp2p/interface/pubsub'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import type { GossipLibp2p, GossipHelia } from '@/interface'
-
 import { Direct } from '@/pubsub/direct.js'
-
-import { getMultiaddr, getTestIpfs, localIpfsOptions } from './utils/ipfs.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
 
 const testName = 'pubsub/direct'
 

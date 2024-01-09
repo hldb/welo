@@ -1,9 +1,3 @@
-import type { BlockView } from 'multiformats/interface'
-import type { CID } from 'multiformats/cid'
-
-import { encodeCbor, decodeCbor } from '@/utils/block.js'
-import type { IdentityInstance } from '@/identity/interface.js'
-
 import protocol from './protocol.js'
 import type {
   EntryData,
@@ -13,6 +7,10 @@ import type {
   Fetch,
   AsEntry
 } from '../interface.js'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { CID } from 'multiformats/cid'
+import type { BlockView } from 'multiformats/interface'
+import { encodeCbor, decodeCbor } from '@/utils/block.js'
 
 export interface SignedEntry {
   auth: CID

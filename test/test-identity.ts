@@ -1,27 +1,25 @@
 import { assert, expect } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
-import type { PublicKey } from '@libp2p/interface/keys'
 import { base32 } from 'multiformats/bases/base32'
-import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface/keychain'
-
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
-
 import { fixtPath, getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, kpi } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { GossipHelia } from '@/interface.js'
+import type { PublicKey } from '@libp2p/interface/keys'
+import type { Keychain } from '@libp2p/keychain'
 import type { Blockstore } from 'interface-blockstore'
+import type { Datastore } from 'interface-datastore'
+import { Identity, basalIdentity } from '@/identity/basal/index.js'
 
 const testName = 'basal identity'
 
 describe(testName, () => {
-  let ipfs: Helia,
+  let ipfs: GossipHelia,
     blockstore: Blockstore,
     identities: Datastore,
-    keychain: KeyChain,
+    keychain: Keychain,
     identity: Identity
-  let tempIpfs: Helia, tempIdentities: Datastore, tempKeychain: KeyChain
+  let tempIpfs: GossipHelia, tempIdentities: Datastore, tempKeychain: Keychain
   const expectedProtocol = '/hldb/identity/basal'
   const name = names.name0
   const password = ''
@@ -41,21 +39,21 @@ describe(testName, () => {
 
     identities = await getTestIdentities(fixtTestPaths)
     const libp2p = await getTestLibp2p(ipfs)
-    keychain = libp2p.keychain
+    keychain = libp2p.services.keychain
 
     identity = await identityModule.import({
       name,
       identities,
       keychain,
       kpi
-    }).catch(async () => await identityModule.get({ name, identities, keychain }))
+    }).catch(async () => identityModule.get({ name, identities, keychain }))
 
     const tempTestPaths = getTestPaths(tempPath, testName)
     tempIpfs = await getTestIpfs(tempTestPaths, offlineIpfsOptions)
 
     tempIdentities = await getTestIdentities(tempTestPaths)
     const tempLibp2p = await getTestLibp2p(ipfs)
-    tempKeychain = tempLibp2p.keychain
+    tempKeychain = tempLibp2p.services.keychain
   })
 
   after(async () => {

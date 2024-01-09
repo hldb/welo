@@ -1,21 +1,21 @@
-import { assert } from 'aegir/chai'
 import { start, stop } from '@libp2p/interfaces/startable'
-import { Key } from 'interface-datastore'
-import { StaticAccess as Access } from '@/access/static/index.js'
+import { assert } from 'aegir/chai'
 import { NamespaceDatastore } from 'datastore-core'
-import { Replica } from '@/replica/index.js'
-import getDatastore from './level-datastore.js'
-import { getTestPaths, tempPath, TestPaths } from './constants.js'
-import { getMultiaddr, getTestIpfs, localIpfsOptions } from './ipfs.js'
+import { Key } from 'interface-datastore'
+import { type TestPaths, getTestPaths, tempPath } from './constants.js'
 import { getTestIdentities, getTestIdentity } from './identities.js'
+import { getMultiaddr, getTestIpfs, localIpfsOptions } from './ipfs.js'
+import getDatastore from './level-datastore.js'
 import { getTestManifest } from './manifest.js'
+import type { GossipHelia, GossipLibp2p } from '@/interface'
+import type { Replicator, ReplicatorModule } from '@/replicator/interface.js'
+import type { Multiaddr } from '@multiformats/multiaddr'
+import type { LevelDatastore } from 'datastore-level'
+import { StaticAccess as Access } from '@/access/static/index.js'
+import staticAccessProtocol from '@/access/static/protocol.js'
 import { basalEntry } from '@/entry/basal/index.js'
 import { basalIdentity } from '@/identity/basal/index.js'
-import staticAccessProtocol from '@/access/static/protocol.js'
-import type { Replicator, ReplicatorModule } from '@/replicator/interface.js'
-import type { LevelDatastore } from 'datastore-level'
-import type { GossipHelia, GossipLibp2p } from '@/interface'
-import type { Multiaddr } from '@multiformats/multiaddr'
+import { Replica } from '@/replica/index.js'
 
 export interface SetupComponents<R extends Replicator = Replicator> {
   ipfs1: GossipHelia
@@ -56,12 +56,12 @@ export const setup = async <R extends Replicator, M extends ReplicatorModule<R>>
 
   const identity1 = await getTestIdentity(
     identities1,
-    libp2p1.keychain,
+    libp2p1.services.keychain,
     name
   )
   const identity2 = await getTestIdentity(
     identities2,
-    libp2p2.keychain,
+    libp2p2.services.keychain,
     name
   )
 

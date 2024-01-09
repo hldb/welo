@@ -1,23 +1,21 @@
 import path from 'path'
 import { assert } from 'aegir/chai'
-import type { LevelDatastore } from 'datastore-level'
+import { getTestPaths, tempPath } from './utils/constants.js'
+import defaultManifest from './utils/default-manifest.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import getDatastore from './utils/level-datastore.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
-
-import { Database } from '@/database.js'
-import { keyvalueStore } from '@/store/keyvalue/index.js'
+import type { LevelDatastore } from 'datastore-level'
+import type { Blockstore } from 'interface-blockstore'
 import { staticAccess } from '@/access/static/index.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
+import { Database } from '@/database.js'
 import { basalEntry } from '@/entry/basal/index.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
 import { Manifest } from '@/manifest/index.js'
-
-import getDatastore from './utils/level-datastore.js'
-import defaultManifest from './utils/default-manifest.js'
-import { getTestPaths, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
-import type { Blockstore } from 'interface-blockstore'
+import { keyvalueStore } from '@/store/keyvalue/index.js'
 
 const testName = 'database'
 
@@ -39,7 +37,7 @@ describe(testName, () => {
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
 
-    identity = await getTestIdentity(identities, libp2p.keychain, testName)
+    identity = await getTestIdentity(identities, libp2p.services.keychain, testName)
 
     manifest = await Manifest.create({
       ...defaultManifest('name', identity),

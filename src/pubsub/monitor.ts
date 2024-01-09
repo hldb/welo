@@ -1,12 +1,10 @@
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
+import { getPeers } from './util.js'
 import type { GossipLibp2p } from '@/interface'
+import type { PeerId } from '@libp2p/interface/peer-id'
 import type { SubscriptionChangeData } from '@libp2p/interface/pubsub'
 import type { Startable } from '@libp2p/interfaces/startable'
-import type { PeerId } from '@libp2p/interface/peer-id'
-
 import { parsedPeerId, peerIdString } from '@/utils/index.js'
-
-import { getPeers } from './util.js'
 
 export interface PeerStatusChangeData {
   peerId: PeerId
@@ -88,12 +86,12 @@ function refreshPeers (
     getPeers(this.libp2p.services.pubsub, this.topic).map(peerIdString)
   )
 
-  const joins: Set<string> = new Set()
+  const joins = new Set<string>()
   for (const peer of this.peers) {
     !_peers.has(peer) && joins.add(peer)
   }
 
-  const leaves: Set<string> = new Set()
+  const leaves = new Set<string>()
   for (const peer of _peers) {
     !this.peers.has(peer) && leaves.add(peer)
   }

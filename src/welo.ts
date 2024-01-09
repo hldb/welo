@@ -2,20 +2,13 @@ import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
-import type { Components, GossipHelia } from '@/interface'
-import type { Datastore } from 'interface-datastore'
-import type { KeyChain } from '@libp2p/interface/keychain'
-
-import { Manifest, Address } from '@/manifest/index.js'
-import { Playable } from '@/utils/playable.js'
-import { cidstring } from '@/utils/index.js'
-import type { ReplicatorModule } from '@/replicator/interface.js'
-import type { IdentityInstance } from '@/identity/interface.js'
-import type { ManifestData } from '@/manifest/interface.js'
-import { DATABASE_NAMESPACE, IDENTITY_NAMESPACE } from '@/utils/constants.js'
-
-// import * as version from './version.js'
+import { staticAccess } from './access/static/index.js'
 import { Database } from './database.js'
+import { basalEntry } from './entry/basal/index.js'
+import { basalIdentity } from './identity/basal/index.js'
+import { liveReplicator } from './replicator/live/index.js'
+import { keyvalueStore } from './store/keyvalue/index.js'
+import type { DbComponents } from './interface'
 import type {
   ClosedEmit,
   Config,
@@ -26,13 +19,19 @@ import type {
   OpenedEmit,
   OpenOptions
 } from './interface.js'
-import { liveReplicator } from './replicator/live/index.js'
-import { basalIdentity } from './identity/basal/index.js'
-import { staticAccess } from './access/static/index.js'
-import { keyvalueStore } from './store/keyvalue/index.js'
-import { basalEntry } from './entry/basal/index.js'
-import type { DbComponents } from './interface'
+import type { IdentityInstance } from '@/identity/interface.js'
+import type { Components, GossipHelia } from '@/interface'
+import type { ManifestData } from '@/manifest/interface.js'
+import type { ReplicatorModule } from '@/replicator/interface.js'
+import type { Keychain } from '@libp2p/keychain'
 import type { Blockstore } from 'interface-blockstore'
+import type { Datastore } from 'interface-datastore'
+import { Manifest, Address } from '@/manifest/index.js'
+import { DATABASE_NAMESPACE, IDENTITY_NAMESPACE } from '@/utils/constants.js'
+import { cidstring } from '@/utils/index.js'
+import { Playable } from '@/utils/playable.js'
+
+// import * as version from './version.js'
 
 export { Manifest, Address }
 export type {
@@ -58,7 +57,7 @@ export class Welo extends Playable {
 
   readonly ipfs: GossipHelia
 
-  readonly keychain: KeyChain
+  readonly keychain: Keychain
 
   readonly identity: IdentityInstance<any>
 
@@ -140,7 +139,7 @@ export class Welo extends Playable {
    * @returns
    */
   async fetch (address: Address): Promise<Manifest> {
-    return await Manifest.fetch({ blockstore: this.blockstore, address })
+    return Manifest.fetch({ blockstore: this.blockstore, address })
   }
 
   /**
@@ -223,7 +222,7 @@ export class Welo extends Playable {
 
     this._opening.set(addr, promise)
 
-    return await promise
+    return promise
   }
 
   getComponents (manifest: Manifest): DbComponents {
@@ -292,13 +291,13 @@ export const createWelo = async (init: WeloInit): Promise<Welo> => {
     identity = await components.identity[0].get({
       name: 'default',
       identities,
-      keychain: ipfs.libp2p.keychain
+      keychain: ipfs.libp2p.services.keychain
     })
   }
 
   const config: Config = {
     ipfs,
-    keychain: ipfs.libp2p.keychain,
+    keychain: ipfs.libp2p.services.keychain,
     datastore,
     identity,
     blockstore: ipfs.blockstore,

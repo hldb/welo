@@ -1,31 +1,29 @@
-import type { Web3Storage } from 'web3.storage'
-import type { Libp2p } from '@libp2p/interface'
-import W3NameService from 'w3name/service'
-import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
-import { w3Namer as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3'
-import { dhtAdvertiser as advertiser, CreateEphemeralKadDHT } from '@tabcat/zzzync/advertisers/dht'
-import { CID } from 'multiformats/cid'
+import { entries as pailEntries } from '@alanshaw/pail'
+import { type ShardBlockView, type ShardLink, ShardFetcher } from '@alanshaw/pail/shard'
 import { CarReader } from '@ipld/car/reader'
 import { CarWriter } from '@ipld/car/writer'
-import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { peerIdFromBytes } from '@libp2p/peer-id'
-
-import { Playable } from '@/utils/playable.js'
-import type { Replica } from '@/replica/index.js'
-
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { zzzync, type Zzzync, toDcid } from '@tabcat/zzzync'
+import { type CreateEphemeralKadDHT, dhtAdvertiser as advertiser } from '@tabcat/zzzync/advertisers/dht'
+import { w3Namer as namer, revisionState, type RevisionState } from '@tabcat/zzzync/namers/w3'
+import { type Datastore, Key } from 'interface-datastore'
+import { CID } from 'multiformats/cid'
+import W3NameService from 'w3name/service'
 import protocol from './protocol.js'
 import type { Config, ReplicatorModule } from '../interface.js'
-import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
-import { Paily } from '@/utils/paily.js'
-import type { Blockstore } from 'interface-blockstore'
-import { entries as pailEntries } from '@alanshaw/pail'
-import { ShardBlockView, ShardFetcher, ShardLink } from '@alanshaw/pail/shard'
-import { Datastore, Key } from 'interface-datastore'
-import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
-import type { AnyLink } from '@alanshaw/pail/link'
 import type { SignedEntry } from '@/entry/basal'
 import type { EntryInstance } from '@/entry/interface'
+import type { Replica } from '@/replica/index.js'
+import type { AnyBlock, BlockFetcher } from '@alanshaw/pail/block'
+import type { AnyLink } from '@alanshaw/pail/link'
+import type { Libp2p } from '@libp2p/interface'
+import type { Ed25519PeerId } from '@libp2p/interface/peer-id'
+import type { Blockstore } from 'interface-blockstore'
+import type { Web3Storage } from 'web3.storage'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
+import { Paily } from '@/utils/paily.js'
+import { Playable } from '@/utils/playable.js'
 
 const ipfsNamespace = '/ipfs/'
 const republishInterval = 1000 * 60 * 60 * 10 // 10 hours in milliseconds
@@ -87,7 +85,7 @@ export class ZzzyncReplicator extends Playable {
 
     this.#zync = zzzync(
       namer(this.w3.name, this.#revisions),
-      advertiser(libp2p.services.dht, options.createEphemeralLibp2p),
+      advertiser(libp2p, options.createEphemeralLibp2p),
       ipfs.blockstore
     )
 
@@ -174,7 +172,7 @@ export class ZzzyncReplicator extends Playable {
       throw new Error('dcid required. is ZzzyncReplicator started?')
     }
 
-    const providers: Map<string, Ed25519PeerId> = new Map()
+    const providers = new Map<string, Ed25519PeerId>()
     for await (const provider of this.#zync.advertiser.findCollaborators(this.dcid)) {
       if (provider.type !== 'Ed25519') {
         continue
@@ -256,7 +254,7 @@ export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
       const carBytes = new Uint8Array(await response.arrayBuffer())
       const reader = await CarReader.fromBytes(carBytes)
 
-      return await reader.get(link as CID)
+      return reader.get(link as CID)
     }
 
     return undefined
@@ -265,7 +263,7 @@ export const w3storageBlockFetcher = (client: Web3Storage): BlockFetcher => ({
 
 export const carBlockFetcher = (car: CarReader): BlockFetcher => ({
   get: async (link: AnyLink): Promise<AnyBlock | undefined> => {
-    return await car.get(link as CID)
+    return car.get(link as CID)
   }
 })
 

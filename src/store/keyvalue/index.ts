@@ -1,18 +1,16 @@
+import { encode, decode } from '@ipld/dag-cbor'
 import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { Key } from 'interface-datastore'
-import { encode, decode } from '@ipld/dag-cbor'
-import type { Datastore } from 'interface-datastore'
-import type { Blockstore } from 'interface-blockstore'
-import type { CID } from 'multiformats/cid'
-
-import { Playable } from '@/utils/playable.js'
-import type { Replica } from '@/replica/index.js'
-import type { Manifest } from '@/manifest/index.js'
-
-import protocol, { Config } from './protocol.js'
-import { creators, selectors, reducer, StateMap, init, load } from './model.js'
-import type { ShardLink } from '@alanshaw/pail/shard'
+import { type StateMap, creators, selectors, reducer, init, load } from './model.js'
+import protocol, { type Config } from './protocol.js'
 import type { StoreComponent, StoreInstance, Events, Props } from '../interface.js'
+import type { Manifest } from '@/manifest/index.js'
+import type { Replica } from '@/replica/index.js'
+import type { ShardLink } from '@alanshaw/pail/shard'
+import type { Blockstore } from 'interface-blockstore'
+import type { Datastore } from 'interface-datastore'
+import type { CID } from 'multiformats/cid'
+import { Playable } from '@/utils/playable.js'
 
 interface PersistedRoot {
   index: ShardLink

@@ -1,12 +1,12 @@
 import all from 'it-all'
-import { parsedcid } from '@/utils/index.js'
-import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
 import { CID } from 'multiformats/cid'
-import { sha256 } from 'multiformats/hashes/sha2'
 import * as raw from 'multiformats/codecs/raw'
+import { sha256 } from 'multiformats/hashes/sha2'
 import { concat, compare } from 'uint8arrays'
 import type { DbComponents } from '@/interface.js'
 import type { Replica } from '@/replica/index.js'
+import { dagLinks, loadEntry, traverser } from '@/replica/traversal.js'
+import { parsedcid } from '@/utils/index.js'
 
 export const getHeads = async (replica: Replica): Promise<CID[]> => {
   const keys = await all(replica.heads.queryKeys({}))

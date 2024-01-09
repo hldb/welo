@@ -1,5 +1,4 @@
 import { assert } from 'aegir/chai'
-
 import * as constants from '@/utils/constants.js'
 
 describe('Constants', () => {

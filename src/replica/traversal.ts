@@ -1,17 +1,15 @@
-import { compare } from 'uint8arrays/compare'
 import { Key } from 'interface-datastore'
-import type { CID } from 'multiformats/cid'
+import { compare } from 'uint8arrays/compare'
 // import { pushable } from 'it-pushable'
 // import { paramap } from 'paramap-it'
-
-import { cidstring, parsedcid } from '@/utils/index.js'
+import type { Edge } from './graph-node.js'
+import type { Graph } from './graph.js'
 import type { EntryInstance, EntryComponent } from '@/entry/interface.js'
 import type { IdentityComponent } from '@/identity/interface.js'
-
-import type { Graph } from './graph.js'
-import type { Edge } from './graph-node.js'
 import type { Paily } from '@/utils/paily.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { CID } from 'multiformats/cid'
+import { cidstring, parsedcid } from '@/utils/index.js'
 
 // the goal is to make a traverser that can read and replicate entries
 // when reading entries we want the traverser to visit only known entries and in order
@@ -38,7 +36,7 @@ export function loadEntry ({
   identity: IdentityComponent
 }): LoadFunc {
   const load: LoadFunc = async function (cid: CID) {
-    return await entry.fetch({ blockstore, cid, identity }).catch(() => null)
+    return entry.fetch({ blockstore, cid, identity }).catch(() => null)
   }
   return load
 }
@@ -50,12 +48,12 @@ export function dagLinks ({
   graph,
   access
 }: {
-  graph: { has: (str: string) => boolean | Promise<boolean> }
+  graph: { has(str: string): boolean | Promise<boolean> }
   access: {
-    canAppend: (entry: EntryInstance<any>) => boolean | Promise<boolean>
+    canAppend(entry: EntryInstance<any>): boolean | Promise<boolean>
   }
 }): LinksFunc {
-  const seen: Set<string> = new Set()
+  const seen = new Set<string>()
 
   const links: LinksFunc = async function (entry: EntryInstance<any>) {
     if (!(await access.canAppend(entry))) {
@@ -89,7 +87,7 @@ export function graphLinks ({
   tails: Paily
   edge: Edge
 }): LinksFunc {
-  const seen: Set<string> = new Set()
+  const seen = new Set<string>()
 
   const links: LinksFunc = async function (entry: EntryInstance<any>) {
     const str = cidstring(entry.cid)
@@ -157,7 +155,7 @@ export async function traverser ({
 
     // get next cids; links function must only return unseen cids so there are no duplicate cids in nexts
     const nexts: CID[] = await Promise.all(
-      entries.map(async (entry) => await links(entry))
+      entries.map(async (entry) => links(entry))
     )
       // flatten array of links which is an array of CIDs
       .then((arr) => arr.flatMap((links) => links).sort(sortCids))

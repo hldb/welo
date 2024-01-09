@@ -1,8 +1,8 @@
-import { Manifest } from '@/manifest/index.js'
 import type { ManifestData } from '@/manifest/interface.js'
 import staticAccessProtocol from '@/access/static/protocol.js'
 import basalEntryProtocol from '@/entry/basal/protocol.js'
 import basalIdentityProtocol from '@/identity/basal/protocol.js'
+import { Manifest } from '@/manifest/index.js'
 import keyvalueStoreProtocol from '@/store/keyvalue/protocol.js'
 
 export const getTestManifestConfig = (
@@ -28,7 +28,7 @@ export const getTestManifest = async (
   name: string,
   overrides: object = {}
 ): Promise<Manifest> =>
-  await Manifest.create({
+  Manifest.create({
     ...getTestManifestConfig(name),
     ...overrides
   })

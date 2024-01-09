@@ -1,31 +1,29 @@
 import { assert, expect } from 'aegir/chai'
-import type { Helia } from '@helia/interface'
-import type { CID } from 'multiformats/cid'
 import { base32 } from 'multiformats/bases/base32'
-import type { LevelDatastore } from 'datastore-level'
-import type { KeyChain } from '@libp2p/interface/keychain'
-
-import { Entry, basalEntry } from '@/entry/basal/index.js'
-import type { EntryData } from '@/entry/interface.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
-
 import { fixtPath, getTestPaths, names } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestIdentities, getTestIdentity, kpi } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
 import { getTestLibp2p } from './utils/libp2p.js'
+import type { EntryData } from '@/entry/interface.js'
+import type { GossipHelia } from '@/interface.js'
+import type { Keychain } from '@libp2p/keychain'
+import type { LevelDatastore } from 'datastore-level'
 import type { Blockstore } from 'interface-blockstore'
+import type { CID } from 'multiformats/cid'
+import { type Entry, basalEntry } from '@/entry/basal/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
 
 const testName = 'basal entry'
 
 describe(testName, () => {
-  let ipfs: Helia,
+  let ipfs: GossipHelia,
     blockstore: Blockstore,
     identity: Identity,
     entry: Entry,
     invalidEntry: Entry,
     identities: LevelDatastore,
-    keychain: KeyChain
+    keychain: Keychain
 
   const expectedProtocol = '/hldb/entry/basal'
   const name = names.name0
@@ -45,14 +43,14 @@ describe(testName, () => {
 
     identities = await getTestIdentities(testPaths)
     const libp2p = await getTestLibp2p(ipfs)
-    keychain = libp2p.keychain
+    keychain = libp2p.services.keychain
 
     identity = await identityModule.import({
       name,
       identities,
       keychain,
       kpi
-    }).catch(async () => await identityModule.get({ name, identities, keychain }))
+    }).catch(async () => identityModule.get({ name, identities, keychain }))
   })
 
   after(async () => {

@@ -1,15 +1,15 @@
-import { CID } from 'multiformats/cid'
 import { DeferredPromise } from '@open-draft/deferred-promise'
 import { BloomFilter } from 'fission-bloom-filters'
-import { hashHeads } from '@/utils/replicator.js'
-import { Message } from '@/message/heads.js'
-import { pipe } from 'it-pipe'
 import * as lp from 'it-length-prefixed'
+import { pipe } from 'it-pipe'
+import { type Pushable, pushable } from 'it-pushable'
+import { CID } from 'multiformats/cid'
 import { consume } from 'streaming-iterables'
-import { pushable, Pushable } from 'it-pushable'
-import type { Uint8ArrayList } from 'uint8arraylist'
-import type { PeerId } from '@libp2p/interface/peer-id'
 import type { Stream } from '@libp2p/interface/connection'
+import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Uint8ArrayList } from 'uint8arraylist'
+import { Message } from '@/message/heads.js'
+import { hashHeads } from '@/utils/replicator.js'
 
 const uint8ArrayToBuffer = (a: Uint8Array): ArrayBuffer => a.buffer.slice(a.byteOffset, a.byteLength + a.byteOffset)
 
@@ -140,7 +140,7 @@ export class HeadsExchange {
     }
 
     if (this.verifyPromise != null) {
-      return await this.verifyPromise
+      return this.verifyPromise
     }
 
     const hash = await hashHeads(this.heads)
@@ -151,7 +151,7 @@ export class HeadsExchange {
       hash: hash.bytes
     })
 
-    return await this.verifyPromise
+    return this.verifyPromise
   }
 
   async getHeads (seed?: number): Promise<CID[]> {
@@ -160,7 +160,7 @@ export class HeadsExchange {
     }
 
     if (this.headsPromise != null) {
-      return await this.headsPromise
+      return this.headsPromise
     }
 
     this.headsPromise = new DeferredPromise()
@@ -181,7 +181,7 @@ export class HeadsExchange {
 
     this.writer.push({ filter: message })
 
-    return await this.headsPromise
+    return this.headsPromise
   }
 
   private async * send (source: AsyncIterable<Partial<Message>>): AsyncGenerator<Partial<Message>> {

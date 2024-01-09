@@ -1,20 +1,20 @@
-import { encodeCbor, decodeCbor } from '@/utils/block.js'
 import type { BlockView } from 'multiformats/interface'
+import { encodeCbor, decodeCbor } from '@/utils/block.js'
 
 export type Edge = 'out' | 'in'
 
 export interface NodeValue {
   in: string[]
   out: string[]
-  missing: Boolean
-  denied: Boolean
+  missing: boolean
+  denied: boolean
 }
 
 export interface NodeObj {
   in: Set<string>
   out: Set<string>
-  missing: Boolean
-  denied: Boolean
+  missing: boolean
+  denied: boolean
 }
 
 // a non-missing or non-denied node can have empty sets for out and in
@@ -30,8 +30,8 @@ export const initialNode: NodeObj = {
 export class Node implements NodeObj {
   in: Set<string>
   out: Set<string>
-  missing: Boolean
-  denied: Boolean
+  missing: boolean
+  denied: boolean
 
   // 'ni' because 'in' is a token
   constructor ({
@@ -56,7 +56,7 @@ export class Node implements NodeObj {
   }
 
   static exists (node: Node | undefined): boolean {
-    return node?.missing === false && node?.denied === false
+    return node?.missing === false && !(node?.denied)
   }
 
   async encode (): Promise<BlockView<NodeValue>> {
@@ -66,6 +66,6 @@ export class Node implements NodeObj {
       missing: this.missing,
       denied: this.denied
     }
-    return await encodeCbor<NodeValue>(simple)
+    return encodeCbor<NodeValue>(simple)
   }
 }

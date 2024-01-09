@@ -1,8 +1,6 @@
-import type { CID } from 'multiformats/cid'
-
-import type { Protocol } from '@/manifest/interface.js'
-
 import { prefix } from '../interface.js'
+import type { Protocol } from '@/manifest/interface.js'
+import type { CID } from 'multiformats/cid'
 
 const protocol = `${prefix}keyvalue` as const
 

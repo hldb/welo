@@ -1,5 +1,5 @@
-import { basalEntry, Entry } from '@/entry/basal/index.js'
 import type { Identity } from '@/identity/basal/index.js'
+import { basalEntry, type Entry } from '@/entry/basal/index.js'
 import { sortEntriesRev } from '@/replica/traversal.js'
 
 export const entryData = {
@@ -12,7 +12,7 @@ export const entryData = {
 export const singleEntry =
   (identity: Identity) =>
     async (nextEntries: Entry[] = []) =>
-      await basalEntry().create({
+      basalEntry().create({
         ...entryData,
         identity,
         next: nextEntries.map((entry) => entry.cid)
@@ -25,7 +25,7 @@ export const concurrentEntries =
       const nextEntries: Entry[] = nextEntriesA[entries.length]
       entries.push(singleEntry(identity)(nextEntries))
     }
-    return await Promise.all(entries).then((entries) =>
+    return Promise.all(entries).then((entries) =>
       entries.sort(sortEntriesRev)
     )
   }

@@ -1,7 +1,6 @@
 /* eslint-disable max-nested-callbacks */
 import { assert } from 'aegir/chai'
 import { CID } from 'multiformats/cid'
-
 import { Address } from '@/manifest/address.js'
 
 describe('Address', () => {

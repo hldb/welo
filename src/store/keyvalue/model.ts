@@ -1,11 +1,10 @@
-import { Key } from 'interface-datastore'
 import { encode, decode } from '@ipld/dag-cbor'
 import { CodeError } from '@libp2p/interfaces/errors'
+import { Key } from 'interface-datastore'
+import type { EntryData, EntryInstance } from '@/entry/interface.js'
 import type { ShardLink } from '@alanshaw/pail/shard'
 import type { Blockstore } from 'interface-blockstore'
-
 import { Paily } from '@/utils/paily.js'
-import type { EntryData, EntryInstance } from '@/entry/interface.js'
 
 const PUT: 'PUT' = 'PUT'
 const DEL: 'DEL' = 'DEL'
@@ -81,7 +80,7 @@ export const selectors = {
 export type StateMap = Paily
 
 export const init = async (blockstore: Blockstore): Promise<StateMap> =>
-  await Paily.create(blockstore)
+  Paily.create(blockstore)
 
 export const load = (blockstore: Blockstore, cid: ShardLink): StateMap =>
   Paily.open(blockstore, cid)

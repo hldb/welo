@@ -1,19 +1,17 @@
 import { assert, expect } from 'aegir/chai'
-import type { Components, GossipHelia, GossipLibp2p } from '@/interface'
-
+import { getTestPaths, names, tempPath } from './utils/constants.js'
 import createWelo from './utils/default-welo.js'
-import type { Welo } from '@/welo.js'
-import type { Address, Manifest } from '@/manifest/index.js'
+import { getTestIdentities, getTestIdentity } from './utils/identities.js'
+import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
+import { getTestLibp2p } from './utils/libp2p.js'
 import type { Database } from '@/database.js'
+import type { Components, GossipHelia, GossipLibp2p } from '@/interface'
+import type { Address, Manifest } from '@/manifest/index.js'
+import type { Welo } from '@/welo.js'
 import { staticAccess } from '@/access/static/index.js'
 import { basalEntry } from '@/entry/basal/index.js'
-import { Identity, basalIdentity } from '@/identity/basal/index.js'
+import { type Identity, basalIdentity } from '@/identity/basal/index.js'
 import { keyvalueStore } from '@/store/keyvalue/index.js'
-
-import { getTestPaths, names, tempPath } from './utils/constants.js'
-import { getTestIpfs, offlineIpfsOptions } from './utils/ipfs.js'
-import { getTestIdentities, getTestIdentity } from './utils/identities.js'
-import { getTestLibp2p } from './utils/libp2p.js'
 
 const testName = 'welo'
 
@@ -30,7 +28,7 @@ describe(testName, () => {
 
     const identities = await getTestIdentities(testPaths)
     libp2p = await getTestLibp2p(ipfs)
-    const keychain = libp2p.keychain
+    const keychain = libp2p.services.keychain
 
     components = {
       store: [keyvalueStore()],

@@ -1,14 +1,14 @@
-import { cidstring } from '@/utils/index.js'
-import { Playable } from '@/utils/playable.js'
-import { addHeads } from '@/utils/replicator.js'
-import { Config, ReplicatorModule, prefix } from '@/replicator/interface.js'
 import { CID } from 'multiformats/cid'
+import type { AccessInstance } from '@/access/interface.js'
 import type { GossipHelia, GossipLibp2p } from '@/interface'
 import type { DbComponents } from '@/interface.js'
 import type { Manifest } from '@/manifest/index.js'
 import type { Replica, ReplicaEvents } from '@/replica/index.js'
-import type { AccessInstance } from '@/access/interface.js'
 import type { Message, PubSub } from '@libp2p/interface/pubsub'
+import { type Config, type ReplicatorModule, prefix } from '@/replicator/interface.js'
+import { cidstring } from '@/utils/index.js'
+import { Playable } from '@/utils/playable.js'
+import { addHeads } from '@/utils/replicator.js'
 
 export const protocol = `${prefix}pubsub/1.0.0/` as const
 

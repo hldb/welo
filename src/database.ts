@@ -2,20 +2,18 @@ import { EventEmitter, CustomEvent } from '@libp2p/interfaces/events'
 import { start, stop } from '@libp2p/interfaces/startable'
 import { NamespaceDatastore } from 'datastore-core'
 import { Key } from 'interface-datastore'
-import type { CID } from 'multiformats/cid'
-import type { Datastore } from 'interface-datastore'
-
-import { Playable } from '@/utils/playable.js'
-import { Replica } from '@/replica/index.js'
+import type { DbConfig, DbOpen, DbEvents, ClosedEmit, DbComponents } from './interface.js'
+import type { AccessInstance } from '@/access/interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
 import type { Address } from '@/manifest/address.js'
 import type { Manifest } from '@/manifest/index.js'
-import type { AccessInstance } from '@/access/interface.js'
-import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
 import type { Replicator } from '@/replicator/interface.js'
+import type { Creator, Selector, StoreInstance } from '@/store/interface.js'
+import type { Datastore } from 'interface-datastore'
+import type { CID } from 'multiformats/cid'
+import { Replica } from '@/replica/index.js'
 import { STORE_NAMESPACE, REPLICA_NAMESPACE } from '@/utils/constants.js'
-
-import type { DbConfig, DbOpen, DbEvents, ClosedEmit, DbComponents } from './interface.js'
+import { Playable } from '@/utils/playable.js'
 
 /**
  * Database Class
@@ -72,7 +70,7 @@ export class Database extends Playable {
     // todo: handle async action creators
 
     interface CreatorProps {
-      value: (...args: any[]) => Promise<CID>
+      value(...args: any[]): Promise<CID>
     }
 
     const handleCreator = ([key, creator]: [string, Creator]): [
@@ -82,12 +80,12 @@ export class Database extends Playable {
       key,
       {
         value: async (...args: any[]): Promise<CID> =>
-          await this.replica.write(creator(...args)).then((entry) => entry.cid)
+          this.replica.write(creator(...args)).then((entry) => entry.cid)
       }
     ]
 
     interface SelectorProps {
-      value: (...args: any[]) => Promise<any>
+      value(...args: any[]): Promise<any>
     }
 
     const handleSelector = ([key, selector]: [string, Selector]): [

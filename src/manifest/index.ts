@@ -1,8 +1,3 @@
-import type { BlockView } from 'multiformats/interface'
-
-import { decodeCbor, encodeCbor } from '@/utils/block.js'
-// import type { FetchOptions } from '@/utils/types.js'
-
 import { Address } from './address.js'
 import type {
   AsManifest,
@@ -11,6 +6,9 @@ import type {
   ManifestData,
   Protocol
 } from './interface.js'
+import type { BlockView } from 'multiformats/interface'
+import { decodeCbor, encodeCbor } from '@/utils/block.js'
+// import type { FetchOptions } from '@/utils/types.js'
 
 export { Address }
 
