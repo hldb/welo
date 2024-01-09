@@ -85,7 +85,7 @@ export class ZzzyncReplicator extends Playable {
 
     this.#zync = zzzync(
       namer(this.w3.name, this.#revisions),
-      advertiser(libp2p.services.dht, options.createEphemeralLibp2p),
+      advertiser(libp2p, options.createEphemeralLibp2p),
       ipfs.blockstore
     )
 

@@ -28,9 +28,11 @@ export async function createLibp2pOptions (opts: Libp2pOptions): Promise<Libp2pO
       }),
       webRTC(),
       webRTCDirect(),
+      // @ts-expect-error @libp2p/webrtc-star is no longer being maintained and has version mismatches
       webRtcStar.transport
     ],
     peerDiscovery: [
+      // @ts-expect-error @libp2p/webrtc-star is no longer being maintained and has version mismatches
       webRtcStar.discovery,
       bootstrap({ list: [...(await getAddrs()).map(String), '/ip4/127.0.0.1/tcp/8001/ws/p2p/12D3KooWDoap6J1qAP17dvR8KgaknSZSFSamxFeggEc5Qzecqto3'] })
     ],
