@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.0.0](https://github.com/hldb/welo/compare/v3.0.1...v4.0.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* update all packages
+* update libp2p, modules and aegir.
+* Update libp2p packages.
+
+### deps
+
+* update all packages ([f79af02](https://github.com/hldb/welo/commit/f79af024e5cbbfb3de3f267d265b9328f9afd078))
+* update libp2p, modules and aegir. ([745e949](https://github.com/hldb/welo/commit/745e9490090c9bf778e928f9fd80bf9e620f9b8f))
+
+
+### Bug Fixes
+
+* await stream close promises. ([9166c8f](https://github.com/hldb/welo/commit/9166c8f1d1c8c1be54cb46039ad6890dd3ef7b30))
+* bootstrap stream types ([6509cfb](https://github.com/hldb/welo/commit/6509cfbd82f2f31e5b117c711030a7a777d13429))
+* resolve the validation promise if the remote validates first. ([61f253a](https://github.com/hldb/welo/commit/61f253a8a96aaf3aa38904aa5f78f1600650639c))
+* update zzzync replicator. ([e50d367](https://github.com/hldb/welo/commit/e50d3671b47aaeef74e9b9227708eecff24679f3))
+
+
+### Miscellaneous Chores
+
+* Update libp2p packages. ([a15c7a7](https://github.com/hldb/welo/commit/a15c7a75fa60f07cc31c8c256b81479cc3daecad))
+
 ## [3.0.1](https://github.com/hldb/welo/compare/v3.0.0...v3.0.1) (2023-10-16)
 
 
