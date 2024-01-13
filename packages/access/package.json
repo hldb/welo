@@ -1,0 +1,83 @@
+{
+  "name": "@welo/access",
+  "version": "1.0.0",
+  "description": "Access control for the welo database",
+  "license": "Apache-2.0 OR MIT",
+  "homepage": "https://github.com/hldb/welo/tree/master/packages/access#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hldb/welo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hldb/welo/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "HLDB",
+    "welo",
+    "local-first",
+    "database",
+    "access",
+    "control"
+  ],
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ],
+      "src/*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ]
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!dist/test",
+    "!**/*.tsbuildinfo"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "project": true,
+      "sourceType": "module"
+    },
+    "ignorePatterns": [
+      "src/*.d.ts"
+    ]
+  },
+  "scripts": {
+    "clean": "aegir clean",
+    "lint": "aegir lint",
+    "dep-check": "aegir dep-check",
+    "build": "aegir build",
+    "test": "aegir test",
+    "test:chrome": "aegir test -t browser",
+    "test:chrome-webworker": "aegir test -t webworker",
+    "test:firefox": "aegir test -t browser -- --browser firefox",
+    "test:firefox-webworker": "aegir test -t webworker -- --browser firefox",
+    "test:webkit": "aegir test -t browser -- --browser webkit",
+    "test:node": "aegir test -t node --cov",
+    "test:electron-main": "aegir test -t electron-main"
+  },
+  "devDependencies": {
+    "aegir": "^42.1.3"
+  }
+}
