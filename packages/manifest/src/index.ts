@@ -3,10 +3,9 @@ import type { Protocol } from './protocol.js'
 
 export interface Manifest <T extends Record<string, any> = Record<string, never>>{
   protocol: Protocol
-  access: Access
-  topic: string
-  meta: T
+  params: {
+    topic: string
+    access: Access
+    meta: T
+  }
 }
-
-// 10kb max size?
-export const validate = <M>(manifest: M): void => {}
