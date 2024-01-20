@@ -2,6 +2,14 @@ import * as cbor from '@ipld/dag-cbor'
 import { base32 } from 'multiformats/bases/base32'
 import type { Account, AccountData } from '@welo/account'
 
+/**
+ * Available roles/permissions for the operation log
+ *
+ * - reader: read permission but no write permission
+ * - writer: read and write permissions
+ * - mod: r/w permission, can also edit reader and writer list
+ * - admin: r/w permission, can also edit reader, writer, and mod list
+ */
 export type Role = 'reader' | 'writer' | 'mod' | 'admin'
 
 /**
