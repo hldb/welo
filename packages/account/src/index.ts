@@ -9,7 +9,9 @@ import type { ByteView } from 'multiformats'
  *
  * Accounts are mutable/update-able device groups.
  * Any update made to an account results in a new version of the account.
- * The only part of an account that is immutable is the root, which is an Ed25519 key used to make updates and make the account routable.
+ * The only part of an account that is immutable is the root.
+ * The account root is an Ed25519 key used to sign updates.
+ *
  * Concurrent updates to an account may have unintended, but not permanent or drastic, results on dependent HLDB protocols.
  */
 export interface Account {
