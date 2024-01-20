@@ -76,13 +76,6 @@ export interface ReadProtectedEpochAccess extends EpochAccess {
 }
 
 /**
- * Maps epoch ids to EpochAccess
- */
-export type Access = Record<string, EpochAccess>
-export type WriteProtectedAccess = Record<string, WriteProtectedEpochAccess>
-export type ReadProtectedAccess = Record<string, ReadProtectedEpochAccess>
-
-/**
  * Rebuilds an Account from the account's id (base32 encoded Account[root]) and AccountAccess instance
  *
  * @param accountId - A base32 encoded Account[root]
