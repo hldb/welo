@@ -1,9 +1,8 @@
-import { CID } from 'multiformats'
-import type { ByteView } from 'multiformats'
-import type { Access } from '@welo/access'
+import type { EpochAccess } from '@welo/access'
+import type { CID, ByteView } from 'multiformats'
 
-export interface Entry<P extends any = unknown> extends WithEpochs, WithSignature, WithData<P> {}
-export interface Epoch<P extends any = unknown> extends WithEpochs, WithSignature, WithData<P>, WithAccess {}
+export interface Entry<P = unknown> extends WithEpochs, WithSignature, WithData<P> {}
+export interface Epoch<P = unknown> extends WithEpochs, WithSignature, WithData<P>, WithAccess {}
 
 export interface WithEpochs {
   height: number
@@ -16,14 +15,14 @@ export interface WithSignature {
 }
 
 export interface WithAccess {
-  access: Access
+  access: EpochAccess
 }
 
-export interface WithData<P extends any = unknown> {
+export interface WithData<P = unknown> {
   data: ByteView<Data<P>>
 }
 
-export interface Data <P extends any = unknown> {
+export interface Data <P = unknown> {
   clock: number
   parents: CID[]
   payload: P

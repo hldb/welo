@@ -1,11 +1,11 @@
-import type { Access } from '@welo/access'
 import type { Protocol } from './protocol.js'
+import type { EpochAccess } from '@welo/access'
 
-export interface Manifest <T extends any = unknown> {
+export interface Manifest <T = unknown> {
   protocol: Protocol
   params: {
     topic: string
-    access: Access
+    access: EpochAccess
     meta: T
   }
 }
