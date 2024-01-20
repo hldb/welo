@@ -46,19 +46,28 @@ export interface ReadProtectedAccountAccess extends AccountAccess {
   keys: Record<string, Uint8Array>
 }
 
+export interface RetroEpochAccess
+  extends Record<string, Omit<AccountAccess, 'role'>> {}
+
 /**
- * Maps account ids to Account Access
+ * Maps account ids to AccountAccess
  */
 export interface EpochAccess {
   author?: Uint8Array
   accounts: Record<string, AccountAccess>
+
+  /**
+   * Hidden AES keys for newly added signers
+   */
+  retro?: Record<string, RetroEpochAccess>
 }
 
-export interface WriteProtectedEpochAccess extends Omit<EpochAccess, 'author'> {
+export interface WriteProtectedEpochAccess
+  extends Omit<EpochAccess, 'author' | 'retro'> {
   accounts: Record<string, WriteProtectedAccountAccess>
 }
 
-export interface ReadProtectedEpochAccess extends Required<EpochAccess> {
+export interface ReadProtectedEpochAccess extends EpochAccess {
   /**
    * An ephemeral Ed25519 public key used to derive shared secrets for each signer
    */
@@ -80,7 +89,10 @@ export type ReadProtectedAccess = Record<string, ReadProtectedEpochAccess>
  * @param accountAccess - An instance of AccountAccess matching the accountId
  * @returns
  */
-export function rebuildAccount (accountId: string, accountAccess: AccountAccess): Account {
+export function rebuildAccount (
+  accountId: string,
+  accountAccess: AccountAccess
+): Account {
   const accountData: AccountData = {
     version: accountAccess.version,
     signers: Object.keys(accountAccess.keys).map(base32.decode)
@@ -93,4 +105,104 @@ export function rebuildAccount (accountId: string, accountAccess: AccountAccess)
     data: cbor.encode(accountData),
     sig: accountAccess.sig
   }
+}
+
+export function buildWriteProtectedAccountAccess (
+  role: Role,
+  sig: Account['sig'],
+  accountData: AccountData
+): WriteProtectedAccountAccess {
+  const keys: WriteProtectedAccountAccess['keys'] = Object.fromEntries(
+    accountData.signers.map((s) => [base32.encode(s), null])
+  )
+  const accountAccess: WriteProtectedAccountAccess = {
+    role,
+    sig,
+    version: accountData.version,
+    keys
+  }
+
+  if (accountData.name != null) accountAccess.name = accountData.name
+
+  return accountAccess
+}
+
+/**
+ * Makes a WriteProtectedAccountAccess ReadAccess
+ *
+ * @param writeProtectedAccountAccess
+ * @param getHiddenAesKey
+ * @returns
+ */
+export async function makeReadProtectedAccountAccess (
+  writeProtectedAccountAccess: WriteProtectedAccountAccess,
+  getHiddenAesKey: (signer: Uint8Array) => Promise<Uint8Array> // returns aes key encrypted with shared secret
+): Promise<ReadProtectedAccountAccess> {
+  const signers: string[] = Object.keys(writeProtectedAccountAccess.keys)
+
+  const hiddenAesKeys: Array<[string, Uint8Array]> = await Promise.all(
+    signers.map(async (signer) => [
+      signer,
+      await getHiddenAesKey(base32.decode(signer))
+    ])
+  )
+
+  const keys = Object.fromEntries(hiddenAesKeys)
+
+  return {
+    ...writeProtectedAccountAccess,
+    keys
+  }
+}
+
+export function buildWriteProtectedEpochAccess (
+  accountRoles: Array<[Account, Role]>
+): WriteProtectedEpochAccess {
+  const writeProtectedAccountAccessEntries: Array<
+  [string, WriteProtectedAccountAccess]
+  > = []
+
+  for (const [account, role] of accountRoles) {
+    writeProtectedAccountAccessEntries.push([
+      base32.encode(account.root),
+      buildWriteProtectedAccountAccess(
+        role,
+        account.sig,
+        cbor.decode(account.data)
+      )
+    ])
+  }
+
+  return { accounts: Object.fromEntries(writeProtectedAccountAccessEntries) }
+}
+
+export interface GetHiddenAesKey {
+  (signer: Uint8Array): Promise<Uint8Array>
+}
+
+export async function makeReadProtectedEpochAccess (
+  writeProtectedEpochAccess: WriteProtectedEpochAccess,
+  author: Uint8Array,
+  getHiddenAesKey: GetHiddenAesKey,
+  retro?: Record<string, RetroEpochAccess>
+): Promise<ReadProtectedEpochAccess> {
+  const accountsEntries: Array<[string, ReadProtectedAccountAccess]> =
+    await Promise.all(Object.entries(writeProtectedEpochAccess.accounts).map(
+      async ([accountId, writeProtectedAccountAccess]) => [
+        accountId,
+        await makeReadProtectedAccountAccess(
+          writeProtectedAccountAccess,
+          getHiddenAesKey
+        )
+      ]
+    ))
+
+  const readProtectedEpochAccess: ReadProtectedEpochAccess = {
+    author,
+    accounts: Object.fromEntries(accountsEntries)
+  }
+
+  if (retro != null) readProtectedEpochAccess.retro = retro
+
+  return readProtectedEpochAccess
 }
