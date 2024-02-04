@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/hldb/welo/compare/v4.0.0...v4.1.0) (2024-02-04)
+
+
+### Features
+
+* allow any file to be imported ([70c11f8](https://github.com/hldb/welo/commit/70c11f8a336f3d1da4c17cecc4bedcf3045d8f50))
+
 ## [4.0.0](https://github.com/hldb/welo/compare/v3.0.1...v4.0.0) (2024-01-09)
 
 
