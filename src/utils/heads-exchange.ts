@@ -163,8 +163,6 @@ export class HeadsExchange {
       return this.headsPromise
     }
 
-    this.headsPromise = new DeferredPromise()
-
     const { filter, hashes } = createFilter(this.heads, {
       seed: this.localSeed,
       collisionRate: this.collisionRate
@@ -180,6 +178,8 @@ export class HeadsExchange {
     }
 
     this.writer.push({ filter: message })
+
+    this.headsPromise = new DeferredPromise()
 
     return this.headsPromise
   }
