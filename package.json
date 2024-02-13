@@ -89,6 +89,7 @@
     "@libp2p/websockets": "^8.0.10",
     "@multiformats/multiaddr": "^12.1.12",
     "@types/mocha": "^10.0.6",
+    "@types/xxhashjs": "^0.2.4",
     "aegir": "^42.1.0",
     "blockstore-level": "^1.1.7",
     "copy-deps": "^1.1.2",
@@ -123,7 +124,6 @@
     "@open-draft/deferred-promise": "^2.2.0",
     "@tabcat/zzzync": "^5.0.0",
     "datastore-core": "^9.2.7",
-    "fission-bloom-filters": "^1.7.1",
     "helia": "^3.0.0",
     "interface-blockstore": "^5.2.9",
     "it-all": "^3.0.4",
@@ -138,7 +138,8 @@
     "streaming-iterables": "^8.0.1",
     "uint8arrays": "^5.0.1",
     "w3name": "^1.0.8",
-    "web3.storage": "^4.5.5"
+    "web3.storage": "^4.5.5",
+    "xxhashjs": "^0.2.2"
   },
   "overrides": {
     "@alanshaw/pail": {

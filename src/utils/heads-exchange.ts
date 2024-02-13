@@ -1,17 +1,15 @@
 import { DeferredPromise } from '@open-draft/deferred-promise'
-import { BloomFilter } from 'fission-bloom-filters'
 import * as lp from 'it-length-prefixed'
 import { pipe } from 'it-pipe'
 import { type Pushable, pushable } from 'it-pushable'
 import { CID } from 'multiformats/cid'
 import { consume } from 'streaming-iterables'
+import BloomFilter from './bloom-filter.js'
 import type { Stream } from '@libp2p/interface/connection'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { Uint8ArrayList } from 'uint8arraylist'
 import { Message } from '@/message/heads.js'
 import { hashHeads } from '@/utils/replicator.js'
-
-const uint8ArrayToBuffer = (a: Uint8Array): ArrayBuffer => a.buffer.slice(a.byteOffset, a.byteLength + a.byteOffset)
 
 const calculateFilterParams = (length: number, rate: number): { size: number, hashes: number } => {
   const safeLength = length <= 0 ? 1 : length
@@ -23,14 +21,10 @@ const calculateFilterParams = (length: number, rate: number): { size: number, ha
 
 const createFilter = (heads: CID[], options: Partial<{ collisionRate: number, seed: number }> = {}): { filter: BloomFilter, hashes: number } => {
   const { size, hashes } = calculateFilterParams(heads.length, options.collisionRate ?? 0.1)
-  const filter = new BloomFilter(size, hashes)
-
-  if (options.seed != null) {
-    filter.seed = options.seed
-  }
+  const filter = new BloomFilter(size, hashes, options.seed)
 
   for (const head of heads) {
-    filter.add(uint8ArrayToBuffer(head.bytes))
+    filter.add(head.bytes)
   }
 
   return { filter, hashes }
@@ -223,7 +217,7 @@ export class HeadsExchange {
 
     filter.seed = message.filter.seed ?? this.remoteSeed
 
-    const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(uint8ArrayToBuffer(b)))
+    const missing = this.heads.map(h => h.bytes).filter(b => !filter.has(b))
 
     return { heads: missing }
   }
