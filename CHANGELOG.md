@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.1](https://github.com/hldb/welo/compare/v4.1.0...v4.1.1) (2024-02-13)
+
+
+### Bug Fixes
+
+* prevent the heads promise from throwing ([59b592c](https://github.com/hldb/welo/commit/59b592c8252cfab380d4cd9b50988601cc1d3c38))
+* replace broken bloom filter ([05edd0d](https://github.com/hldb/welo/commit/05edd0d52feadd14099c2e20aeb1043b403308aa))
+
 ## [4.1.0](https://github.com/hldb/welo/compare/v4.0.0...v4.1.0) (2024-02-04)
 
 
