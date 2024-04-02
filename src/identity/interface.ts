@@ -2,6 +2,7 @@ import type { ComponentProtocol } from '@/interface.js'
 import type { Keychain } from '@libp2p/keychain'
 import type { Blockstore } from 'interface-blockstore'
 import type { Datastore } from 'interface-datastore'
+import type { AbortOptions } from 'interface-store'
 import type { CID } from 'multiformats/cid'
 import type { BlockView } from 'multiformats/interface'
 import { HLDB_PREFIX } from '@/utils/constants.js'
@@ -44,7 +45,7 @@ export interface IdentityInstance<Value> {
 export interface IdentityComponent<T extends IdentityInstance<unknown> = IdentityInstance<unknown>, P extends string = string> extends ComponentProtocol<P> {
   gen(gen: Gen): Promise<T>
   get(get: Get): Promise<T>
-  fetch(fetch: Fetch): Promise<T>
+  fetch(fetch: Fetch, options?: AbortOptions): Promise<T>
   asIdentity(asIdentity: AsIdentity<unknown>): T | null
   import(imp: Import): Promise<T>
   export(exp: Export): Promise<Uint8Array>

@@ -26,6 +26,7 @@ import type { ReplicatorModule } from '@/replicator/interface.js'
 import type { Keychain } from '@libp2p/keychain'
 import type { Blockstore } from 'interface-blockstore'
 import type { Datastore } from 'interface-datastore'
+import type { AbortOptions } from 'interface-store'
 import { Manifest, Address } from '@/manifest/index.js'
 import { DATABASE_NAMESPACE, IDENTITY_NAMESPACE } from '@/utils/constants.js'
 import { cidstring } from '@/utils/index.js'
@@ -108,17 +109,17 @@ export class Welo extends Playable {
    *
    * Options are shallow merged with {@link defaultManifest}.
    *
-   * @param options - Override defaults used to create the manifest.
+   * @param settings - Override defaults used to create the manifest.
    * @returns
    */
-  async determine (options: Determine): Promise<Manifest> {
+  async determine (settings: Determine, options?: AbortOptions): Promise<Manifest> {
     const manifestObj: ManifestData = {
-      ...this.getDefaultManifest(options.name),
-      ...options
+      ...this.getDefaultManifest(settings.name),
+      ...settings
     }
 
     const manifest = await Manifest.create(manifestObj)
-    await this.blockstore.put(manifest.block.cid, manifest.block.bytes)
+    await this.blockstore.put(manifest.block.cid, manifest.block.bytes, options)
 
     try {
       this.getComponents(manifest)
@@ -138,8 +139,8 @@ export class Welo extends Playable {
    * @param address - the Address of the Manifest to fetch
    * @returns
    */
-  async fetch (address: Address): Promise<Manifest> {
-    return Manifest.fetch({ blockstore: this.blockstore, address })
+  async fetch (address: Address, options?: AbortOptions): Promise<Manifest> {
+    return Manifest.fetch({ blockstore: this.blockstore, address }, options)
   }
 
   /**

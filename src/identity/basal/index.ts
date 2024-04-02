@@ -14,6 +14,7 @@ import type {
   Import
 } from '../interface.js'
 import type { PrivateKey, PublicKey } from '@libp2p/interface/keys'
+import type { AbortOptions } from 'interface-store'
 import type { CID } from 'multiformats/cid'
 import type { BlockView } from 'multiformats/interface'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
@@ -132,8 +133,8 @@ const get = async ({ name, identities, keychain }: Get): Promise<Identity> => {
   }
 }
 
-const fetch = async ({ blockstore, auth: cid }: Fetch): Promise<Identity> => {
-  const bytes = await blockstore.get(cid)
+const fetch = async ({ blockstore, auth: cid }: Fetch, options?: AbortOptions): Promise<Identity> => {
+  const bytes = await blockstore.get(cid, options)
   const block = await decodeCbor<IdentityValue>(bytes)
 
   const identity = asIdentity({ block })
