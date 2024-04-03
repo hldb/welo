@@ -1,6 +1,7 @@
 import type { IdentityInstance, IdentityComponent } from '@/identity/interface.js'
 import type { ComponentProtocol } from '@/interface.js'
 import type { Blockstore } from 'interface-blockstore'
+import type { AbortOptions } from 'interface-store'
 import type { CID } from 'multiformats/cid'
 import type { BlockView } from 'multiformats/interface'
 import { HLDB_PREFIX } from '@/utils/constants.js'
@@ -26,14 +27,13 @@ export interface Fetch {
   blockstore: Blockstore
   identity: IdentityComponent<any>
   cid: CID
-  timeout?: number
 }
 
 export type AsEntry<Value> = Pick<EntryInstance<Value>, 'block' | 'identity'>
 
 export interface EntryComponent<T extends EntryInstance<unknown> = EntryInstance<unknown>, P extends string = string> extends ComponentProtocol<P> {
   create(create: Create): Promise<T>
-  fetch(fetch: Fetch): Promise<T>
+  fetch(fetch: Fetch, options?: AbortOptions): Promise<T>
   asEntry(entry: AsEntry<unknown>): Promise<T | null>
   verify(entry: AsEntry<unknown>): Promise<boolean>
 }

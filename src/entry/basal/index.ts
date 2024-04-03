@@ -8,6 +8,7 @@ import type {
   AsEntry
 } from '../interface.js'
 import type { IdentityInstance } from '@/identity/interface.js'
+import type { AbortOptions } from 'interface-store'
 import type { CID } from 'multiformats/cid'
 import type { BlockView } from 'multiformats/interface'
 import { encodeCbor, decodeCbor } from '@/utils/block.js'
@@ -91,11 +92,11 @@ const asEntry = async (entry: AsEntry<unknown>): Promise<Entry | null> => {
   return new Entry({ block: asSigned, data, identity })
 }
 
-const fetch = async ({ blockstore, identity, cid }: Fetch): Promise<Entry> => {
-  const bytes = await blockstore.get(cid)
+const fetch = async ({ blockstore, identity, cid }: Fetch, options?: AbortOptions): Promise<Entry> => {
+  const bytes = await blockstore.get(cid, options)
   const block = await decodeCbor<SignedEntry>(bytes)
   const { auth } = block.value
-  const identityInstance = await identity.fetch({ blockstore, auth })
+  const identityInstance = await identity.fetch({ blockstore, auth }, options)
 
   const entry = await asEntry({ block, identity: identityInstance })
 

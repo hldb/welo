@@ -6,6 +6,7 @@ import type {
   ManifestData,
   Protocol
 } from './interface.js'
+import type { AbortOptions } from 'interface-store'
 import type { BlockView } from 'multiformats/interface'
 import { decodeCbor, encodeCbor } from '@/utils/block.js'
 // import type { FetchOptions } from '@/utils/types.js'
@@ -77,9 +78,10 @@ export class Manifest {
    * @returns
    */
   static async fetch (
-    { blockstore, address }: Fetch
+    { blockstore, address }: Fetch,
+    options?: AbortOptions
   ): Promise<Manifest> {
-    const bytes = await blockstore.get(address.cid)
+    const bytes = await blockstore.get(address.cid, options)
     const block = await decodeCbor<ManifestData>(bytes)
     const manifest = this.asManifest({ block })
 
