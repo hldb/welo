@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.2.0](https://github.com/hldb/welo/compare/v4.1.1...v4.2.0) (2024-04-03)
+
+
+### Features
+
+* add abort options to requests. ([ebc7d58](https://github.com/hldb/welo/commit/ebc7d5804cbf8f32ab570c23b6b049a94f61cd5b))
+
+
+### Bug Fixes
+
+* add missing dependency ([d8f489d](https://github.com/hldb/welo/commit/d8f489dd310df3e375769de444a11088779b2b71))
+
 ## [4.1.1](https://github.com/hldb/welo/compare/v4.1.0...v4.1.1) (2024-02-13)
 
 
