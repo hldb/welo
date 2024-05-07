@@ -12,6 +12,16 @@ peer-to-peer, collaborative states using Merkle-CRDTs
 
 [HLDB](https://github.com/hldb) implementation in Typescript
 
+## Project Status
+
+```
+I am currently working on https://github.com/tabcat/dd-tree which will be the core structure for the database.
+It has not been simple but I am making small progress daily.
+It is the hardest part of the project from a technical standpoint and I want to have a solid solution that will last.
+To track this project's progress see this issue: https://github.com/hldb/welo/issues/102
+```
+-[tabcat](https://github.com/tabcat)
+
 ## Install
 
 ```bash
